@@ -1,0 +1,79 @@
+{
+  "id": "proyecto-adivina-el-numero",
+  "requires": [
+    "variable",
+    "condicional",
+    "ciclo",
+    "función"
+  ],
+  "widget": "guess-game",
+  "html": "<p>Este proyecto reúne todo el nivel Básico: variables, entrada y salida, condicionales, operadores lógicos, ciclos y funciones. Vas a construir un juego en el que la computadora piensa un número del 1 al 100 y tú intentas adivinarlo con ayuda de pistas.</p>\n<p>Los programas grandes se construyen por <b>descomposición</b>: dividir un problema en partes pequeñas, resolver cada una y juntarlas. Nuestro plan:</p>\n<ol><li>Elegir un número secreto al azar.</li><li>Repetir: pedir un intento y dar una pista, hasta que acierte.</li><li>Contar los intentos.</li><li>Mostrar el resultado.</li></ol>\n<p><b>Paso 1: la pista.</b> Una función compara el intento con el secreto y devuelve un mensaje. Como <code>devolver</code> termina la función, cada rama entrega su texto y sale:</p><pre><div>funcion pista(intento, secreto)</div><div>    si intento < secreto entonces</div><div>        devolver \"Más alto\"</div><div>    sino si intento > secreto entonces</div><div>        devolver \"Más bajo\"</div><div>    sino</div><div>        devolver \"¡Acertaste!\"</div><div>    fin si</div><div>fin funcion</div></pre><p><b>Paso 2: el ciclo principal.</b> Usamos <code>aleatorio(1, 100)</code>, una función que entrega un número entero al azar entre 1 y 100, ambos incluidos, así que el secreto cambia en cada partida:</p><pre><div>secreto = aleatorio(1, 100)</div><div>intentos = 0</div><div>intento = 0</div><div>mientras intento != secreto hacer</div><div>    intento = entero(leer(\"Adivina un número del 1 al 100:\"))</div><div>    intentos = intentos + 1</div><div>    mostrar(pista(intento, secreto))</div><div>fin mientras</div><div>mostrar(\"Lo lograste en\", intentos, \"intentos\")</div></pre><p>¿Por qué <code>intento = 0</code> al inicio? La condición se evalúa antes de la primera vuelta y el secreto nunca es 0, así que el ciclo arranca. Cada vuelta lee la entrada (convertida con <code>entero</code>, como viste en Entrada y salida), cuenta con un acumulador y muestra la pista.</p>\n<p><b>Paso 3: límite de intentos.</b> Combinamos condiciones con <code>y</code> para que el juego termine al acertar <i>o</i> al agotar 7 intentos, y decidimos el mensaje final con un condicional:</p><pre><div>mientras intento != secreto y intentos < 7 hacer</div><div>    intento = entero(leer(\"Adivina un número del 1 al 100:\"))</div><div>    intentos = intentos + 1</div><div>    mostrar(pista(intento, secreto))</div><div>fin mientras</div><div></div><div>si intento == secreto entonces</div><div>    mostrar(\"Lo lograste en\", intentos, \"intentos\")</div><div>sino</div><div>    mostrar(\"Se acabaron los intentos. Era\", secreto)</div><div>fin si</div></pre><p>¿Por qué 7? Si en cada intento pruebas el punto medio del rango posible, descartas la mitad de las opciones: 100, 50, 25, 13, 7, 4, 2, 1. Siete intentos bastan siempre con esa estrategia, una idea que volverás a ver en el nivel de algoritmia.</p>\n<div class=\"card\"><p class=\"q\">Juega la versión terminada</p><label for=\"jn\">Tu intento (1 a 100)</label><input id=\"jn\" type=\"number\" min=\"1\" max=\"100\" inputmode=\"numeric\"><div class=\"btns\"><button class=\"btn\" id=\"jb\">Probar</button><button class=\"btn sec\" id=\"jr\">Nueva partida</button></div><p id=\"jf\" aria-live=\"polite\" style=\"margin:12px 0 0\"></p></div>\n<p>Reto para practicar: haz que el juego pregunte si quieres jugar otra vez (pista: un ciclo exterior), o que el rango sea configurable.</p>",
+  "quiz": [
+    {
+      "type": "choice",
+      "concept": "descomposición",
+      "prompt": "¿Por qué conviene dividir el juego en partes (función pista, ciclo principal, resultado)?",
+      "options": [
+        "Cada parte resuelve un problema pequeño y es más fácil de entender y probar",
+        "El programa corre más rápido",
+        "Así nunca hay errores",
+        "Lo exige el lenguaje"
+      ],
+      "answer": 0,
+      "explanation": "Descomponer un problema grande en partes pequeñas facilita construirlo, entenderlo y probarlo."
+    },
+    {
+      "type": "choice",
+      "concept": "integración de conceptos",
+      "prompt": "En el ciclo principal, ¿por qué se inicia intento = 0 antes del mientras?",
+      "options": [
+        "Para que intento != secreto sea verdadero la primera vez y el ciclo arranque",
+        "Porque 0 es el número secreto",
+        "Porque mientras exige un cero",
+        "Para contar los intentos"
+      ],
+      "answer": 0,
+      "explanation": "La condición se evalúa antes de la primera vuelta; como el secreto nunca es 0, el ciclo empieza."
+    },
+    {
+      "type": "choice",
+      "concept": "valor de retorno",
+      "prompt": "¿Qué muestra este programa?",
+      "code": "funcion pista(intento, secreto)\n    si intento < secreto entonces\n        devolver \"Más alto\"\n    sino si intento > secreto entonces\n        devolver \"Más bajo\"\n    sino\n        devolver \"¡Acertaste!\"\n    fin si\nfin funcion\n\nmostrar(pista(25, 40))",
+      "options": [
+        "Más alto",
+        "Más bajo",
+        "¡Acertaste!",
+        "Nada"
+      ],
+      "answer": 0,
+      "explanation": "25 es menor que 40, así que pista devuelve “Más alto”: hay que probar un número mayor."
+    },
+    {
+      "type": "choice",
+      "concept": "número aleatorio",
+      "prompt": "¿Qué hace aleatorio(1, 100)?",
+      "options": [
+        "Entrega un entero al azar entre 1 y 100, ambos incluidos",
+        "Siempre entrega 50",
+        "Entrega un decimal entre 0 y 1",
+        "Le pide un número a la persona"
+      ],
+      "answer": 0,
+      "explanation": "Así el número secreto cambia en cada partida."
+    },
+    {
+      "type": "choice",
+      "concept": "integración de conceptos",
+      "prompt": "Quieres que el juego termine al acertar o al llegar a 7 intentos. ¿Qué condición del mientras sirve?",
+      "options": [
+        "intento != secreto y intentos < 7",
+        "intento != secreto o intentos < 7",
+        "intento == secreto y intentos >= 7",
+        "intentos < 7 o intento == secreto"
+      ],
+      "answer": 0,
+      "explanation": "Debe seguir solo si aún no acertó y todavía quedan intentos. Ambas cosas a la vez: por eso y."
+    }
+  ]
+}
