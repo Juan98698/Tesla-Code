@@ -1,4 +1,4 @@
-name: Validar contenido
+name: Validar plataforma
 on:
   push:
   pull_request:
@@ -10,4 +10,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node tools/validate-content.mjs
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run validate
+      - run: npm run test:coverage
+      - run: python3 tests/python-examples.py
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:module
+      - run: npm run test:e2e

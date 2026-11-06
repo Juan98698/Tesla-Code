@@ -1,10 +1,13 @@
 import { PASS_RATIO } from './gamification.js';
-
-// Strategy: un corrector por tipo de pregunta. Para añadir un tipo, añade una entrada.
+const normalize = (value) =>
+  String(value).trim().normalize('NFC').toLocaleLowerCase('es').replace(/\s+/g, ' ');
 const graders = {
-  choice: (question, response) => response === question.answer,
-  order: (question, response) => response.join('|') === question.steps.join('|'),
+  choice: (q, response) => response === q.answer,
+  order: (q, response) =>
+    Array.isArray(response) &&
+    response.length === q.steps.length &&
+    response.every((value, i) => value === q.steps[i]),
+  text: (q, response) => q.answers.some((answer) => normalize(answer) === normalize(response)),
 };
-
-export const grade = (question, response) => graders[question.type](question, response);
-export const isPassing = (correct, total) => correct / total >= PASS_RATIO;
+export const grade = (q, response) => Boolean(graders[q.type]?.(q, response));
+export const isPassing = (correct, total) => total > 0 && correct / total >= PASS_RATIO;

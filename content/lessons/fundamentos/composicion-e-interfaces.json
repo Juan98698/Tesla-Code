@@ -1,0 +1,113 @@
+{
+  "id": "composicion-e-interfaces",
+  "outcome": "Sustituir una dependencia sin cambiar el componente que la utiliza.",
+  "requiresConcepts": [
+    "fundamentos.herencia",
+    "fundamentos.polimorfismo",
+    "fundamentos.sobrescritura"
+  ],
+  "html": "<p>La composición construye un componente con otros: un Servicio usa un canal para enviar mensajes. No necesita heredar de cada canal posible. Recibir la dependencia como parámetro permite sustituirla por una implementación de prueba.</p><p>Una interfaz describe las operaciones que un consumidor espera. Aquí basta el contrato enviar(texto) que devuelve un texto. Python permite este estilo sin declarar una interfaz formal; los protocolos de typing pueden describirlo para análisis estático, pero una anotación no verifica automáticamente el comportamiento.</p><p>El acoplamiento mide cuánto depende un componente de detalles de otro. Si Servicio crea directamente un proveedor y conoce sus atributos internos, cambiarlo será más difícil. Depender de una operación pequeña reduce ese conocimiento, aunque todavía hay un contrato que mantener.</p><pre>class Consola:\n    def enviar(self, texto):\n        return &quot;Consola: &quot; + texto\n\nclass Servicio:\n    def __init__(self, canal):\n        self.canal = canal\n\n    def avisar(self):\n        return self.canal.enviar(&quot;Listo&quot;)\n\nprint(Servicio(Consola()).avisar())</pre><dl class=\"concept-notes\"><dt>composición</dt><dd>La composición relaciona un componente con otros que utiliza para realizar una tarea, en lugar de derivar de todas sus implementaciones.</dd><dt>interfaz</dt><dd>Una interfaz define las operaciones y expectativas visibles para un consumidor. En el ejemplo exige enviar(texto) y su resultado.</dd><dt>acoplamiento</dt><dd>El acoplamiento es la dependencia entre componentes y sus detalles. Una interfaz pequeña permite cambiar implementaciones con menos cambios en sus consumidores.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Crea un canal de prueba que almacene mensajes en una lista y comprueba una llamada de Servicio.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.composicion",
+      "prompt": "¿Qué relación tiene Servicio con Consola?",
+      "options": [
+        "La utiliza mediante composición",
+        "Servicio hereda de Consola",
+        "Son la misma clase"
+      ],
+      "answer": 0,
+      "explanation": "Servicio recibe y utiliza el objeto canal."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.interfaz",
+      "prompt": "¿Qué operación debe ofrecer el canal?",
+      "options": [
+        "enviar(texto)",
+        "avisar() sin parámetros",
+        "Un atributo global obligatorio"
+      ],
+      "answer": 0,
+      "explanation": "Ese es el contrato que consume Servicio."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.acoplamiento",
+      "prompt": "¿Qué reduce dependencia de un proveedor concreto?",
+      "options": [
+        "Recibir una implementación compatible",
+        "Leer sus atributos internos",
+        "Copiar todo su código"
+      ],
+      "answer": 0,
+      "explanation": "Se reduce el conocimiento de detalles concretos."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.interfaz",
+      "prompt": "¿Una anotación de tipos comprueba siempre el comportamiento en ejecución?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo si la clase es pequeña"
+      ],
+      "answer": 0,
+      "explanation": "El contrato también necesita pruebas y validación apropiada."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.composicion",
+      "prompt": "Una clase guarda un canal recibido por parámetro. ¿La relación principal es composición o herencia?",
+      "answers": [
+        "composición",
+        "composicion"
+      ],
+      "hint": "El canal es una dependencia utilizada.",
+      "explanation": "El componente usa otro objeto en lugar de derivar de él."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.composicion": {
+      "explanationExcerpt": "La composición relaciona un componente con otros que utiliza para realizar una tarea, en lugar de derivar de todas sus implementaciones.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.interfaz": {
+      "explanationExcerpt": "Una interfaz define las operaciones y expectativas visibles para un consumidor. En el ejemplo exige enviar(texto) y su resultado.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.acoplamiento": {
+      "explanationExcerpt": "El acoplamiento es la dependencia entre componentes y sus detalles. Una interfaz pequeña permite cambiar implementaciones con menos cambios en sus consumidores.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "class Consola:\n    def enviar(self, texto):\n        return \"Consola: \" + texto\n\nclass Servicio:\n    def __init__(self, canal):\n        self.canal = canal\n\n    def avisar(self):\n        return self.canal.enviar(\"Listo\")\n\nprint(Servicio(Consola()).avisar())",
+      "stdout": "Consola: Listo\n"
+    }
+  ]
+}

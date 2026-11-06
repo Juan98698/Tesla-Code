@@ -1,30 +1,24 @@
-export const isPublished = (lesson) => lesson.status === 'published';
-
+export const isPublished = (lesson) => lesson?.status === 'published';
+export const lessonKey = (routeId, lessonId) => `${routeId}/${lessonId}`;
 export function indexRoute(route) {
-  const lessons = route.levels.flatMap((level) => level.lessons.map((lesson) => ({ ...lesson, level: level.name })));
-  const pos = Object.fromEntries(lessons.map((lesson, i) => [lesson.id, i]));
-  return { ...route, lessons, pos };
+  const lessons = route.levels.flatMap((level) =>
+    level.lessons.map((lesson) => ({ ...lesson, level: level.name, levelId: level.id })),
+  );
+  return { ...route, lessons, pos: Object.fromEntries(lessons.map((lesson, i) => [lesson.id, i])) };
 }
-
-// Una lección se abre al aprobar la lección publicada anterior de la ruta.
+export function missingPrerequisites(lesson, completed) {
+  return (lesson.dependsOn ?? []).filter((key) => !completed.has(key));
+}
 export function isUnlocked(route, id, completed) {
-  const i = route.pos[id];
-  if (!isPublished(route.lessons[i])) return false;
-  for (let k = i - 1; k >= 0; k -= 1) {
-    if (isPublished(route.lessons[k])) return completed.has(route.lessons[k].id);
-  }
-  return true;
+  const lesson = route.lessons[route.pos[id]];
+  return (
+    isPublished(lesson) &&
+    (completed.has(lessonKey(route.id, id)) || missingPrerequisites(lesson, completed).length === 0)
+  );
 }
-
-export const nextPublished = (route, id) => route.lessons.slice(route.pos[id] + 1).find(isPublished);
-
-export function nextMessage(route, id) {
-  const current = route.lessons[route.pos[id]];
-  const next = route.lessons[route.pos[id] + 1];
-  if (!next) return `Completaste la ruta ${route.name}.`;
-  const levelDone = next.level !== current.level ? `Completaste el nivel ${current.level}. ` : '';
-  const n = route.pos[next.id] + 1;
-  return levelDone + (isPublished(next)
-    ? `Se desbloquea la lección ${n}: ${next.title}.`
-    : `La siguiente lección, ${n}: ${next.title}, llega pronto.`);
+export function nextLesson(route, completed) {
+  return route.lessons.find(
+    (lesson) =>
+      !completed.has(lessonKey(route.id, lesson.id)) && isUnlocked(route, lesson.id, completed),
+  );
 }

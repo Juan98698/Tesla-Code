@@ -1,0 +1,113 @@
+{
+  "id": "rendimiento-y-memoria",
+  "outcome": "Medir antes de optimizar y definir cuándo una caché deja de ser válida.",
+  "requiresConcepts": [
+    "fundamentos.hilo",
+    "fundamentos.async-y-await",
+    "fundamentos.condicion-de-carrera"
+  ],
+  "html": "<p>El perfilado identifica dónde se consumen tiempo y recursos. Mide con entradas representativas, repite y distingue una microprueba del comportamiento del sistema completo. perf_counter permite medir intervalos; cProfile observa llamadas de funciones y su costo.</p><p>La gestión de memoria incluye entender referencias, objetos vivos y estructuras que crecen. En Python se administra gran parte automáticamente, pero una colección que conserva referencias puede seguir creciendo. Limita resultados retenidos y revisa la memoria auxiliar de tus algoritmos.</p><p>Una caché conserva resultados para reutilizarlos. Define clave, tamaño e invalidación: un precio almacenado puede quedar obsoleto cuando cambia la tarifa. functools.lru_cache limita entradas y requiere argumentos utilizables como claves, es decir, con hash estable y comparación compatible; una lista mutable no sirve directamente.</p><p>El ejemplo instrumenta llamadas con una lista solo para observar la caché. En producción, una función cacheada no debería depender de efectos que deban repetirse en cada petición. Los decoradores @lru_cache envuelven la función, igual que @property cambiaba su forma de acceso.</p><pre>import cProfile\nfrom functools import lru_cache\nfrom time import perf_counter\n\nllamadas = []\n@lru_cache(maxsize=2)\ndef doble(n):\n    llamadas.append(n)\n    return n * 2\n\nperfil = cProfile.Profile()\ninicio = perf_counter()\nperfil.enable()\nprint(doble(4), doble(4))\nperfil.disable()\ntranscurrido = perf_counter() - inicio\nprint(len(llamadas), doble.cache_info().hits)\nprint(transcurrido &gt;= 0)\ndoble.cache_clear()</pre><dl class=\"concept-notes\"><dt>perfilado</dt><dd>El perfilado observa el consumo de recursos para localizar costos relevantes antes de elegir una optimización.</dd><dt>gestión de memoria</dt><dd>La gestión de memoria considera objetos vivos, referencias retenidas y crecimiento de estructuras, aunque el lenguaje automatice parte de su liberación.</dd><dt>caché</dt><dd>Una caché guarda resultados reutilizables con reglas de clave, capacidad e invalidación. Un resultado rápido pero obsoleto puede ser incorrecto.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Compara llamadas repetidas y entradas diferentes, mide memoria y explica cuándo tu caché puede quedar obsoleta.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.perfilado",
+      "prompt": "¿Qué conviene hacer antes de optimizar?",
+      "options": [
+        "Medir el trabajo representativo",
+        "Reescribir todo",
+        "Agregar caché a todas las funciones"
+      ],
+      "answer": 0,
+      "explanation": "El perfilado orienta el cambio hacia costos reales."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.gestion-de-memoria",
+      "prompt": "¿Por qué una lista global puede crecer sin límite?",
+      "options": [
+        "Conserva referencias a objetos",
+        "Python siempre la borra al terminar una función",
+        "Porque todos los números son enormes"
+      ],
+      "answer": 0,
+      "explanation": "La administración automática no decide la política de retención."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.cache",
+      "prompt": "¿Qué debe definirse además de la clave de caché?",
+      "options": [
+        "Tamaño e invalidación",
+        "Solo su nombre",
+        "Un color"
+      ],
+      "answer": 0,
+      "explanation": "Los resultados pueden ocupar recursos y quedar obsoletos."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.cache",
+      "prompt": "¿Cuántas veces se calcula doble(4) en el ejemplo?",
+      "options": [
+        "Una",
+        "Dos",
+        "Cero"
+      ],
+      "answer": 0,
+      "explanation": "La segunda llamada reutiliza el resultado almacenado."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.cache",
+      "prompt": "Si una tarifa cambia, ¿debes considerar invalidar su valor cacheado? Escribe sí o no.",
+      "answers": [
+        "sí",
+        "si"
+      ],
+      "hint": "La caché puede conservar un precio anterior.",
+      "explanation": "La política debe mantener coherencia con los datos originales."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.perfilado": {
+      "explanationExcerpt": "El perfilado observa el consumo de recursos para localizar costos relevantes antes de elegir una optimización.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.gestion-de-memoria": {
+      "explanationExcerpt": "La gestión de memoria considera objetos vivos, referencias retenidas y crecimiento de estructuras, aunque el lenguaje automatice parte de su liberación.",
+      "assessmentIds": [
+        "q2"
+      ]
+    },
+    "fundamentos.cache": {
+      "explanationExcerpt": "Una caché guarda resultados reutilizables con reglas de clave, capacidad e invalidación. Un resultado rápido pero obsoleto puede ser incorrecto.",
+      "assessmentIds": [
+        "q3",
+        "q4"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "import cProfile\nfrom functools import lru_cache\nfrom time import perf_counter\n\nllamadas = []\n@lru_cache(maxsize=2)\ndef doble(n):\n    llamadas.append(n)\n    return n * 2\n\nperfil = cProfile.Profile()\ninicio = perf_counter()\nperfil.enable()\nprint(doble(4), doble(4))\nperfil.disable()\ntranscurrido = perf_counter() - inicio\nprint(len(llamadas), doble.cache_info().hits)\nprint(transcurrido >= 0)\ndoble.cache_clear()",
+      "stdout": "8 8\n1 1\nTrue\n"
+    }
+  ]
+}

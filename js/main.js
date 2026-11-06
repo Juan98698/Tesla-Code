@@ -1,90 +1,351 @@
 import { $ } from './core/dom.js';
-import { emit } from './core/events.js';
-import { indexRoute, nextMessage, nextPublished, isPublished } from './domain/curriculum.js';
-import { XP } from './domain/gamification.js';
-import { renderRouteInfo, renderRouteMap, renderSyllabus, renderTabs } from './features/catalog.js';
-import { completedFor, initGamification } from './features/gamification.js';
-import { renderLesson } from './features/lesson.js';
+import { escapeHtml as e } from './core/html.js';
+import { progressRepository } from './core/storage.js';
+import { loadCurricula, loadLesson, loadConcepts } from './repositories/content-repository.js';
+import { indexRoute, isUnlocked, nextLesson, lessonKey, isPublished } from './domain/curriculum.js';
+import { recordAttempt, completeIfReady } from './domain/progress.js';
+import { updateStreak } from './domain/gamification.js';
+import {
+  homePage,
+  routesPage,
+  routePage,
+  inspector,
+  practicePage,
+  progressPage,
+  lessonHref,
+} from './features/catalog.js';
+import { lessonPage, mountActivities } from './features/lesson.js';
 import { mountQuiz } from './features/quiz.js';
-import { on } from './core/events.js';
-import { loadCurricula } from './repositories/content-repository.js';
+import { widgets } from './widgets/index.js';
 
-let routes = [];
-let activeId = 'fundamentos';
-let renderedId = null;
-
-const routeById = (id) => routes.find((route) => route.id === id);
-
-function refreshCatalog() {
-  const route = routeById(activeId);
-  const open = renderedId === activeId ? [...$('tem').querySelectorAll('details')].map((d) => d.open) : null;
-  $('tabs').innerHTML = renderTabs(routes, activeId);
-  $('rinfo').innerHTML = renderRouteInfo(route);
-  $('tem').innerHTML = renderSyllabus(route, completedFor(route.id));
-  if (open) $('tem').querySelectorAll('details').forEach((d, i) => { d.open = open[i]; });
-  renderedId = activeId;
+let routes = [],
+  concepts = new Map(),
+  renderVersion = 0,
+  filter = 'all',
+  toastTimer;
+const state = progressRepository.load();
+function toast(message) {
+  clearTimeout(toastTimer);
+  $('toast').textContent = message;
+  $('toast').hidden = false;
+  toastTimer = setTimeout(() => ($('toast').hidden = true), 4200);
 }
-
-function describeResult(route, meta, { passed, weak }) {
-  if (!passed) {
-    return { text: `Aún no llegas al 80%. Repasa estos conceptos y vuelve a intentarlo: ${weak.join(', ')}.` };
+function save() {
+  const persisted = progressRepository.save(state);
+  $('xp').textContent = `${state.xp} XP`;
+  $('racha').textContent = `♨ ${state.streak.count} ${state.streak.count === 1 ? 'día' : 'días'}`;
+  if (!persisted)
+    toast('No pudimos guardar en este navegador. Conserva una copia desde Mi progreso.');
+}
+function selectNode(route, id) {
+  const lesson =
+    route.lessons.find((l) => l.id === id) ??
+    nextLesson(route, new Set(state.completed)) ??
+    route.lessons[0];
+  $('node-inspector').innerHTML = inspector(route, lesson, state, routes);
+  document
+    .querySelectorAll('[data-node]')
+    .forEach((button) =>
+      button.setAttribute('aria-pressed', String(button.dataset.node === lesson.id)),
+    );
+}
+function updateCompletion(route, meta, data) {
+  const key = lessonKey(route.id, meta.id),
+    wasComplete = state.completed.includes(key);
+  const complete = completeIfReady(state, key, data);
+  if (complete && !wasComplete) toast('¡Una nueva habilidad! Lección completada · +50 XP');
+  if ($('lesson-status')) {
+    $('lesson-status').textContent = complete ? '✓ Completada' : 'Aprende · Practica · Comprueba';
+    $('lesson-status').classList.toggle('live', complete);
   }
-  const first = !completedFor(route.id).has(meta.id);
-  emit('quiz:passed', { routeId: route.id, lessonId: meta.id });
-  const next = nextPublished(route, meta.id);
-  const bonus = first ? ` Ganaste ${XP.lessonPassed} XP extra.` : '';
-  return {
-    text: `Superaste el 80%. ${nextMessage(route, meta.id)}${bonus}`,
-    actions: next ? [{ label: `Ir a la lección ${route.pos[next.id] + 1}`, onClick: () => openLesson(route.id, next.id) }] : [],
-  };
+  save();
+  return complete;
 }
-
-async function openLesson(routeId, lessonId, { scroll = true } = {}) {
-  const route = routeById(routeId);
-  const meta = route.lessons[route.pos[lessonId]];
+async function mountLabs(root, version) {
+  for (const el of root.querySelectorAll('[data-lab]')) {
+    const widget = await widgets[el.dataset.lab]();
+    if (version !== renderVersion) return;
+    widget.mount(el);
+  }
+}
+async function render() {
+  const version = ++renderVersion;
+  const raw = location.hash.replace(/^#\/?/, '').split('/');
+  const [view = 'inicio', rid, lid, requestedTab] = raw;
+  const route = routes.find((r) => r.id === rid);
+  const nav = { ruta: 'rutas', leccion: 'rutas' }[view] ?? view;
+  document.querySelectorAll('[data-nav]').forEach((link) => {
+    if (link.dataset.nav === nav) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+  $('search-results').hidden = true;
+  $('breadcrumb').textContent =
+    {
+      inicio: 'Mi aprendizaje',
+      rutas: 'Explorar rutas',
+      ruta: route?.name,
+      leccion: route?.name,
+      practica: 'Laboratorio',
+      progreso: 'Mi progreso',
+    }[view] ?? 'TeslaCode';
+  const root = $('content');
   try {
-    const data = await renderLesson(route, meta);
-    $('ql').textContent = `${data.quiz.length} preguntas. Necesitas al menos 80% para desbloquear la siguiente lección.`;
-    mountQuiz({ box: $('qbox'), questions: data.quiz, onFinish: (summary) => describeResult(route, meta, summary) });
-    if (scroll) $('leccion').scrollIntoView({ behavior: 'smooth' });
+    if (view === 'inicio') root.innerHTML = homePage(routes, state);
+    else if (view === 'rutas') {
+      root.innerHTML = routesPage(routes, state, filter);
+      root.querySelectorAll('[data-filter]').forEach(
+        (button) =>
+          (button.onclick = () => {
+            filter = button.dataset.filter;
+            render();
+          }),
+      );
+      $('goal-select').onchange = (event) => {
+        state.goal = event.target.value;
+        save();
+        render();
+      };
+    } else if (view === 'ruta' && route) {
+      root.innerHTML = routePage(route, state);
+      selectNode(route, lid);
+      root
+        .querySelectorAll('[data-node]')
+        .forEach((button) => (button.onclick = () => selectNode(route, button.dataset.node)));
+    } else if (view === 'practica') {
+      root.innerHTML = practicePage(routes, state);
+      await mountLabs(root, version);
+    } else if (view === 'progreso') {
+      root.innerHTML = progressPage(routes, state, concepts);
+      $('export-progress').onclick = () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }),
+          url = URL.createObjectURL(blob),
+          link = document.createElement('a');
+        link.href = url;
+        link.download = 'teslacode-progreso.json';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
+    } else if (view === 'leccion' && route) {
+      const meta = route.lessons.find((l) => l.id === lid),
+        key = lessonKey(rid, lid);
+      if (!meta) throw new Error('Esta lección no existe en el mapa.');
+      if (!isUnlocked(route, lid, new Set(state.completed))) {
+        root.innerHTML = `<div class="page"><a class="text-link" href="#/ruta/${rid}/${lid}">← Volver al mapa</a><div class="card" style="margin-top:20px">${inspector(route, meta, state, routes)}</div></div>`;
+      } else {
+        const tab = ['aprender', 'practicar', 'comprobar'].includes(requestedTab)
+          ? requestedTab
+          : 'aprender';
+        root.innerHTML =
+          '<div class="loading-state"><span class="loader"></span><p>Preparando tu laboratorio…</p></div>';
+        const data = await loadLesson(rid, lid);
+        if (version !== renderVersion) return;
+        state.recent = key;
+        save();
+        root.innerHTML = lessonPage(route, meta, data, state, tab);
+        document.title = `${meta.title} · TeslaCode`;
+        $('bookmark').onclick = () => {
+          state.bookmarks = state.bookmarks.includes(key)
+            ? state.bookmarks.filter((k) => k !== key)
+            : [...state.bookmarks, key];
+          save();
+          $('bookmark').textContent = state.bookmarks.includes(key) ? '★' : '☆';
+          $('bookmark').setAttribute('aria-pressed', String(state.bookmarks.includes(key)));
+        };
+        const tabs = [...root.querySelectorAll('[data-tab]')];
+        tabs.forEach((button, i) => {
+          button.onclick = () => {
+            location.hash = lessonHref(rid, lid, button.dataset.tab).slice(1);
+          };
+          button.onkeydown = (event) => {
+            let next;
+            if (event.key === 'ArrowRight') next = (i + 1) % tabs.length;
+            if (event.key === 'ArrowLeft') next = (i + tabs.length - 1) % tabs.length;
+            if (event.key === 'Home') next = 0;
+            if (event.key === 'End') next = tabs.length - 1;
+            if (next !== undefined) {
+              event.preventDefault();
+              tabs[next].focus();
+            }
+          };
+        });
+        if (tab === 'aprender' && data.widget) {
+          const widget = await widgets[data.widget]();
+          if (version !== renderVersion) return;
+          widget.mount($('lesson-widget') ?? $('lesson'));
+        }
+        if (tab === 'practicar') {
+          const refresh = () => {
+            $('practice-summary').textContent =
+              `${data.activities.filter((a) => state.practices.includes(`${key}/${a.id}`)).length} de ${data.activities.length} actividades resueltas.`;
+          };
+          mountActivities(
+            $('activities'),
+            data.activities,
+            (id) => state.practices.includes(`${key}/${id}`),
+            (id) => {
+              const practiceKey = `${key}/${id}`;
+              if (!state.practices.includes(practiceKey)) state.practices.push(practiceKey);
+              state.streak = updateStreak(state.streak);
+              updateCompletion(route, meta, data);
+              refresh();
+            },
+          );
+          refresh();
+          await mountLabs(root, version);
+        }
+        if (tab === 'comprobar')
+          mountQuiz({
+            box: $('qbox'),
+            questions: data.quiz,
+            onFinish: (summary) => {
+              recordAttempt(state, key, summary.results);
+              const complete = updateCompletion(route, meta, data),
+                next = nextLesson(route, new Set(state.completed));
+              return {
+                text: complete
+                  ? next
+                    ? 'Práctica y comprobación completas. Puedes avanzar o volver a explorar.'
+                    : route.lessons.every(isPublished)
+                      ? `¡Completaste la ruta ${route.name}! Revisa tus logros y elige un nuevo camino.`
+                      : 'Completaste las lecciones disponibles de esta ruta. Los demás temas siguen en preparación.'
+                  : summary.passed
+                    ? 'Superaste la comprobación. Resuelve también la actividad de práctica para completar la lección.'
+                    : 'Revisa las explicaciones y vuelve a intentarlo. Tus dificultades aparecerán en Mi progreso.',
+                actions:
+                  complete && next
+                    ? [
+                        {
+                          label: 'Mi siguiente paso →',
+                          onClick: () => (location.hash = lessonHref(route.id, next.id).slice(1)),
+                        },
+                      ]
+                    : complete
+                      ? [
+                          {
+                            label: 'Ver mi progreso →',
+                            onClick: () => (location.hash = '/progreso'),
+                          },
+                          {
+                            label: 'Explorar otra ruta →',
+                            onClick: () => (location.hash = '/rutas'),
+                          },
+                        ]
+                      : [
+                          {
+                            label: 'Ir a la práctica →',
+                            onClick: () =>
+                              (location.hash = lessonHref(rid, lid, 'practicar').slice(1)),
+                          },
+                        ],
+              };
+            },
+          });
+      }
+    } else
+      root.innerHTML =
+        '<div class="empty-state"><h1>Este camino todavía no existe.</h1><p>Vuelve a tus rutas para encontrar el siguiente paso.</p><a class="btn" href="#/rutas">Explorar rutas →</a></div>';
+    if (version !== renderVersion) return;
+    if (view !== 'leccion') document.title = 'TeslaCode · Aprende, experimenta, construye';
+    root.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   } catch (error) {
-    $('lesson').textContent = `No se pudo cargar la lección. ${error.message}`;
+    if (version !== renderVersion) return;
+    root.innerHTML = `<div class="empty-state" role="alert"><h1>No pudimos abrir este paso.</h1><p>${e(error.message)}</p><button class="btn" id="retry">Volver a intentar</button> <a class="btn ghost" href="#/rutas">Ir a las rutas</a></div>`;
+    $('retry').onclick = render;
   }
 }
-
-function selectRoute(id) {
-  activeId = id;
-  refreshCatalog();
-}
-
-function bindEvents() {
-  $('mapa').addEventListener('click', (event) => {
-    const target = event.target.closest('button[data-route]');
-    if (!target) return;
-    selectRoute(target.dataset.route);
-    $('temario').scrollIntoView({ behavior: 'smooth' });
+function bindShell() {
+  let theme;
+  try {
+    theme = localStorage.getItem('teslacode:theme');
+  } catch {}
+  if (!['light', 'dark'].includes(theme))
+    theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  function setTheme(value) {
+    document.documentElement.dataset.theme = value;
+    $('theme-toggle').setAttribute(
+      'aria-label',
+      value === 'dark' ? 'Activar tema claro' : 'Activar tema oscuro',
+    );
+    $('theme-toggle').textContent = value === 'dark' ? '☀' : '☾';
+  }
+  setTheme(theme);
+  $('theme-toggle').onclick = () => {
+    theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    setTheme(theme);
+    try {
+      localStorage.setItem('teslacode:theme', theme);
+    } catch {}
+  };
+  $('search').closest('form').onsubmit = (event) => event.preventDefault();
+  $('search').oninput = () => {
+    const fold = (value) =>
+      value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('es');
+    const query = fold($('search').value.trim());
+    const hits =
+      query.length < 2
+        ? []
+        : routes
+            .flatMap((r) =>
+              r.lessons
+                .filter((l) => fold(`${l.title} ${l.concepts.join(' ')}`).includes(query))
+                .map((l) => ({ route: r, lesson: l })),
+            )
+            .slice(0, 20);
+    $('search-results').hidden = query.length < 2;
+    $('search-results').innerHTML = hits.length
+      ? hits
+          .map(
+            ({ route: r, lesson: l }) =>
+              `<a href="${isUnlocked(r, l.id, new Set(state.completed)) ? lessonHref(r.id, l.id) : `#/ruta/${r.id}/${l.id}`}">${e(l.title)}<small>${e(r.name)} · ${l.status === 'published' ? 'Lección publicada' : 'Tema en preparación'}</small></a>`,
+          )
+          .join('')
+      : '<p class="muted" style="padding:12px">No encontramos ese tema. Prueba con otro concepto.</p>';
+  };
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      $('search-results').hidden = true;
+    }
+    if (
+      event.key === '/' &&
+      !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
+      !event.ctrlKey &&
+      !event.metaKey
+    ) {
+      event.preventDefault();
+      $('search').focus();
+    }
+    if (
+      event.key === 'ArrowDown' &&
+      document.activeElement === $('search') &&
+      !$('search-results').hidden
+    ) {
+      const first = $('search-results').querySelector('a');
+      if (first) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
-  $('tabs').addEventListener('click', (event) => {
-    const target = event.target.closest('button[data-route]');
-    if (target) selectRoute(target.dataset.route);
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.search,.search-results')) {
+      $('search-results').hidden = true;
+    }
   });
-  $('tem').addEventListener('click', (event) => {
-    const target = event.target.closest('button[data-lesson]');
-    if (target && !target.disabled) openLesson(activeId, target.dataset.lesson);
-  });
-  on('progress:changed', refreshCatalog);
+  window.addEventListener('hashchange', render);
 }
-
-async function boot() {
-  routes = (await loadCurricula()).map(indexRoute);
-  initGamification();
-  $('mapa').innerHTML = renderRouteMap(routes);
-  bindEvents();
-  refreshCatalog();
-  const first = routeById(activeId).lessons.find(isPublished);
-  await openLesson(activeId, first.id, { scroll: false });
-}
-
-export const ready = boot().catch((error) => {
-  $('lesson').textContent = `No se pudo iniciar TeslaCode. ${error.message}`;
+export const ready = (async () => {
+  const [curricula, registry] = await Promise.all([loadCurricula(), loadConcepts()]);
+  routes = curricula.map(indexRoute);
+  concepts = new Map(registry.concepts.map((c) => [c.id, c]));
+  bindShell();
+  save();
+  if (!location.hash || location.hash === '#') location.replace('#/inicio');
+  else await render();
+})().catch((error) => {
+  $('content').innerHTML =
+    `<div class="empty-state" role="alert"><h1>No se pudo iniciar TeslaCode.</h1><p>${e(error.message)}</p><button class="btn" onclick="location.reload()">Recargar</button></div>`;
 });
