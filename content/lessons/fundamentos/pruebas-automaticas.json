@@ -1,0 +1,118 @@
+{
+  "id": "pruebas-automaticas",
+  "outcome": "Escribir pruebas que detecten un comportamiento incorrecto y repetirlas.",
+  "requiresConcepts": [
+    "fundamentos.notacion-big-o",
+    "fundamentos.complejidad-de-tiempo",
+    "fundamentos.complejidad-de-espacio"
+  ],
+  "html": "<p>Una prueba unitaria verifica una responsabilidad pequeña y controlable. Organiza cada prueba en preparar entradas, actuar y comprobar. Debe poder fallar cuando el comportamiento está roto; comprobar que el resultado existe no basta si se espera una cantidad concreta.</p><p>Una aserción compara el resultado con una expectativa decidida antes de ejecutar. unittest, incluido con Python, descubre métodos que empiezan por test_ en clases TestCase. assertEqual compara valores y assertRaises comprueba un error esperado; with delimita la operación que debe producirlo.</p><p>TDD propone escribir una prueba que falle por el comportamiento ausente, implementar lo mínimo para que pase y refactorizar manteniéndola verde. No consiste en cambiar la expectativa para justificar un error. La cobertura mide qué código se ejecutó, pero un 100 % de líneas no demuestra buenas comprobaciones ni ausencia de fallos.</p><p>En el ejemplo se captura la salida del runner con StringIO, un archivo de texto en memoria, para mostrar solo un resumen estable. En un proyecto también puedes ejecutar python -m unittest en la terminal. No dependas de internet ni de la hora real en una prueba unitaria que no evalúa esos servicios.</p><pre>import io\nimport unittest\n\ndef dividir(a, b):\n    return a / b\n\nclass TestDividir(unittest.TestCase):\n    def test_positivo(self):\n        self.assertEqual(dividir(6, 2), 3)\n\n    def test_negativo(self):\n        self.assertEqual(dividir(-6, 2), -3)\n\n    def test_cero(self):\n        with self.assertRaises(ZeroDivisionError):\n            dividir(1, 0)\n\nsuite = unittest.defaultTestLoader.loadTestsFromTestCase(TestDividir)\nresultado = unittest.TextTestRunner(stream=io.StringIO()).run(suite)\nprint(resultado.testsRun, resultado.wasSuccessful())</pre><dl class=\"concept-notes\"><dt>prueba unitaria</dt><dd>Una prueba unitaria verifica una responsabilidad delimitada con entradas y expectativas controladas, aislando dependencias externas cuando corresponde.</dd><dt>aserción</dt><dd>Una aserción expresa una condición que debe cumplirse. Si el resultado difiere de lo esperado, la prueba falla.</dd><dt>TDD</dt><dd>TDD organiza el trabajo en prueba que falla, implementación que la satisface y refactorización. La primera falla debe deberse al comportamiento que falta.</dd><dt>cobertura</dt><dd>La cobertura cuantifica partes del código ejecutadas por las pruebas. No garantiza que las expectativas sean suficientes ni correctas.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Agrega casos con decimales y comprueba que una implementación deliberadamente incorrecta hace fallar la suite.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.prueba-unitaria",
+      "prompt": "¿Qué conviene controlar en una prueba unitaria?",
+      "options": [
+        "Entradas y dependencias",
+        "La red pública necesariamente",
+        "Solo el nombre del archivo"
+      ],
+      "answer": 0,
+      "explanation": "Un resultado reproducible permite atribuir los fallos al comportamiento evaluado."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.asercion",
+      "prompt": "Si dividir(6, 2) devuelve 4, ¿qué hace assertEqual(..., 3)?",
+      "options": [
+        "Falla",
+        "Aprueba porque ambos son números",
+        "Cambia la función"
+      ],
+      "answer": 0,
+      "explanation": "Se compara el valor exacto esperado."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.tdd",
+      "prompt": "¿Cuál es el orden habitual de TDD?",
+      "options": [
+        "Fallar, implementar, refactorizar",
+        "Implementar, ignorar fallos, publicar",
+        "Cambiar expectativas hasta que pase"
+      ],
+      "answer": 0,
+      "explanation": "La prueba guía la implementación y protege cambios posteriores."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.cobertura",
+      "prompt": "¿100 % de cobertura demuestra ausencia de errores?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo en funciones pequeñas"
+      ],
+      "answer": 0,
+      "explanation": "Se puede ejecutar una línea sin comprobar su resultado correctamente."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.asercion",
+      "prompt": "Si una prueba espera 8 y obtiene 7, ¿debe pasar o fallar?",
+      "answers": [
+        "fallar",
+        "falla"
+      ],
+      "hint": "Compara con la expectativa original.",
+      "explanation": "La discrepancia debe producir un fallo visible."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.prueba-unitaria": {
+      "explanationExcerpt": "Una prueba unitaria verifica una responsabilidad delimitada con entradas y expectativas controladas, aislando dependencias externas cuando corresponde.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.asercion": {
+      "explanationExcerpt": "Una aserción expresa una condición que debe cumplirse. Si el resultado difiere de lo esperado, la prueba falla.",
+      "assessmentIds": [
+        "q2"
+      ]
+    },
+    "fundamentos.tdd": {
+      "explanationExcerpt": "TDD organiza el trabajo en prueba que falla, implementación que la satisface y refactorización. La primera falla debe deberse al comportamiento que falta.",
+      "assessmentIds": [
+        "q3"
+      ]
+    },
+    "fundamentos.cobertura": {
+      "explanationExcerpt": "La cobertura cuantifica partes del código ejecutadas por las pruebas. No garantiza que las expectativas sean suficientes ni correctas.",
+      "assessmentIds": [
+        "q4"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "import io\nimport unittest\n\ndef dividir(a, b):\n    return a / b\n\nclass TestDividir(unittest.TestCase):\n    def test_positivo(self):\n        self.assertEqual(dividir(6, 2), 3)\n\n    def test_negativo(self):\n        self.assertEqual(dividir(-6, 2), -3)\n\n    def test_cero(self):\n        with self.assertRaises(ZeroDivisionError):\n            dividir(1, 0)\n\nsuite = unittest.defaultTestLoader.loadTestsFromTestCase(TestDividir)\nresultado = unittest.TextTestRunner(stream=io.StringIO()).run(suite)\nprint(resultado.testsRun, resultado.wasSuccessful())",
+      "stdout": "3 True\n"
+    }
+  ]
+}

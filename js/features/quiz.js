@@ -1,116 +1,113 @@
 import { button, span } from '../core/dom.js';
-import { emit } from '../core/events.js';
+import { shuffle, codeBlock, escapeHtml } from '../core/html.js';
 import { grade, isPassing } from '../domain/grading.js';
-
-const escapeHtml = (text) => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;');
-const codeBlock = (code) => `<pre>${code.split('\n').map((line) => `<div>${escapeHtml(line)}</div>`).join('')}</pre>`;
-
 export function mountQuiz({ box, questions, onFinish }) {
-  let index = 0;
-  let correct = 0;
-  let weak = new Set();
-
+  let index, results, deck;
   function start() {
     index = 0;
-    correct = 0;
-    weak = new Set();
+    results = [];
+    deck = shuffle(questions);
     show();
   }
-
   function show() {
-    const q = questions[index];
-    box.innerHTML = `<div class="qmeta"><span>Pregunta ${index + 1} de ${questions.length}</span><span>${correct} correctas</span></div><div class="meter"><i style="width:${(index / questions.length) * 100}%"></i></div><p class="q"></p>${q.code ? codeBlock(q.code) : ''}`;
-    box.querySelector('.q').textContent = q.prompt;
-    (q.type === 'order' ? showOrder : showChoice)(q);
-  }
-
-  function feedback(q, good, extra = '') {
-    emit('quiz:answered', { correct: good });
-    if (good) correct += 1;
-    else weak.add(q.concept);
-    const panel = document.createElement('div');
-    panel.className = `fb ${good ? 'ok' : 'bad'}`;
-    panel.setAttribute('aria-live', 'polite');
-    const lead = document.createElement('b');
-    lead.textContent = good ? 'Correcto. ' : 'Todavía no. ';
-    panel.append(lead, `${extra}${q.explanation ?? ''}`);
-    const last = index === questions.length - 1;
-    const next = button(last ? 'Ver resultado' : 'Siguiente pregunta', 'btn', () => {
-      index += 1;
-      if (index < questions.length) show();
-      else finish();
-    });
-    next.style.cssText = 'display:block;margin-top:10px';
-    panel.append(next);
-    box.append(panel);
-    next.focus();
-  }
-
-  function showChoice(q) {
-    const wrap = document.createElement('div');
-    wrap.className = 'opts';
-    q.options.forEach((text, i) => wrap.append(button(text, 'opt', () => {
-      [...wrap.children].forEach((b) => { b.disabled = true; });
-      const good = grade(q, i);
-      wrap.children[q.answer].classList.add('ok');
-      if (!good) wrap.children[i].classList.add('bad');
-      feedback(q, good);
-    })));
-    box.append(wrap);
-  }
-
-  function showOrder(q) {
-    const picked = [];
-    const pool = document.createElement('div');
-    pool.className = 'opts';
-    const chosen = document.createElement('div');
-    chosen.className = 'resp';
-    chosen.setAttribute('aria-label', 'Tu orden');
-    const actions = document.createElement('div');
-    actions.className = 'btns';
-    const paint = () => chosen.replaceChildren(
-      ...(picked.length ? picked.map((t, i) => span(`${i + 1}. ${t}`, 'tag')) : [span('Toca los pasos en orden.')]),
-    );
-    const check = button('Comprobar orden', 'btn', () => {
+    const q = deck[index];
+    box.dataset.questionId = q.id;
+    box.innerHTML = `<div class="qmeta"><span>Pregunta ${index + 1} de ${deck.length}</span><span>${results.filter((r) => r.correct).length} correctas</span></div><div class="meter"><i style="width:${(index / deck.length) * 100}%"></i></div><h3 class="q">${escapeHtml(q.prompt)}</h3>${q.code ? codeBlock(q.code) : ''}`;
+    const controls = document.createElement('div');
+    controls.className = 'opts';
+    box.append(controls);
+    let answered = false;
+    function answer(response) {
+      if (answered) return;
+      answered = true;
+      controls.querySelectorAll('button,input').forEach((el) => (el.disabled = true));
+      const correct = grade(q, response);
+      results.push({ id: q.id, concept: q.concept, correct });
+      const panel = document.createElement('div');
+      panel.className = `fb ${correct ? 'ok' : 'bad'}`;
+      panel.setAttribute('role', 'status');
+      const solution =
+        q.type === 'choice'
+          ? q.options[q.answer]
+          : q.type === 'order'
+            ? q.steps.join(' → ')
+            : q.answers[0];
+      panel.textContent = `${correct ? '¡Bien resuelto!' : `Revisemos. Respuesta: ${solution}.`} ${q.explanation}`;
+      const next = button(
+        index === deck.length - 1 ? 'Ver mi resultado →' : 'Siguiente pregunta →',
+        'btn',
+        () => {
+          index++;
+          index < deck.length ? show() : finish();
+        },
+      );
+      panel.append(next);
+      box.append(panel);
+      next.focus({ preventScroll: true });
+    }
+    if (q.type === 'choice')
+      shuffle(q.options.map((text, original) => ({ text, original }))).forEach((option) =>
+        controls.append(button(option.text, 'opt', () => answer(option.original))),
+      );
+    if (q.type === 'text') {
+      const form = document.createElement('form');
+      const label = document.createElement('label');
+      label.textContent = 'Tu respuesta';
+      const input = document.createElement('input');
+      input.required = true;
+      input.autocomplete = 'off';
+      label.append(input);
+      const submit = button('Comprobar', 'btn', () => {});
+      submit.type = 'submit';
+      form.append(label, submit);
+      controls.append(form);
+      form.onsubmit = (event) => {
+        event.preventDefault();
+        answer(input.value);
+      };
+    }
+    if (q.type === 'order') {
+      const picked = [];
+      const chosen = document.createElement('div');
+      chosen.className = 'resp';
+      chosen.setAttribute('aria-live', 'polite');
+      const pool = document.createElement('div');
+      pool.className = 'opts';
+      const check = button('Comprobar orden', 'btn', () => answer(picked));
       check.disabled = true;
-      clear.disabled = true;
-      [...pool.children].forEach((b) => { b.disabled = true; });
-      const good = grade(q, picked);
-      feedback(q, good, good ? '' : `El orden correcto era: ${q.steps.join(' → ')}. `);
-    });
-    const clear = button('Borrar', 'btn sec', () => {
-      picked.length = 0;
-      [...pool.children].forEach((b) => { b.disabled = false; });
-      check.disabled = true;
-      paint();
-    });
-    check.disabled = true;
-    [...q.steps].sort(() => Math.random() - 0.5).forEach((text) => pool.append(button(text, 'opt', (event) => {
-      picked.push(text);
-      event.currentTarget.disabled = true;
-      check.disabled = picked.length < q.steps.length;
-      paint();
-    })));
-    actions.append(check, clear);
-    box.append(pool, chosen, actions);
-    paint();
+      const reset = button('Empezar de nuevo', 'btn ghost', () => {
+        picked.length = 0;
+        chosen.replaceChildren();
+        pool.querySelectorAll('button').forEach((b) => (b.disabled = false));
+        check.disabled = true;
+      });
+      shuffle(q.steps).forEach((text) =>
+        pool.append(
+          button(text, 'opt', (event) => {
+            picked.push(text);
+            event.currentTarget.disabled = true;
+            chosen.append(span(`${picked.length}. ${text}`, 'tag'));
+            check.disabled = picked.length !== q.steps.length;
+          }),
+        ),
+      );
+      controls.append(pool, chosen, check, reset);
+    }
   }
-
   function finish() {
-    const total = questions.length;
-    const passed = isPassing(correct, total);
-    const pct = Math.round((correct / total) * 100);
-    const { text, actions = [] } = onFinish({ correct, total, passed, weak: [...weak] });
-    box.innerHTML = `<div class="res"><div class="meter"><i style="width:${pct}%"></i></div><h3>${pct}% de dominio</h3><p></p></div>`;
-    const result = box.querySelector('.res');
-    result.querySelector('p').textContent = text;
-    result.append(button(passed ? 'Repetir el quiz' : 'Reintentar', 'btn', start));
-    actions.forEach((a) => {
-      const b = button(a.label, 'btn sec', a.onClick);
-      b.style.marginLeft = '10px';
-      result.append(b);
+    delete box.dataset.questionId;
+    const correct = results.filter((r) => r.correct).length;
+    const pct = Math.round((correct / deck.length) * 100);
+    const summary = onFinish({
+      correct,
+      total: deck.length,
+      passed: isPassing(correct, deck.length),
+      results,
     });
+    box.innerHTML = `<div class="result-orbit ${pct >= 80 ? 'passed' : ''}">${pct}<small>%</small></div><h3>${pct >= 80 ? 'Buen trabajo. Sigue construyendo.' : 'Cada intento te enseña algo.'}</h3><p>${escapeHtml(summary.text)}</p>`;
+    box.append(button('Volver a practicar', 'btn ghost', start));
+    for (const action of summary.actions ?? [])
+      box.append(button(action.label, 'btn', action.onClick));
   }
-
   start();
 }

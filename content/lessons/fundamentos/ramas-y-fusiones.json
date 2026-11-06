@@ -1,0 +1,109 @@
+{
+  "id": "ramas-y-fusiones",
+  "outcome": "Crear una rama de trabajo y fusionar sus cambios en un repositorio local nuevo.",
+  "requiresConcepts": [
+    "fundamentos.prueba-unitaria",
+    "fundamentos.asercion",
+    "fundamentos.tdd",
+    "fundamentos.cobertura"
+  ],
+  "html": "<p>echo escribe una línea. En la terminal, &gt; redirige la salida reemplazando el archivo y &gt;&gt; agrega al final. En este ejercicio se usa solo un archivo nuevo de práctica.</p><p>Una rama es una referencia móvil a una línea de commits. Crear mejora permite registrar trabajo sin mover inmediatamente main. Cambiar de rama actualiza los archivos visibles al estado correspondiente; conserva o registra cambios pendientes antes de hacerlo.</p><p>Una fusión integra líneas de trabajo. Si main no avanzó desde la separación, Git puede hacer fast-forward: mover la referencia sin crear un commit adicional. Si ambas líneas avanzaron, puede necesitar una fusión de tres vías y, en ocasiones, resolución de conflictos.</p><p>El ejemplo se ejecuta únicamente en una carpeta nueva de práctica. Configura identidad local para ese repositorio, no global; cambia los valores de ejemplo por tu identidad al trabajar de verdad. Git no sube nada a internet con estos comandos. La siguiente lección explicará conflictos y revisión en equipo.</p><pre>git init -b main\ngit config user.name &quot;Estudiante&quot;\ngit config user.email &quot;estudiante@example.invalid&quot;\necho &quot;Inicio&quot; &gt; notas.txt\ngit add notas.txt\ngit commit -m &quot;Crear notas&quot;\ngit checkout -b mejora\necho &quot;Mejora&quot; &gt;&gt; notas.txt\ngit add notas.txt\ngit commit -m &quot;Ampliar notas&quot;\ngit checkout main\ngit merge mejora\ngit status --short</pre><dl class=\"concept-notes\"><dt>rama</dt><dd>Una rama es una referencia a una línea de commits que puede avanzar al registrar cambios. Crear otra rama no publica el repositorio.</dd><dt>fusión</dt><dd>Una fusión integra cambios entre líneas de trabajo. Puede ser fast-forward o requerir una integración de tres vías con posibles conflictos.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Crea otra rama, agrega un archivo distinto y revisa el historial antes y después de integrarla.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.rama",
+      "prompt": "¿Qué crea git checkout -b mejora?",
+      "options": [
+        "Una rama nueva y cambia a ella",
+        "Una cuenta remota",
+        "Un archivo de respaldo independiente"
+      ],
+      "answer": 0,
+      "explanation": "La rama registra una línea local de trabajo."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.fusion",
+      "prompt": "Si main no avanzó, ¿qué fusión puede realizarse?",
+      "options": [
+        "Fast-forward",
+        "Siempre un conflicto",
+        "Ninguna"
+      ],
+      "answer": 0,
+      "explanation": "Git puede adelantar main hasta el commit de mejora."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.rama",
+      "prompt": "¿Crear una rama sube el código a internet?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo si el nombre es main"
+      ],
+      "answer": 0,
+      "explanation": "La publicación requiere operaciones remotas adicionales."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.fusion",
+      "prompt": "¿Toda fusión necesita un commit extra?",
+      "options": [
+        "No, fast-forward puede mover la referencia",
+        "Sí",
+        "Solo si hay archivos de texto"
+      ],
+      "answer": 0,
+      "explanation": "La forma de integración depende del historial."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.rama",
+      "prompt": "¿Cuál es el nombre de la rama de trabajo que crea el ejemplo?",
+      "answers": [
+        "mejora"
+      ],
+      "hint": "Se indica después de -b.",
+      "explanation": "La rama mejora permite desarrollar antes de integrar en main."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.rama": {
+      "explanationExcerpt": "Una rama es una referencia a una línea de commits que puede avanzar al registrar cambios. Crear otra rama no publica el repositorio.",
+      "assessmentIds": [
+        "q1",
+        "q3"
+      ]
+    },
+    "fundamentos.fusion": {
+      "explanationExcerpt": "Una fusión integra cambios entre líneas de trabajo. Puede ser fast-forward o requerir una integración de tres vías con posibles conflictos.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    }
+  },
+  "examples": [],
+  "gitExample": {
+    "script": "git init -b main\ngit config user.name \"Estudiante\"\ngit config user.email \"estudiante@example.invalid\"\necho \"Inicio\" > notas.txt\ngit add notas.txt\ngit commit -m \"Crear notas\"\ngit checkout -b mejora\necho \"Mejora\" >> notas.txt\ngit add notas.txt\ngit commit -m \"Ampliar notas\"\ngit checkout main\ngit merge mejora\ngit status --short",
+    "expectedBranch": "main",
+    "expectedFiles": {
+      "notas.txt": "Inicio\nMejora\n"
+    },
+    "expectedCommits": 2
+  }
+}

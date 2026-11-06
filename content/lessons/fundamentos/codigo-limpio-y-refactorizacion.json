@@ -1,0 +1,114 @@
+{
+  "id": "codigo-limpio-y-refactorizacion",
+  "outcome": "Mejorar estructura manteniendo el comportamiento comprobado.",
+  "requiresConcepts": [
+    "fundamentos.responsabilidad-unica",
+    "fundamentos.abierto-y-cerrado",
+    "fundamentos.inversion-de-dependencias",
+    "fundamentos.solid.3",
+    "fundamentos.solid.4"
+  ],
+  "html": "<p>El bucle desempaqueta cada pareja en precio y premium: ambas variables reciben, en ese orden, los dos elementos de la tupla. La expresión a if condición else b elige un valor sin ejecutar las dos alternativas.</p><p>El código limpio comunica intención mediante nombres claros, operaciones pequeñas y reglas visibles. Una función corta puede seguir siendo incomprensible; busca claridad respecto al problema, no una cantidad arbitraria de líneas.</p><p>Refactorizar cambia la estructura conservando el comportamiento observable acordado. Antes de mover código, establece pruebas de caracterización que documenten lo que debe mantenerse. Si también corriges una regla de negocio, separa ese cambio para que pueda revisarse.</p><p>La deuda técnica representa un costo futuro de decisiones actuales, como duplicación o dependencias difíciles de modificar. Puede aceptarse conscientemente por una necesidad real, pero registra consecuencias y una condición para revisarla. No todo código que no te gusta constituye deuda relevante.</p><p>El ejemplo extrae una regla y conserva resultados en varios casos. La igualdad en esos casos no demuestra equivalencia universal, pero protege comportamientos relevantes. Amplía la selección con límites y entradas inválidas.</p><pre>def antes(precio, premium):\n    if premium:\n        return precio * 90 // 100\n    return precio\n\ndef aplicar_descuento(precio):\n    return precio * 90 // 100\n\ndef despues(precio, premium):\n    return aplicar_descuento(precio) if premium else precio\n\n# &quot;a if condicion else b&quot; es una expresión condicional de Python.\nfor precio, premium in [(0, True), (1000, True), (1000, False)]:\n    assert antes(precio, premium) == despues(precio, premium)\nprint(&quot;3 casos conservados&quot;)</pre><dl class=\"concept-notes\"><dt>código limpio</dt><dd>El código limpio expresa intención y reglas de forma comprensible para sus lectores. La claridad depende también del contexto del problema.</dd><dt>refactorización</dt><dd>La refactorización cambia estructura interna sin alterar el comportamiento observable que se ha decidido conservar.</dd><dt>deuda técnica</dt><dd>La deuda técnica es un costo futuro asociado a decisiones de implementación o diseño. Se gestiona identificando consecuencias y prioridades.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Refactoriza el proyecto de biblioteca por pasos y ejecuta sus pruebas después de cada extracción.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.codigo-limpio",
+      "prompt": "¿Qué mejora la claridad de una regla?",
+      "options": [
+        "Un nombre que expresa su intención",
+        "Usar siempre nombres de una letra",
+        "Eliminar todos los comentarios"
+      ],
+      "answer": 0,
+      "explanation": "Los nombres ayudan a reconocer el propósito."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.refactorizacion",
+      "prompt": "¿Qué debe conservar una refactorización?",
+      "options": [
+        "El comportamiento observable acordado",
+        "Cada línea exactamente",
+        "Los errores que se decidió corregir en el mismo cambio sin avisar"
+      ],
+      "answer": 0,
+      "explanation": "Una corrección funcional debe identificarse por separado."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.deuda-tecnica",
+      "prompt": "¿Qué ayuda a gestionar deuda técnica?",
+      "options": [
+        "Consecuencias y criterio de revisión",
+        "Solo llamarla deuda",
+        "Reescribir todo sin medir"
+      ],
+      "answer": 0,
+      "explanation": "La prioridad depende de su costo real."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.refactorizacion",
+      "prompt": "¿Tres casos iguales prueban equivalencia para cualquier entrada?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo si usan assert"
+      ],
+      "answer": 0,
+      "explanation": "Las pruebas cubren los casos seleccionados, no todas las posibilidades."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.refactorizacion",
+      "prompt": "Si una extracción cambia el total esperado de 900 a 800, ¿conservó el comportamiento? Escribe sí o no.",
+      "answers": [
+        "no"
+      ],
+      "hint": "Compara el resultado observable.",
+      "explanation": "Ese cambio necesita investigarse o declararse como modificación de la regla."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.codigo-limpio": {
+      "explanationExcerpt": "El código limpio expresa intención y reglas de forma comprensible para sus lectores. La claridad depende también del contexto del problema.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.refactorizacion": {
+      "explanationExcerpt": "La refactorización cambia estructura interna sin alterar el comportamiento observable que se ha decidido conservar.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.deuda-tecnica": {
+      "explanationExcerpt": "La deuda técnica es un costo futuro asociado a decisiones de implementación o diseño. Se gestiona identificando consecuencias y prioridades.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "def antes(precio, premium):\n    if premium:\n        return precio * 90 // 100\n    return precio\n\ndef aplicar_descuento(precio):\n    return precio * 90 // 100\n\ndef despues(precio, premium):\n    return aplicar_descuento(precio) if premium else precio\n\n# \"a if condicion else b\" es una expresión condicional de Python.\nfor precio, premium in [(0, True), (1000, True), (1000, False)]:\n    assert antes(precio, premium) == despues(precio, premium)\nprint(\"3 casos conservados\")",
+      "stdout": "3 casos conservados\n"
+    }
+  ]
+}

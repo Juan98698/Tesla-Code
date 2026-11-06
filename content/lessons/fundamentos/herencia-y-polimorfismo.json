@@ -1,0 +1,112 @@
+{
+  "id": "herencia-y-polimorfismo",
+  "outcome": "Usar implementaciones distintas a través de una operación compatible.",
+  "requiresConcepts": [
+    "fundamentos.encapsulamiento",
+    "fundamentos.abstraccion",
+    "fundamentos.interfaz-publica"
+  ],
+  "html": "<p>La herencia permite definir una clase a partir de otra. En class Texto(Notificacion), Texto hereda la interfaz y los métodos de Notificacion. Es apropiada si la nueva clase puede usarse donde se espera la base sin romper su contrato.</p><p>El polimorfismo permite invocar la misma operación sobre implementaciones diferentes. En Python no siempre requiere herencia: objetos distintos pueden ofrecer el mismo método. La llamada decide qué implementación usar según el objeto real.</p><p>La sobrescritura redefine un método heredado. Conserva su propósito, parámetros y expectativas. No cambies un método que siempre devuelve texto por otro que devuelve una lista sin modificar el contrato y sus consumidores. super() permite delegar en la implementación de una clase base cuando es necesario.</p><pre>class Notificacion:\n    def mensaje(self):\n        return &quot;Aviso&quot;\n\nclass Texto(Notificacion):\n    def mensaje(self):\n        return &quot;Texto&quot;\n\nclass Correo(Notificacion):\n    def mensaje(self):\n        return &quot;Correo&quot;\n\nfor canal in [Texto(), Correo()]:\n    print(canal.mensaje())</pre><dl class=\"concept-notes\"><dt>herencia</dt><dd>La herencia establece que una clase deriva de otra y puede reutilizar o especializar su comportamiento. Requiere compatibilidad con el contrato de la base.</dd><dt>polimorfismo</dt><dd>El polimorfismo permite tratar objetos mediante operaciones compatibles aunque sus implementaciones sean distintas.</dd><dt>sobrescritura</dt><dd>La sobrescritura reemplaza en una subclase la implementación de un método heredado conservando las expectativas del contrato.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Añade una clase Push manteniendo el contrato de mensaje y prueba las tres implementaciones.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.herencia",
+      "prompt": "¿Qué declara class Texto(Notificacion)?",
+      "options": [
+        "Que Texto deriva de Notificacion",
+        "Que ambas son el mismo objeto",
+        "Que se copia un archivo"
+      ],
+      "answer": 0,
+      "explanation": "La clase entre paréntesis es la base."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.polimorfismo",
+      "prompt": "¿Por qué el mismo bucle admite Texto y Correo?",
+      "options": [
+        "Ambos ofrecen mensaje con un contrato compatible",
+        "Porque tienen el mismo estado siempre",
+        "Porque el bucle ignora los objetos"
+      ],
+      "answer": 0,
+      "explanation": "La llamada se resuelve sobre cada objeto."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.sobrescritura",
+      "prompt": "¿Qué hace Texto.mensaje?",
+      "options": [
+        "Sobrescribe el método heredado",
+        "Borra la clase base",
+        "Crea una variable global"
+      ],
+      "answer": 0,
+      "explanation": "Es una especialización del comportamiento de la base."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.polimorfismo",
+      "prompt": "¿Python exige siempre herencia para polimorfismo?",
+      "options": [
+        "No, pueden existir operaciones compatibles sin ella",
+        "Sí",
+        "Solo con cadenas"
+      ],
+      "answer": 0,
+      "explanation": "La compatibilidad de operaciones también permite polimorfismo."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.sobrescritura",
+      "prompt": "Si Texto.mensaje devuelve \"SMS\" en vez de \"Texto\", ¿qué imprime el primer paso del bucle?",
+      "answers": [
+        "SMS"
+      ],
+      "hint": "Se usa la implementación del objeto Texto.",
+      "explanation": "La sobrescritura determina el resultado de esa llamada."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.herencia": {
+      "explanationExcerpt": "La herencia establece que una clase deriva de otra y puede reutilizar o especializar su comportamiento. Requiere compatibilidad con el contrato de la base.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.polimorfismo": {
+      "explanationExcerpt": "El polimorfismo permite tratar objetos mediante operaciones compatibles aunque sus implementaciones sean distintas.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.sobrescritura": {
+      "explanationExcerpt": "La sobrescritura reemplaza en una subclase la implementación de un método heredado conservando las expectativas del contrato.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "class Notificacion:\n    def mensaje(self):\n        return \"Aviso\"\n\nclass Texto(Notificacion):\n    def mensaje(self):\n        return \"Texto\"\n\nclass Correo(Notificacion):\n    def mensaje(self):\n        return \"Correo\"\n\nfor canal in [Texto(), Correo()]:\n    print(canal.mensaje())",
+      "stdout": "Texto\nCorreo\n"
+    }
+  ]
+}

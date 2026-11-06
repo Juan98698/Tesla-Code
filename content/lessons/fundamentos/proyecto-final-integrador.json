@@ -1,0 +1,108 @@
+{
+  "id": "proyecto-final-integrador",
+  "outcome": "Entregar un gestor persistente con reglas probadas, instrucciones y un artefacto verificable.",
+  "requiresConcepts": [
+    "fundamentos.ci-cd",
+    "fundamentos.pipeline",
+    "fundamentos.despliegue"
+  ],
+  "html": "<p>is None comprueba ausencia mediante identidad. isinstance(dato, dict) verifica que el dato sea un diccionario y dict(self.datos) crea una copia superficial. El ejemplo asume un escritor a la vez: varios procesos o usuarios requieren coordinación y una política de recuperación más completa.</p><p>El proyecto final integra diseño, pruebas y entrega. Construirás un gestor de tareas persistente con identificadores, validación, consultas y registro de resultados. Define los criterios antes del código: agregar, rechazar duplicados, recuperar después de reiniciar y conservar datos ante un archivo inválido.</p><p>El núcleo registrar recibe un repositorio y devuelve un resultado. RepositorioJSON es el adaptador de disco. pathlib.Path representa una ruta y ofrece operaciones de lectura y escritura; replace mueve el archivo temporal al destino. Escribir primero un temporal en el mismo directorio evita exponer una escritura parcial en condiciones habituales, pero no equivale por sí solo a garantizar durabilidad frente a cualquier fallo.</p><p>El ejemplo es una base completa del incremento de registro y persistencia. Ejecútalo en una carpeta nueva: crea tareas.json. Repetirlo conserva la tarea y rechaza el duplicado. Para probar aisladamente usa un directorio temporal, como hacen las pruebas del curso, y ensaya también contenido corrupto.</p><p>Para entregar, incluye código, pruebas, README y una versión identificable. Si publicas una interfaz web, separa ese adaptador del dominio y comprueba el sitio desplegado. El navegador no puede escribir libremente en el disco del servidor: una aplicación web persistente necesita un servicio o almacenamiento apropiado. Este proyecto de terminal no se convierte en una aplicación web con solo subir el archivo .py.</p><pre>import json\nfrom pathlib import Path\n\nclass RepositorioJSON:\n    def __init__(self, ruta):\n        self.ruta = Path(ruta)\n        self.datos = json.loads(self.ruta.read_text(encoding=&quot;utf-8&quot;)) if self.ruta.exists() else {}\n        if not isinstance(self.datos, dict):\n            raise ValueError(&quot;Se esperaba un objeto JSON&quot;)\n\n    def obtener(self, id):\n        return self.datos.get(id)\n\n    def guardar(self, id, texto):\n        nuevos = dict(self.datos)\n        nuevos[id] = texto\n        temporal = self.ruta.with_suffix(&quot;.tmp&quot;)\n        temporal.write_text(json.dumps(nuevos, ensure_ascii=False), encoding=&quot;utf-8&quot;)\n        temporal.replace(self.ruta)\n        self.datos = nuevos\n\ndef registrar(repo, id, texto):\n    if not id.strip() or not texto.strip() or repo.obtener(id) is not None:\n        return False\n    repo.guardar(id, texto.strip())\n    return True\n\nrepo = RepositorioJSON(&quot;tareas.json&quot;)\nprint(registrar(repo, &quot;T1&quot;, &quot; Leer &quot;))\nprint(registrar(repo, &quot;T1&quot;, &quot;Otra&quot;))\nrecuperado = RepositorioJSON(&quot;tareas.json&quot;)\nprint(recuperado.obtener(&quot;T1&quot;))</pre><dl class=\"concept-notes\"><dt>diseño</dt><dd>El diseño del proyecto define responsabilidades, contratos y reglas antes de elegir mecanismos. Aquí separa el registro de tareas del repositorio JSON.</dd><dt>pruebas y despliegue</dt><dd>Las pruebas y despliegue conectan comportamiento comprobado con una versión entregable: verifica reglas, persistencia, instrucciones y la operación real en el entorno elegido.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Agrega completar y listar; aplica el contrato del repositorio y entrega las pruebas y documentación de los criterios siguientes.</aside><h2>Criterios de aceptación del proyecto</h2><ul><li>Registrar una tarea válida y rechazar texto vacío, ID vacío e ID duplicado sin modificar los datos previos.</li><li>Guardar, construir otra instancia y recuperar los mismos datos; verificar el comportamiento al repetir el programa.</li><li>Rechazar JSON inválido y estructuras no admitidas sin sobrescribir el archivo original.</li><li>Agregar pruebas unitarias del caso de uso y pruebas de integración del adaptador con directorios temporales.</li><li>Entregar README, instrucciones reproducibles, historial de cambios y una comprobación del artefacto; documentar límites de concurrencia y durabilidad.</li></ul><p>El ejemplo es una base ejecutable. Construye y prueba los incrementos del reto en una carpeta propia; la actividad breve comprueba una decisión concreta, no certifica todo el proyecto.</p>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.diseno",
+      "prompt": "¿Qué permite sustituir disco por memoria en las pruebas?",
+      "options": [
+        "Un contrato de repositorio recibido por el caso de uso",
+        "Una ruta global oculta",
+        "Copiar registrar para cada archivo"
+      ],
+      "answer": 0,
+      "explanation": "La regla depende del contrato, no del mecanismo de disco."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.pruebas-y-despliegue",
+      "prompt": "¿Qué prueba confirma persistencia?",
+      "options": [
+        "Crear otro repositorio y recuperar el dato guardado",
+        "Solo observar una variable en memoria",
+        "Cambiar el nombre de la tarea"
+      ],
+      "answer": 0,
+      "explanation": "Se comprueba la recuperación desde el almacenamiento."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.diseno",
+      "prompt": "¿Qué debe pasar si el JSON del disco está corrupto?",
+      "options": [
+        "Informar el fallo sin sobrescribirlo silenciosamente",
+        "Empezar vacío y reemplazarlo siempre",
+        "Inventar el dato perdido"
+      ],
+      "answer": 0,
+      "explanation": "Conservar la evidencia evita pérdida silenciosa."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.pruebas-y-despliegue",
+      "prompt": "¿Subir este .py a un hosting estático crea un backend persistente?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo si el archivo tiene comentarios"
+      ],
+      "answer": 0,
+      "explanation": "El hosting estático no ejecuta un servicio de Python."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.pruebas-y-despliegue",
+      "prompt": "En una carpeta nueva, se registra T1 dos veces. ¿Qué booleano devuelve el segundo registro?",
+      "answers": [
+        "False",
+        "falso"
+      ],
+      "hint": "El ID ya existe en el repositorio.",
+      "explanation": "El contrato rechaza duplicados sin reemplazar la tarea original."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.diseno": {
+      "explanationExcerpt": "El diseño del proyecto define responsabilidades, contratos y reglas antes de elegir mecanismos. Aquí separa el registro de tareas del repositorio JSON.",
+      "assessmentIds": [
+        "q1",
+        "q3"
+      ]
+    },
+    "fundamentos.pruebas-y-despliegue": {
+      "explanationExcerpt": "Las pruebas y despliegue conectan comportamiento comprobado con una versión entregable: verifica reglas, persistencia, instrucciones y la operación real en el entorno elegido.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "import json\nfrom pathlib import Path\n\nclass RepositorioJSON:\n    def __init__(self, ruta):\n        self.ruta = Path(ruta)\n        self.datos = json.loads(self.ruta.read_text(encoding=\"utf-8\")) if self.ruta.exists() else {}\n        if not isinstance(self.datos, dict):\n            raise ValueError(\"Se esperaba un objeto JSON\")\n\n    def obtener(self, id):\n        return self.datos.get(id)\n\n    def guardar(self, id, texto):\n        nuevos = dict(self.datos)\n        nuevos[id] = texto\n        temporal = self.ruta.with_suffix(\".tmp\")\n        temporal.write_text(json.dumps(nuevos, ensure_ascii=False), encoding=\"utf-8\")\n        temporal.replace(self.ruta)\n        self.datos = nuevos\n\ndef registrar(repo, id, texto):\n    if not id.strip() or not texto.strip() or repo.obtener(id) is not None:\n        return False\n    repo.guardar(id, texto.strip())\n    return True\n\nrepo = RepositorioJSON(\"tareas.json\")\nprint(registrar(repo, \"T1\", \" Leer \"))\nprint(registrar(repo, \"T1\", \"Otra\"))\nrecuperado = RepositorioJSON(\"tareas.json\")\nprint(recuperado.obtener(\"T1\"))",
+      "stdout": "True\nFalse\nLeer\n"
+    }
+  ]
+}

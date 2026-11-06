@@ -1,0 +1,113 @@
+{
+  "id": "arquitectura-de-software",
+  "outcome": "Separar un caso de uso de sus mecanismos de entrada y persistencia.",
+  "requiresConcepts": [
+    "fundamentos.codigo-limpio",
+    "fundamentos.refactorizacion",
+    "fundamentos.deuda-tecnica"
+  ],
+  "html": "<p>La arquitectura organiza responsabilidades, límites y dependencias importantes. En un programa pequeño puede bastar con funciones y módulos; un diagrama complejo no garantiza separación real.</p><p>Las capas agrupan responsabilidades, por ejemplo presentación, aplicación, dominio e infraestructura. Una regla de dominio no debería necesitar un navegador ni un formato de archivo para decidir si un préstamo es válido. El caso de uso coordina esa regla y sus dependencias.</p><p>La arquitectura hexagonal describe un núcleo conectado al exterior mediante puertos y adaptadores. Un puerto es un contrato requerido u ofrecido; un adaptador lo conecta con un mecanismo concreto, como JSON o memoria. El nombre hexagonal no obliga a dibujar seis componentes.</p><p>Un módulo es una unidad de organización con responsabilidades y una interfaz. Puedes separar el ejemplo en dominio.py, repositorio.py y app.py conservando la dirección de dependencias. En el ejemplo en un solo archivo, RepositorioMemoria es un adaptador intercambiable.</p><pre>class RepositorioMemoria:\n    def __init__(self):\n        self.datos = {}\n\n    def guardar(self, id, texto):\n        self.datos[id] = texto\n\n    def obtener(self, id):\n        return self.datos.get(id)\n\ndef registrar(repo, id, texto):\n    limpio = texto.strip()\n    if not limpio:\n        return False\n    repo.guardar(id, limpio)\n    return True\n\nrepo = RepositorioMemoria()\nprint(registrar(repo, &quot;T1&quot;, &quot;  Leer  &quot;))\nprint(repo.obtener(&quot;T1&quot;))</pre><dl class=\"concept-notes\"><dt>capas</dt><dd>Las capas agrupan responsabilidades y establecen una dirección de dependencias, evitando que las reglas centrales necesiten detalles de interfaz o almacenamiento.</dd><dt>arquitectura hexagonal</dt><dd>La arquitectura hexagonal protege un núcleo mediante contratos llamados puertos y mecanismos externos llamados adaptadores.</dd><dt>módulos</dt><dd>Los módulos organizan código con una responsabilidad e interfaz reconocibles. Separar archivos sin controlar dependencias no basta para modularizar.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Sustituye el repositorio de memoria por JSON sin cambiar registrar y ejecuta las mismas pruebas de contrato.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.capas",
+      "prompt": "¿Qué debería poder probarse sin navegador?",
+      "options": [
+        "La regla que rechaza una tarea vacía",
+        "Solo el color de la página",
+        "El tamaño de la ventana"
+      ],
+      "answer": 0,
+      "explanation": "La regla pertenece al núcleo del problema."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.arquitectura-hexagonal",
+      "prompt": "¿Qué es RepositorioMemoria en este diseño?",
+      "options": [
+        "Un adaptador de persistencia",
+        "Una base de datos remota obligatoria",
+        "El caso de uso completo"
+      ],
+      "answer": 0,
+      "explanation": "Implementa el contrato de guardar y obtener."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.modulos",
+      "prompt": "¿Separar archivos garantiza modularidad?",
+      "options": [
+        "No, también importan responsabilidades y dependencias",
+        "Sí",
+        "Solo si tienen nombres largos"
+      ],
+      "answer": 0,
+      "explanation": "La organización física puede ocultar acoplamiento."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.arquitectura-hexagonal",
+      "prompt": "¿La arquitectura hexagonal exige seis componentes?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo en Python"
+      ],
+      "answer": 0,
+      "explanation": "El nombre es una representación conceptual, no un conteo obligatorio."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.arquitectura-hexagonal",
+      "prompt": "¿Cómo se llama el componente que conecta un contrato del núcleo con JSON o memoria?",
+      "answers": [
+        "adaptador",
+        "un adaptador"
+      ],
+      "hint": "Es el mecanismo concreto del exterior.",
+      "explanation": "El adaptador implementa la conexión con una tecnología."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.capas": {
+      "explanationExcerpt": "Las capas agrupan responsabilidades y establecen una dirección de dependencias, evitando que las reglas centrales necesiten detalles de interfaz o almacenamiento.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.arquitectura-hexagonal": {
+      "explanationExcerpt": "La arquitectura hexagonal protege un núcleo mediante contratos llamados puertos y mecanismos externos llamados adaptadores.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.modulos": {
+      "explanationExcerpt": "Los módulos organizan código con una responsabilidad e interfaz reconocibles. Separar archivos sin controlar dependencias no basta para modularizar.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "class RepositorioMemoria:\n    def __init__(self):\n        self.datos = {}\n\n    def guardar(self, id, texto):\n        self.datos[id] = texto\n\n    def obtener(self, id):\n        return self.datos.get(id)\n\ndef registrar(repo, id, texto):\n    limpio = texto.strip()\n    if not limpio:\n        return False\n    repo.guardar(id, limpio)\n    return True\n\nrepo = RepositorioMemoria()\nprint(registrar(repo, \"T1\", \"  Leer  \"))\nprint(repo.obtener(\"T1\"))",
+      "stdout": "True\nLeer\n"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "id": "patrones-esenciales",
+  "outcome": "Distinguir creación, selección de algoritmo y notificación de eventos.",
+  "requiresConcepts": [
+    "fundamentos.patron-de-diseno",
+    "fundamentos.problema-recurrente",
+    "fundamentos.catalogo-de-patrones"
+  ],
+  "html": "<p>Una lambda es una función breve escrita como expresión. La función devuelta conserva acceso al oyente de esa suscripción: es un cierre sobre ese valor. No se ejecuta hasta llamar a cancelar.</p><p>Factory concentra la elección y creación de una implementación. Puede comenzar como una función que valida una clave y devuelve un objeto o función. No hace falta una jerarquía de fábricas si una función expresa bien la decisión.</p><p>Strategy hace intercambiable un comportamiento que el consumidor usa por contrato. En el ejemplo, el corrector puede cambiar sin reescribir la evaluación. La función fábrica selecciona una estrategia; son intenciones distintas que pueden colaborar.</p><p>Observer notifica a suscriptores cuando sucede un evento sin que el emisor conozca cada reacción. Define cómo suscribirse y cancelar la suscripción; evita acumular escuchas al volver a montar una pantalla. No todos los cambios necesitan un bus global: una llamada explícita puede ser más clara.</p><p>El ejemplo recorre una copia de la lista de oyentes para permitir cambios de suscripción durante una notificación. El manejo de errores de oyentes debe diseñarse: aquí se dejan visibles para no ocultarlos.</p><pre>def exacto(esperado, respuesta):\n    return esperado == respuesta\n\ndef sin_mayusculas(esperado, respuesta):\n    return esperado.lower() == respuesta.lower()\n\ndef crear_corrector(tipo):\n    opciones = {&quot;exacto&quot;: exacto, &quot;texto&quot;: sin_mayusculas}\n    if tipo not in opciones:\n        raise ValueError(&quot;Tipo desconocido&quot;)\n    return opciones[tipo]\n\noyentes = []\ndef suscribir(oyente):\n    oyentes.append(oyente)\n    return lambda: oyentes.remove(oyente)\n\ndef notificar(mensaje):\n    for oyente in list(oyentes):\n        oyente(mensaje)\n\n# lambda crea una función breve: se ejecutará al cancelar, no al suscribir.\ncancelar = suscribir(print)\ncorrector = crear_corrector(&quot;texto&quot;)\nnotificar(str(corrector(&quot;Hola&quot;, &quot;HOLA&quot;)))\ncancelar()\nprint(len(oyentes))</pre><dl class=\"concept-notes\"><dt>Factory</dt><dd>Factory centraliza la creación o selección de una implementación mediante un contrato. Puede implementarse con una función sencilla.</dd><dt>Strategy</dt><dd>Strategy encapsula un comportamiento intercambiable, como una forma de corregir respuestas, sin modificar a quien lo utiliza.</dd><dt>Observer</dt><dd>Observer permite que varios suscriptores reaccionen a eventos del emisor. La gestión del ciclo de vida y la cancelación de suscripciones forman parte del diseño.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Sustituye la lambda por una función con nombre y comprueba que cancelar impide futuras notificaciones.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.factory",
+      "prompt": "¿Qué intención tiene crear_corrector?",
+      "options": [
+        "Seleccionar una implementación",
+        "Guardar todo el estado global",
+        "Notificar a usuarios"
+      ],
+      "answer": 0,
+      "explanation": "Es la función fábrica del ejemplo."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.strategy",
+      "prompt": "¿Qué representa la función corrector?",
+      "options": [
+        "Una estrategia intercambiable",
+        "Una copia del documento",
+        "Un contador de eventos"
+      ],
+      "answer": 0,
+      "explanation": "El consumidor utiliza un contrato de corrección."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.observer",
+      "prompt": "¿Por qué se devuelve cancelar?",
+      "options": [
+        "Para retirar una suscripción",
+        "Para modificar el archivo fuente",
+        "Para ejecutar el evento dos veces"
+      ],
+      "answer": 0,
+      "explanation": "El ciclo de vida evita oyentes acumulados."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.observer",
+      "prompt": "¿Observer exige siempre un bus global?",
+      "options": [
+        "No, depende del problema",
+        "Sí",
+        "Solo con Python"
+      ],
+      "answer": 0,
+      "explanation": "Las llamadas explícitas pueden ser suficientes."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.strategy",
+      "prompt": "¿Qué patrón permite cambiar el algoritmo de corrección conservando el consumidor?",
+      "answers": [
+        "Strategy",
+        "estrategia"
+      ],
+      "hint": "Se intercambia el comportamiento.",
+      "explanation": "Strategy representa una operación sustituible."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.factory": {
+      "explanationExcerpt": "Factory centraliza la creación o selección de una implementación mediante un contrato. Puede implementarse con una función sencilla.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.strategy": {
+      "explanationExcerpt": "Strategy encapsula un comportamiento intercambiable, como una forma de corregir respuestas, sin modificar a quien lo utiliza.",
+      "assessmentIds": [
+        "q2"
+      ]
+    },
+    "fundamentos.observer": {
+      "explanationExcerpt": "Observer permite que varios suscriptores reaccionen a eventos del emisor. La gestión del ciclo de vida y la cancelación de suscripciones forman parte del diseño.",
+      "assessmentIds": [
+        "q3",
+        "q4"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "def exacto(esperado, respuesta):\n    return esperado == respuesta\n\ndef sin_mayusculas(esperado, respuesta):\n    return esperado.lower() == respuesta.lower()\n\ndef crear_corrector(tipo):\n    opciones = {\"exacto\": exacto, \"texto\": sin_mayusculas}\n    if tipo not in opciones:\n        raise ValueError(\"Tipo desconocido\")\n    return opciones[tipo]\n\noyentes = []\ndef suscribir(oyente):\n    oyentes.append(oyente)\n    return lambda: oyentes.remove(oyente)\n\ndef notificar(mensaje):\n    for oyente in list(oyentes):\n        oyente(mensaje)\n\n# lambda crea una función breve: se ejecutará al cancelar, no al suscribir.\ncancelar = suscribir(print)\ncorrector = crear_corrector(\"texto\")\nnotificar(str(corrector(\"Hola\", \"HOLA\")))\ncancelar()\nprint(len(oyentes))",
+      "stdout": "True\n0\n"
+    }
+  ]
+}

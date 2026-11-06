@@ -1,0 +1,112 @@
+{
+  "id": "registro-y-observabilidad",
+  "outcome": "Relacionar eventos, medidas e identificadores para investigar un fallo.",
+  "requiresConcepts": [
+    "fundamentos.validacion-de-entradas",
+    "fundamentos.inyeccion",
+    "fundamentos.gestion-de-secretos"
+  ],
+  "html": "<p>El formateador añade nivel y mensaje. En el mensaje de logging, %s coloca el argumento recibido como texto; no lo ejecuta como código.</p><p>Un log registra un evento con contexto útil: qué operación ocurrió, su resultado y un identificador. Define niveles como INFO para actividad esperada y ERROR para fallos. Evita imprimir contraseñas, tokens o datos personales innecesarios.</p><p>Una métrica resume cantidades, como peticiones procesadas o duración. Un contador acumula eventos y un histograma puede resumir una distribución de duraciones. No uses identificadores únicos como etiquetas de cada métrica: aumenta sin límite la cantidad de series.</p><p>Una traza conecta operaciones de una solicitud mediante un contexto de correlación. Un span representa una operación con principio y fin. El ejemplo añade un trace_id a un evento local; una solución distribuida necesita propagar contexto y exportar spans, no solo incluir una cadena en un mensaje.</p><p>Investigar exige una pregunta: qué falló, en qué entradas y con qué cambio. Combina eventos detallados, medidas agregadas y relaciones entre operaciones. La observabilidad ayuda a explicar el sistema; no sustituye sus pruebas ni sus requisitos.</p><pre>import logging\nimport sys\n\nregistro = logging.Logger(&quot;aprendizaje&quot;)\nregistro.setLevel(logging.INFO)\nmanejador = logging.StreamHandler(sys.stdout)\nmanejador.setFormatter(logging.Formatter(&quot;%(levelname)s %(message)s&quot;))\nregistro.addHandler(manejador)\n\nmetricas = {&quot;operaciones&quot;: 0, &quot;errores&quot;: 0}\ndef procesar(texto, trace_id):\n    metricas[&quot;operaciones&quot;] += 1\n    if not texto.strip():\n        metricas[&quot;errores&quot;] += 1\n        registro.error(&quot;entrada_vacia trace_id=%s&quot;, trace_id)\n        return False\n    registro.info(&quot;entrada_valida trace_id=%s&quot;, trace_id)\n    return True\n\nprocesar(&quot;leer&quot;, &quot;demo-1&quot;)\nprocesar(&quot; &quot;, &quot;demo-2&quot;)\nprint(metricas[&quot;operaciones&quot;], metricas[&quot;errores&quot;])</pre><dl class=\"concept-notes\"><dt>logs</dt><dd>Los logs registran eventos individuales con nivel y contexto suficiente para investigar, sin exponer información sensible.</dd><dt>métricas</dt><dd>Las métricas agregan mediciones del sistema, como conteos y distribuciones. Sus etiquetas deben mantener una cantidad de combinaciones controlada.</dd><dt>trazas</dt><dd>Las trazas relacionan operaciones de una solicitud mediante contexto propagado y spans. Un identificador en un log solo aporta correlación local.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Agrega duración y un identificador correlacionado a biblioteca; registra un fallo sin exponer el contenido privado del usuario.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.logs",
+      "prompt": "¿Qué dato debe evitarse en un log?",
+      "options": [
+        "Una contraseña real",
+        "El nombre de una operación",
+        "Un código de resultado"
+      ],
+      "answer": 0,
+      "explanation": "Los registros no deben convertirse en una filtración de secretos."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.metricas",
+      "prompt": "¿Qué resume un contador de errores?",
+      "options": [
+        "La cantidad de errores observados",
+        "Toda la explicación de cada fallo",
+        "El código fuente completo"
+      ],
+      "answer": 0,
+      "explanation": "La medida agrega eventos de una clase."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.trazas",
+      "prompt": "¿Un trace_id en un log implementa por sí solo trazado distribuido?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo con números"
+      ],
+      "answer": 0,
+      "explanation": "Faltan operaciones, propagación de contexto y exportación apropiada."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.metricas",
+      "prompt": "¿Qué problema causa un ID único como etiqueta de cada métrica?",
+      "options": [
+        "Crece la cardinalidad de series",
+        "Disminuye siempre el consumo de memoria",
+        "Cifra los resultados"
+      ],
+      "answer": 0,
+      "explanation": "Las combinaciones pueden crecer con cada solicitud."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.metricas",
+      "prompt": "Si se procesan 5 entradas y fallan 2, ¿qué valor debe tener el contador de errores?",
+      "answers": [
+        "2"
+      ],
+      "hint": "Se cuenta cada error observado.",
+      "explanation": "El contador resume fallos, no todas las operaciones."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.logs": {
+      "explanationExcerpt": "Los logs registran eventos individuales con nivel y contexto suficiente para investigar, sin exponer información sensible.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.metricas": {
+      "explanationExcerpt": "Las métricas agregan mediciones del sistema, como conteos y distribuciones. Sus etiquetas deben mantener una cantidad de combinaciones controlada.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.trazas": {
+      "explanationExcerpt": "Las trazas relacionan operaciones de una solicitud mediante contexto propagado y spans. Un identificador en un log solo aporta correlación local.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "import logging\nimport sys\n\nregistro = logging.Logger(\"aprendizaje\")\nregistro.setLevel(logging.INFO)\nmanejador = logging.StreamHandler(sys.stdout)\nmanejador.setFormatter(logging.Formatter(\"%(levelname)s %(message)s\"))\nregistro.addHandler(manejador)\n\nmetricas = {\"operaciones\": 0, \"errores\": 0}\ndef procesar(texto, trace_id):\n    metricas[\"operaciones\"] += 1\n    if not texto.strip():\n        metricas[\"errores\"] += 1\n        registro.error(\"entrada_vacia trace_id=%s\", trace_id)\n        return False\n    registro.info(\"entrada_valida trace_id=%s\", trace_id)\n    return True\n\nprocesar(\"leer\", \"demo-1\")\nprocesar(\" \", \"demo-2\")\nprint(metricas[\"operaciones\"], metricas[\"errores\"])",
+      "stdout": "INFO entrada_valida trace_id=demo-1\nERROR entrada_vacia trace_id=demo-2\n2 1\n"
+    }
+  ]
+}

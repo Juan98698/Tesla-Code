@@ -1,0 +1,136 @@
+{
+  "id": "principios-solid",
+  "outcome": "Aplicar principios de diseño a un cambio concreto sin añadir estructuras innecesarias.",
+  "requiresConcepts": [
+    "fundamentos.factory",
+    "fundamentos.strategy",
+    "fundamentos.observer"
+  ],
+  "html": "<p>En Python, // realiza división entera redondeando hacia abajo. Aquí los importes son centavos enteros no negativos y el contrato decide cómo tratar cualquier resto; no se interpreta el valor como una cantidad de coma flotante.</p><p>SOLID reúne cinco principios orientados a reducir costos de cambio. No son reglas que obliguen a crear una clase por operación. Explica primero qué cambia y qué contratos deben conservarse.</p><p>Responsabilidad única: separar cálculo y escritura en disco cuando cambian por motivos distintos. Abierto y cerrado: permitir otra política de descuento sin reescribir el caso de uso estable. No significa que nunca puedas modificar código existente.</p><p>Sustitución de Liskov: una implementación sustituible debe mantener las expectativas del contrato, incluidos resultados y errores permitidos. Una cuenta que prohíbe retirar no sustituye sin más a otra cuyo contrato garantiza esa operación. Segregación de interfaces: quien solo necesita leer no debería depender de operaciones de escritura que no utiliza.</p><p>Inversión de dependencias: la regla de alto nivel trabaja contra un contrato y recibe una implementación. Inyectar una dependencia es un mecanismo posible; pasar un objeto no demuestra por sí solo que el contrato esté bien diseñado. En el ejemplo, total recibe una política de descuento como función.</p><pre>def sin_descuento(importe):\n    return importe\n\ndef diez_por_ciento(importe):\n    return importe * 90 // 100\n\ndef total(importe_centavos, politica):\n    if importe_centavos &lt; 0:\n        raise ValueError(&quot;Importe negativo&quot;)\n    return politica(importe_centavos)\n\nprint(total(1000, sin_descuento))\nprint(total(1000, diez_por_ciento))</pre><dl class=\"concept-notes\"><dt>responsabilidad única</dt><dd>La responsabilidad única agrupa elementos que cambian por el mismo motivo y separa responsabilidades con razones de cambio distintas.</dd><dt>abierto y cerrado</dt><dd>Abierto y cerrado propone extender comportamientos variables sin alterar continuamente el núcleo estable, cuando esa separación aporta valor.</dd><dt>inversión de dependencias</dt><dd>La inversión de dependencias hace que las reglas de alto nivel dependan de contratos, no de detalles concretos que ellas mismas construyen.</dd><dt>sustitución de Liskov</dt><dd>La sustitución de Liskov exige que las implementaciones sustituibles respeten el contrato y las expectativas de sus consumidores.</dd><dt>segregación de interfaces</dt><dd>La segregación de interfaces evita obligar a un consumidor a depender de operaciones que no necesita.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Diseña una política nueva y una prueba de contrato que todas las políticas deban cumplir para entradas válidas.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.responsabilidad-unica",
+      "prompt": "¿Qué separación tiene razones de cambio distintas?",
+      "options": [
+        "Calcular precio y guardar un archivo",
+        "Dos nombres de la misma cantidad",
+        "Una suma y su resultado inmediato"
+      ],
+      "answer": 0,
+      "explanation": "El almacenamiento y la regla de precios pueden evolucionar independientemente."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.abierto-y-cerrado",
+      "prompt": "¿Qué facilita agregar una nueva política al ejemplo?",
+      "options": [
+        "Pasar otra función compatible",
+        "Copiar total para cada descuento",
+        "Eliminar la validación"
+      ],
+      "answer": 0,
+      "explanation": "Se amplía la variación sin duplicar el caso de uso."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.inversion-de-dependencias",
+      "prompt": "¿Qué conoce total sobre su política?",
+      "options": [
+        "El contrato de entrada y resultado",
+        "El archivo interno del proveedor",
+        "La contraseña del servicio"
+      ],
+      "answer": 0,
+      "explanation": "El núcleo consume un contrato pequeño."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.solid.3",
+      "prompt": "¿Qué debe conservar una implementación sustituible?",
+      "options": [
+        "Las expectativas del contrato",
+        "Solo el nombre del archivo",
+        "Únicamente el color del editor"
+      ],
+      "answer": 0,
+      "explanation": "Resultados y errores forman parte de esas expectativas."
+    },
+    {
+      "id": "q5",
+      "type": "choice",
+      "concept": "fundamentos.solid.4",
+      "prompt": "¿Qué debería recibir un consumidor que solo lee?",
+      "options": [
+        "Un contrato de lectura suficiente",
+        "Operaciones obligatorias de borrado",
+        "Todos los detalles internos"
+      ],
+      "answer": 0,
+      "explanation": "La interfaz debe ajustarse a las necesidades reales."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.abierto-y-cerrado",
+      "prompt": "Con una política del 10 % sobre 2000 centavos, ¿qué total queda?",
+      "answers": [
+        "1800"
+      ],
+      "hint": "Conserva el 90 % del importe.",
+      "explanation": "2000 × 90 / 100 = 1800 centavos."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.responsabilidad-unica": {
+      "explanationExcerpt": "La responsabilidad única agrupa elementos que cambian por el mismo motivo y separa responsabilidades con razones de cambio distintas.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.abierto-y-cerrado": {
+      "explanationExcerpt": "Abierto y cerrado propone extender comportamientos variables sin alterar continuamente el núcleo estable, cuando esa separación aporta valor.",
+      "assessmentIds": [
+        "q2"
+      ]
+    },
+    "fundamentos.inversion-de-dependencias": {
+      "explanationExcerpt": "La inversión de dependencias hace que las reglas de alto nivel dependan de contratos, no de detalles concretos que ellas mismas construyen.",
+      "assessmentIds": [
+        "q3"
+      ]
+    },
+    "fundamentos.solid.3": {
+      "explanationExcerpt": "La sustitución de Liskov exige que las implementaciones sustituibles respeten el contrato y las expectativas de sus consumidores.",
+      "assessmentIds": [
+        "q4"
+      ]
+    },
+    "fundamentos.solid.4": {
+      "explanationExcerpt": "La segregación de interfaces evita obligar a un consumidor a depender de operaciones que no necesita.",
+      "assessmentIds": [
+        "q5"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "def sin_descuento(importe):\n    return importe\n\ndef diez_por_ciento(importe):\n    return importe * 90 // 100\n\ndef total(importe_centavos, politica):\n    if importe_centavos < 0:\n        raise ValueError(\"Importe negativo\")\n    return politica(importe_centavos)\n\nprint(total(1000, sin_descuento))\nprint(total(1000, diez_por_ciento))",
+      "stdout": "1000\n900\n"
+    }
+  ]
+}

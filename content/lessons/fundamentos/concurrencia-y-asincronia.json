@@ -1,0 +1,113 @@
+{
+  "id": "concurrencia-y-asincronia",
+  "outcome": "Distinguir concurrencia, paralelismo y espera asíncrona.",
+  "requiresConcepts": [
+    "fundamentos.capas",
+    "fundamentos.arquitectura-hexagonal",
+    "fundamentos.modulos"
+  ],
+  "html": "<p>La concurrencia permite progresar en varias tareas con períodos de ejecución intercalados. El paralelismo ejecuta trabajo simultáneo en distintos recursos. Un hilo es una unidad de ejecución dentro de un proceso; compartir memoria también exige coordinar accesos.</p><p>async def define una función asíncrona que produce una corrutina al llamarse. await cede el control mientras espera una operación compatible. asyncio.run inicia un bucle de eventos para coordinar esas tareas; gather espera un grupo y entrega resultados en el orden de sus argumentos. No convierte automáticamente cálculos de CPU en trabajo paralelo.</p><p>Una condición de carrera sucede cuando el resultado depende de una intercalación no controlada. Si dos tareas leen saldo = 0 y cada una escribe 1 después de sumar, se pierde una actualización. Un bloqueo puede proteger una sección crítica; las estructuras adecuadas dependen del entorno.</p><p>No uses time.sleep dentro del bucle asíncrono cuando necesitas una espera cooperativa; asyncio.sleep cede control. El ejemplo usa un hilo con join para esperar su fin y dos corrutinas. No demuestra mayor velocidad: compara costos reales y las restricciones de tu intérprete.</p><pre>import asyncio\nfrom threading import Thread\n\nsalidas = []\ndef trabajo():\n    salidas.append(&quot;hilo terminado&quot;)\n\nhilo = Thread(target=trabajo)\nhilo.start()\nhilo.join()\nprint(salidas[0])\n\nasync def obtener(nombre):\n    await asyncio.sleep(0)\n    return nombre\n\nasync def principal():\n    return await asyncio.gather(obtener(&quot;A&quot;), obtener(&quot;B&quot;))\n\nprint(asyncio.run(principal()))</pre><dl class=\"concept-notes\"><dt>hilo</dt><dd>Un hilo es una unidad de ejecución de un proceso que puede compartir memoria con otros hilos. Su uso no garantiza paralelismo de CPU en cualquier intérprete.</dd><dt>async y await</dt><dd>async y await expresan tareas cooperativas y puntos de espera. Una corrutina cede control en operaciones compatibles para permitir que otras progresen.</dd><dt>condición de carrera</dt><dd>Una condición de carrera depende de accesos intercalados a estado compartido sin coordinación suficiente, pudiendo perder actualizaciones o romper invariantes.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Escribe la intercalación que causa la pérdida y luego diseña una sección crítica que la evite.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.hilo",
+      "prompt": "¿Qué garantiza join en el ejemplo?",
+      "options": [
+        "Esperar a que termine el hilo",
+        "Ejecutar siempre en dos CPU",
+        "Eliminar cualquier carrera del programa"
+      ],
+      "answer": 0,
+      "explanation": "Se espera la finalización de ese hilo concreto."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.async-y-await",
+      "prompt": "¿Qué permite await asyncio.sleep(0)?",
+      "options": [
+        "Ceder control al bucle de eventos",
+        "Acelerar cualquier cálculo",
+        "Crear una copia del proceso"
+      ],
+      "answer": 0,
+      "explanation": "Es una espera cooperativa."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.condicion-de-carrera",
+      "prompt": "Dos tareas leen 0 y ambas escriben 1 tras incrementar. ¿Qué ocurrió?",
+      "options": [
+        "Se perdió una actualización",
+        "El resultado correcto fue dos",
+        "Una herencia de clases"
+      ],
+      "answer": 0,
+      "explanation": "La operación leer-modificar-escribir no fue coordinada."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.async-y-await",
+      "prompt": "¿async convierte automáticamente código de CPU en paralelo?",
+      "options": [
+        "No",
+        "Sí",
+        "Solo con listas"
+      ],
+      "answer": 0,
+      "explanation": "La asincronía y el paralelismo son conceptos distintos."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.condicion-de-carrera",
+      "prompt": "Dos incrementos deberían llevar un contador de 0 a 2, pero termina en 1. ¿Cuántas actualizaciones se perdieron?",
+      "answers": [
+        "1",
+        "una"
+      ],
+      "hint": "Ambas tareas partieron del mismo estado.",
+      "explanation": "Una escritura reemplazó el resultado de la otra."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.hilo": {
+      "explanationExcerpt": "Un hilo es una unidad de ejecución de un proceso que puede compartir memoria con otros hilos. Su uso no garantiza paralelismo de CPU en cualquier intérprete.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.async-y-await": {
+      "explanationExcerpt": "async y await expresan tareas cooperativas y puntos de espera. Una corrutina cede control en operaciones compatibles para permitir que otras progresen.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.condicion-de-carrera": {
+      "explanationExcerpt": "Una condición de carrera depende de accesos intercalados a estado compartido sin coordinación suficiente, pudiendo perder actualizaciones o romper invariantes.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "import asyncio\nfrom threading import Thread\n\nsalidas = []\ndef trabajo():\n    salidas.append(\"hilo terminado\")\n\nhilo = Thread(target=trabajo)\nhilo.start()\nhilo.join()\nprint(salidas[0])\n\nasync def obtener(nombre):\n    await asyncio.sleep(0)\n    return nombre\n\nasync def principal():\n    return await asyncio.gather(obtener(\"A\"), obtener(\"B\"))\n\nprint(asyncio.run(principal()))",
+      "stdout": "hilo terminado\n['A', 'B']\n"
+    }
+  ]
+}

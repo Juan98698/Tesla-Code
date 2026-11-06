@@ -1,0 +1,113 @@
+{
+  "id": "encapsulamiento-y-abstraccion",
+  "outcome": "Definir operaciones que protejan una regla del estado.",
+  "requiresConcepts": [
+    "fundamentos.clase",
+    "fundamentos.objeto",
+    "fundamentos.atributo",
+    "fundamentos.metodo"
+  ],
+  "html": "<p>Una cuenta no debería aceptar un saldo negativo porque una parte del programa asignó un valor sin comprobarlo. Encapsular consiste en agrupar datos y operaciones y decidir qué acceso se permite. La regla saldo >= 0 es una invariante: debe mantenerse después de cada operación válida.</p><p>En Python, un nombre que empieza por _ indica uso interno por convención, no una barrera de seguridad. Una propiedad con @property permite consultar un dato mediante una operación controlada. El decorador @property transforma el método de lectura en un atributo consultable; no necesitas escribir un decorador propio para usarlo.</p><p>La abstracción presenta lo relevante: ingresar e inspeccionar saldo sin conocer la representación interna. El código que llama a esa interfaz pública no debería modificar _saldo directamente. Prueba ingresos positivos, cero y negativos.</p><pre>class Cuenta:\n    def __init__(self):\n        self._saldo = 0\n\n    @property\n    def saldo(self):\n        return self._saldo\n\n    def ingresar(self, cantidad):\n        if cantidad &lt;= 0:\n            return False\n        self._saldo += cantidad\n        return True\n\ncuenta = Cuenta()\nprint(cuenta.ingresar(-5), cuenta.saldo)\nprint(cuenta.ingresar(10), cuenta.saldo)</pre><dl class=\"concept-notes\"><dt>encapsulamiento</dt><dd>El encapsulamiento organiza el acceso al estado para conservar sus reglas. Una convención _interna no impide por sí sola modificar un atributo desde fuera.</dd><dt>abstracción</dt><dd>La abstracción expone operaciones relevantes sin exigir conocer sus detalles internos. Una cuenta ofrece ingresar y consultar saldo.</dd><dt>interfaz pública</dt><dd>La interfaz pública es el conjunto de operaciones y datos que el consumidor está autorizado a usar según el contrato del componente.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Agrega retirar(cantidad), conserva la invariante y prueba el intento de retirar más del saldo.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.encapsulamiento",
+      "prompt": "¿Por qué se rechaza ingresar(-5)?",
+      "options": [
+        "Para conservar la regla del saldo",
+        "Para acelerar siempre el programa",
+        "Porque Python no admite negativos"
+      ],
+      "answer": 0,
+      "explanation": "La operación protege una invariante del estado."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.abstraccion",
+      "prompt": "¿Qué detalle puede ocultar una abstracción?",
+      "options": [
+        "La representación interna del saldo",
+        "El contrato de ingresar",
+        "El significado del resultado"
+      ],
+      "answer": 0,
+      "explanation": "El consumidor necesita el contrato, no todos los mecanismos internos."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.interfaz-publica",
+      "prompt": "¿Qué debería usar otro módulo?",
+      "options": [
+        "La interfaz pública",
+        "Modificar _saldo sin comprobarlo",
+        "Copiar los atributos internos"
+      ],
+      "answer": 0,
+      "explanation": "La interfaz preserva las reglas del componente."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.encapsulamiento",
+      "prompt": "¿Un guion bajo impide cualquier acceso externo en Python?",
+      "options": [
+        "No, expresa una convención",
+        "Sí, es cifrado",
+        "Solo si el atributo es entero"
+      ],
+      "answer": 0,
+      "explanation": "No confundas encapsulamiento con protección frente a código hostil."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.encapsulamiento",
+      "prompt": "En el ejemplo, ingresas 10 y después intentas ingresar -3. ¿Qué saldo queda?",
+      "answers": [
+        "10"
+      ],
+      "hint": "El segundo ingreso se rechaza.",
+      "explanation": "La operación inválida no modifica el saldo."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.encapsulamiento": {
+      "explanationExcerpt": "El encapsulamiento organiza el acceso al estado para conservar sus reglas. Una convención _interna no impide por sí sola modificar un atributo desde fuera.",
+      "assessmentIds": [
+        "q1",
+        "q4"
+      ]
+    },
+    "fundamentos.abstraccion": {
+      "explanationExcerpt": "La abstracción expone operaciones relevantes sin exigir conocer sus detalles internos. Una cuenta ofrece ingresar y consultar saldo.",
+      "assessmentIds": [
+        "q2"
+      ]
+    },
+    "fundamentos.interfaz-publica": {
+      "explanationExcerpt": "La interfaz pública es el conjunto de operaciones y datos que el consumidor está autorizado a usar según el contrato del componente.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "class Cuenta:\n    def __init__(self):\n        self._saldo = 0\n\n    @property\n    def saldo(self):\n        return self._saldo\n\n    def ingresar(self, cantidad):\n        if cantidad <= 0:\n            return False\n        self._saldo += cantidad\n        return True\n\ncuenta = Cuenta()\nprint(cuenta.ingresar(-5), cuenta.saldo)\nprint(cuenta.ingresar(10), cuenta.saldo)",
+      "stdout": "False 0\nTrue 10\n"
+    }
+  ]
+}

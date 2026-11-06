@@ -1,0 +1,113 @@
+{
+  "id": "seguridad-del-codigo",
+  "outcome": "Separar datos e instrucciones y proteger entradas y secretos.",
+  "requiresConcepts": [
+    "fundamentos.perfilado",
+    "fundamentos.gestion-de-memoria",
+    "fundamentos.cache"
+  ],
+  "html": "<p>La validación comprueba tipo, forma, rango y reglas del dato en el límite del sistema. Que una interfaz restrinja un campo no evita que otra entrada lo eluda; valida también donde se aplican las reglas. Declara qué entradas se rechazan y qué error recibe el consumidor.</p><p>Una inyección ocurre cuando datos externos se interpretan como instrucciones. En SQL, concatenar texto del usuario dentro de una consulta puede cambiar su significado. Una consulta parametrizada separa la instrucción del valor: ? es un marcador que sqlite3 reemplaza como dato, no como código.</p><p>El ejemplo usa SQLite en memoria, incluido con Python. CREATE TABLE define una tabla, INSERT agrega una fila y SELECT consulta filas cuyo nombre coincide con el parámetro. No necesitas una base externa para observar la separación.</p><p>La gestión de secretos mantiene claves fuera de archivos públicos, commits y registros. Usa el mecanismo seguro del entorno, limita permisos y rota claves expuestas. Nunca uses eval para resolver una entrada del usuario ni escribas contraseñas en los logs. El ejemplo no contiene ni requiere credenciales.</p><pre>import sqlite3\n\nconexion = sqlite3.connect(&quot;:memory:&quot;)\nconexion.execute(&quot;CREATE TABLE personas (nombre TEXT)&quot;)\nconexion.execute(&quot;INSERT INTO personas VALUES (?)&quot;, (&quot;Ana&quot;,))\nentrada = &quot;Ana&#x27; OR &#x27;1&#x27;=&#x27;1&quot;\nfilas = conexion.execute(\n    &quot;SELECT nombre FROM personas WHERE nombre = ?&quot;, (entrada,)\n).fetchall()\nprint(filas)\nprint(conexion.execute(\n    &quot;SELECT nombre FROM personas WHERE nombre = ?&quot;, (&quot;Ana&quot;,)\n).fetchone()[0])\nconexion.close()</pre><dl class=\"concept-notes\"><dt>validación de entradas</dt><dd>La validación de entradas comprueba tipo, estructura, límites y reglas antes de ejecutar una operación. No se limita a la interfaz visual.</dd><dt>inyección</dt><dd>La inyección interpreta datos externos como instrucciones. Parametrizar consultas mantiene la estructura SQL separada de sus valores.</dd><dt>gestión de secretos</dt><dd>La gestión de secretos controla almacenamiento, acceso y rotación de credenciales, evitando su exposición en código, commits y registros.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Añade una regla de longitud del nombre y pruebas de entradas vacías, largas y con comillas.</aside>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "fundamentos.validacion-de-entradas",
+      "prompt": "¿Dónde deben comprobarse las reglas de una entrada?",
+      "options": [
+        "En el límite que ejecuta la operación",
+        "Solo en el color del formulario",
+        "Solo en una nota del README"
+      ],
+      "answer": 0,
+      "explanation": "La regla debe aplicarse aunque cambie la interfaz."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "fundamentos.inyeccion",
+      "prompt": "¿Qué logra el parámetro ? del ejemplo?",
+      "options": [
+        "Tratar la entrada como un dato",
+        "Concatenar instrucciones arbitrarias",
+        "Garantizar todas las reglas de negocio"
+      ],
+      "answer": 0,
+      "explanation": "El controlador mantiene la separación entre SQL y valor."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "fundamentos.gestion-de-secretos",
+      "prompt": "¿Dónde debe evitarse guardar una clave real?",
+      "options": [
+        "En commits y registros públicos",
+        "En el mecanismo seguro del entorno",
+        "En un gestor de secretos autorizado"
+      ],
+      "answer": 0,
+      "explanation": "Los registros y el historial pueden exponerla."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "fundamentos.inyeccion",
+      "prompt": "¿Qué devuelve la búsqueda de la cadena con OR en el ejemplo?",
+      "options": [
+        "Una lista vacía",
+        "Todas las personas",
+        "Una tabla nueva"
+      ],
+      "answer": 0,
+      "explanation": "El texto completo se compara como un nombre literal."
+    }
+  ],
+  "activities": [
+    {
+      "id": "transferir",
+      "type": "text",
+      "concept": "fundamentos.inyeccion",
+      "prompt": "¿La consulta debe concatenar la entrada o parametrizarla?",
+      "answers": [
+        "parametrizarla",
+        "parametrizar"
+      ],
+      "hint": "El valor debe conservarse como dato.",
+      "explanation": "La parametrización evita interpretar el valor como parte de la instrucción."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Documentación de Python 3",
+      "url": "https://docs.python.org/3/"
+    }
+  ],
+  "coverage": {
+    "fundamentos.validacion-de-entradas": {
+      "explanationExcerpt": "La validación de entradas comprueba tipo, estructura, límites y reglas antes de ejecutar una operación. No se limita a la interfaz visual.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "fundamentos.inyeccion": {
+      "explanationExcerpt": "La inyección interpreta datos externos como instrucciones. Parametrizar consultas mantiene la estructura SQL separada de sus valores.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "fundamentos.gestion-de-secretos": {
+      "explanationExcerpt": "La gestión de secretos controla almacenamiento, acceso y rotación de credenciales, evitando su exposición en código, commits y registros.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "principal",
+      "language": "python",
+      "code": "import sqlite3\n\nconexion = sqlite3.connect(\":memory:\")\nconexion.execute(\"CREATE TABLE personas (nombre TEXT)\")\nconexion.execute(\"INSERT INTO personas VALUES (?)\", (\"Ana\",))\nentrada = \"Ana' OR '1'='1\"\nfilas = conexion.execute(\n    \"SELECT nombre FROM personas WHERE nombre = ?\", (entrada,)\n).fetchall()\nprint(filas)\nprint(conexion.execute(\n    \"SELECT nombre FROM personas WHERE nombre = ?\", (\"Ana\",)\n).fetchone()[0])\nconexion.close()",
+      "stdout": "[]\nAna\n"
+    }
+  ]
+}
