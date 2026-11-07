@@ -2,7 +2,21 @@
 
 Se revisaron los seis mapas curriculares y las explicaciones, ejemplos, cuestionarios y prácticas publicados. La revisión es asistida por Codex y se registra con huellas en `content/pedagogy-reviews.json`. No se ha realizado una evaluación independiente con docentes ni una prueba de aprendizaje longitudinal con estudiantes.
 
-La versión auditada contiene 339 temas en seis mapas, 85 lecciones publicadas y 279 conceptos introducidos con trazabilidad explicativa y evaluativa. Los 254 temas pendientes no se presentan como contenido ya validado.
+La versión auditada contiene 343 temas en seis mapas, 90 lecciones publicadas y 299 conceptos introducidos con trazabilidad explicativa y evaluativa. Los 253 temas pendientes no se presentan como contenido ya validado.
+
+## Revisión del 7 de noviembre de 2026
+
+La observación sobre el `for` de la primera lección de Algoritmia reveló una limitación de la revisión anterior: declarar requisitos y ofrecer repasos no garantizaba una entrada gradual. Se revisaron de nuevo los seis mapas y las explicaciones y actividades publicadas. Se corrigieron estos hallazgos:
+
+- **Algoritmia:** entrada sin Python; algoritmo y programa, terminación, método, pseudocódigo y traza antes de implementar. El método deja de estar después de invariantes. Se publican cinco lecciones adicionales, incluidas funciones y recursión antes de su análisis. La medición ya no anuncia Big O como siguiente lección cuando antes hay matemáticas.
+- **Correspondencia conceptual:** la actividad de porcentaje evalúa porcentaje; la de memoria auxiliar evalúa memoria; `application/json` se asocia a cabecera; la latencia tiene definición, comprobación y punto de introducción propios, antes de observabilidad.
+- **Requisitos:** se unifican las declaraciones del mapa y del archivo de contenido; el juego declara el retorno que ya utiliza su evaluación. Las primeras lecciones de todas las rutas carecen de requisitos previos.
+- **Explicaciones:** se aclaran raíz cuadrada, pila/terminación, tupla de un elemento, retorno múltiple, excepciones deliberadas, operaciones JSON de texto/archivo, cancelación de suscripciones, filas SQLite y claves de caché. Se corrigen formulaciones sobre nombres locales, compilación e interpretación.
+- **Entradas de especialidad:** se explican protocolo, URL, recursos web, API, JSON, autenticación/autorización, tabla/fila/identificador y esquema antes de pedir su aplicación. En IA se explican modelo, tokenizador, probabilidad y muestreo, ruido, codificación y regresión en el nivel introductorio correspondiente.
+- **Ejemplos:** las 90 lecciones incluyen situación, razonamiento y resultado visibles, con condiciones explícitas y actividad identificada. No se presentan los ejercicios breves como entregas completas de proyectos.
+- **Planificación futura:** accesibilidad antes de CSS/React; pruebas HTTP después de OpenAPI y antes de persistencia y arquitectura; seguridad de IA antes de agentes. Se retira el proyecto Python como requisito del contenido conceptual de prompts. La exfiltración se distingue de la contaminación de conjuntos de datos.
+
+La revisión es asistida y cada lección conserva notas concretas y huella actual. El contenido aún no escrito conserva su estado en preparación; se revisó su orden y requisitos, no una suficiencia explicativa que todavía no se puede observar.
 
 ## Hallazgos corregidos en contenido disponible
 
@@ -41,7 +55,7 @@ Estas correcciones de planificación no crean lecciones automáticamente: los te
 6. Revisión editorial ligada a la versión: cambiar el contenido o el currículo invalida la revisión anterior.
 7. Pruebas de regresión que modifican copias del contenido y comprueban que CI rechaza saltos, explicaciones eliminadas y revisiones obsoletas.
 
-También se ejecutaron los 37 ejemplos Python publicados y el ejemplo de ramas y fusión de Git en un repositorio temporal con entradas controladas y resultados esperados, en directorios temporales. Esta prueba corre en CI y comprueba las operaciones de lista, referencias, matrices, recursión, archivos, excepciones y el núcleo del proyecto de tareas.
+También se ejecutaron los 39 ejemplos Python publicados en Python 3.12 y 3.15 y el ejemplo de ramas y fusión de Git en directorios temporales con entradas controladas y resultados esperados. Esta prueba corre en CI y comprueba las operaciones de lista, referencias, matrices, recursión, archivos, excepciones y los contratos de los proyectos.
 
 ## Alcance de la conclusión
 
@@ -49,6 +63,8 @@ Se corrigieron los vacíos identificados y los controles pasan sobre el contenid
 
 ## Acceso independiente y revisión de entradas
 
-Las introducciones a Internet, cliente/servidor y datos básicos son autosuficientes y no requieren completar juegos o gestores de tareas en Python. Algoritmia declara en su entrada los conocimientos que usa su ejemplo: Python, variables, asignación, listas, índices, recorridos y condiciones. Los siete repasos compartidos explican esos conceptos con ejemplos de números negativos y actividades con devolución. La validación obliga a proporcionar repasos para futuros conceptos transversales usados en lecciones publicadas.
+Las introducciones a Internet, cliente/servidor y datos básicos son autosuficientes y no requieren completar juegos o gestores de tareas en Python. Algoritmia empieza por diseño sin sintaxis Python. La implementación posterior explica Python, variables, asignación, listas, índices, recorridos y condiciones; los siete repasos compartidos siguen disponibles como apoyo. La validación obliga a proporcionar repasos para futuros conceptos transversales usados en lecciones publicadas.
 
 Las referencias entre rutas permanecen en el grafo académico; el acceso exige los pasos de la propia ruta. La orientación opcional explora tres preguntas iniciales y sirve para recomendar acompañamiento, no para acreditar experiencia ni completar lecciones.
+
+El control de publicación ahora rechaza código ejecutable en una entrada conceptual, requisitos distintos entre mapa y contenido, requisitos internos colocados después, un tronco principal dependiente de una especialización opcional, ejemplos sin razonamiento/condiciones visibles y bloques Python sin ejemplo comprobable. Las pruebas de regresión recrean esas omisiones. La asociación semántica entre una pregunta y su concepto sigue necesitando revisión editorial: los identificadores por sí solos no prueban esa relación.

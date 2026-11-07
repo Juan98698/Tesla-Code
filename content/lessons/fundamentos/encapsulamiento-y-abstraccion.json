@@ -1,13 +1,13 @@
 {
   "id": "encapsulamiento-y-abstraccion",
-  "outcome": "Definir operaciones que protejan una regla del estado.",
+  "outcome": "En el ejemplo, ingresas 10 y después intentas ingresar -3. ¿Qué saldo queda?",
   "requiresConcepts": [
     "fundamentos.clase",
     "fundamentos.objeto",
     "fundamentos.atributo",
     "fundamentos.metodo"
   ],
-  "html": "<p>Una cuenta no debería aceptar un saldo negativo porque una parte del programa asignó un valor sin comprobarlo. Encapsular consiste en agrupar datos y operaciones y decidir qué acceso se permite. La regla saldo >= 0 es una invariante: debe mantenerse después de cada operación válida.</p><p>En Python, un nombre que empieza por _ indica uso interno por convención, no una barrera de seguridad. Una propiedad con @property permite consultar un dato mediante una operación controlada. El decorador @property transforma el método de lectura en un atributo consultable; no necesitas escribir un decorador propio para usarlo.</p><p>La abstracción presenta lo relevante: ingresar e inspeccionar saldo sin conocer la representación interna. El código que llama a esa interfaz pública no debería modificar _saldo directamente. Prueba ingresos positivos, cero y negativos.</p><pre>class Cuenta:\n    def __init__(self):\n        self._saldo = 0\n\n    @property\n    def saldo(self):\n        return self._saldo\n\n    def ingresar(self, cantidad):\n        if cantidad &lt;= 0:\n            return False\n        self._saldo += cantidad\n        return True\n\ncuenta = Cuenta()\nprint(cuenta.ingresar(-5), cuenta.saldo)\nprint(cuenta.ingresar(10), cuenta.saldo)</pre><dl class=\"concept-notes\"><dt>encapsulamiento</dt><dd>El encapsulamiento organiza el acceso al estado para conservar sus reglas. Una convención _interna no impide por sí sola modificar un atributo desde fuera.</dd><dt>abstracción</dt><dd>La abstracción expone operaciones relevantes sin exigir conocer sus detalles internos. Una cuenta ofrece ingresar y consultar saldo.</dd><dt>interfaz pública</dt><dd>La interfaz pública es el conjunto de operaciones y datos que el consumidor está autorizado a usar según el contrato del componente.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Agrega retirar(cantidad), conserva la invariante y prueba el intento de retirar más del saldo.</aside>",
+  "html": "<p>Una cuenta no debería aceptar un saldo negativo porque una parte del programa asignó un valor sin comprobarlo. Encapsular consiste en agrupar datos y operaciones y decidir qué acceso se permite. La regla saldo >= 0 es una invariante: debe mantenerse después de cada operación válida.</p><p>En Python, un nombre que empieza por _ indica uso interno por convención, no una barrera de seguridad. Una propiedad con @property permite consultar un dato mediante una operación controlada. El decorador @property transforma el método de lectura en un atributo consultable; no necesitas escribir un decorador propio para usarlo.</p><p>La abstracción presenta lo relevante: ingresar e inspeccionar saldo sin conocer la representación interna. El código que llama a esa interfaz pública no debería modificar _saldo directamente. Prueba ingresos positivos, cero y negativos.</p><pre data-language=\"python\">class Cuenta:\n    def __init__(self):\n        self._saldo = 0\n\n    @property\n    def saldo(self):\n        return self._saldo\n\n    def ingresar(self, cantidad):\n        if cantidad &lt;= 0:\n            return False\n        self._saldo += cantidad\n        return True\n\ncuenta = Cuenta()\nprint(cuenta.ingresar(-5), cuenta.saldo)\nprint(cuenta.ingresar(10), cuenta.saldo)</pre><dl class=\"concept-notes\"><dt>encapsulamiento</dt><dd>El encapsulamiento organiza el acceso al estado para conservar sus reglas. Una convención _interna no impide por sí sola modificar un atributo desde fuera.</dd><dt>abstracción</dt><dd>La abstracción expone operaciones relevantes sin exigir conocer sus detalles internos. Una cuenta ofrece ingresar y consultar saldo.</dd><dt>interfaz pública</dt><dd>La interfaz pública es el conjunto de operaciones y datos que el consumidor está autorizado a usar según el contrato del componente.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Agrega retirar(cantidad), conserva la invariante y prueba el intento de retirar más del saldo.</aside><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: Una cuenta con saldo cero rechaza ingresar -5 y luego acepta 10.</p><p>Razonamiento: La operación comprueba su contrato antes de mutar el saldo; consultar saldo no requiere modificar _saldo.</p><p>Resultado: El primer resultado es False con saldo 0; después es True con saldo 10.</p><p><strong>Condiciones del ejemplo:</strong> Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo.</p></section>",
   "quiz": [
     {
       "id": "q1",
@@ -128,5 +128,18 @@
     ],
     "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
     "policyDigest": "fe5cb02eac121a2cb1a18f6d127b6d442967a8edcfc0959146d82ad290468924"
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo."
+    ],
+    "workedExample": {
+      "problem": "Situación: Una cuenta con saldo cero rechaza ingresar -5 y luego acepta 10.",
+      "reasoning": "Razonamiento: La operación comprueba su contrato antes de mutar el saldo; consultar saldo no requiere modificar _saldo.",
+      "result": "Resultado: El primer resultado es False con saldo 0; después es True con saldo 10."
+    },
+    "transferActivityIds": [
+      "transferir"
+    ]
   }
 }

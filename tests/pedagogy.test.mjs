@@ -10,6 +10,8 @@ import {
   coverageErrors,
   reviewErrors,
   REVIEW_CHECKS,
+  curriculumSequenceErrors,
+  learningDesignErrors,
 } from '../tools/pedagogy.mjs';
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const meta = {
@@ -127,4 +129,98 @@ test('publication requires reusable refreshers for external concepts', (t) => {
     delete r.concepts.find((c) => c.id === 'fundamentos.variable').refresher;
   });
   assert.match(output, /falta repaso opcional para el concepto transversal fundamentos.variable/);
+});
+
+test('visible curriculum order rejects later prerequisites and mandatory optional specialties', () => {
+  const first = {
+    id: 'start',
+    status: 'published',
+    kind: 'core',
+    dependsOn: [],
+    requiresConcepts: [],
+  };
+  const route = {
+    id: 'r',
+    entryApproach: 'conceptual',
+    levels: [{ lessons: [first, { id: 'next', kind: 'core', dependsOn: ['r/start'] }] }],
+  };
+  assert.deepEqual(curriculumSequenceErrors(route), []);
+  const forward = structuredClone(route);
+  forward.levels[0].lessons.reverse();
+  assert.ok(curriculumSequenceErrors(forward).some((error) => error.includes('posterior')));
+  const optional = structuredClone(route);
+  optional.levels[0].lessons[0].kind = 'optional';
+  assert.ok(curriculumSequenceErrors(optional).some((error) => error.includes('especialización')));
+});
+
+test('worked examples require visible reasoning, conditions and a real transfer activity', () => {
+  const d = read('content/lessons/fundamentos/tu-primer-paso.json');
+  const m = read('content/curriculum/fundamentos.json').levels[0].lessons[0];
+  assert.deepEqual(learningDesignErrors(m, d, { entry: true }), []);
+  const missing = structuredClone(d);
+  missing.html = missing.html.replace(missing.learningDesign.workedExample.reasoning, '');
+  assert.ok(learningDesignErrors(m, missing).some((error) => error.includes('reasoning')));
+  const condition = structuredClone(d);
+  condition.learningDesign.assumptions = ['A condition not explained to the learner.'];
+  assert.ok(learningDesignErrors(m, condition).some((error) => error.includes('condición')));
+  const transfer = structuredClone(d);
+  transfer.learningDesign.transferActivityIds = ['nonexistent'];
+  assert.ok(learningDesignErrors(m, transfer).some((error) => error.includes('no existe')));
+});
+
+test('a conceptual entry rejects executable code even when an example has expected output', (t) => {
+  const output = invalidContent(
+    t,
+    'content/lessons/algoritmia/que-hace-bueno-a-un-algoritmo.json',
+    (d) => {
+      d.html += '<pre data-language="python">for n in [1]:\n    print(n)</pre>';
+      d.examples = [
+        {
+          id: 'sudden-code',
+          language: 'python',
+          code: 'for n in [1]:\n    print(n)',
+          stdout: '1\n',
+        },
+      ];
+    },
+  );
+  assert.match(output, /entrada conceptual introduce código/);
+});
+
+test('publication rejects differing prerequisite declarations and undeclared assessment concepts', (t) => {
+  const mismatch = invalidContent(t, 'content/lessons/fundamentos/editor-y-ejecucion.json', (d) => {
+    d.requiresConcepts = [];
+  });
+  assert.match(mismatch, /requisitos del contenido y del temario no coinciden/);
+  const undeclared = invalidContent(t, 'content/lessons/fundamentos/variables.json', (d) => {
+    d.quiz[0].concept = 'fundamentos.archivo';
+  });
+  assert.match(undeclared, /concepto evaluado sin requisito o enseñanza explícitos/);
+});
+
+test('publication rejects Python without an executed example declaration and unlabeled blocks', (t) => {
+  const missing = invalidContent(
+    t,
+    'content/lessons/algoritmia/implementar-algoritmos-en-python.json',
+    (d) => {
+      delete d.examples;
+    },
+  );
+  assert.match(missing, /bloque Python no tiene un ejemplo ejecutable/);
+  const unlabeled = invalidContent(
+    t,
+    'content/lessons/algoritmia/implementar-algoritmos-en-python.json',
+    (d) => {
+      d.html = d.html.replace(' data-language="python"', '');
+    },
+  );
+  assert.match(unlabeled, /no declara su lenguaje/);
+});
+
+test('publication rejects displaying a prerequisite after its dependent lesson', (t) => {
+  const output = invalidContent(t, 'content/curriculum/algoritmia.json', (r) => {
+    const lessons = r.levels[0].lessons;
+    [lessons[1], lessons[2]] = [lessons[2], lessons[1]];
+  });
+  assert.match(output, /requisito interno posterior en el orden visible/);
 });

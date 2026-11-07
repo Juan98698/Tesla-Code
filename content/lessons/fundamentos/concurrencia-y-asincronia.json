@@ -1,12 +1,12 @@
 {
   "id": "concurrencia-y-asincronia",
-  "outcome": "Distinguir concurrencia, paralelismo y espera asíncrona.",
+  "outcome": "Dos incrementos deberían llevar un contador de 0 a 2, pero termina en 1. ¿Cuántas actualizaciones se perdieron?",
   "requiresConcepts": [
     "fundamentos.capas",
     "fundamentos.arquitectura-hexagonal",
     "fundamentos.modulos"
   ],
-  "html": "<p>La concurrencia permite progresar en varias tareas con períodos de ejecución intercalados. El paralelismo ejecuta trabajo simultáneo en distintos recursos. Un hilo es una unidad de ejecución dentro de un proceso; compartir memoria también exige coordinar accesos.</p><p>async def define una función asíncrona que produce una corrutina al llamarse. await cede el control mientras espera una operación compatible. asyncio.run inicia un bucle de eventos para coordinar esas tareas; gather espera un grupo y entrega resultados en el orden de sus argumentos. No convierte automáticamente cálculos de CPU en trabajo paralelo.</p><p>Una condición de carrera sucede cuando el resultado depende de una intercalación no controlada. Si dos tareas leen saldo = 0 y cada una escribe 1 después de sumar, se pierde una actualización. Un bloqueo puede proteger una sección crítica; las estructuras adecuadas dependen del entorno.</p><p>No uses time.sleep dentro del bucle asíncrono cuando necesitas una espera cooperativa; asyncio.sleep cede control. El ejemplo usa un hilo con join para esperar su fin y dos corrutinas. No demuestra mayor velocidad: compara costos reales y las restricciones de tu intérprete.</p><pre>import asyncio\nfrom threading import Thread\n\nsalidas = []\ndef trabajo():\n    salidas.append(&quot;hilo terminado&quot;)\n\nhilo = Thread(target=trabajo)\nhilo.start()\nhilo.join()\nprint(salidas[0])\n\nasync def obtener(nombre):\n    await asyncio.sleep(0)\n    return nombre\n\nasync def principal():\n    return await asyncio.gather(obtener(&quot;A&quot;), obtener(&quot;B&quot;))\n\nprint(asyncio.run(principal()))</pre><dl class=\"concept-notes\"><dt>hilo</dt><dd>Un hilo es una unidad de ejecución de un proceso que puede compartir memoria con otros hilos. Su uso no garantiza paralelismo de CPU en cualquier intérprete.</dd><dt>async y await</dt><dd>async y await expresan tareas cooperativas y puntos de espera. Una corrutina cede control en operaciones compatibles para permitir que otras progresen.</dd><dt>condición de carrera</dt><dd>Una condición de carrera depende de accesos intercalados a estado compartido sin coordinación suficiente, pudiendo perder actualizaciones o romper invariantes.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Escribe la intercalación que causa la pérdida y luego diseña una sección crítica que la evite.</aside>",
+  "html": "<p>La concurrencia permite progresar en varias tareas con períodos de ejecución intercalados. El paralelismo ejecuta trabajo simultáneo en distintos recursos. Un hilo es una unidad de ejecución dentro de un proceso; compartir memoria también exige coordinar accesos.</p><p>async def define una función asíncrona que produce una corrutina al llamarse. await cede el control mientras espera una operación compatible. asyncio.run inicia un bucle de eventos para coordinar esas tareas; gather espera un grupo y entrega resultados en el orden de sus argumentos. No convierte automáticamente cálculos de CPU en trabajo paralelo.</p><p>Una condición de carrera sucede cuando el resultado depende de una intercalación no controlada. Si dos tareas leen saldo = 0 y cada una escribe 1 después de sumar, se pierde una actualización. Un bloqueo puede proteger una sección crítica; las estructuras adecuadas dependen del entorno.</p><p>No uses time.sleep dentro del bucle asíncrono cuando necesitas una espera cooperativa; asyncio.sleep cede control. El ejemplo usa un hilo con join para esperar su fin y dos corrutinas. No demuestra mayor velocidad: compara costos reales y las restricciones de tu intérprete.</p><pre data-language=\"python\">import asyncio\nfrom threading import Thread\n\nsalidas = []\ndef trabajo():\n    salidas.append(&quot;hilo terminado&quot;)\n\nhilo = Thread(target=trabajo)\nhilo.start()\nhilo.join()\nprint(salidas[0])\n\nasync def obtener(nombre):\n    await asyncio.sleep(0)\n    return nombre\n\nasync def principal():\n    return await asyncio.gather(obtener(&quot;A&quot;), obtener(&quot;B&quot;))\n\nprint(asyncio.run(principal()))</pre><dl class=\"concept-notes\"><dt>hilo</dt><dd>Un hilo es una unidad de ejecución de un proceso que puede compartir memoria con otros hilos. Su uso no garantiza paralelismo de CPU en cualquier intérprete.</dd><dt>async y await</dt><dd>async y await expresan tareas cooperativas y puntos de espera. Una corrutina cede control en operaciones compatibles para permitir que otras progresen.</dd><dt>condición de carrera</dt><dd>Una condición de carrera depende de accesos intercalados a estado compartido sin coordinación suficiente, pudiendo perder actualizaciones o romper invariantes.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Escribe la intercalación que causa la pérdida y luego diseña una sección crítica que la evite.</aside><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: Dos tareas leen un contador en cero antes de guardar su incremento.</p><p>Razonamiento: Ambas calculan uno usando el mismo valor anterior; una escritura pisa la otra si no se coordina el acceso.</p><p>Resultado: El contador puede terminar en 1 en vez de 2: se pierde una actualización.</p><p><strong>Condiciones del ejemplo:</strong> La intercalación explica un riesgo posible; el ejemplo con hilos no demuestra aceleración ni ejecuta CPU en paralelo por sí solo.</p></section>",
   "quiz": [
     {
       "id": "q1",
@@ -128,5 +128,18 @@
     ],
     "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
     "policyDigest": "fe5cb02eac121a2cb1a18f6d127b6d442967a8edcfc0959146d82ad290468924"
+  },
+  "learningDesign": {
+    "assumptions": [
+      "La intercalación explica un riesgo posible; el ejemplo con hilos no demuestra aceleración ni ejecuta CPU en paralelo por sí solo."
+    ],
+    "workedExample": {
+      "problem": "Situación: Dos tareas leen un contador en cero antes de guardar su incremento.",
+      "reasoning": "Razonamiento: Ambas calculan uno usando el mismo valor anterior; una escritura pisa la otra si no se coordina el acceso.",
+      "result": "Resultado: El contador puede terminar en 1 en vez de 2: se pierde una actualización."
+    },
+    "transferActivityIds": [
+      "transferir"
+    ]
   }
 }

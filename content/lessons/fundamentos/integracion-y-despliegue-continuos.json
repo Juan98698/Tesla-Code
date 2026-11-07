@@ -1,12 +1,12 @@
 {
   "id": "integracion-y-despliegue-continuos",
-  "outcome": "Diseñar comprobaciones que impidan publicar un artefacto con fallos.",
+  "outcome": "Si la etapa probar devuelve False, ¿qué etapa del ejemplo queda impedida?",
   "requiresConcepts": [
     "fundamentos.logs",
     "fundamentos.metricas",
     "fundamentos.trazas"
   ],
-  "html": "<p>La integración continua (CI) ejecuta comprobaciones al incorporar cambios: formato, pruebas, validación de contenido y otras pertinentes. Un pipeline describe sus etapas y dependencias; si una etapa requerida falla, las etapas dependientes no deberían continuar.</p><p>Entrega continua prepara un artefacto que puede publicarse mediante una decisión. Despliegue continuo automatiza también esa publicación cuando se cumplen las condiciones. Un despliegue coloca una versión en un entorno; que las pruebas pasen no demuestra que el entorno nuevo esté sano.</p><p>El artefacto es el resultado identificable que se entrega: por ejemplo, archivos estáticos o un paquete. Conserva versión y procedencia y usa el mismo artefacto verificado al desplegar. Después comprueba una operación representativa y prepara una estrategia de reversión.</p><p>El ejemplo simula la decisión del pipeline con funciones locales, sin publicar nada. En este repositorio puedes consultar .github/workflows/validate.yml para ver un pipeline real. GitHub Pages puede servir el sitio estático: selecciona la fuente en Settings → Pages, espera el despliegue y verifica carga de rutas y contenido. Los procesos y permisos de esa plataforma son distintos de este simulador.</p><pre>def ejecutar_pipeline(etapas):\n    completadas = []\n    for nombre, ejecutar in etapas:\n        if not ejecutar():\n            return False, completadas\n        completadas.append(nombre)\n    return True, completadas\n\netapas = [\n    (&quot;validar&quot;, lambda: True),\n    (&quot;probar&quot;, lambda: False),\n    (&quot;publicar&quot;, lambda: True),\n]\nexito, completadas = ejecutar_pipeline(etapas)\nprint(exito)\nprint(completadas)</pre><dl class=\"concept-notes\"><dt>CI/CD</dt><dd>CI/CD reúne integración y entrega o despliegue continuos. Sus condiciones deben distinguir comprobación, preparación del artefacto y publicación.</dd><dt>pipeline</dt><dd>Un pipeline organiza etapas y dependencias. Un fallo en una etapa requerida debe impedir pasos que dependen de ella.</dd><dt>despliegue</dt><dd>Un despliegue instala o activa una versión en un entorno y requiere verificación posterior; preparar archivos no equivale a publicarlos.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Diseña un pipeline para biblioteca: pruebas de reglas, persistencia y comprobación posterior a la entrega. Indica cómo volver a una versión anterior.</aside>",
+  "html": "<p>La integración continua (CI) ejecuta comprobaciones al incorporar cambios: formato, pruebas, validación de contenido y otras pertinentes. Un pipeline describe sus etapas y dependencias; si una etapa requerida falla, las etapas dependientes no deberían continuar.</p><p>Entrega continua prepara un artefacto que puede publicarse mediante una decisión. Despliegue continuo automatiza también esa publicación cuando se cumplen las condiciones. Un despliegue coloca una versión en un entorno; que las pruebas pasen no demuestra que el entorno nuevo esté sano.</p><p>El artefacto es el resultado identificable que se entrega: por ejemplo, archivos estáticos o un paquete. Conserva versión y procedencia y usa el mismo artefacto verificado al desplegar. Después comprueba una operación representativa y prepara una estrategia de reversión.</p><p>El ejemplo simula la decisión del pipeline con funciones locales, sin publicar nada. En este repositorio puedes consultar .github/workflows/validate.yml para ver un pipeline real. GitHub Pages puede servir el sitio estático: selecciona la fuente en Settings → Pages, espera el despliegue y verifica carga de rutas y contenido. Los procesos y permisos de esa plataforma son distintos de este simulador.</p><pre data-language=\"python\">def ejecutar_pipeline(etapas):\n    completadas = []\n    for nombre, ejecutar in etapas:\n        if not ejecutar():\n            return False, completadas\n        completadas.append(nombre)\n    return True, completadas\n\netapas = [\n    (&quot;validar&quot;, lambda: True),\n    (&quot;probar&quot;, lambda: False),\n    (&quot;publicar&quot;, lambda: True),\n]\nexito, completadas = ejecutar_pipeline(etapas)\nprint(exito)\nprint(completadas)</pre><dl class=\"concept-notes\"><dt>CI/CD</dt><dd>CI/CD reúne integración y entrega o despliegue continuos. Sus condiciones deben distinguir comprobación, preparación del artefacto y publicación.</dd><dt>pipeline</dt><dd>Un pipeline organiza etapas y dependencias. Un fallo en una etapa requerida debe impedir pasos que dependen de ella.</dd><dt>despliegue</dt><dd>Un despliegue instala o activa una versión en un entorno y requiere verificación posterior; preparar archivos no equivale a publicarlos.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Diseña un pipeline para biblioteca: pruebas de reglas, persistencia y comprobación posterior a la entrega. Indica cómo volver a una versión anterior.</aside><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: El pipeline valida correctamente, pero probar devuelve False.</p><p>Razonamiento: El coordinador detiene las etapas dependientes antes de llamar a publicar.</p><p>Resultado: Solo validar queda en completadas y exito es False.</p><p><strong>Condiciones del ejemplo:</strong> Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo.</p></section>",
   "quiz": [
     {
       "id": "q1",
@@ -127,5 +127,18 @@
     ],
     "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
     "policyDigest": "cf465fb44f2c3bfdddabbfdbf5d88d1b1fb2a273ad8fab17177886d2e43bd345"
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo."
+    ],
+    "workedExample": {
+      "problem": "Situación: El pipeline valida correctamente, pero probar devuelve False.",
+      "reasoning": "Razonamiento: El coordinador detiene las etapas dependientes antes de llamar a publicar.",
+      "result": "Resultado: Solo validar queda en completadas y exito es False."
+    },
+    "transferActivityIds": [
+      "transferir"
+    ]
   }
 }

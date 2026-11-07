@@ -8,6 +8,8 @@ import {
   reviewErrors,
   coverageErrors,
   explanationText,
+  curriculumSequenceErrors,
+  learningDesignErrors,
 } from './pedagogy.mjs';
 const errors = [];
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -39,6 +41,7 @@ for (const rid of routes) {
   for (const error of reviewErrors(reviews.routes[rid], digest(source)))
     fail(`Ruta ${rid}: ${error}`);
   const route = indexRoute(source);
+  for (const error of curriculumSequenceErrors(source)) fail('Ruta ' + rid + ': ' + error);
   if (route.id !== rid) fail(`Ruta inconsistente: ${rid}`);
   for (const meta of route.lessons) {
     const key = `${rid}/${meta.id}`;
@@ -149,6 +152,8 @@ for (const [key, meta] of lessons) {
   for (const error of coverageErrors(meta, data)) fail(`${path}: ${error}`);
   for (const error of reviewErrors(reviews.lessons[key], lessonDigest(meta, data, registry)))
     fail(`${path}: ${error}`);
+  for (const error of learningDesignErrors(meta, data, { entry: !meta.dependsOn.length }))
+    fail(path + ': ' + error);
   allowed.add(key);
   if (data.id !== key.split('/')[1]) fail(`${path}: id inconsistente`);
   if (!data.html || !data.outcome) fail(`${path}: falta explicación u objetivo`);

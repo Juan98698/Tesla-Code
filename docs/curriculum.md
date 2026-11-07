@@ -12,7 +12,21 @@
 
 Los siete niveles de Fundamentos están publicados: 68 lecciones. El piloto automatizado cubre las 17 lecciones de Primeros pasos e Inicio; no equivale a una prueba con estudiantes reales.
 
-Todas las rutas permiten empezar por su primera lección publicada. Fundamentos es el comienzo recomendado para principiantes. Los pasos previos de la misma ruta regulan su progresión; las referencias a otras rutas documentan conocimientos recomendados y no bloquean el acceso. Algoritmia ofrece siete repasos compartidos de Python, variables, listas y condiciones. La orientación opcional sugiere explicaciones o práctica sin conceder finalizaciones.
+Todas las rutas permiten empezar por su primera lección publicada, con una entrada conceptual sin requisitos previos. Fundamentos es el comienzo recomendado para principiantes. Los pasos previos de la misma ruta regulan su progresión; las referencias a otras rutas documentan conocimientos recomendados y no bloquean el acceso. Los siete repasos compartidos de Python, variables, listas y condiciones aparecen al implementar en Algoritmia, después del diseño. La orientación opcional sugiere explicaciones o práctica sin conceder finalizaciones.
+
+## Inicio de Algoritmia
+
+1. Algoritmos: problema, pasos y resultado, sin código.
+2. Método para resolver problemas.
+3. Diseñar con secuencias, decisiones y repeticiones en pseudocódigo explicado.
+4. Trazar y comprobar antes de programar.
+5. Traducir a Python, instrucción por instrucción, con requisitos de entorno explícitos y ayudas opcionales.
+6. Funciones, recursión y terminación.
+7. Medir tiempo y memoria.
+
+Estas siete lecciones están publicadas. Después vienen funciones matemáticas, potencias y logaritmos, cotas asintóticas, análisis de ciclos/recursión, razonamiento formal e invariantes. Los IDs de las lecciones anteriores se conservan; los pasos añadidos no conceden finalizaciones a quienes ya tenían progreso.
+
+En las demás especialidades, accesibilidad precede a CSS y React, las pruebas HTTP de backend se aprenden después del contrato OpenAPI y antes de persistencia/arquitectura, y la seguridad de aplicaciones con IA precede a agentes y uso autónomo de herramientas. La exfiltración de datos privados se distingue de la contaminación entre datos de entrenamiento y evaluación.
 
 ## IA: distintos objetivos, distintas dependencias
 

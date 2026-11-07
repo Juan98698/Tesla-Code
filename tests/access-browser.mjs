@@ -76,7 +76,37 @@ await withBrowser(4320, async (browser, origin) => {
     assert.deepEqual(state.completed, []);
     assert.equal(state.xp, 0);
     const algo = routes.find((r) => r.id === 'algoritmia');
-    await page.goto(`${origin}/#/leccion/algoritmia/${entry(algo).id}/aprender`);
+    const algorithmLessons = algo.levels
+      .flatMap((level) => level.lessons)
+      .filter((lesson) => lesson.status === 'published');
+    const completeAlgorithmLesson = async (meta) => {
+      const data = read('content/lessons/algoritmia/' + meta.id + '.json');
+      await page.getByRole('tab', { name: /Practicar/ }).click();
+      await page.locator('#activities [data-activity]').first().waitFor();
+      for (const activity of data.activities) {
+        const section = page.locator('#activities [data-activity="' + activity.id + '"]');
+        await section.locator('input').fill(activity.answers[0]);
+        await section.locator('button[type=submit]').click();
+      }
+      await answerQuiz(page, data);
+      const state = await snapshot(page);
+      assert.ok(state.completed.includes('algoritmia/' + meta.id));
+    };
+    for (const meta of algorithmLessons.slice(0, 4)) {
+      await page.goto(origin + '/#/leccion/algoritmia/' + meta.id + '/aprender');
+      await page.locator('#lesson').waitFor();
+      assert.equal(
+        await page.locator('pre[data-language="python"], pre[data-language="shell"]').count(),
+        0,
+      );
+      assert.equal(await page.locator('.worked-example').count(), 1);
+      assert.equal(await page.locator('.learning-support').count(), 0);
+      if (meta.id === entry(algo).id)
+        await page.screenshot({ path: '/tmp/teslacode-algoritmia-intro-' + width + '.png' });
+      await completeAlgorithmLesson(meta);
+    }
+    const earnedIntro = await snapshot(page);
+    await page.goto(`${origin}/#/leccion/algoritmia/implementar-algoritmos-en-python/aprender`);
     await page.locator('#lesson').waitFor();
     await page.locator('.learning-support > summary').click();
     await page.locator('.concept-refresher > summary').first().click();
@@ -87,9 +117,9 @@ await withBrowser(4320, async (browser, origin) => {
     await refresher.locator('button[type=submit]').click();
     assert.match(await refresher.locator('[role=status]').innerText(), /resolviste/);
     state = await snapshot(page);
-    assert.deepEqual(state.completed, []);
-    assert.equal(state.xp, 0);
-    assert.deepEqual(state.practices, []);
+    assert.deepEqual(state.completed, earnedIntro.completed);
+    assert.equal(state.xp, earnedIntro.xp);
+    assert.deepEqual(state.practices, earnedIntro.practices);
     for (const theme of ['dark', 'light']) {
       await page.evaluate((t) => (document.documentElement.dataset.theme = t), theme);
       await audit(page, `${width}: refresher ${theme}`);
@@ -120,15 +150,15 @@ await withBrowser(4320, async (browser, origin) => {
       await audit(page, `${width}: orientation ${theme}`);
     }
     state = await snapshot(page);
-    assert.deepEqual(state.completed, []);
-    assert.equal(state.xp, 0);
+    assert.deepEqual(state.completed, earnedIntro.completed);
+    assert.equal(state.xp, earnedIntro.xp);
     await page.getByRole('button', { name: 'Comenzar con esta guía →', exact: true }).click();
     await page.locator('#activities').waitFor();
     assert.match(page.url(), /practicar$/);
     state = await snapshot(page);
     assert.equal(state.learningMode, 'experienced');
-    assert.deepEqual(state.completed, []);
-    assert.equal(state.xp, 0);
+    assert.deepEqual(state.completed, earnedIntro.completed);
+    assert.equal(state.xp, earnedIntro.xp);
     await page.goto(origin + '/#/leccion/backend/http-en-profundidad/aprender');
     await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
     await page.goto(`${origin}/#/leccion/backend/${first.id}/practicar`);
@@ -140,13 +170,26 @@ await withBrowser(4320, async (browser, origin) => {
     }
     await answerQuiz(page, data);
     state = await snapshot(page);
-    assert.deepEqual(state.completed, [`backend/${first.id}`]);
-    assert.ok(state.xp > 0);
+    assert.deepEqual(state.completed, [...earnedIntro.completed, `backend/${first.id}`]);
+    assert.ok(state.xp > earnedIntro.xp);
     await page.getByRole('button', { name: 'Mi siguiente paso →', exact: true }).click();
     await page.locator('#lesson').waitFor();
     assert.match(await page.locator('h1').innerText(), /HTTP/);
     await page.goto(origin + '/#/leccion/fundamentos/editor-y-ejecucion/aprender');
     await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
+    for (const meta of algorithmLessons.slice(4)) {
+      await page.goto(origin + '/#/leccion/algoritmia/' + meta.id + '/aprender');
+      await page.locator('#lesson').waitFor();
+      await completeAlgorithmLesson(meta);
+    }
+    await page.reload();
+    await page.locator('#qbox').waitFor();
+    const finished = await snapshot(page);
+    assert.equal(finished.completed.filter((key) => key.startsWith('algoritmia/')).length, 7);
+    assert.equal(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      true,
+    );
     assert.deepEqual(errors, []);
     console.log(
       `PASS acceso ${width}px: seis entradas libres, secuencia interna, diagnóstico opcional, repasos sin créditos, modo con experiencia, progreso real y movimiento reducido.`,
