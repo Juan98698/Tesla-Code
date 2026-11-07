@@ -46,3 +46,9 @@ También se ejecutaron los 37 ejemplos Python publicados y el ejemplo de ramas y
 ## Alcance de la conclusión
 
 Se corrigieron los vacíos identificados y los controles pasan sobre el contenido de esta versión. No se afirma una garantía absoluta: una coincidencia textual no demuestra comprensión, una pregunta no demuestra transferencia, y un requisito omitido por todos los autores no puede descubrirse solamente siguiendo el grafo. La revisión independiente y las pruebas con principiantes siguen siendo trabajo editorial necesario. Los errores futuros deben producir nuevas correcciones y pruebas, no una renovación automática de la huella.
+
+## Acceso independiente y revisión de entradas
+
+Las introducciones a Internet, cliente/servidor y datos básicos son autosuficientes y no requieren completar juegos o gestores de tareas en Python. Algoritmia declara en su entrada los conocimientos que usa su ejemplo: Python, variables, asignación, listas, índices, recorridos y condiciones. Los siete repasos compartidos explican esos conceptos con ejemplos de números negativos y actividades con devolución. La validación obliga a proporcionar repasos para futuros conceptos transversales usados en lecciones publicadas.
+
+Las referencias entre rutas permanecen en el grafo académico; el acceso exige los pasos de la propia ruta. La orientación opcional explora tres preguntas iniciales y sirve para recomendar acompañamiento, no para acreditar experiencia ni completar lecciones.

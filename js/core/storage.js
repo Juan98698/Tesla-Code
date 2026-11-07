@@ -11,6 +11,7 @@ export const emptyProgress = () => ({
   bookmarks: [],
   recent: null,
   goal: 'fundamentos',
+  learningMode: 'guided',
 });
 export function normalizeProgress(raw) {
   const base = emptyProgress();
@@ -56,6 +57,7 @@ export function normalizeProgress(raw) {
     base.streak = raw.streak;
   if (typeof raw.recent === 'string') base.recent = raw.recent;
   if (typeof raw.goal === 'string') base.goal = raw.goal;
+  if (['guided', 'experienced'].includes(raw.learningMode)) base.learningMode = raw.learningMode;
   return base;
 }
 export function createProgressRepository(storage) {

@@ -185,7 +185,7 @@ test('catalog views reflect available, locked, planned and completed states with
     planned = routes.find((r) => r.id === 'frontend').lessons.find((l) => l.status === 'planned');
   root.innerHTML = views.homePage(routes, state);
   assert.equal(root.querySelectorAll('.route-card').length, 6);
-  assert.match(root.querySelector('.hero a').href, /tu-primer-paso/);
+  assert.match(root.querySelector('.continue-card .btn').href, /tu-primer-paso/);
   assert.equal(views.nodeState(base, first, state), 'ready');
   assert.equal(views.nodeState(base, next, state), 'locked');
   assert.equal(
@@ -207,6 +207,7 @@ test('catalog views reflect available, locked, planned and completed states with
     routes,
   );
   assert.match(root.textContent, /preparación/);
+  assert.ok(!root.textContent.includes('Puedes empezar aquí'));
   assert.equal(root.querySelector('#lesson'), null);
   root.innerHTML = views.routesPage(routes, state, 'open');
   assert.ok(root.querySelectorAll('.route-card').length >= 1);
@@ -217,7 +218,7 @@ test('continuation respects selected goal, inaccessible recent and fully complet
   const state = emptyProgress();
   state.goal = 'ia';
   assert.equal(views.continuation(routes, state).route.id, 'ia');
-  state.recent = 'frontend/como-funciona-internet';
+  state.recent = 'frontend/http-y-https';
   assert.equal(views.continuation(routes, state).route.id, 'ia');
   state.recent = 'ia/que-es-la-inteligencia-artificial';
   assert.equal(views.continuation(routes, state).lesson.id, 'que-es-la-inteligencia-artificial');

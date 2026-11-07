@@ -7,7 +7,14 @@ const shell = readFileSync('index.html', 'utf8');
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const start = () => import('../js/main.js').then((m) => m.ready);
 async function navigate(hash, predicate) {
-  location.hash = '#/' + hash;
+  const target = '#/' + hash;
+  if (location.hash !== target) {
+    const changed = new Promise((resolve) =>
+      window.addEventListener('hashchange', resolve, { once: true }),
+    );
+    location.hash = target;
+    await changed;
+  }
   await until(predicate);
 }
 function clickText(selector, text) {
@@ -60,8 +67,13 @@ test('controller coordinates navigation, learning, search, preferences, export a
   }));
   await start();
   assert.ok(document.querySelector('.hero'));
+  document.getElementById('motion-toggle').click();
+  assert.equal(localStorage.getItem('teslacode:motion'), 'off');
+  assert.equal(document.getElementById('motion-toggle').getAttribute('aria-pressed'), 'true');
+  document.getElementById('motion-toggle').click();
+  assert.equal(localStorage.getItem('teslacode:motion'), 'on');
   document.getElementById('theme-toggle').click();
-  assert.equal(localStorage.getItem('teslacode:theme'), 'dark');
+  assert.equal(localStorage.getItem('teslacode:theme'), 'light');
   document.getElementById('theme-toggle').click();
   document.body.focus();
   document.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: '/', bubbles: true }));
@@ -79,17 +91,46 @@ test('controller coordinates navigation, learning, search, preferences, export a
   document.body.click();
   assert.equal(document.getElementById('search-results').hidden, true);
   await navigate('rutas', () => document.getElementById('goal-select'));
+  const original = JSON.parse(localStorage.getItem('teslacode:progress:v2'));
+  change(document.getElementById('learning-mode'), 'experienced', 'change');
+  const preference = JSON.parse(localStorage.getItem('teslacode:progress:v2'));
+  assert.equal(preference.learningMode, 'experienced');
+  assert.deepEqual(preference.completed, original.completed);
+  assert.equal(preference.xp, original.xp);
   change(document.getElementById('goal-select'), 'ia', 'change');
   assert.equal(JSON.parse(localStorage.getItem('teslacode:progress:v2')).goal, 'ia');
   document.querySelector('[data-filter=goal]').click();
   assert.equal(document.querySelectorAll('.route-card').length, 1);
   await navigate('ruta/frontend', () => document.querySelector('[data-node="html-semantico"]'));
+  document.getElementById('route-orientation').open = true;
+  await until(() => document.querySelector('.orientation-form'));
+  const entryQuestions = read('content/lessons/frontend/como-funciona-internet.json')
+    .quiz.filter((q) => q.type === 'choice')
+    .slice(0, 3);
+  const fields = document.querySelectorAll('.orientation-form fieldset');
+  entryQuestions.forEach((q, i) => {
+    fields[i].querySelector(`input[value="${q.answer}"]`).checked = true;
+  });
+  submit(document.querySelector('.orientation-form'));
+  document.querySelector('.orientation-result button').click();
+  await until(() => document.getElementById('activities'));
+  assert.match(document.querySelector('h1').textContent, /internet/);
+  assert.equal(JSON.parse(localStorage.getItem('teslacode:progress:v2')).xp, original.xp);
+  assert.deepEqual(
+    JSON.parse(localStorage.getItem('teslacode:progress:v2')).completed,
+    original.completed,
+  );
+  await navigate('ruta/frontend', () => document.getElementById('node-inspector'));
   document.querySelector('[data-node="html-semantico"]').click();
   assert.match(document.getElementById('node-inspector').textContent, /preparación/);
-  await navigate('leccion/frontend/como-funciona-internet/aprender', () =>
+  await navigate('leccion/frontend/http-y-https/aprender', () =>
     document.querySelector('#content .card'),
   );
   assert.equal(document.getElementById('lesson'), null);
+  await navigate('leccion/frontend/como-funciona-internet/aprender', () =>
+    document.getElementById('lesson'),
+  );
+  assert.match(document.querySelector('h1').textContent, /internet/);
   await navigate('leccion/fundamentos/tu-primer-paso/aprender', () =>
     document.getElementById('lesson'),
   );

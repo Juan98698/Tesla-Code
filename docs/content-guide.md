@@ -55,3 +55,9 @@ Las lecciones nuevas de Fundamentos declaran sus programas Python en `examples` 
 Todo tema declara `technologyRefs` con IDs de la política. Si está publicado, `technicalReview` debe incluir fechas vigentes, las mismas referencias, `policyDigest` y `testedVersions`. Una lista vacía significa que no se atribuye ejecución de un ejemplo dependiente de runtime. Las referencias de catálogo conservan `scope: reference-only`.
 
 No copies una versión de catálogo al apartado de pruebas sin ejecutarla. Para afirmar compatibilidad de un SDK nuevo, amplía antes el formato de evidencia y el runner: actualmente las pruebas de contenido declaradas corresponden a ejemplos de la biblioteca estándar de Python. Las fechas no se renuevan automáticamente. Consulta `docs/technology-currency.md` para el procedimiento completo.
+
+## Entrada independiente y repasos
+
+`dependsOn` conserva el grafo académico. En ejecución, los pasos de la propia ruta son obligatorios y las referencias a otras rutas son recomendaciones. Toda lección publicada que utilice un concepto de otra ruta debe disponer de un `refresher` compartido en el registro del concepto: explicación, ejemplo y actividad con pista y devolución. El validador exige estos apoyos; se revisan junto a la lección mediante su huella semántica. Evita requisitos por haber completado un proyecto que no aporte conocimientos usados en el contenido.
+
+La orientación inicial reutiliza tres preguntas de selección de la primera lección publicada. Si no hay tres, muestra que la orientación está en preparación y mantiene la entrada directa. Su resultado guía el acompañamiento y nunca concede progreso o créditos.

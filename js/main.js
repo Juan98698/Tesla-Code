@@ -17,6 +17,7 @@ import {
 import { lessonPage, mountActivities } from './features/lesson.js';
 import { mountQuiz } from './features/quiz.js';
 import { widgets } from './widgets/index.js';
+import { mountSupport, mountOrientation } from './features/learning-support.js';
 
 let routes = [],
   concepts = new Map(),
@@ -43,11 +44,11 @@ function selectNode(route, id) {
     nextLesson(route, new Set(state.completed)) ??
     route.lessons[0];
   $('node-inspector').innerHTML = inspector(route, lesson, state, routes);
-  document
-    .querySelectorAll('[data-node]')
-    .forEach((button) =>
-      button.setAttribute('aria-pressed', String(button.dataset.node === lesson.id)),
-    );
+  document.querySelectorAll('[data-node]').forEach((button) => {
+    const selected = button.dataset.node === lesson.id;
+    button.setAttribute('aria-pressed', String(selected));
+    if (selected) button.closest('details.level').open = true;
+  });
 }
 function updateCompletion(route, meta, data) {
   const key = lessonKey(route.id, meta.id),
@@ -74,6 +75,7 @@ async function render() {
   const [view = 'inicio', rid, lid, requestedTab] = raw;
   const route = routes.find((r) => r.id === rid);
   const nav = { ruta: 'rutas', leccion: 'rutas' }[view] ?? view;
+  document.body.dataset.view = view;
   document.querySelectorAll('[data-nav]').forEach((link) => {
     if (link.dataset.nav === nav) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
@@ -90,8 +92,28 @@ async function render() {
     }[view] ?? 'TeslaCode';
   const root = $('content');
   try {
-    if (view === 'inicio') root.innerHTML = homePage(routes, state);
-    else if (view === 'rutas') {
+    if (view === 'inicio') {
+      root.innerHTML = homePage(routes, state);
+      const control = $('motion-toggle');
+      const refreshMotion = () => {
+        const paused = document.documentElement.dataset.motion === 'off';
+        control.setAttribute('aria-pressed', String(paused));
+        control.setAttribute(
+          'aria-label',
+          paused ? 'Activar efecto holográfico' : 'Pausar efecto holográfico',
+        );
+        control.textContent = paused ? 'Activar efecto' : 'Pausar efecto';
+      };
+      refreshMotion();
+      control.onclick = () => {
+        const value = document.documentElement.dataset.motion === 'off' ? 'on' : 'off';
+        document.documentElement.dataset.motion = value;
+        try {
+          localStorage.setItem('teslacode:motion', value);
+        } catch {}
+        refreshMotion();
+      };
+    } else if (view === 'rutas') {
       root.innerHTML = routesPage(routes, state, filter);
       root.querySelectorAll('[data-filter]').forEach(
         (button) =>
@@ -102,6 +124,12 @@ async function render() {
       );
       $('goal-select').onchange = (event) => {
         state.goal = event.target.value;
+        state.recent = null;
+        save();
+        render();
+      };
+      $('learning-mode').onchange = (event) => {
+        state.learningMode = event.target.value;
         save();
         render();
       };
@@ -111,6 +139,32 @@ async function render() {
       root
         .querySelectorAll('[data-node]')
         .forEach((button) => (button.onclick = () => selectNode(route, button.dataset.node)));
+      const orientation = $('route-orientation');
+      let loaded = false;
+      orientation.ontoggle = async () => {
+        if (!orientation.open || loaded) return;
+        loaded = true;
+        const entry = route.lessons.find(isPublished);
+        try {
+          const data = await loadLesson(route.id, entry.id);
+          if (version !== renderVersion) return;
+          mountOrientation($('orientation-body'), data.quiz, concepts, (mode) => {
+            state.learningMode = mode;
+            save();
+            const next = nextLesson(route, new Set(state.completed)) ?? entry;
+            location.hash = lessonHref(
+              route.id,
+              next.id,
+              mode === 'experienced' ? 'practicar' : 'aprender',
+            ).slice(1);
+          });
+        } catch {
+          if (version !== renderVersion) return;
+          loaded = false;
+          $('orientation-body').textContent =
+            'No pudimos cargar la orientación. Puedes comenzar la ruta o cerrar y volver a abrir este panel para reintentar.';
+        }
+      };
     } else if (view === 'practica') {
       root.innerHTML = practicePage(routes, state);
       await mountLabs(root, version);
@@ -141,7 +195,8 @@ async function render() {
         if (version !== renderVersion) return;
         state.recent = key;
         save();
-        root.innerHTML = lessonPage(route, meta, data, state, tab);
+        root.innerHTML = lessonPage(route, meta, data, state, tab, concepts);
+        mountSupport(root, concepts);
         document.title = `${meta.title} · TeslaCode`;
         $('bookmark').onclick = () => {
           state.bookmarks = state.bookmarks.includes(key)
@@ -259,15 +314,24 @@ function bindShell() {
   try {
     theme = localStorage.getItem('teslacode:theme');
   } catch {}
-  if (!['light', 'dark'].includes(theme))
-    theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (!['light', 'dark'].includes(theme)) theme = 'dark';
+  let motion;
+  try {
+    motion = localStorage.getItem('teslacode:motion');
+  } catch {}
+  document.documentElement.dataset.motion = ['on', 'off'].includes(motion)
+    ? motion
+    : matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 'off'
+      : 'on';
   function setTheme(value) {
     document.documentElement.dataset.theme = value;
     $('theme-toggle').setAttribute(
       'aria-label',
       value === 'dark' ? 'Activar tema claro' : 'Activar tema oscuro',
     );
-    $('theme-toggle').textContent = value === 'dark' ? '☀' : '☾';
+    $('theme-toggle').innerHTML =
+      `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">${value === 'dark' ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1"/>' : '<path d="M20 15a8 8 0 0 1-11-11A8 8 0 1 0 20 15Z"/>'}</svg>`;
   }
   setTheme(theme);
   $('theme-toggle').onclick = () => {
@@ -310,10 +374,11 @@ function bindShell() {
       $('search-results').hidden = true;
     }
     if (
-      event.key === '/' &&
-      !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
-      !event.ctrlKey &&
-      !event.metaKey
+      (event.key === 'k' && (event.ctrlKey || event.metaKey)) ||
+      (event.key === '/' &&
+        !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
+        !event.ctrlKey &&
+        !event.metaKey)
     ) {
       event.preventDefault();
       $('search').focus();

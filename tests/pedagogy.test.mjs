@@ -122,3 +122,9 @@ test('real example gate rejects unsupported executable languages', (t) => {
   });
   assert.match(output, /lenguaje sin runner/);
 });
+test('publication requires reusable refreshers for external concepts', (t) => {
+  const output = invalidContent(t, 'content/concepts.json', (r) => {
+    delete r.concepts.find((c) => c.id === 'fundamentos.variable').refresher;
+  });
+  assert.match(output, /falta repaso opcional para el concepto transversal fundamentos.variable/);
+});
