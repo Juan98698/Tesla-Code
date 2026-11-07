@@ -55,7 +55,8 @@ test('controller coordinates navigation, learning, search, preferences, export a
     return timer;
   });
   t.after(() => timers.forEach((timer) => clearTimeout(timer)));
-  t.mock.method(globalThis, 'fetch', async (path) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    const path = url.split('?')[0];
     if (failSecond && path.endsWith('/editor-y-ejecucion.json')) {
       return { ok: false };
     }
@@ -67,6 +68,9 @@ test('controller coordinates navigation, learning, search, preferences, export a
   }));
   await start();
   assert.ok(document.querySelector('.hero'));
+  change(document.getElementById('studio-route-select'), 'backend', 'change');
+  assert.equal(JSON.parse(localStorage.getItem('teslacode:progress:v2')).goal, 'backend');
+  assert.equal(JSON.parse(localStorage.getItem('teslacode:progress:v2')).xp, 0);
   document.getElementById('motion-toggle').click();
   assert.equal(localStorage.getItem('teslacode:motion'), 'off');
   assert.equal(document.getElementById('motion-toggle').getAttribute('aria-pressed'), 'true');

@@ -40,6 +40,21 @@ await withBrowser(4320, async (browser, origin) => {
     assert.ok(
       await page.locator('.brand img').evaluate((el) => el.complete && el.naturalWidth > 0),
     );
+    assert.equal(await page.locator('#studio-route-select option').count(), 6);
+    for (const route of routes) {
+      await page.locator('#studio-route-select').selectOption(route.id);
+      await page.locator(`[data-studio-route="${route.id}"]`).waitFor();
+      await page.locator('#studio-form button').click();
+      assert.ok((await page.locator('#studio-status').innerText()).length > 5);
+    }
+    const studioState = await snapshot(page);
+    assert.deepEqual(studioState.completed, []);
+    assert.equal(studioState.xp, 0);
+    for (const theme of ['dark', 'light']) {
+      await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
+      await audit(page, `${width}: workbench ${theme}`);
+    }
+    await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
     await page.screenshot({ path: `/tmp/teslacode-final-${width}.png`, fullPage: true });
     await page.locator('#motion-toggle').click(); // Optional opt-in cannot override reduced motion.
     assert.equal(
@@ -139,6 +154,6 @@ await withBrowser(4320, async (browser, origin) => {
     await context.close();
   }
   console.log(
-    'PASS: 8 auditorías WCAG adicionales en orientación y repasos, escritorio/móvil, ambos temas.',
+    'PASS: 12 auditorías WCAG adicionales en laboratorio, orientación y repasos, escritorio/móvil, ambos temas.',
   );
 });

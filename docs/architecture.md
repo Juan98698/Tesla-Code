@@ -47,4 +47,8 @@ Una cuenta sincronizada, ejecución completa de lenguajes o integración con API
 
 `activities.js` contiene la interacción reutilizada por prácticas y repasos. `learning-support.js` presenta los conceptos transversales y la orientación de tres preguntas. Estas consultas no registran intentos de curso, finalizaciones o XP. La orientación permite elegir acompañamiento y comenzar el siguiente paso disponible.
 
-La capa `experience.css` organiza la nueva presentación sobre los estilos compartidos de ejercicios. La computadora del inicio se construye con HTML/CSS, muestra un ejemplo de la ruta y confina la lluvia de código a su pantalla; no evalúa ese código. Las animaciones se pueden pausar y respetan movimiento reducido. El tema oscuro es el predeterminado y se conserva la selección de tema del usuario.
+Las capas `experience.css` y `studio.css` organizan las vistas de aprendizaje y la portada de trabajo, respectivamente. `studio.js` presenta hitos reales y un laboratorio; `playground.js` calcula sus transformaciones locales sin otorgar créditos de curso. La computadora combina una ilustración WebP con controles HTML y lluvia de código CSS confinada a la pantalla; no ejecuta lenguajes arbitrarios. Las animaciones se pueden pausar y respetan movimiento reducido. El tema oscuro es el predeterminado y se conserva la selección de tema del usuario.
+
+## Coherencia entre ediciones
+
+El índice versiona todo el grafo ES mediante un import map, junto con estilos, contenido e imágenes. Las consultas JSON conservan su caché de promesas en memoria, usan URLs de la edición y evitan la caché HTTP. La prueba con caché previa verifica actualización y conservación del progreso. Consulta `docs/release-coherence.md`.

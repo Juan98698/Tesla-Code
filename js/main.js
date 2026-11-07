@@ -1,3 +1,4 @@
+import { mountStudio } from './features/studio.js';
 import { $ } from './core/dom.js';
 import { escapeHtml as e } from './core/html.js';
 import { progressRepository } from './core/storage.js';
@@ -90,10 +91,21 @@ async function render() {
       practica: 'Laboratorio',
       progreso: 'Mi progreso',
     }[view] ?? 'TeslaCode';
+  document
+    .querySelectorAll('[data-route]')
+    .forEach((link) =>
+      link.classList.toggle('active-route', link.dataset.route === (rid ?? state.goal)),
+    );
   const root = $('content');
   try {
     if (view === 'inicio') {
       root.innerHTML = homePage(routes, state);
+      mountStudio(root, routes, (id) => {
+        state.goal = id;
+        state.recent = null;
+        save();
+        render();
+      });
       const control = $('motion-toggle');
       const refreshMotion = () => {
         const paused = document.documentElement.dataset.motion === 'off';
@@ -406,6 +418,12 @@ export const ready = (async () => {
   const [curricula, registry] = await Promise.all([loadCurricula(), loadConcepts()]);
   routes = curricula.map(indexRoute);
   concepts = new Map(registry.concepts.map((c) => [c.id, c]));
+  $('sidebar-routes').innerHTML = routes
+    .map(
+      (r) =>
+        `<a href="#/ruta/${r.id}" data-route="${r.id}"><span class="route-dot ${r.color}" aria-hidden="true"></span>${e(r.name)}</a>`,
+    )
+    .join('');
   bindShell();
   save();
   if (!location.hash || location.hash === '#') location.replace('#/inicio');
