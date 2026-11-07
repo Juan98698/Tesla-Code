@@ -61,3 +61,29 @@ No copies una versión de catálogo al apartado de pruebas sin ejecutarla. Para 
 `dependsOn` conserva el grafo académico. En ejecución, los pasos de la propia ruta son obligatorios y las referencias a otras rutas son recomendaciones. Toda lección publicada que utilice un concepto de otra ruta debe disponer de un `refresher` compartido en el registro del concepto: explicación, ejemplo y actividad con pista y devolución. El validador exige estos apoyos; se revisan junto a la lección mediante su huella semántica. Evita requisitos por haber completado un proyecto que no aporte conocimientos usados en el contenido.
 
 La orientación inicial reutiliza tres preguntas de selección de la primera lección publicada. Si no hay tres, muestra que la orientación está en preparación y mantiene la entrada directa. Su resultado guía el acompañamiento y nunca concede progreso o créditos.
+
+## Secuencia y ejemplos razonados
+
+Cada ruta declara `entryApproach: "conceptual"`. Su primera lección publicada parte de cero, sin requisitos académicos previos ni bloques de lenguaje ejecutable. En Algoritmia las cuatro primeras lecciones explican problema, diseño, pseudocódigo y traza; Python aparece después con traducción instrucción por instrucción.
+
+El orden visible debe colocar cada requisito interno antes de su consumidor. Un tema principal no puede exigir una especialización opcional. Las dependencias entre rutas siguen siendo recomendaciones acompañadas por repasos; no sustituyen una explicación necesaria.
+
+Todo bloque `pre` declara `data-language`: `text`, `pseudocode`, `python`, `shell`, `http`, `sql`, `javascript` o `json`. La etiqueta identifica la representación, no habilita ejecución. Cada bloque Python requiere un ejemplo declarado con salida comprobable, ejecutado por CI.
+
+Cada lección publicada incluye `learningDesign`:
+
+```json
+{
+  "assumptions": ["Condiciones concretas de los datos o del entorno usadas en el ejemplo."],
+  "workedExample": {
+    "problem": "Fragmento visible que plantea una situación concreta.",
+    "reasoning": "Fragmento visible que explica los pasos y por qué funcionan.",
+    "result": "Fragmento visible con el resultado y su interpretación."
+  },
+  "transferActivityIds": ["aplicar"]
+}
+```
+
+Los fragmentos y condiciones deben aparecer en el texto mostrado, y las actividades identificadas deben existir. `requiresConcepts` debe coincidir en mapa y contenido. Cada concepto evaluado se declara como enseñanza actual o requisito explícito: ya no basta con que aparezca en cualquier antecesor.
+
+Estos controles rechazan omisiones verificables; no descubren automáticamente todo término sin explicar ni demuestran que una actividad transfiera conocimiento. Revisa las preguntas contra lo que realmente piden: por ejemplo, identificar `application/json` evalúa una cabecera, no el método HTTP. No registres una revisión mientras esa correspondencia no esté contrastada.

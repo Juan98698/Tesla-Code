@@ -1,6 +1,6 @@
 {
   "id": "codigo-limpio-y-refactorizacion",
-  "outcome": "Mejorar estructura manteniendo el comportamiento comprobado.",
+  "outcome": "Si una extracción cambia el total esperado de 900 a 800, ¿conservó el comportamiento? Escribe sí o no.",
   "requiresConcepts": [
     "fundamentos.responsabilidad-unica",
     "fundamentos.abierto-y-cerrado",
@@ -8,7 +8,7 @@
     "fundamentos.solid.3",
     "fundamentos.solid.4"
   ],
-  "html": "<p>El bucle desempaqueta cada pareja en precio y premium: ambas variables reciben, en ese orden, los dos elementos de la tupla. La expresión a if condición else b elige un valor sin ejecutar las dos alternativas.</p><p>El código limpio comunica intención mediante nombres claros, operaciones pequeñas y reglas visibles. Una función corta puede seguir siendo incomprensible; busca claridad respecto al problema, no una cantidad arbitraria de líneas.</p><p>Refactorizar cambia la estructura conservando el comportamiento observable acordado. Antes de mover código, establece pruebas de caracterización que documenten lo que debe mantenerse. Si también corriges una regla de negocio, separa ese cambio para que pueda revisarse.</p><p>La deuda técnica representa un costo futuro de decisiones actuales, como duplicación o dependencias difíciles de modificar. Puede aceptarse conscientemente por una necesidad real, pero registra consecuencias y una condición para revisarla. No todo código que no te gusta constituye deuda relevante.</p><p>El ejemplo extrae una regla y conserva resultados en varios casos. La igualdad en esos casos no demuestra equivalencia universal, pero protege comportamientos relevantes. Amplía la selección con límites y entradas inválidas.</p><pre>def antes(precio, premium):\n    if premium:\n        return precio * 90 // 100\n    return precio\n\ndef aplicar_descuento(precio):\n    return precio * 90 // 100\n\ndef despues(precio, premium):\n    return aplicar_descuento(precio) if premium else precio\n\n# &quot;a if condicion else b&quot; es una expresión condicional de Python.\nfor precio, premium in [(0, True), (1000, True), (1000, False)]:\n    assert antes(precio, premium) == despues(precio, premium)\nprint(&quot;3 casos conservados&quot;)</pre><dl class=\"concept-notes\"><dt>código limpio</dt><dd>El código limpio expresa intención y reglas de forma comprensible para sus lectores. La claridad depende también del contexto del problema.</dd><dt>refactorización</dt><dd>La refactorización cambia estructura interna sin alterar el comportamiento observable que se ha decidido conservar.</dd><dt>deuda técnica</dt><dd>La deuda técnica es un costo futuro asociado a decisiones de implementación o diseño. Se gestiona identificando consecuencias y prioridades.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Refactoriza el proyecto de biblioteca por pasos y ejecuta sus pruebas después de cada extracción.</aside>",
+  "html": "<p>El bucle desempaqueta cada pareja en precio y premium: ambas variables reciben, en ese orden, los dos elementos de la tupla. La expresión a if condición else b elige un valor sin ejecutar las dos alternativas.</p><p>El código limpio comunica intención mediante nombres claros, operaciones pequeñas y reglas visibles. Una función corta puede seguir siendo incomprensible; busca claridad respecto al problema, no una cantidad arbitraria de líneas.</p><p>Refactorizar cambia la estructura conservando el comportamiento observable acordado. Antes de mover código, establece pruebas de caracterización que documenten lo que debe mantenerse. Si también corriges una regla de negocio, separa ese cambio para que pueda revisarse.</p><p>La deuda técnica representa un costo futuro de decisiones actuales, como duplicación o dependencias difíciles de modificar. Puede aceptarse conscientemente por una necesidad real, pero registra consecuencias y una condición para revisarla. No todo código que no te gusta constituye deuda relevante.</p><p>El ejemplo extrae una regla y conserva resultados en varios casos. La igualdad en esos casos no demuestra equivalencia universal, pero protege comportamientos relevantes. Amplía la selección con límites y entradas inválidas.</p><pre data-language=\"python\">def antes(precio, premium):\n    if premium:\n        return precio * 90 // 100\n    return precio\n\ndef aplicar_descuento(precio):\n    return precio * 90 // 100\n\ndef despues(precio, premium):\n    return aplicar_descuento(precio) if premium else precio\n\n# &quot;a if condicion else b&quot; es una expresión condicional de Python.\nfor precio, premium in [(0, True), (1000, True), (1000, False)]:\n    assert antes(precio, premium) == despues(precio, premium)\nprint(&quot;3 casos conservados&quot;)</pre><dl class=\"concept-notes\"><dt>código limpio</dt><dd>El código limpio expresa intención y reglas de forma comprensible para sus lectores. La claridad depende también del contexto del problema.</dd><dt>refactorización</dt><dd>La refactorización cambia estructura interna sin alterar el comportamiento observable que se ha decidido conservar.</dd><dt>deuda técnica</dt><dd>La deuda técnica es un costo futuro asociado a decisiones de implementación o diseño. Se gestiona identificando consecuencias y prioridades.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Refactoriza el proyecto de biblioteca por pasos y ejecuta sus pruebas después de cada extracción.</aside><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: Extraes el descuento de antes en otra función usada por despues.</p><p>Razonamiento: Comparas las dos implementaciones con cero, con descuento y sin descuento para detectar cambios de comportamiento.</p><p>Resultado: Los tres casos conservan sus resultados; más casos siguen siendo necesarios para ampliar la confianza.</p><p><strong>Condiciones del ejemplo:</strong> Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo.</p></section>",
   "quiz": [
     {
       "id": "q1",
@@ -129,5 +129,18 @@
     ],
     "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
     "policyDigest": "fe5cb02eac121a2cb1a18f6d127b6d442967a8edcfc0959146d82ad290468924"
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo."
+    ],
+    "workedExample": {
+      "problem": "Situación: Extraes el descuento de antes en otra función usada por despues.",
+      "reasoning": "Razonamiento: Comparas las dos implementaciones con cero, con descuento y sin descuento para detectar cambios de comportamiento.",
+      "result": "Resultado: Los tres casos conservan sus resultados; más casos siguen siendo necesarios para ampliar la confianza."
+    },
+    "transferActivityIds": [
+      "transferir"
+    ]
   }
 }

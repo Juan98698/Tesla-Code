@@ -55,7 +55,7 @@ EXAMPLES = {
 
 # Cada ejemplo se ejecuta por separado y debe coincidir con el código mostrado.
 cases = []
-for path in sorted((ROOT / 'content' / 'lessons' / 'fundamentos').glob('*.json')):
+for path in sorted((ROOT / 'content' / 'lessons').glob('*/*.json')):
     content = json.loads(path.read_text())
     parser = CodeBlocks()
     parser.feed(content['html'])
@@ -81,6 +81,17 @@ try:
             with redirect_stdout(output):
                 exec(compile(program, lesson + '.py', 'exec'), namespace)
             assert output.getvalue() == expected, (lesson, output.getvalue(), expected)
+            if lesson == 'implementar-algoritmos-en-python':
+                for values, maximum in [([-5, -2, -9], -2), ([4, 9, 2], 9), ([7], 7), ([2, 2], 2)]:
+                    trial = program.replace('datos = [-8, -3, -6]', 'datos = ' + repr(values), 1)
+                    trial_output = StringIO()
+                    with redirect_stdout(trial_output):
+                        exec(compile(trial, lesson + '.py', 'exec'), {})
+                    assert trial_output.getvalue() == str(maximum) + '\n'
+            if lesson == 'funciones-y-recursion-algoritmica':
+                assert namespace['factorial'](0) == 1
+                assert namespace['factorial'](5) == 120
+                assert namespace['doble'](-3) == -6
             if example_id in ['legacy', 'principal'] and lesson == 'proyecto-gestor-de-tareas':
                 tasks = []
                 assert namespace['agregar'](tasks, '   ') is False

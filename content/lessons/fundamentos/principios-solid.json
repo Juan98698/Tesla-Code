@@ -1,12 +1,12 @@
 {
   "id": "principios-solid",
-  "outcome": "Aplicar principios de diseño a un cambio concreto sin añadir estructuras innecesarias.",
+  "outcome": "Para usar otra política sin reescribir total, ¿qué parámetro debes sustituir?",
   "requiresConcepts": [
     "fundamentos.factory",
     "fundamentos.strategy",
     "fundamentos.observer"
   ],
-  "html": "<p>En Python, // realiza división entera redondeando hacia abajo. Aquí los importes son centavos enteros no negativos y el contrato decide cómo tratar cualquier resto; no se interpreta el valor como una cantidad de coma flotante.</p><p>SOLID reúne cinco principios orientados a reducir costos de cambio. No son reglas que obliguen a crear una clase por operación. Explica primero qué cambia y qué contratos deben conservarse.</p><p>Responsabilidad única: separar cálculo y escritura en disco cuando cambian por motivos distintos. Abierto y cerrado: permitir otra política de descuento sin reescribir el caso de uso estable. No significa que nunca puedas modificar código existente.</p><p>Sustitución de Liskov: una implementación sustituible debe mantener las expectativas del contrato, incluidos resultados y errores permitidos. Una cuenta que prohíbe retirar no sustituye sin más a otra cuyo contrato garantiza esa operación. Segregación de interfaces: quien solo necesita leer no debería depender de operaciones de escritura que no utiliza.</p><p>Inversión de dependencias: la regla de alto nivel trabaja contra un contrato y recibe una implementación. Inyectar una dependencia es un mecanismo posible; pasar un objeto no demuestra por sí solo que el contrato esté bien diseñado. En el ejemplo, total recibe una política de descuento como función.</p><pre>def sin_descuento(importe):\n    return importe\n\ndef diez_por_ciento(importe):\n    return importe * 90 // 100\n\ndef total(importe_centavos, politica):\n    if importe_centavos &lt; 0:\n        raise ValueError(&quot;Importe negativo&quot;)\n    return politica(importe_centavos)\n\nprint(total(1000, sin_descuento))\nprint(total(1000, diez_por_ciento))</pre><dl class=\"concept-notes\"><dt>responsabilidad única</dt><dd>La responsabilidad única agrupa elementos que cambian por el mismo motivo y separa responsabilidades con razones de cambio distintas.</dd><dt>abierto y cerrado</dt><dd>Abierto y cerrado propone extender comportamientos variables sin alterar continuamente el núcleo estable, cuando esa separación aporta valor.</dd><dt>inversión de dependencias</dt><dd>La inversión de dependencias hace que las reglas de alto nivel dependan de contratos, no de detalles concretos que ellas mismas construyen.</dd><dt>sustitución de Liskov</dt><dd>La sustitución de Liskov exige que las implementaciones sustituibles respeten el contrato y las expectativas de sus consumidores.</dd><dt>segregación de interfaces</dt><dd>La segregación de interfaces evita obligar a un consumidor a depender de operaciones que no necesita.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Diseña una política nueva y una prueba de contrato que todas las políticas deban cumplir para entradas válidas.</aside>",
+  "html": "<p>En Python, // realiza división entera redondeando hacia abajo. Aquí los importes son centavos enteros no negativos y el contrato decide cómo tratar cualquier resto; no se interpreta el valor como una cantidad de coma flotante.</p><p>SOLID reúne cinco principios orientados a reducir costos de cambio. No son reglas que obliguen a crear una clase por operación. Explica primero qué cambia y qué contratos deben conservarse.</p><p>Responsabilidad única: separar cálculo y escritura en disco cuando cambian por motivos distintos. Abierto y cerrado: permitir otra política de descuento sin reescribir el caso de uso estable. No significa que nunca puedas modificar código existente.</p><p>Sustitución de Liskov: una implementación sustituible debe mantener las expectativas del contrato, incluidos resultados y errores permitidos. Una cuenta que prohíbe retirar no sustituye sin más a otra cuyo contrato garantiza esa operación. Segregación de interfaces: quien solo necesita leer no debería depender de operaciones de escritura que no utiliza.</p><p>Inversión de dependencias: la regla de alto nivel trabaja contra un contrato y recibe una implementación. Inyectar una dependencia es un mecanismo posible; pasar un objeto no demuestra por sí solo que el contrato esté bien diseñado. En el ejemplo, total recibe una política de descuento como función.</p><pre data-language=\"python\">def sin_descuento(importe):\n    return importe\n\ndef diez_por_ciento(importe):\n    return importe * 90 // 100\n\ndef total(importe_centavos, politica):\n    if importe_centavos &lt; 0:\n        raise ValueError(&quot;Importe negativo&quot;)\n    return politica(importe_centavos)\n\nprint(total(1000, sin_descuento))\nprint(total(1000, diez_por_ciento))</pre><dl class=\"concept-notes\"><dt>responsabilidad única</dt><dd>La responsabilidad única agrupa elementos que cambian por el mismo motivo y separa responsabilidades con razones de cambio distintas.</dd><dt>abierto y cerrado</dt><dd>Abierto y cerrado propone extender comportamientos variables sin alterar continuamente el núcleo estable, cuando esa separación aporta valor.</dd><dt>inversión de dependencias</dt><dd>La inversión de dependencias hace que las reglas de alto nivel dependan de contratos, no de detalles concretos que ellas mismas construyen.</dd><dt>sustitución de Liskov</dt><dd>La sustitución de Liskov exige que las implementaciones sustituibles respeten el contrato y las expectativas de sus consumidores.</dd><dt>segregación de interfaces</dt><dd>La segregación de interfaces evita obligar a un consumidor a depender de operaciones que no necesita.</dd></dl><aside class=\"callout\"><strong>Tu siguiente reto.</strong> Diseña una política nueva y una prueba de contrato que todas las políticas deban cumplir para entradas válidas.</aside><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: total recibe 1000 centavos y la función diez_por_ciento.</p><p>Razonamiento: La política calcula 1000 por 90 dividido de forma entera entre 100; total depende del contrato de la política.</p><p>Resultado: Se devuelve 900; otra política puede reemplazarse sin reescribir total.</p><p><strong>Condiciones del ejemplo:</strong> Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo.</p></section>",
   "quiz": [
     {
       "id": "q1",
@@ -79,12 +79,13 @@
       "id": "transferir",
       "type": "text",
       "concept": "fundamentos.abierto-y-cerrado",
-      "prompt": "Con una política del 10 % sobre 2000 centavos, ¿qué total queda?",
+      "prompt": "Para usar otra política sin reescribir total, ¿qué parámetro debes sustituir?",
       "answers": [
-        "1800"
+        "politica",
+        "política"
       ],
-      "hint": "Conserva el 90 % del importe.",
-      "explanation": "2000 × 90 / 100 = 1800 centavos."
+      "hint": "Es el segundo parámetro de total.",
+      "explanation": "La política se recibe como una dependencia intercambiable; total conserva su responsabilidad."
     }
   ],
   "sources": [
@@ -151,5 +152,18 @@
     ],
     "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
     "policyDigest": "fe5cb02eac121a2cb1a18f6d127b6d442967a8edcfc0959146d82ad290468924"
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Las operaciones del ejemplo se estudian bajo las condiciones descritas; la actividad de la plataforma comprueba una parte y no ejecuta un proyecto completo."
+    ],
+    "workedExample": {
+      "problem": "Situación: total recibe 1000 centavos y la función diez_por_ciento.",
+      "reasoning": "Razonamiento: La política calcula 1000 por 90 dividido de forma entera entre 100; total depende del contrato de la política.",
+      "result": "Resultado: Se devuelve 900; otra política puede reemplazarse sin reescribir total."
+    },
+    "transferActivityIds": [
+      "transferir"
+    ]
   }
 }

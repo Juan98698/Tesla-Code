@@ -4,10 +4,10 @@
 
 - `npm test`: pruebas unitarias de dominio, componentes DOM, widgets, repositorios y controlador; más pruebas de regresión de las herramientas pedagógicas.
 - `npm run test:coverage`: Node 24/26; genera `coverage/lcov.info` y verifica que los 23 módulos de `js/` aparezcan en la cobertura. El informe no sustituye las aserciones.
-- `python3 tests/python-examples.py`: ejecuta 37 ejemplos Python y el ejercicio Git en directorios temporales, contrasta salida esperada y comprueba contratos de los proyectos. Los ejemplos declarados deben coincidir con el código mostrado.
+- `python3 tests/python-examples.py`: ejecuta 39 ejemplos Python de Fundamentos y Algoritmia y el ejercicio Git en directorios temporales, contrasta salida esperada y comprueba contratos de los proyectos. Incluye negativos, un único elemento, empates y casos base de recursión. Los ejemplos declarados deben coincidir con el código mostrado.
 - `npm run test:cache`: navegación con módulos/estilos/datos antiguos realmente cacheados, seis entradas libres y preservación del perfil anterior.
 - `npm run test:module`: piloto de 17 lecciones iniciales sin progreso artificial, en escritorio y móvil.
-- `npm run test:access`: entradas independientes en las seis rutas, orientación y repasos sin créditos, preferencia con experiencia, secuencia interna, movimiento reducido y doce auditorías WCAG adicionales en escritorio/móvil.
+- `npm run test:access`: entradas independientes en las seis rutas, piloto real de las siete lecciones de Algoritmia sin inyectar progreso, orientación y repasos sin créditos, preferencia con experiencia, secuencia interna, movimiento reducido y doce auditorías WCAG adicionales en escritorio/móvil.
 - `npm run test:e2e`: renderiza todas las lecciones publicadas y resuelve sus prácticas; verifica navegación, desbloqueos, persistencia, descarga, simuladores, diseños y accesibilidad.
 - `npm run test:all`: ejecuta el validador, control técnico local, cobertura, ejemplos, piloto, acceso independiente y recorrido general.
 - `npm run technology:check -- --online`: consulta fuentes oficiales y devuelve un fallo si cambian referencias o falta evidencia. No instala ni renueva versiones.

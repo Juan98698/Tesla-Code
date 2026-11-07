@@ -81,7 +81,7 @@ test('learning preference survives normalization without manufacturing progress 
 test('contextual refreshers teach actual prerequisites and give feedback without awarding route credit', (t) => {
   installDOM(t);
   const route = routes.find((r) => r.id === 'algoritmia'),
-    meta = route.lessons[0],
+    meta = route.lessons.find((lesson) => lesson.id === 'implementar-algoritmos-en-python'),
     state = emptyProgress();
   const root = document.getElementById('root'),
     before = structuredClone(state);

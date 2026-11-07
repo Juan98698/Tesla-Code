@@ -1,6 +1,6 @@
 {
   "id": "alcance-de-variables",
-  "html": "<p>¿Desde dónde se puede usar una variable? El <b>alcance</b> (o ámbito) de una variable es la parte del programa donde existe y puede usarse.</p>\n<p>Una variable creada dentro de una función tiene <b>ámbito local</b>: su nombre se usa dentro de la función y no puede consultarse directamente desde fuera. Esto describe visibilidad; un objeto puede seguir existiendo si otra referencia lo conserva. Fuera de la función no existe, y usarla provoca un error de ejecución:</p><pre><div>funcion calcular()</div><div>    resultado = 10</div><div>fin funcion</div><div></div><div>calcular()</div><div>mostrar(resultado)</div></pre><p>Este programa falla porque <code>resultado</code> es local a <code>calcular</code>. Una variable creada fuera de cualquier función tiene <b>ámbito global</b>: es visible en todo el programa. Si una función asigna un valor a un nombre que también existe como global, en nuestro pseudocódigo (y en lenguajes como Python) se crea una variable local nueva y la global no cambia:</p><pre><div>mensaje = \"Hola\"</div><div></div><div>funcion cambiar()</div><div>    mensaje = \"Adiós\"</div><div>    mostrar(mensaje)</div><div>fin funcion</div><div></div><div>cambiar()</div><div>mostrar(mensaje)</div></pre><p>Se muestra <code>Adiós</code> y luego <code>Hola</code>. Otros lenguajes, como JavaScript, dependen de cómo declares la variable, así que conviene revisar sus reglas.</p>\n<p>Recomendación general: evita depender de variables globales. Entrega los datos con <b>parámetros</b> y recibe los resultados con <b>devolver</b>. Así cada función es predecible, fácil de probar y no cambia el programa a escondidas.</p>",
+  "html": "<p>¿Desde dónde se puede usar una variable? El <b>alcance</b> (o ámbito) de una variable es la parte del programa donde existe y puede usarse.</p>\n<p>Una variable creada dentro de una función tiene <b>ámbito local</b>: su nombre se usa dentro de la función y no puede consultarse directamente desde fuera. Esto describe visibilidad; un objeto puede seguir existiendo si otra referencia lo conserva. Fuera de la función ese nombre local no es accesible; consultarlo allí sin otra definición provoca un error de ejecución:</p><p>En este ejemplo, la expresión «no existe fuera» se refiere al nombre local resultado, no a que todo objeto deba destruirse al terminar una función. Un nombre global se puede consultar cuando su asignación ya se ejecutó; no anticipa valores de líneas todavía no ejecutadas.</p><pre data-language=\"pseudocode\"><div>funcion calcular()</div><div>    resultado = 10</div><div>fin funcion</div><div></div><div>calcular()</div><div>mostrar(resultado)</div></pre><p>Este programa falla porque <code>resultado</code> es local a <code>calcular</code>. Una variable creada fuera de cualquier función tiene <b>ámbito global</b>: es visible en todo el programa. Si una función asigna un valor a un nombre que también existe como global, en nuestro pseudocódigo (y en lenguajes como Python) se crea una variable local nueva y la global no cambia:</p><pre data-language=\"pseudocode\"><div>mensaje = \"Hola\"</div><div></div><div>funcion cambiar()</div><div>    mensaje = \"Adiós\"</div><div>    mostrar(mensaje)</div><div>fin funcion</div><div></div><div>cambiar()</div><div>mostrar(mensaje)</div></pre><p>Se muestra <code>Adiós</code> y luego <code>Hola</code>. Otros lenguajes, como JavaScript, dependen de cómo declares la variable, así que conviene revisar sus reglas.</p>\n<p>Recomendación general: evita depender de variables globales. Entrega los datos con <b>parámetros</b> y recibe los resultados con <b>devolver</b>. Así cada función es predecible, fácil de probar y no cambia el programa a escondidas.</p><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: mensaje global vale Hola y una función asigna Adiós a un mensaje local.</p><p>Razonamiento: En las reglas explicadas, la asignación local crea otro nombre; no cambia la asociación global.</p><p>Resultado: La función muestra Adiós y la consulta exterior sigue mostrando Hola.</p><p><strong>Condiciones del ejemplo:</strong> Los ejemplos de este bloque se siguen a mano con las reglas del pseudocódigo indicadas; no se pegan directamente en un intérprete Python.</p></section>",
   "quiz": [
     {
       "type": "choice",
@@ -101,7 +101,7 @@
   "sources": [],
   "coverage": {
     "fundamentos.ambito-local": {
-      "explanationExcerpt": "able creada dentro de una función tiene ámbito local : su nombre se usa dentro de la función y no puede consultarse directamente desde fuera. Esto describe visibilidad; un objeto puede seguir existiendo si otra referencia lo conserva. Fuera de la función no existe, y usarla provoca un error de ejecución: funcion calcular() resultado = 10 ",
+      "explanationExcerpt": "Una variable creada dentro de una función tiene ámbito local : su nombre se usa dentro de la función y no puede consultarse directamente desde fuera. Esto describe visibilidad; un objeto puede seguir existiendo si otra referencia lo conserva.",
       "assessmentIds": [
         "q1",
         "q2",
@@ -125,5 +125,18 @@
     "testedVersions": [],
     "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
     "policyDigest": "a219497c0cd5d59e45322551975de61055635324ddd1bae937d9d0c27bc4caeb"
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Los ejemplos de este bloque se siguen a mano con las reglas del pseudocódigo indicadas; no se pegan directamente en un intérprete Python."
+    ],
+    "workedExample": {
+      "problem": "Situación: mensaje global vale Hola y una función asigna Adiós a un mensaje local.",
+      "reasoning": "Razonamiento: En las reglas explicadas, la asignación local crea otro nombre; no cambia la asociación global.",
+      "result": "Resultado: La función muestra Adiós y la consulta exterior sigue mostrando Hola."
+    },
+    "transferActivityIds": [
+      "aplicar"
+    ]
   }
 }

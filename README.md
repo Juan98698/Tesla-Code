@@ -39,7 +39,7 @@ También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran su propi
 ## Qué está disponible
 
 - Seis mapas de rutas: Fundamentos, Algoritmia, Frontend, Backend, Bases de datos e IA.
-- **85 lecciones publicadas** con explicación, práctica, pistas y evaluación. Los demás temas se muestran como **en preparación**, sin simular que incluyen un curso.
+- **90 lecciones publicadas** con explicación, ejemplos razonados, condiciones explícitas, práctica, pistas y evaluación. Los demás temas se muestran como **en preparación**, sin simular que incluyen un curso.
 - **Fundamentos completo: 68 lecciones**, desde Primeros pasos hasta Experto. Incluye Python, Git, colecciones, objetos, diseño, pruebas, concurrencia, seguridad, observabilidad y proyectos integradores.
 - IA: nueve lecciones introductorias sobre modelos, inferencia, LLM, prompts, contexto, memoria, evaluación, difusión/flow matching, conceptos siguientes/LCM y criterios de proyecto. El mapa técnico distingue aplicaciones, modelos, difusión, investigación y producción.
 - Primeras dos lecciones de las otras cuatro especializaciones. Todas las rutas tienen entrada libre; la progresión obligatoria se conserva dentro de cada una.
