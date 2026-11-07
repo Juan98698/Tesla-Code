@@ -20,11 +20,25 @@ Todas las rutas permiten empezar por su primera lección publicada, con una entr
 2. Método para resolver problemas.
 3. Diseñar con secuencias, decisiones y repeticiones en pseudocódigo explicado.
 4. Trazar y comprobar antes de programar.
-5. Traducir a Python, instrucción por instrucción, con requisitos de entorno explícitos y ayudas opcionales.
-6. Funciones, recursión y terminación.
-7. Medir tiempo y memoria.
+5. Funciones, recursión y terminación, en pseudocódigo.
+6. Medir tiempo y memoria, con un modelo de coste explícito.
+7. Funciones matemáticas, potencias y logaritmos.
+8. Big O, Ω y Θ.
+9. Analizar ciclos y recurrencias.
+10. Razonamiento, contraejemplos e inducción.
+11. Corrección con invariantes.
 
-Estas siete lecciones están publicadas. Después vienen funciones matemáticas, potencias y logaritmos, cotas asintóticas, análisis de ciclos/recursión, razonamiento formal e invariantes. Los IDs de las lecciones anteriores se conservan; los pasos añadidos no conceden finalizaciones a quienes ya tenían progreso.
+Estas once lecciones están publicadas. Un duodécimo laboratorio opcional traduce el máximo a Python, explica la sintaxis desde cero y permite ejecutarlo con casos. Se habilita después de la traza y no bloquea el núcleo. El teorema maestro queda como profundización posterior a recurrencias e inducción. Los IDs anteriores se conservan, sin conceder finalizaciones artificiales.
+
+`progressionRequires` conserva el orden de aprendizaje y `dependsOn`/`requiresConcepts` describen los conocimientos utilizados. En Algoritmia, los recorridos de grafos enlazan colas y pilas, Dijkstra enlaza prioridad y Kruskal ordenamiento. Grafos deja de exigir tries y tablas hash deja de exigir colas. La revisión semántica completa de los otros mapas heredados sigue pendiente.
+
+## Python desde cero
+
+El mapa tiene 67 temas en once bloques. Está publicado el primero: qué es un programa → ejecutar y leer → operaciones → variables → texto/entrada → tipos/conversiones → presupuesto. Son siete lecciones con tres actividades cada una; desde la segunda se ejecutan programas en el navegador. Los diez bloques siguientes continúan con control, colecciones, funciones/módulos, archivos, pruebas, entorno, objetos, mecanismos avanzados, integración y proyecto final.
+
+No se exige haber cursado Fundamentos o Algoritmia. La introducción mínima de clases se sitúa antes de unittest; el modelado de objetos se profundiza después. Ordenar con `key` enseña explícitamente pasar una función como argumento. Los decoradores propios y los cierres se reservan para una etapa posterior. Los temas avanzados siguen en preparación: el mapa no se presenta como un curso completo ya disponible.
+
+Se conserva el puente de Fundamentos como repaso disponible. No se acreditan automáticamente lecciones entre rutas: compartir conocimientos o un resultado de orientación no demuestra haber superado los nuevos objetivos y prácticas.
 
 En las demás especialidades, accesibilidad precede a CSS y React, las pruebas HTTP de backend se aprenden después del contrato OpenAPI y antes de persistencia/arquitectura, y la seguridad de aplicaciones con IA precede a agentes y uso autónomo de herramientas. La exfiltración de datos privados se distingue de la contaminación entre datos de entrenamiento y evaluación.
 

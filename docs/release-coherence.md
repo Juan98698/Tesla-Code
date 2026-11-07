@@ -19,6 +19,6 @@ El import map usa rutas relativas y no necesita un empaquetador. Los hashes norm
 
 `npm run test:cache` utiliza un servidor HTTP y un navegador real sin interceptar solicitudes. Precarga módulos y estilos antiguos con caché larga, además de un catálogo antiguo y un perfil de prueba con 180 XP y dos lecciones completadas. Una segunda navegación demuestra que esos recursos están realmente cacheados.
 
-Después publica el índice actual en el mismo origen y comprueba que el grafo de módulos y el catálogo pertenecen a la nueva edición, que se puede entrar a las seis rutas y que las lecciones internas pendientes siguen bloqueadas. Los 180 XP y las finalizaciones anteriores se conservan. La fixture verifica compatibilidad; no representa haber cursado esas lecciones durante la prueba.
+Después publica el índice actual en el mismo origen y comprueba que el grafo de módulos y el catálogo pertenecen a la nueva edición, que se puede entrar a todas las rutas y que las lecciones internas pendientes siguen bloqueadas. Los 180 XP y las finalizaciones anteriores se conservan. La fixture verifica compatibilidad; no representa haber cursado esas lecciones durante la prueba.
 
 La actualización requiere que el servidor o el despliegue publique el nuevo índice. No se puede sustituir desde el repositorio una pestaña que siga ejecutando el documento anterior sin navegar o recargar. No hace falta borrar `localStorage` para actualizar la aplicación.

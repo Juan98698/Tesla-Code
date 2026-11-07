@@ -2,6 +2,7 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { indexRoute } from '../js/domain/curriculum.js';
 import { checkTechnologyPolicy, checkLessonTechnology } from './technology-policy.mjs';
+import { pythonExerciseErrors } from '../js/domain/python-exercise.js';
 import {
   digest,
   lessonDigest,
@@ -10,6 +11,7 @@ import {
   explanationText,
   curriculumSequenceErrors,
   learningDesignErrors,
+  publicationDepthErrors,
 } from './pedagogy.mjs';
 const errors = [];
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -28,9 +30,11 @@ for (const error of checkTechnologyPolicy(
 const reviews = existsSync('content/pedagogy-reviews.json')
   ? read('content/pedagogy-reviews.json')
   : { routes: {}, lessons: {} };
+const depthBacklog = new Set(read('content/editorial-backlog.json').lessons);
 const concepts = new Map(),
   lessons = new Map(),
-  files = new Set();
+  files = new Set(),
+  entryKeys = new Set();
 let published = 0;
 for (const c of registry) {
   if (concepts.has(c.id)) fail(`Concepto duplicado: ${c.id}`);
@@ -41,6 +45,7 @@ for (const rid of routes) {
   for (const error of reviewErrors(reviews.routes[rid], digest(source)))
     fail(`Ruta ${rid}: ${error}`);
   const route = indexRoute(source);
+  entryKeys.add(`${rid}/${route.lessons[0]?.id}`);
   for (const error of curriculumSequenceErrors(source)) fail('Ruta ' + rid + ': ' + error);
   if (route.id !== rid) fail(`Ruta inconsistente: ${rid}`);
   for (const meta of route.lessons) {
@@ -129,6 +134,8 @@ function checkQuestion(q, where, allowed) {
       q.answers.some((a) => typeof a !== 'string' || !a.trim())
     )
       fail(`${where}: respuestas vacías`);
+  } else if (q.type === 'python') {
+    for (const error of pythonExerciseErrors(q)) fail(`${where}: ${error}`);
   } else fail(`${where}: tipo desconocido ${q.type}`);
 }
 for (const [key, meta] of lessons) {
@@ -142,6 +149,8 @@ for (const [key, meta] of lessons) {
   }
   const data = read(path),
     allowed = ancestors(key);
+  if (!depthBacklog.has(key))
+    for (const error of publicationDepthErrors(data)) fail(path + ': ' + error);
   for (const cid of meta.requiresConcepts ?? []) {
     const c = concepts.get(cid);
     if (c && !c.introducedBy.startsWith(key.split('/')[0] + '/') && !c.refresher)
@@ -152,7 +161,7 @@ for (const [key, meta] of lessons) {
   for (const error of coverageErrors(meta, data)) fail(`${path}: ${error}`);
   for (const error of reviewErrors(reviews.lessons[key], lessonDigest(meta, data, registry)))
     fail(`${path}: ${error}`);
-  for (const error of learningDesignErrors(meta, data, { entry: !meta.dependsOn.length }))
+  for (const error of learningDesignErrors(meta, data, { entry: entryKeys.has(key) }))
     fail(path + ': ' + error);
   allowed.add(key);
   if (data.id !== key.split('/')[1]) fail(`${path}: id inconsistente`);
@@ -183,7 +192,11 @@ for (const [key, meta] of lessons) {
   if (!Array.isArray(data.quiz) || data.quiz.length < 4) fail(`${path}: mínimo cuatro preguntas`);
   if (new Set((data.quiz ?? []).map((q) => q.id)).size !== data.quiz?.length)
     fail(`${path}: ids de pregunta duplicados`);
-  for (const q of data.quiz ?? []) checkQuestion(q, `${path}/${q.id}`, allowed);
+  for (const q of data.quiz ?? []) {
+    if (q.type === 'python')
+      fail(`${path}/${q.id}: el código pertenece a la práctica, no al quiz.`);
+    checkQuestion(q, `${path}/${q.id}`, allowed);
+  }
   if (!Array.isArray(data.activities) || !data.activities.length) fail(`${path}: falta práctica`);
   if (new Set((data.activities ?? []).map((a) => a.id)).size !== data.activities?.length)
     fail(`${path}: ids de actividad duplicados`);

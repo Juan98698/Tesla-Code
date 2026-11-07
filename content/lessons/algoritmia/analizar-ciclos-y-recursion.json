@@ -1,0 +1,155 @@
+{
+  "id": "analizar-ciclos-y-recursion",
+  "html": "<h2>Cuenta lo que el programa hace</h2><p>Una etiqueta de complejidad debe salir de los pasos. Elegimos una operación que represente el trabajo principal y contamos cuántas veces ocurre. En los ejemplos, una operación elemental cuesta una unidad y n es un entero no negativo. Separaremos el caso n = 0 cuando usemos divisiones o logaritmos.</p>\n <p>Si un ciclo visita n elementos una vez y hace una comparación por visita, registra n comparaciones. Si después ejecuta otro recorrido completo con una comparación por visita, se suman: n + n = 2n, que tiene orden Θ(n). Dos ciclos consecutivos no se multiplican.</p>\n <h2>Cuándo se multiplican los recorridos</h2><p>En el pseudocódigo siguiente, PARA i DESDE 1 HASTA n incluye ambos extremos; si n es cero no se ejecuta. PARA j repite sus pasos completos por cada valor de i. REGISTRAR PAR representa una operación elemental, no guardar necesariamente una colección.</p><pre data-language=\"pseudocode\">PARA i DESDE 1 HASTA n HACER\n    PARA j DESDE 1 HASTA n HACER\n        REGISTRAR PAR(i, j)\n    FIN PARA\nFIN PARA</pre><p>Para n = 3, aparecen nueve pares: cada uno de los tres valores de i se combina con tres valores de j. El total es n × n = n². Esta multiplicación corresponde a esos límites concretos.</p>\n <p>Si el ciclo interior va de 1 a 5, realiza siempre cinco operaciones por vuelta externa: el total es 5n y el crecimiento es lineal. La mera presencia de un ciclo dentro de otro no demuestra coste cuadrático.</p>\n <p>Si el interior va de 1 hasta i, el trabajo es 1 + 2 + … + n. Podemos emparejar el primer y último término, el segundo y penúltimo: cada pareja suma n + 1. El resultado general es n(n + 1)/2, también Θ(n²). Para n = 3 son seis operaciones, no nueve. Si n es impar, el término central completa la misma fórmula al considerar dos copias de la suma.</p>\n <h2>Reducción del tamaño</h2><p>Una repetición que divide n por dos hasta llegar a uno tiene etapas logarítmicas, pero debemos contar el trabajo de cada etapa. Si cada una recorre nuevamente toda la entrada original, no podemos declarar Θ(log n) solo por el número de etapas.</p>\n <h2>Recursión y trabajo pendiente</h2><p>Para una función que, con entrada n positiva, realiza una unidad de trabajo y llama una sola vez con n − 1, podemos escribir T(n) = T(n − 1) + 1. Añadimos un caso base T(0) = 1: incluso devolver el caso base cuesta una unidad en este modelo.</p>\n <p>Desplegar la relación produce T(3) = T(2) + 1 = T(1) + 2 = T(0) + 3 = 4. En general, T(n) = n + 1 y su crecimiento es lineal. Si las llamadas guardan contexto hasta regresar, su profundidad también crece con n; el espacio auxiliar de la pila no desaparece porque el código sea corto.</p>\n <p>Una llamada sobre n/2, con una unidad adicional de trabajo y base en uno, satisface T(n) = T(n/2) + 1. Para potencias de dos, puede desplegarse tantas veces como indique log₂(n). Usar otras entradas obliga a especificar redondeo y condición de parada.</p>\n <p>Dos llamadas por nivel no siempre significan exponencial respecto a n. En T(n) = 2T(n/2) + n, las dos entradas se reducen a la mitad: hay log₂(n) niveles y el trabajo por nivel suma n, lo que lleva a Θ(n log n) para potencias de dos y un caso base constante. Debes describir tamaño, número de llamadas y trabajo externo por separado. El teorema maestro profundizará en estas relaciones después de la inducción.</p><dl><dt>conteo de operaciones</dt><dd>El conteo de operaciones obtiene el trabajo de un algoritmo sumando la frecuencia y el coste de las instrucciones bajo un modelo explícito.</dd><dt>recurrencias</dt><dd>Una recurrencia expresa el coste de una entrada mediante los costes de entradas menores y el trabajo adicional realizado en esa llamada.</dd></dl><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Comparamos un par de ciclos con límites n y n frente a límites n y 5.</p><p>El primero realiza n² operaciones; el segundo, 5n, porque su límite interior permanece fijo.</p><p>El anidamiento por sí solo no decide la complejidad: importan los límites y el trabajo del cuerpo.</p><p><strong>Condición:</strong> Las operaciones elementales cuestan una unidad; las recurrencias por mitades se ilustran con potencias de dos.</p></section>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "algoritmia.conteo-de-operaciones",
+      "prompt": "Dos recorridos consecutivos de n elementos hacen una operación por elemento. ¿Cuántas hacen?",
+      "options": [
+        "2n",
+        "n²",
+        "2ⁿ"
+      ],
+      "answer": 0,
+      "explanation": "Los trabajos consecutivos se suman."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "algoritmia.conteo-de-operaciones",
+      "prompt": "Un ciclo externo de n vueltas y otro interno de 5 vueltas fijas produce…",
+      "options": [
+        "n² operaciones necesariamente.",
+        "5n operaciones.",
+        "5 operaciones."
+      ],
+      "answer": 1,
+      "explanation": "El límite interior no crece con n."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "algoritmia.recurrencias",
+      "prompt": "Con T(0) = 1 y T(n) = T(n − 1) + 1, ¿cuánto vale T(2)?",
+      "options": [
+        "4",
+        "2",
+        "3"
+      ],
+      "answer": 2,
+      "explanation": "Se despliega hasta la base: T(2) = T(0) + 2."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "algoritmia.recurrencias",
+      "prompt": "¿Qué falta si solo escribimos T(n) = T(n − 1) + 1?",
+      "options": [
+        "El caso base y el dominio de entradas.",
+        "El nombre del editor.",
+        "Elegir siempre Python."
+      ],
+      "answer": 0,
+      "explanation": "La recurrencia necesita dónde empieza y para qué entradas se aplica."
+    }
+  ],
+  "activities": [
+    {
+      "id": "consecutivos",
+      "type": "text",
+      "concept": "algoritmia.conteo-de-operaciones",
+      "prompt": "Para n = 6, ¿cuántas operaciones hacen dos recorridos consecutivos completos con una operación por elemento?",
+      "answers": [
+        "12"
+      ],
+      "hint": "Suma los recorridos.",
+      "explanation": "Seis más seis, no seis por seis."
+    },
+    {
+      "id": "triangular",
+      "type": "text",
+      "concept": "algoritmia.conteo-de-operaciones",
+      "prompt": "El ciclo interior recorre 1 hasta i. Para i de 1 a 4, ¿cuántas operaciones acumula?",
+      "answers": [
+        "10"
+      ],
+      "hint": "Suma 1 + 2 + 3 + 4.",
+      "explanation": "La cantidad depende del valor de i: son diez."
+    },
+    {
+      "id": "desplegar",
+      "type": "text",
+      "concept": "algoritmia.recurrencias",
+      "prompt": "Con T(0) = 1 y T(n) = T(n − 1) + 1, calcula T(5).",
+      "answers": [
+        "6"
+      ],
+      "hint": "Cuenta cinco reducciones y el trabajo base.",
+      "explanation": "La base agrega una unidad: cinco más uno."
+    }
+  ],
+  "requiresConcepts": [
+    "algoritmia.cotas",
+    "algoritmia.ordenes-de-crecimiento",
+    "algoritmia.clases-comunes",
+    "algoritmia.repeticion",
+    "algoritmia.funcion-algoritmica",
+    "algoritmia.recursion-inicial",
+    "algoritmia.terminacion-recursiva"
+  ],
+  "outcome": "Derivar conteos y recurrencias sencillas a partir del comportamiento de ciclos y llamadas.",
+  "sources": [
+    {
+      "title": "OpenDSA: análisis de algoritmos",
+      "url": "https://opendsa-server.cs.vt.edu/ODSA/Books/Everything/html/AlgorithmAnalysis.html"
+    },
+    {
+      "title": "MIT OCW: introducción a algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"
+    }
+  ],
+  "coverage": {
+    "algoritmia.conteo-de-operaciones": {
+      "explanationExcerpt": "El conteo de operaciones obtiene el trabajo de un algoritmo sumando la frecuencia y el coste de las instrucciones bajo un modelo explícito.",
+      "assessmentIds": [
+        "q1",
+        "q2"
+      ]
+    },
+    "algoritmia.recurrencias": {
+      "explanationExcerpt": "Una recurrencia expresa el coste de una entrada mediante los costes de entradas menores y el trabajo adicional realizado en esa llamada.",
+      "assessmentIds": [
+        "q3",
+        "q4"
+      ]
+    }
+  },
+  "examples": [],
+  "learningDesign": {
+    "assumptions": [
+      "Las operaciones elementales cuestan una unidad; las recurrencias por mitades se ilustran con potencias de dos."
+    ],
+    "workedExample": {
+      "problem": "Comparamos un par de ciclos con límites n y n frente a límites n y 5.",
+      "reasoning": "El primero realiza n² operaciones; el segundo, 5n, porque su límite interior permanece fijo.",
+      "result": "El anidamiento por sí solo no decide la complejidad: importan los límites y el trabajo del cuerpo."
+    },
+    "transferActivityIds": [
+      "consecutivos",
+      "triangular",
+      "desplegar"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-07",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations"
+    ],
+    "testedVersions": [],
+    "note": "Revisión de conceptos, notación, fuentes y condiciones; no se atribuye ejecución a ejemplos de pseudocódigo o explicaciones sin programas.",
+    "policyDigest": "a219497c0cd5d59e45322551975de61055635324ddd1bae937d9d0c27bc4caeb"
+  }
+}

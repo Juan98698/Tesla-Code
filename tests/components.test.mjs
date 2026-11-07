@@ -185,7 +185,7 @@ test('catalog views reflect available, locked, planned and completed states with
     planned = routes.find((r) => r.id === 'frontend').lessons.find((l) => l.status === 'planned');
   root.innerHTML = views.homePage(routes, state);
   assert.equal(root.querySelectorAll('.route-card').length, 3);
-  assert.equal(root.querySelectorAll('#studio-route-select option').length, 6);
+  assert.equal(root.querySelectorAll('#studio-route-select option').length, routes.length);
   assert.match(root.querySelector('.continue-card .btn').href, /tu-primer-paso/);
   assert.equal(views.nodeState(base, first, state), 'ready');
   assert.equal(views.nodeState(base, next, state), 'locked');

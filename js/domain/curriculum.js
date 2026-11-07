@@ -9,13 +9,19 @@ export function indexRoute(route) {
 export function missingPrerequisites(lesson, completed) {
   return (lesson.dependsOn ?? []).filter((key) => !completed.has(key));
 }
-// El grafo conserva los requisitos académicos. Solo los pasos de la propia
-// ruta condicionan el acceso; conocer otra especialidad no exige cursarla aquí.
+// El itinerario controla el avance. El grafo académico documenta conocimientos.
+// La alternativa conserva compatibilidad con catálogos anteriores y fixtures.
+export function progressionRequirements(route, lesson) {
+  return (
+    lesson.progressionRequires ??
+    (lesson.dependsOn ?? []).filter((key) => key.startsWith(`${route.id}/`))
+  );
+}
 export function accessState(route, id, completed) {
   const lesson = route.lessons[route.pos[id]];
   if (!isPublished(lesson)) return { status: 'planned', required: [], recommended: [] };
   const missing = missingPrerequisites(lesson, completed);
-  const required = missing.filter((key) => key.startsWith(`${route.id}/`));
+  const required = progressionRequirements(route, lesson).filter((key) => !completed.has(key));
   const recommended = missing.filter((key) => !key.startsWith(`${route.id}/`));
   return {
     status: completed.has(lessonKey(route.id, id)) ? 'done' : required.length ? 'locked' : 'ready',
@@ -27,8 +33,9 @@ export function isUnlocked(route, id, completed) {
   return ['ready', 'done'].includes(accessState(route, id, completed).status);
 }
 export function nextLesson(route, completed) {
-  return route.lessons.find(
+  const available = route.lessons.filter(
     (lesson) =>
       !completed.has(lessonKey(route.id, lesson.id)) && isUnlocked(route, lesson.id, completed),
   );
+  return available.find((lesson) => lesson.kind !== 'optional') ?? available[0];
 }

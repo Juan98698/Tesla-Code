@@ -1,0 +1,158 @@
+{
+  "id": "razonamiento-y-demostracion",
+  "html": "<h2>Qué afirmas exactamente</h2><p>«Mi algoritmo funciona» es demasiado amplio. Una afirmación verificable puede ser: para toda lista finita no vacía de números comparables, el recorrido devuelve un valor de la lista que es mayor o igual que cada elemento. Aquí se declara el dominio, el resultado y la relación que debe satisfacer.</p>\n <p>«Para toda» es un cuantificador universal: exige la propiedad en cada entrada del dominio. «Existe» es un cuantificador existencial: basta una entrada que la cumpla. Encontrar una lista en la que el programa acierta demuestra existencia de un acierto; no demuestra que acierte para todas.</p>\n <h2>Las pruebas y los contraejemplos</h2><p>Ejecutar casos normales, negativos, empates y un único elemento ayuda a encontrar fallos. Un solo fallo dentro del contrato refuta la afirmación universal. Si inicializas el máximo en cero, la entrada [−5, −2] devuelve cero aunque cero ni siquiera pertenece a la lista. Esa entrada es un contraejemplo.</p>\n <p>Una lista vacía no refuta el contrato anterior, porque este la excluye. Sí revela que una aplicación que acepte listas vacías necesita otra especificación y un manejo explícito. Cambiar el contrato después de encontrar un fallo sin justificarlo no corrige el programa para sus usuarios originales.</p>\n <p>Probar muchas entradas puede elevar nuestra confianza y prevenir regresiones. Una demostración explica por qué la propiedad se mantiene en todas las entradas admitidas. Si el dominio es finito y pequeño podrías probarlo exhaustivamente, pero tres ejemplos no representan un dominio ilimitado.</p>\n <h2>Inducción sobre enteros: el primer peldaño y el siguiente</h2><p>La inducción es una forma de organizar una demostración. Primero defines una propiedad P(n) para todos los enteros desde cierto inicio. Luego verificas el caso base. Finalmente, supones que P(k) se cumple para un entero arbitrario permitido y demuestras P(k + 1). Esa suposición es una herramienta para demostrar el paso, no una declaración gratuita de que todo ya funciona.</p>\n <p>Por ejemplo, queremos justificar que sumar uno n veces desde cero produce n. En el caso n = 0 no hay sumas y el acumulador vale 0. Para el paso, suponemos que después de k sumas vale k. Una suma adicional produce k + 1. La base y el paso cubren todos los enteros no negativos mediante avances sucesivos.</p>\n <p>Si solo compruebas 0, 1, 2 y 3, todavía no has explicado el paso para un k arbitrario. Si solo muestras el paso pero omites la base, no has establecido dónde comienza la cadena. Si la llamada recursiva reduce en dos, también debes revisar si los casos base cubren tanto entradas pares como impares.</p>\n <h2>Aplicarlo a programas</h2><p>La corrección de un procedimiento recursivo suele relacionarse con entradas más pequeñas. Necesitas justificar que la llamada menor cumple sus condiciones y que su resultado permite construir el correcto para la entrada actual. También necesitas terminación: una función que no termina no entrega el resultado prometido, aunque sus transformaciones parezcan conservar una propiedad.</p>\n <p>En un ciclo, podemos razonar sobre la cantidad de pasos procesados. La siguiente unidad llamará invariante a una propiedad que conecta cada estado con el siguiente. No es necesario memorizar símbolos formales para entender la idea; sí hace falta precisar qué se conserva, desde cuándo y bajo cuáles condiciones.</p>\n <p>Para revisar una explicación, separa evidencia y conclusión: el ejemplo ilustra; el contraejemplo refuta; la demostración justifica una afirmación general. Usa los tres recursos cuando corresponda, sin intercambiar sus alcances.</p><dl><dt>cuantificador</dt><dd>Un cuantificador indica si una afirmación se exige para todos los elementos de un dominio o si basta con que exista uno que la cumpla.</dd><dt>inducción matemática</dt><dd>La inducción matemática demuestra una propiedad para enteros desde un inicio mediante un caso base y un paso que la conserva del entero k al siguiente.</dd><dt>contraejemplo</dt><dd>Un contraejemplo es una entrada permitida que incumple una afirmación universal y basta para demostrar que esa afirmación es falsa.</dd></dl><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Queremos justificar que un acumulador iniciado en cero vale n después de n incrementos de una unidad.</p><p>La base con cero incrementos vale cero; si tras k incrementos vale k, uno más lo deja en k + 1.</p><p>La propiedad queda justificada para todo entero no negativo mediante base y paso inductivo.</p><p><strong>Condición:</strong> La inducción presentada avanza por enteros consecutivos desde cero; los contraejemplos deben estar dentro del dominio declarado.</p></section>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "algoritmia.razonamiento-y-demostracion.1",
+      "prompt": "¿Qué exige «para toda entrada permitida»?",
+      "options": [
+        "Que la propiedad se cumpla en cada entrada del dominio.",
+        "Que exista al menos un acierto.",
+        "Que pase tres ejemplos."
+      ],
+      "answer": 0,
+      "explanation": "El cuantificador universal abarca el dominio completo."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "algoritmia.razonamiento-y-demostracion.3",
+      "prompt": "¿Cuántos contraejemplos válidos bastan para refutar una afirmación universal?",
+      "options": [
+        "Cien",
+        "Uno",
+        "Todos los casos posibles"
+      ],
+      "answer": 1,
+      "explanation": "Un incumplimiento dentro del contrato contradice «para toda»."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "algoritmia.razonamiento-y-demostracion.2",
+      "prompt": "¿Qué dos partes necesita una inducción sobre enteros consecutivos?",
+      "options": [
+        "Un gráfico y una medición.",
+        "Dos ejemplos cualesquiera.",
+        "Caso base y paso de k a k + 1."
+      ],
+      "answer": 2,
+      "explanation": "La base inicia la cadena y el paso explica cómo continúa."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "algoritmia.razonamiento-y-demostracion.3",
+      "prompt": "¿Una entrada fuera del contrato es un contraejemplo de ese contrato?",
+      "options": [
+        "No, aunque puede revelar una necesidad de ampliar la especificación.",
+        "Sí, siempre.",
+        "Solo si el programa es recursivo."
+      ],
+      "answer": 0,
+      "explanation": "La afirmación se refiere a su dominio declarado."
+    }
+  ],
+  "activities": [
+    {
+      "id": "contraejemplo",
+      "type": "text",
+      "concept": "algoritmia.razonamiento-y-demostracion.3",
+      "prompt": "Un máximo inicializado en cero devuelve cero para [−7, −3]. ¿Cuál era el resultado correcto?",
+      "answers": [
+        "-3",
+        "−3"
+      ],
+      "hint": "El resultado debe pertenecer a la lista.",
+      "explanation": "−3 supera a −7; cero es una suposición incorrecta."
+    },
+    {
+      "id": "base",
+      "type": "text",
+      "concept": "algoritmia.razonamiento-y-demostracion.2",
+      "prompt": "Si empezamos con total = 0 y hacemos cero incrementos, ¿cuánto vale total?",
+      "answers": [
+        "0"
+      ],
+      "hint": "El caso base no ejecuta el cuerpo.",
+      "explanation": "La propiedad se cumple en el inicio: total es cero."
+    },
+    {
+      "id": "refutar",
+      "type": "text",
+      "concept": "algoritmia.razonamiento-y-demostracion.1",
+      "prompt": "La afirmación dice «todos los enteros positivos son pares». Entre 1, 2 y 4, ¿qué valor la refuta?",
+      "answers": [
+        "1"
+      ],
+      "hint": "Busca un entero positivo que no sea divisible entre dos.",
+      "explanation": "Un impar positivo basta; varios ejemplos pares no prueban la afirmación."
+    }
+  ],
+  "requiresConcepts": [
+    "algoritmia.correccion",
+    "algoritmia.algoritmo",
+    "algoritmia.terminacion",
+    "algoritmia.matematicas-para-complejidad.1"
+  ],
+  "outcome": "Distinguir ejemplos, contraejemplos y demostraciones y construir una inducción sencilla.",
+  "sources": [
+    {
+      "title": "OpenDSA: análisis de algoritmos",
+      "url": "https://opendsa-server.cs.vt.edu/ODSA/Books/Everything/html/AlgorithmAnalysis.html"
+    },
+    {
+      "title": "MIT OCW: introducción a algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"
+    }
+  ],
+  "coverage": {
+    "algoritmia.razonamiento-y-demostracion.1": {
+      "explanationExcerpt": "Un cuantificador indica si una afirmación se exige para todos los elementos de un dominio o si basta con que exista uno que la cumpla.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "algoritmia.razonamiento-y-demostracion.2": {
+      "explanationExcerpt": "La inducción matemática demuestra una propiedad para enteros desde un inicio mediante un caso base y un paso que la conserva del entero k al siguiente.",
+      "assessmentIds": [
+        "q3"
+      ]
+    },
+    "algoritmia.razonamiento-y-demostracion.3": {
+      "explanationExcerpt": "Un contraejemplo es una entrada permitida que incumple una afirmación universal y basta para demostrar que esa afirmación es falsa.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    }
+  },
+  "examples": [],
+  "learningDesign": {
+    "assumptions": [
+      "La inducción presentada avanza por enteros consecutivos desde cero; los contraejemplos deben estar dentro del dominio declarado."
+    ],
+    "workedExample": {
+      "problem": "Queremos justificar que un acumulador iniciado en cero vale n después de n incrementos de una unidad.",
+      "reasoning": "La base con cero incrementos vale cero; si tras k incrementos vale k, uno más lo deja en k + 1.",
+      "result": "La propiedad queda justificada para todo entero no negativo mediante base y paso inductivo."
+    },
+    "transferActivityIds": [
+      "contraejemplo",
+      "base",
+      "refutar"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-07",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations"
+    ],
+    "testedVersions": [],
+    "note": "Revisión de conceptos, notación, fuentes y condiciones; no se atribuye ejecución a ejemplos de pseudocódigo o explicaciones sin programas.",
+    "policyDigest": "a219497c0cd5d59e45322551975de61055635324ddd1bae937d9d0c27bc4caeb"
+  }
+}

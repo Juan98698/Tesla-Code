@@ -1,19 +1,21 @@
 # Publicar contenido con coherencia
 
 1. Define el objetivo observable: qué podrá predecir, construir o explicar el estudiante.
-2. Declara los requisitos en `dependsOn`, mediante IDs completos de lección. No uses títulos ni coincidencias parciales. Para temas de otras rutas, declara el enlace explícito.
+2. Declara los conocimientos usados en `dependsOn` y `requiresConcepts` y justifícalos en `dependencyRationale`. `progressionRequires` expresa el orden obligatorio de la propia ruta. No copies automáticamente el tema anterior al grafo académico.
 3. Registra los conceptos nuevos en `content/concepts.json`: `id`, `label`, `introducedBy`, `status`. Incluye sus IDs en `teaches` de la lección que los introduce. Reutiliza el ID al volver a evaluar un concepto existente.
-4. Crea `content/lessons/<ruta>/<id>.json`. Incluye `outcome`, `html`, `requiresConcepts`, al menos cuatro preguntas y una actividad con pista. Los IDs de preguntas y actividades deben ser estables para no otorgar XP de nuevo por un cambio de orden.
+4. Crea `content/lessons/<ruta>/<id>.json`. Incluye `outcome`, `html`, `requiresConcepts`, al menos cuatro preguntas, fuentes y tres prácticas que combinen comprensión, ayuda guiada y transferencia. Los IDs de preguntas y actividades deben ser estables para no otorgar XP de nuevo por un cambio de orden.
 5. Agrega un ejemplo trabajado y una práctica de transferencia. No uses en el reto una operación que no hayas explicado. Si introduces una herramienta externa, explica cómo acceder a ella y cómo comprobar el resultado.
 6. Las preguntas declaran `concept` con un ID del registro. Tipos: `choice` (`options`, `answer`), `order` (`steps`) o `text` (`answers`). `answer` indexa el orden original; la interfaz conserva esa identidad al barajar.
-7. Las actividades actuales de práctica usan `text`, con `answers`, `hint` y `explanation`. Para agregar otros tipos a esta etapa hay que extender `mountActivities`, además del corrector y las pruebas.
+7. Las prácticas usan `text` (`answers`) o `python` (`starter`, `solution` y `cases`), con `hint` y `explanation`. Python ejecutable no es un tipo de pregunta del quiz. Para añadir otro motor hay que extender la vista, el adaptador, la validación y las pruebas.
 8. Los widgets se registran en `js/widgets/index.js`. Explica qué simulan y sus límites. Si se montan dentro del HTML existente, conserva sus IDs de enlace; los widgets `*-lab` reciben un contenedor independiente.
-9. Cambia `status` a `published` solo cuando archivo, requisitos, conceptos y actividades estén completos. Un requisito en preparación bloquea publicación. `kind: optional` identifica profundización; el grafo, no la posición visual, determina los requisitos.
+9. Cambia `status` a `published` solo cuando archivo, requisitos, conceptos y actividades estén completos. Un requisito en preparación bloquea publicación. `kind: optional` identifica profundización: no puede ser paso obligatorio ni requisito académico de una lección principal.
 10. Ejecuta `npm run check`, `npm run test:e2e` y `npm run format`. Revisa también exactitud, ambigüedad, accesibilidad y adecuación a una persona principiante.
 
 `requiresConcepts` documenta conocimientos ya introducidos; el validador comprueba su procedencia por el grafo. No analiza semánticamente cada párrafo ni descubre requisitos omitidos por el autor. La revisión editorial debe contrastar explicación, ejemplo, práctica, evaluación y proyecto.
 
 Las fuentes externas se enlazan con HTTPS en `sources`. Redacta contenido propio y respeta licencias; no copies cursos, gráficos o mapas de otras plataformas sin autorización.
+
+`content/editorial-backlog.json` conserva 83 publicaciones heredadas que todavía requieren revisión de profundidad y fuentes. No se añaden publicaciones nuevas a esa excepción. Al revisar una, completa sus prácticas y referencias y retírala del registro. El mínimo de tres actividades es verificable, pero repetir tres preguntas equivalentes no cumple la intención pedagógica. La revisión debe juzgar qué aprende y transfiere cada una, sin imponer un número de palabras como prueba de calidad.
 
 ## Control obligatorio de publicación
 
@@ -52,19 +54,44 @@ Las lecciones nuevas de Fundamentos declaran sus programas Python en `examples` 
 
 ## Versiones, fuentes y revisión técnica
 
+### Actividades de código real
+
+Un contrato mínimo de programa con entradas y salida exacta:
+
+```json
+{
+  "id": "sumar",
+  "type": "python",
+  "concept": "python.tipos-y-conversiones.2",
+  "prompt": "Lee dos enteros y muestra su suma.",
+  "starter": "# Escribe tu solución.\n",
+  "solution": "a = int(input())\nb = int(input())\nprint(a + b)",
+  "cases": [
+    { "name": "Positivos", "stdin": ["2", "3"], "stdout": "5\n" },
+    { "name": "Negativos", "stdin": ["-4", "-2"], "stdout": "-6\n" }
+  ],
+  "hint": "input devuelve texto; conviértelo antes de sumar.",
+  "explanation": "La suma debe depender de ambas entradas."
+}
+```
+
+`stdin` proporciona los textos de cada llamada a `input`; un mensaje como `input("Número: ")` forma parte de la salida. `globals` puede aportar variables del enunciado, como `{"datos": [-8, -3]}`, siempre explicando su procedencia. Para funciones, `entrypoint` identifica el nombre, y cada caso declara `args` y `expected`, comparados como valores JSON. No se comparan coincidencias textuales del código con la solución de referencia.
+
+Usa varios datos cuando el contrato admita entradas variables; comprueba una solución equivalente y una implementación incorrecta representativa. No enseñes `input`, conversiones, índices o funciones por primera vez dentro del reto. `npm test` ejecuta todas las soluciones de referencia con el mismo runtime fijado; `npm run test:python` recorre el módulo en navegador real. Conserva las limitaciones de entorno y los supuestos visibles.
+
 Todo tema declara `technologyRefs` con IDs de la política. Si está publicado, `technicalReview` debe incluir fechas vigentes, las mismas referencias, `policyDigest` y `testedVersions`. Una lista vacía significa que no se atribuye ejecución de un ejemplo dependiente de runtime. Las referencias de catálogo conservan `scope: reference-only`.
 
 No copies una versión de catálogo al apartado de pruebas sin ejecutarla. Para afirmar compatibilidad de un SDK nuevo, amplía antes el formato de evidencia y el runner: actualmente las pruebas de contenido declaradas corresponden a ejemplos de la biblioteca estándar de Python. Las fechas no se renuevan automáticamente. Consulta `docs/technology-currency.md` para el procedimiento completo.
 
 ## Entrada independiente y repasos
 
-`dependsOn` conserva el grafo académico. En ejecución, los pasos de la propia ruta son obligatorios y las referencias a otras rutas son recomendaciones. Toda lección publicada que utilice un concepto de otra ruta debe disponer de un `refresher` compartido en el registro del concepto: explicación, ejemplo y actividad con pista y devolución. El validador exige estos apoyos; se revisan junto a la lección mediante su huella semántica. Evita requisitos por haber completado un proyecto que no aporte conocimientos usados en el contenido.
+`dependsOn` conserva el grafo académico. En ejecución, `progressionRequires` determina los pasos obligatorios; las referencias a otras rutas son recomendaciones. Toda lección publicada que utilice un concepto de otra ruta debe disponer de un `refresher` compartido en el registro del concepto: explicación, ejemplo y actividad con pista y devolución. El validador exige estos apoyos; se revisan junto a la lección mediante su huella semántica. Evita requisitos por haber completado un proyecto que no aporte conocimientos usados en el contenido.
 
 La orientación inicial reutiliza tres preguntas de selección de la primera lección publicada. Si no hay tres, muestra que la orientación está en preparación y mantiene la entrada directa. Su resultado guía el acompañamiento y nunca concede progreso o créditos.
 
 ## Secuencia y ejemplos razonados
 
-Cada ruta declara `entryApproach: "conceptual"`. Su primera lección publicada parte de cero, sin requisitos académicos previos ni bloques de lenguaje ejecutable. En Algoritmia las cuatro primeras lecciones explican problema, diseño, pseudocódigo y traza; Python aparece después con traducción instrucción por instrucción.
+Cada ruta declara `entryApproach: "conceptual"`. Su primera lección publicada parte de cero, sin requisitos académicos previos ni bloques de lenguaje ejecutable. En Algoritmia el núcleo continúa en pseudocódigo después de problema, diseño y traza; Python es un laboratorio opcional con traducción instrucción por instrucción. La ruta Python enseña su lenguaje desde cero.
 
 El orden visible debe colocar cada requisito interno antes de su consumidor. Un tema principal no puede exigir una especialización opcional. Las dependencias entre rutas siguen siendo recomendaciones acompañadas por repasos; no sustituyen una explicación necesaria.
 

@@ -96,7 +96,7 @@ try {
   assert.match(await page.locator('h1').innerText(), /Construye lo que imaginas/);
   assert.equal(
     await page.locator('#studio-route-select option').count(),
-    6,
+    read('content/curriculum/index.json').routes.length,
     'JSON must bypass the old single-route catalog',
   );
   assert.ok(hits.some((p) => p.startsWith('/content/curriculum/index.json?v=')));
@@ -146,7 +146,7 @@ try {
   assert.deepEqual(errors, []);
   await context.close();
   console.log(
-    'PASS: real legacy HTTP cache replaced coherently; all six routes open, 180 XP and previous completions preserved, internal sequence enforced, lazy modules versioned.',
+    'PASS: real legacy HTTP cache replaced coherently; all route entries open, 180 XP and previous completions preserved, internal sequence enforced, lazy modules versioned.',
   );
 } finally {
   await browser?.close();

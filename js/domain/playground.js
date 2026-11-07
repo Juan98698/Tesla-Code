@@ -8,6 +8,15 @@ const settings = {
     to: 'Memoria',
     action: '+ 1',
   },
+  python: {
+    label: 'Personas (entero no negativo)',
+    value: '3',
+    type: 'number',
+    title: 'Un presupuesto: entrada de 8 y transporte total de 5',
+    from: 'Personas',
+    to: 'Total',
+    action: '× 8 + 5',
+  },
   algoritmia: {
     label: 'Lista de números',
     value: '-8, -3, -6',
@@ -125,7 +134,7 @@ export function runPlayground(id, raw) {
       throw Error('Usa hasta 40 números separados por comas.');
     const numbers = parts.map(Number);
     return {
-      request: `datos = [${numbers.join(', ')}]\nmayor = max(datos)`,
+      request: `datos ← [${numbers.join(', ')}]\nmayor ← primer elemento\nPARA CADA valor restante\n    SI valor > mayor: mayor ← valor\nDEVOLVER mayor`,
       body: { mayor: Math.max(...numbers), elementos: numbers.length },
       status: 'Comparación completada',
     };
@@ -133,6 +142,15 @@ export function runPlayground(id, raw) {
   const value = Number(input);
   if (!Number.isFinite(value) || Math.abs(value) > 1000000)
     throw Error('Usa un número entre -1000000 y 1000000.');
+  if (id === 'python') {
+    if (!Number.isInteger(value) || value < 0)
+      throw Error('La cantidad de personas debe ser un entero no negativo.');
+    return {
+      request: `personas = ${value}\nentrada = 8\ntransporte = 5\ntotal = personas * entrada + transporte\nprint("Total:", total)`,
+      body: { total: value * 8 + 5 },
+      status: 'Presupuesto simulado · Practica con Python real dentro de la ruta',
+    };
+  }
   return {
     request: `contador = ${value}\ncontador = contador + 1`,
     body: { antes: value, despues: value + 1 },

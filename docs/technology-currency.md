@@ -10,6 +10,14 @@ Se probaron Node 24.22.2 y 26.13.0. Sus distribuciones locales se descargaron de
 
 ## Fuentes y versiones sin atribuciones falsas
 
+### Ampliación del 7 de noviembre: Python en navegador
+
+Pyodide se fija en `314.0.7` tanto en npm como en la URL de jsDelivr. El runtime devuelve **Python 3.14.2**: se declara esa versión comprobada, sin presentarla como el último parche de CPython. La línea 3.14 tiene soporte hasta octubre de 2030 según PEP 745. La preferencia local existente de Python 3.15 no se confunde con la versión WebAssembly.
+
+En esta implementación los 44 ejemplos visibles se ejecutaron con CPython 3.12.14. La comprobación de compatibilidad adicional con Pyodide pasó 43; el ejemplo de hilos de Fundamentos necesita ejecución local y no se anuncia como compatible con el laboratorio. Las trece actividades de código (doce de Python y una de Algoritmia) sí se ejecutan en el motor del navegador.
+
+Las revisiones técnicas de las lecciones afectadas registran únicamente esos alcances; las pruebas locales anteriores de 3.15 no se extrapolan al contenido nuevo. CI mantiene las líneas configuradas para repetir la compatibilidad. Para actualizar Pyodide: contrastar sus notas y restricciones, cambiar el pin npm y la URL juntos, ejecutar soluciones y recorridos de navegador, revisar comportamiento y solo después registrar la nueva evidencia. No basta con que npm publique un número mayor.
+
 `content/technology-policy.json` contiene fuentes, fecha de verificación, plazo máximo de revisión y versiones de catálogo de 22 referencias. React, Next.js, Transformers, Diffusers, PyTorch y las demás bibliotecas están identificadas como **referencias**, no como dependencias instaladas de esta aplicación ni como cursos técnicos ya ejecutados.
 
 Las pruebas de la plataforma usan sus dependencias reales de `package-lock.json`. Las pruebas de contenido ejecutan los ejemplos Python y Git. No se ha entrenado un modelo, ejecutado una GPU o probado todas las APIs mencionadas en los mapas; esas verificaciones corresponden a las lecciones técnicas cuando se desarrollen.

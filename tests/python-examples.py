@@ -36,7 +36,7 @@ class CodeBlocks(HTMLParser):
 EXAMPLES = {
     'primer-programa-python': 'Hola\n21\n',
     'decisiones-y-funciones-python': 'Acceso\n',
-    'ciclos-y-entradas-python': '2\n3\n',
+    'ciclos-y-entradas-python': 'Inicio: 2\n3\n',
     'valores-vacios-y-validacion': 'Escribe una tarea\n',
     'listas-y-arreglos': '22\n',
     'operaciones-con-listas': '2\npracticar\n',
@@ -76,7 +76,10 @@ try:
         output = StringIO()
         with TemporaryDirectory(prefix='teslacode-example-') as directory:
             os.chdir(directory)
-            builtins.input = lambda prompt='': '2'
+            def example_input(prompt=''):
+                print(prompt, end='')
+                return '2'
+            builtins.input = example_input
             namespace = {}
             with redirect_stdout(output):
                 exec(compile(program, lesson + '.py', 'exec'), namespace)

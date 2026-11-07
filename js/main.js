@@ -19,12 +19,14 @@ import { lessonPage, mountActivities } from './features/lesson.js';
 import { mountQuiz } from './features/quiz.js';
 import { widgets } from './widgets/index.js';
 import { mountSupport, mountOrientation } from './features/learning-support.js';
+import { mountProgressImport } from './features/progress-import.js';
 
 let routes = [],
   concepts = new Map(),
   renderVersion = 0,
   filter = 'all',
   toastTimer;
+let disposeView = () => {};
 const state = progressRepository.load();
 function toast(message) {
   clearTimeout(toastTimer);
@@ -71,6 +73,8 @@ async function mountLabs(root, version) {
   }
 }
 async function render() {
+  disposeView();
+  disposeView = () => {};
   const version = ++renderVersion;
   const raw = location.hash.replace(/^#\/?/, '').split('/');
   const [view = 'inicio', rid, lid, requestedTab] = raw;
@@ -182,6 +186,13 @@ async function render() {
       await mountLabs(root, version);
     } else if (view === 'progreso') {
       root.innerHTML = progressPage(routes, state, concepts);
+      disposeView = mountProgressImport(root, state, (next, notice) => {
+        if (!progressRepository.save(next)) throw Error('No se pudo guardar el progreso.');
+        Object.assign(state, next);
+        save();
+        render();
+        toast(notice);
+      });
       $('export-progress').onclick = () => {
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }),
           url = URL.createObjectURL(blob),
@@ -245,7 +256,7 @@ async function render() {
             $('practice-summary').textContent =
               `${data.activities.filter((a) => state.practices.includes(`${key}/${a.id}`)).length} de ${data.activities.length} actividades resueltas.`;
           };
-          mountActivities(
+          disposeView = mountActivities(
             $('activities'),
             data.activities,
             (id) => state.practices.includes(`${key}/${id}`),
@@ -256,6 +267,7 @@ async function render() {
               updateCompletion(route, meta, data);
               refresh();
             },
+            { context: key },
           );
           refresh();
           await mountLabs(root, version);

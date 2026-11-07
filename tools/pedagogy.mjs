@@ -30,6 +30,8 @@ export function lessonDigest(meta, data, registry) {
       'teaches',
       'requiresConcepts',
       'dependsOn',
+      'progressionRequires',
+      'dependencyRationale',
       'status',
       'kind',
       'technologyRefs',
@@ -57,6 +59,26 @@ export const REVIEW_CHECKS = [
   'practice',
   'language-rules',
 ];
+export function publicationDepthErrors(data) {
+  const errors = [];
+  if (
+    !Array.isArray(data.sources) ||
+    !data.sources.length ||
+    data.sources.some((source) => {
+      try {
+        return !source.title?.trim() || new URL(source.url).protocol !== 'https:';
+      } catch {
+        return true;
+      }
+    })
+  )
+    errors.push('La publicación necesita fuentes identificadas con enlaces HTTPS.');
+  if (!Array.isArray(data.activities) || new Set(data.activities.map((a) => a.id)).size < 3)
+    errors.push(
+      'La publicación necesita al menos tres actividades: comprensión, práctica guiada y transferencia.',
+    );
+  return errors;
+}
 export function coverageErrors(meta, data) {
   const errors = [],
     text = explanationText(data.html ?? '');
@@ -108,6 +130,42 @@ export function curriculumSequenceErrors(route) {
     errors.push('La primera lección debe estar publicada.');
   if (first?.dependsOn?.length || first?.requiresConcepts?.length)
     errors.push('La entrada conceptual no puede presuponer lecciones o conceptos previos.');
+  if (route.schemaVersion === 2) {
+    let previousCore;
+    for (const lesson of lessons) {
+      const steps = lesson.progressionRequires;
+      if (!Array.isArray(steps) || new Set(steps).size !== steps.length) {
+        errors.push(lesson.id + ': faltan pasos de progresión explícitos y únicos.');
+        continue;
+      }
+      if (lesson === first && steps.length)
+        errors.push('La entrada no puede exigir pasos previos.');
+      if (
+        lesson.kind === 'core' &&
+        previousCore &&
+        !steps.includes(route.id + '/' + previousCore.id)
+      )
+        errors.push(lesson.id + ': la secuencia principal omite su paso anterior.');
+      for (const step of steps) {
+        const prefix = route.id + '/';
+        const position = step.startsWith(prefix)
+          ? positions.get(step.slice(prefix.length))
+          : undefined;
+        const prerequisite = lessons[position];
+        if (!prerequisite || position >= positions.get(lesson.id))
+          errors.push(
+            lesson.id + ': paso de progresión inexistente, externo o posterior: ' + step + '.',
+          );
+        else {
+          if (lesson.kind === 'core' && prerequisite.kind === 'optional')
+            errors.push(lesson.id + ': una práctica opcional bloquea la secuencia principal.');
+          if (lesson.status === 'published' && prerequisite.status !== 'published')
+            errors.push(lesson.id + ': paso previo todavía en preparación.');
+        }
+      }
+      if (lesson.kind === 'core') previousCore = lesson;
+    }
+  }
   for (const lesson of lessons)
     for (const dependency of lesson.dependsOn ?? []) {
       if (!dependency.startsWith(route.id + '/')) continue;
