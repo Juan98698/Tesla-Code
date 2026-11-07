@@ -59,7 +59,8 @@ try {
   });
   await page.goto(origin);
   await page.locator('.hero').waitFor();
-  assert.equal(await page.locator('.route-card').count(), 6);
+  assert.equal(await page.locator('.route-card').count(), 3);
+  assert.equal(await page.locator('#studio-route-select option').count(), 6);
   await page.getByRole('link', { name: /Empieza tu primera lección/ }).click();
   await page.locator('#lesson').waitFor();
   assert.match(await page.locator('h1').innerText(), /primer paso/);
@@ -215,7 +216,7 @@ try {
   assert.equal(await page.locator('#jb').isDisabled(), true);
   assert.match(await page.locator('#jf').innerText(), /Era 100/);
   // Regresión de navegación asíncrona: una carga lenta no puede reemplazar otra vista.
-  await page.route('**/content/lessons/ia/llm-tokens-y-contexto.json', async (route) => {
+  await page.route('**/content/lessons/ia/llm-tokens-y-contexto.json?*', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 150));
     await route.continue();
   });

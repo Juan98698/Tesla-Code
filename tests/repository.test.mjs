@@ -5,7 +5,8 @@ const fresh = () => import(modulePath);
 test('repository shares simultaneous requests, caches data and preserves endpoint names', async (t) => {
   const calls = [];
   let release;
-  t.mock.method(globalThis, 'fetch', (path) => {
+  t.mock.method(globalThis, 'fetch', (path, options) => {
+    assert.equal(options.cache, 'no-store');
     calls.push(path);
     return new Promise(
       (resolve) => (release = () => resolve({ ok: true, json: async () => ({ id: 'lesson' }) })),
@@ -15,7 +16,11 @@ test('repository shares simultaneous requests, caches data and preserves endpoin
     a = repo.loadLesson('base', 'lesson'),
     b = repo.loadLesson('base', 'lesson');
   assert.strictEqual(a, b);
-  assert.deepEqual(calls, ['content/lessons/base/lesson.json']);
+  assert.deepEqual(
+    calls.map((p) => p.split('?')[0]),
+    ['content/lessons/base/lesson.json'],
+  );
+  assert.match(calls[0], /\?v=local$/);
   release();
   assert.deepEqual(await a, { id: 'lesson' });
   assert.strictEqual(repo.loadLesson('base', 'lesson'), a);
@@ -42,7 +47,8 @@ test('repository evicts failed HTTP and invalid JSON results so retry can work',
 });
 test('repository loads configured routes in order and registry without guessing paths', async (t) => {
   const calls = [];
-  t.mock.method(globalThis, 'fetch', async (path) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    const path = url.split('?')[0];
     calls.push(path);
     return {
       ok: true,

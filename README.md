@@ -18,9 +18,10 @@ npm run check        # Contenido, dependencias curriculares y pruebas del domini
 npm run technology:check # Vigencia de revisiones y líneas de soporte
 npm run technology:check -- --online # Contraste con registros y calendario oficiales
 npm run test:e2e     # Chromium: navegación, aprendizaje, simuladores y accesibilidad
+npm run test:cache   # Actualización con caché previa y progreso existente
 npm run test:access  # Entradas libres, orientación, repasos y secuencia interna
 npm run test:module  # Piloto del módulo inicial: 17 lecciones, escritorio y móvil
-npm run test:coverage # Cobertura de los 20 módulos de aplicación (Node 24/26)
+npm run test:coverage # Cobertura de los 23 módulos de aplicación (Node 24/26)
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
 python3 tests/python-examples.py # Ejemplos del curso (requiere Python 3)
@@ -54,9 +55,9 @@ Se puede guardar una lección y exportar una copia del progreso en JSON. No hay 
 
 ## Interfaz y acompañamiento
 
-Inicio minimalista en grafito con computadora holográfica y ejemplos por ruta, animaciones pausables, temas claro/oscuro y navegación adaptable. La identidad combina T, perfil y terminal. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros.
+Vista de trabajo en grafito con mapa conectado, laboratorio lateral, computadora holográfica y tarjetas de especialidades. Incluye ejemplos locales por ruta, animaciones pausables y temas claro/oscuro. La identidad conserva el perfil realista azul/cian de la referencia. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros.
 
-Consulta [la dirección de producto](docs/product-direction.md) para las decisiones de acceso e identidad.
+Consulta [la coherencia de publicación](docs/release-coherence.md) y [la dirección de producto](docs/product-direction.md) para las decisiones de acceso e identidad.
 
 ## Organización y ampliación
 

@@ -1,9 +1,10 @@
+import { assetUrl } from '../core/assets.js';
 const cache = new Map();
 export function getJson(path) {
   if (!cache.has(path))
     cache.set(
       path,
-      fetch(path)
+      fetch(assetUrl(path), { cache: 'no-store' })
         .then((response) => {
           if (!response.ok) throw new Error(`No se pudo cargar ${path}. Intenta nuevamente.`);
           return response.json();

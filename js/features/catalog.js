@@ -1,3 +1,4 @@
+import { studioHome } from './studio.js';
 import { escapeHtml as e } from '../core/html.js';
 import {
   lessonKey,
@@ -23,7 +24,8 @@ export const lessonHref = (route, lesson, tab = 'aprender') =>
 export function routeCard(route, state) {
   const count = publishedCount(route),
     done = completedCount(route, state);
-  return `<a class="route-card ${route.color}" href="#/ruta/${route.id}"><div class="route-art" aria-hidden="true"><span class="art-number">${route.number}</span><span class="route-glyph">${e(glyphs[route.id])}</span></div><div class="route-card-body"><div><span class="badge ${count ? 'live' : ''}">${count ? `${count} lecciones disponibles` : 'En preparación'}</span></div><h3>${e(route.name)}</h3><p>${e(route.tagline)}</p><div class="route-meta"><span>◷ A tu ritmo</span><span>·</span><span>${route.lessons.length} temas en el mapa</span></div>${done ? `<div class="meter"><i style="width:${Math.min((done / count) * 100, 100)}%"></i></div>` : ''}<div class="route-card-footer"><span>${done ? `${done} completadas · Continuar` : 'Explorar la ruta'}</span><span class="arrow">→</span></div></div></a>`;
+  const first = nextLesson(route, new Set(state.completed)) ?? route.lessons.find(isPublished);
+  return `<article class="route-card ${route.color}"><div class="route-art" aria-hidden="true"><span class="art-number">${route.number}</span><span class="route-glyph">${e(glyphs[route.id])}</span></div><div class="route-card-body"><span class="badge live">${count} lecciones disponibles · Entrada libre</span><h3>${e(route.name)}</h3><p>${e(route.tagline)}</p><div class="route-meta"><span>${route.lessons.length} temas en el mapa</span>${done ? `<span>· ${done} completadas</span>` : ''}</div><div class="route-card-footer">${first ? `<a class="btn small" href="${lessonHref(route.id, first.id, state.learningMode === 'experienced' ? 'practicar' : 'aprender')}">${done ? 'Continuar' : 'Empezar ruta'} →</a>` : ''}<a class="text-link" href="#/ruta/${route.id}">Ver temario →</a></div></div></article>`;
 }
 export function continuation(routes, state) {
   const completed = new Set(state.completed);
@@ -48,39 +50,8 @@ export function continuation(routes, state) {
   }
   return null;
 }
-const terminalExamples = {
-  fundamentos: [
-    'primer_programa.py',
-    'nombre = "mundo"',
-    'print("Hola, " + nombre)',
-    'Hola, mundo',
-  ],
-  algoritmia: ['encontrar_mayor.py', 'datos = [-8, -3, -6]', 'print(max(datos))', '-3'],
-  frontend: [
-    'tu_interfaz.html',
-    '<button>Crear algo nuevo</button>',
-    '<style>button { color: cyan; }</style>',
-    'Una idea toma forma',
-  ],
-  backend: ['peticion.http', 'GET /saludo HTTP/1.1', 'Host: ejemplo.local', '200 OK · Hola, mundo'],
-  'bases-de-datos': ['consulta.sql', 'SELECT nombre', 'FROM proyectos;', 'Tu próxima idea'],
-  ia: [
-    'contexto.txt',
-    'pregunta + evidencia',
-    '→ modelo → verificar respuesta',
-    'Generar · Comprobar',
-  ],
-};
-function holographicComputer(route) {
-  const [file, line1, line2, output] = terminalExamples[route.id];
-  return `<div class="hologram" aria-hidden="true"><div class="holo-halo"></div><div class="holo-computer"><div class="holo-screen"><div class="holo-top"><span>● ● ●</span><span>${e(file)}</span><span>_</span></div><div class="digital-rain">${Array.from({ length: 14 }, (_, i) => `<span style="--i:${i}">${['0101 0011 10', '1010 1100 01', '0010 1011 00'][i % 3]}</span>`).join('')}</div><div class="holo-code"><small>TESLACODE / ${e(route.id.toUpperCase())}</small><p><b>›</b> ${e(line1)}</p><p><b>›</b> ${e(line2)}</p><div class="holo-output">${e(output)} <span>▌</span></div></div></div><div class="holo-stand"></div><div class="holo-keyboard">${'<i></i>'.repeat(36)}</div></div><div class="projection-plane"></div></div>`;
-}
 export function homePage(routes, state) {
-  const next = continuation(routes, state),
-    goal = routes.find((r) => r.id === state.goal) ?? routes[0];
-  return `<div class="page home-page"><section class="hero" aria-label="Comienza tu aprendizaje"><div class="hero-copy"><div class="eyebrow"><span class="dot"></span> APRENDE. CONSTRUYE. EVOLUCIONA.</div><h1>Tu próxima idea<br>empieza <em>aquí.</em></h1><p>Aprende a programar y conecta cada habilidad con algo que puedes crear.</p><a class="btn" href="#/rutas">Explorar rutas <span>→</span></a><div class="hero-caption">Tu curiosidad marca el comienzo.</div></div><div class="hero-art">${holographicComputer(next?.route ?? goal)}<button class="motion-control" id="motion-toggle" aria-label="Pausar efecto holográfico" aria-pressed="false">Ⅱ <span>Pausar efecto</span></button></div></section>
-  ${next ? `<section class="continue-card card" aria-label="Tu siguiente paso"><div class="continue-label"><span class="eyebrow">TU SIGUIENTE PASO</span><h2>${e(next.lesson.title)}</h2><p>${e(next.route.name)} <span>·</span> ${next.lesson.minutes} min</p></div><div class="learning-steps" aria-label="Aprende, practica y comprueba"><span>Aprender</span><i></i><span>Practicar</span><i></i><span>Comprobar</span></div><div class="continue-actions"><a class="btn" href="${lessonHref(next.route.id, next.lesson.id, state.learningMode === 'experienced' ? 'practicar' : 'aprender')}">${state.recent ? 'Continuar aprendiendo' : 'Empieza tu primera lección'} →</a><a class="text-link" href="#/ruta/${next.route.id}">Ver mapa</a></div></section>` : '<section class="card"><h2>Completaste las lecciones disponibles</h2><p>Vuelve a tus proyectos o explora los temas del mapa.</p><a class="text-link" href="#/rutas">Explorar rutas →</a></section>'}
-  <section class="paths-section"><div class="section-heading"><div><h2>Elige tu camino</h2><p>Todas las rutas tienen un punto de entrada.</p></div><a class="text-link" href="#/rutas">Ver todas →</a></div><div class="route-shortcuts">${routes.map((r) => `<a class="route-card route-shortcut ${r.color}" href="#/ruta/${r.id}"><span class="shortcut-icon" aria-hidden="true">${e(glyphs[r.id])}</span><span>${e(r.name)}</span><span class="shortcut-arrow" aria-hidden="true">→</span></a>`).join('')}</div></section><div class="home-help"><p>¿Tu primera línea de código? <a class="text-link" href="#/ruta/fundamentos">Empieza por Fundamentos →</a></p><small>Aprende a tu ritmo. El progreso se guarda en este navegador.</small></div></div>`;
+  return studioHome(routes, state, continuation(routes, state), lessonHref);
 }
 export function routesPage(routes, state, filter = 'all') {
   const filtered =

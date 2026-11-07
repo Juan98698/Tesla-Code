@@ -6,17 +6,20 @@
   "description": "Aprende programación desde cero con rutas visuales, laboratorios y proyectos.",
   "scripts": {
     "validate": "node tools/validate-content.mjs",
-    "start": "serve . --listen tcp://127.0.0.1:3000 --no-clipboard --no-port-switching",
+    "start": "npm run assets:version && serve . --listen tcp://127.0.0.1:3000 --no-clipboard --no-port-switching",
     "test": "node --test tests/*.test.mjs",
     "test:e2e": "node tests/browser.mjs",
-    "check": "npm run validate && npm test",
-    "format": "prettier --write index.html css js tools tests docs README.md package.json .github",
-    "format:check": "prettier --check index.html css js tools tests docs README.md package.json .github",
+    "check": "npm run assets:check && npm run validate && npm test",
+    "format": "prettier --write index.html css js tools tests docs README.md package.json .github serve.json && npm run assets:version && prettier --write index.html",
+    "format:check": "prettier --check index.html css js tools tests docs README.md package.json .github serve.json && npm run assets:check",
     "test:module": "node tests/module-pilot.mjs",
     "test:coverage": "node tools/run-coverage.mjs",
-    "test:all": "npm run validate && npm run technology:check && npm run test:coverage && python3 tests/python-examples.py && npm run test:module && npm run test:access && npm run test:e2e",
+    "test:all": "npm run assets:check && npm run validate && npm run technology:check && npm run test:coverage && python3 tests/python-examples.py && npm run test:cache && npm run test:module && npm run test:access && npm run test:e2e",
     "technology:check": "node tools/check-technologies.mjs",
-    "test:access": "node tests/access-browser.mjs"
+    "test:access": "node tests/access-browser.mjs",
+    "assets:version": "node tools/version-assets.mjs",
+    "assets:check": "node tools/version-assets.mjs --check",
+    "test:cache": "node tests/cache-update.mjs"
   },
   "engines": {
     "node": "^24.0.0 || ^26.0.0"

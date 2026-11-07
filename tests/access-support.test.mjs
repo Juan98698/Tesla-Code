@@ -75,7 +75,7 @@ test('learning preference survives normalization without manufacturing progress 
   assert.equal(normalizeProgress({ learningMode: 'expert-auto-pass' }).learningMode, 'guided');
   const before = structuredClone(state);
   document.getElementById('root').innerHTML = homePage(routes, state);
-  assert.match(document.querySelector('.continue-actions .btn').href, /practicar$/);
+  assert.match(document.querySelector('.studio-lab-footer .btn').href, /practicar$/);
   assert.deepEqual(state, before);
 });
 test('contextual refreshers teach actual prerequisites and give feedback without awarding route credit', (t) => {

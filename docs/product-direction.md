@@ -1,6 +1,6 @@
 # Dirección de producto acordada
 
-Este documento conserva las decisiones aprobadas y su implementación: rutas con entrada independiente, apoyos contextuales, orientación opcional e interfaz minimalista con computadora holográfica. La identidad elegida combina una T, un perfil ilustrado y el símbolo de terminal, recreados a partir de la referencia aportada por el usuario.
+Este documento conserva las decisiones aprobadas y su implementación: rutas con entrada independiente, apoyos contextuales, orientación opcional y la interfaz de la primera propuesta: mapa conectado, laboratorio lateral y tarjetas de especialidades. La identidad elegida combina una T, un perfil ilustrado y el símbolo de terminal, recreados a partir de la referencia aportada por el usuario.
 
 ## Acceso para principiantes y personas con experiencia
 
@@ -16,12 +16,12 @@ Ejemplos: un desarrollador Backend puede comenzar Frontend sin completar Fundame
 
 ## Dirección visual elegida
 
-- Interfaz minimalista con fondo grafito, texto legible, espacio libre y acentos de azul eléctrico/cian.
+- Vista de trabajo basada en la primera propuesta aprobada: grafito, paneles con profundidad, mapa de hitos a la izquierda, laboratorio a la derecha y tarjetas de especialidades debajo. En móvil se muestra primero el laboratorio.
 - Computadora holográfica como elemento protagonista del inicio. La lluvia de código inspirada en Matrix permanece dentro de su pantalla y muestra ejemplos relacionados con la ruta elegida.
-- Información progresiva: inicio, mapa y lección muestran el detalle pertinente a cada etapa; el mapa completo y el laboratorio se abren al elegirlos.
+- El inicio presenta una vista de hitos y un laboratorio local por ruta. El mapa completo conserva todos los pasos y muestra con claridad qué contenido sigue en preparación. Las tarjetas de rutas incluyen enlaces directos para comenzar.
 - Movimiento lento y brillo contenido. Durante la lectura, los efectos se atenúan y quedan estáticos. Se respeta la preferencia de movimiento reducido y se ofrece una versión ligera para móvil.
 - La ilustración no implica que exista un asistente de IA ni un entorno de ejecución de lenguajes que la plataforma no haya implementado.
-- El rayo se sustituye por el emblema T/perfil/terminal, con fondo transparente y una variante SVG simplificada para el favicon. Los archivos de identidad se encuentran en `assets/brand/`.
+- El emblema T/perfil/terminal conserva el retrato realista, la iluminación eléctrica azul/cian y los circuitos de la referencia del usuario. La misma imagen se utiliza en marca e icono del navegador, sin sustituirla por un perfil plano. Hay maestros PNG y versiones WebP de entrega en `assets/brand/` y `assets/studio/`.
 
 ## Guía de implementación
 

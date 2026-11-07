@@ -15,7 +15,10 @@ test('default URL, completed state and saved theme initialize without losing pri
   );
   localStorage.setItem('teslacode:theme', 'dark');
   localStorage.setItem('teslacode:progress:v2', JSON.stringify({ completed, xp: 250 }));
-  t.mock.method(globalThis, 'fetch', async (path) => ({ ok: true, json: async () => read(path) }));
+  t.mock.method(globalThis, 'fetch', async (path) => ({
+    ok: true,
+    json: async () => read(path.split('?')[0]),
+  }));
   await start();
   await until(() => document.querySelector('.hero'));
   assert.equal(document.documentElement.dataset.theme, 'dark');
