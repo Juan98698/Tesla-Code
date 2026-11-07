@@ -18,8 +18,9 @@ npm run check        # Contenido, dependencias curriculares y pruebas del domini
 npm run technology:check # Vigencia de revisiones y líneas de soporte
 npm run technology:check -- --online # Contraste con registros y calendario oficiales
 npm run test:e2e     # Chromium: navegación, aprendizaje, simuladores y accesibilidad
+npm run test:access  # Entradas libres, orientación, repasos y secuencia interna
 npm run test:module  # Piloto del módulo inicial: 17 lecciones, escritorio y móvil
-npm run test:coverage # Cobertura de los 18 módulos de aplicación (Node 24/26)
+npm run test:coverage # Cobertura de los 20 módulos de aplicación (Node 24/26)
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
 python3 tests/python-examples.py # Ejemplos del curso (requiere Python 3)
@@ -40,7 +41,7 @@ También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran su propi
 - **85 lecciones publicadas** con explicación, práctica, pistas y evaluación. Los demás temas se muestran como **en preparación**, sin simular que incluyen un curso.
 - **Fundamentos completo: 68 lecciones**, desde Primeros pasos hasta Experto. Incluye Python, Git, colecciones, objetos, diseño, pruebas, concurrencia, seguridad, observabilidad y proyectos integradores.
 - IA: nueve lecciones introductorias sobre modelos, inferencia, LLM, prompts, contexto, memoria, evaluación, difusión/flow matching, conceptos siguientes/LCM y criterios de proyecto. El mapa técnico distingue aplicaciones, modelos, difusión, investigación y producción.
-- Primeras dos lecciones de las otras cuatro especializaciones, con requisitos entre rutas.
+- Primeras dos lecciones de las otras cuatro especializaciones. Todas las rutas tienen entrada libre; la progresión obligatoria se conserva dentro de cada una.
 - Laboratorios de variables, ciclos, condicionales, segmentación de texto y señal/ruido; proyectos de propinas y adivinación; intérprete acotado de pseudocódigo.
 
 Las simulaciones de IA son didácticas y locales: no ejecutan modelos ni consumen APIs. El editor acotado acepta asignaciones numéricas, aritmética y `mostrar`; no ejecuta Python o JavaScript arbitrarios. Los proyectos de Python se reproducen localmente siguiendo las instrucciones.
@@ -50,6 +51,12 @@ Las simulaciones de IA son didácticas y locales: no ejecutan modelos ni consume
 Se conserva en `localStorage`, con migración del formato anterior. Una lección nueva se completa al resolver sus prácticas y lograr al menos 80 % en una comprobación. Las preguntas y opciones cambian de orden. Cada pregunta correcta otorga XP una sola vez; completar una lección agrega una recompensa única. Las dificultades por concepto se calculan a partir del último intento de cada lección, sin presentarlas como una certificación de dominio.
 
 Se puede guardar una lección y exportar una copia del progreso en JSON. No hay cuentas, sincronización entre dispositivos ni importación automática del archivo. Si el almacenamiento está bloqueado, la sesión funciona en memoria y comunica que no pudo guardar.
+
+## Interfaz y acompañamiento
+
+Inicio minimalista en grafito con computadora holográfica y ejemplos por ruta, animaciones pausables, temas claro/oscuro y navegación adaptable. La identidad combina T, perfil y terminal. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros.
+
+Consulta [la dirección de producto](docs/product-direction.md) para las decisiones de acceso e identidad.
 
 ## Organización y ampliación
 

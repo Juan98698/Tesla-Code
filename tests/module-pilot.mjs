@@ -25,7 +25,7 @@ await withBrowser(4318, async (browser, origin) => {
       const next = module[index + 1];
       if (index === 0) {
         await page.goto(`${origin}/#/leccion/fundamentos/${next.id}/aprender`);
-        await page.getByText('Construye la base primero', { exact: true }).waitFor();
+        await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
         assert.equal(await page.locator('#lesson').count(), 0);
         await page.goto(`${origin}/#/leccion/fundamentos/${meta.id}/aprender`);
         await page.locator('#lesson').waitFor();

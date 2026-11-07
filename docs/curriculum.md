@@ -12,7 +12,7 @@
 
 Los siete niveles de Fundamentos están publicados: 68 lecciones. El piloto automatizado cubre las 17 lecciones de Primeros pasos e Inicio; no equivale a una prueba con estudiantes reales.
 
-Frontend y Bases de datos parten de Básico. Backend y Algoritmia requieren el proyecto de Intermedio. Las dependencias viven en los datos y se muestran al seleccionar un nodo.
+Todas las rutas permiten empezar por su primera lección publicada. Fundamentos es el comienzo recomendado para principiantes. Los pasos previos de la misma ruta regulan su progresión; las referencias a otras rutas documentan conocimientos recomendados y no bloquean el acceso. Algoritmia ofrece siete repasos compartidos de Python, variables, listas y condiciones. La orientación opcional sugiere explicaciones o práctica sin conceder finalizaciones.
 
 ## IA: distintos objetivos, distintas dependencias
 

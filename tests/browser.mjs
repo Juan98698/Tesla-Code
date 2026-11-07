@@ -120,11 +120,19 @@ try {
   await page.locator('.map-node').first().waitFor();
   assert.equal(await page.locator('#qbox').count(), 0);
   assert.equal(await page.locator('#lesson').count(), 0);
-  assert.match(await page.locator('#node-inspector').innerText(), /base primero/);
+  assert.match(await page.locator('#node-inspector').innerText(), /Lista para aprender/);
+  await page
+    .locator('details.level')
+    .filter({ has: page.locator('[data-node="css-moderno"]') })
+    .locator(':scope > summary')
+    .click();
   await page.locator('[data-node="css-moderno"]').click();
   assert.match(await page.locator('#node-inspector').innerText(), /preparación/);
   await page.goto(origin + '/#/leccion/frontend/como-funciona-internet/aprender');
-  await page.getByText('Construye la base primero', { exact: true }).waitFor();
+  await page.locator('#lesson').waitFor();
+  assert.match(await page.locator('h1').innerText(), /internet/);
+  await page.goto(origin + '/#/leccion/frontend/http-y-https/aprender');
+  await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
   assert.equal(await page.locator('#lesson').count(), 0);
   await page.locator('#search').fill('difusión');
   await page.locator('#search-results a').first().waitFor();
@@ -147,7 +155,7 @@ try {
   await page.locator('#export-progress').click();
   assert.equal((await downloadPromise).suggestedFilename(), 'teslacode-progreso.json');
   console.log(
-    'PASS: flujo real desde cero, práctica incorrecta/correcta, quiz, persistencia, XP limitado, bloqueo entre rutas, búsqueda, simulaciones y exportación.',
+    'PASS: flujo real desde cero, práctica incorrecta/correcta, quiz, persistencia, XP limitado, entrada libre y secuencia interna, búsqueda, simulaciones y exportación.',
   );
   // Fixture explícita para revisar TODOS los contenidos, sin confundirlo con completar sus cursos.
   await page.evaluate(
@@ -165,7 +173,7 @@ try {
     await page.locator('#lesson').waitFor();
     assert.ok((await page.locator('#lesson').innerText()).length > 100, meta.id);
     await page.getByRole('tab', { name: /Practicar/ }).click();
-    await page.locator('[data-activity]').first().waitFor();
+    await page.locator('#activities [data-activity]').first().waitFor();
     for (const a of data.activities) {
       const section = page.locator(`[data-activity="${a.id}"]`);
       await section.locator('input').fill(a.answers[0]);
@@ -234,6 +242,11 @@ try {
       );
     }
   }
+  await page.evaluate(() => {
+    localStorage.setItem('teslacode:theme', 'light');
+  });
+  await page.reload();
+  await page.locator('.page').waitFor();
   await page.locator('#theme-toggle').click();
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
   await page.reload();

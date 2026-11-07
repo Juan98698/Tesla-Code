@@ -1,5 +1,11 @@
 import { escapeHtml as e } from '../core/html.js';
-import { lessonKey, isPublished, isUnlocked, nextLesson } from '../domain/curriculum.js';
+import {
+  lessonKey,
+  isPublished,
+  isUnlocked,
+  nextLesson,
+  accessState,
+} from '../domain/curriculum.js';
 import { conceptEvidence } from '../domain/progress.js';
 const glyphs = {
   fundamentos: '{ }',
@@ -42,10 +48,39 @@ export function continuation(routes, state) {
   }
   return null;
 }
+const terminalExamples = {
+  fundamentos: [
+    'primer_programa.py',
+    'nombre = "mundo"',
+    'print("Hola, " + nombre)',
+    'Hola, mundo',
+  ],
+  algoritmia: ['encontrar_mayor.py', 'datos = [-8, -3, -6]', 'print(max(datos))', '-3'],
+  frontend: [
+    'tu_interfaz.html',
+    '<button>Crear algo nuevo</button>',
+    '<style>button { color: cyan; }</style>',
+    'Una idea toma forma',
+  ],
+  backend: ['peticion.http', 'GET /saludo HTTP/1.1', 'Host: ejemplo.local', '200 OK · Hola, mundo'],
+  'bases-de-datos': ['consulta.sql', 'SELECT nombre', 'FROM proyectos;', 'Tu próxima idea'],
+  ia: [
+    'contexto.txt',
+    'pregunta + evidencia',
+    '→ modelo → verificar respuesta',
+    'Generar · Comprobar',
+  ],
+};
+function holographicComputer(route) {
+  const [file, line1, line2, output] = terminalExamples[route.id];
+  return `<div class="hologram" aria-hidden="true"><div class="holo-halo"></div><div class="holo-computer"><div class="holo-screen"><div class="holo-top"><span>● ● ●</span><span>${e(file)}</span><span>_</span></div><div class="digital-rain">${Array.from({ length: 14 }, (_, i) => `<span style="--i:${i}">${['0101 0011 10', '1010 1100 01', '0010 1011 00'][i % 3]}</span>`).join('')}</div><div class="holo-code"><small>TESLACODE / ${e(route.id.toUpperCase())}</small><p><b>›</b> ${e(line1)}</p><p><b>›</b> ${e(line2)}</p><div class="holo-output">${e(output)} <span>▌</span></div></div></div><div class="holo-stand"></div><div class="holo-keyboard">${'<i></i>'.repeat(36)}</div></div><div class="projection-plane"></div></div>`;
+}
 export function homePage(routes, state) {
   const next = continuation(routes, state),
-    total = routes.reduce((n, r) => n + publishedCount(r), 0);
-  return `<div class="page"><div class="welcome-row"><div><h1>Tu próxima gran idea empieza aquí<span style="color:var(--arc)">.</span></h1><p>Un poco de curiosidad. Un nuevo descubrimiento. Un paso más lejos.</p></div><span class="date-label">APRENDE A TU RITMO →</span></div><section class="hero" aria-label="Comienza tu aprendizaje"><div class="hero-copy"><div class="eyebrow"><span></span> DE LA CURIOSIDAD A LA CREACIÓN</div><h2>Aprende desde cero.<br><em>Construye sin límites.</em></h2><p>Entiende el porqué. Experimenta con el cómo.<br>Conecta cada concepto con algo que puedes crear.</p><div class="hero-bottom"><a class="btn lime" href="${next ? lessonHref(next.route.id, next.lesson.id) : '#/rutas'}">${state.recent ? 'Continuar aprendiendo' : 'Empieza tu primera lección'} <span>→</span></a><small>Sin experiencia previa.</small></div></div><div class="hero-art" aria-hidden="true"><div class="orbital"></div><span class="art-star">✳</span><div class="code-window"><div class="window-bar"><i></i><i></i><i></i><span>mi_primera_idea.py</span></div><div class="code-lines"><span style="color:#8da2c3"># Todo empieza con una idea</span><br>curiosidad = <em>True</em><br><b>if</b> curiosidad:<br>&nbsp;&nbsp;print(<em>"¡Hola, mundo!"</em>)</div><div class="code-output">› ¡Hola, mundo! <span style="opacity:.5">▌</span></div></div><div class="floating-label">✓ Tu potencial no tiene punto final.</div></div></section><div class="quick-stats"><div class="quick-stat"><span class="stat-icon">⌘</span><div><b>06</b><small>Rutas para descubrir</small></div></div><div class="quick-stat"><span class="stat-icon">◈</span><div><b>${total}</b><small>Lecciones para aprender</small></div></div><div class="quick-stat"><span class="stat-icon">✓</span><div><b>${state.completed.length.toString().padStart(2, '0')}</b><small>Pequeñas victorias tuyas</small></div></div></div><section><div class="section-heading"><div><h2>Encuentra tu próximo camino</h2><p>Una base en común. Muchas formas de crear.</p></div><a class="text-link" href="#/rutas">Ver todas las rutas →</a></div><div class="routes-grid">${routes.map((r) => routeCard(r, state)).join('')}</div></section><div class="home-bottom">${next ? `<a class="card continue-card" href="${lessonHref(next.route.id, next.lesson.id)}"><span class="stat-icon">▷</span><div><div class="eyebrow">TU SIGUIENTE PASO · ${e(next.route.name)}</div><h3>${e(next.lesson.title)}</h3><p>${next.lesson.minutes} min · Explica, experimenta y comprueba →</p></div></a>` : '<div class="card"><h3>Completaste las lecciones disponibles</h3><p>Vuelve a tus proyectos o explora los temas del mapa.</p></div>'}<div class="start-note"><h3>¿Nunca has escrito una línea de código?</h3><p>Estás en el lugar correcto. Empezaremos por las herramientas, con ejemplos y espacio para equivocarte.</p><a class="text-link" href="#/ruta/fundamentos">Conoce Fundamentos y lógica →</a></div></div></div>`;
+    goal = routes.find((r) => r.id === state.goal) ?? routes[0];
+  return `<div class="page home-page"><section class="hero" aria-label="Comienza tu aprendizaje"><div class="hero-copy"><div class="eyebrow"><span class="dot"></span> APRENDE. CONSTRUYE. EVOLUCIONA.</div><h1>Tu próxima idea<br>empieza <em>aquí.</em></h1><p>Aprende a programar y conecta cada habilidad con algo que puedes crear.</p><a class="btn" href="#/rutas">Explorar rutas <span>→</span></a><div class="hero-caption">Tu curiosidad marca el comienzo.</div></div><div class="hero-art">${holographicComputer(next?.route ?? goal)}<button class="motion-control" id="motion-toggle" aria-label="Pausar efecto holográfico" aria-pressed="false">Ⅱ <span>Pausar efecto</span></button></div></section>
+  ${next ? `<section class="continue-card card" aria-label="Tu siguiente paso"><div class="continue-label"><span class="eyebrow">TU SIGUIENTE PASO</span><h2>${e(next.lesson.title)}</h2><p>${e(next.route.name)} <span>·</span> ${next.lesson.minutes} min</p></div><div class="learning-steps" aria-label="Aprende, practica y comprueba"><span>Aprender</span><i></i><span>Practicar</span><i></i><span>Comprobar</span></div><div class="continue-actions"><a class="btn" href="${lessonHref(next.route.id, next.lesson.id, state.learningMode === 'experienced' ? 'practicar' : 'aprender')}">${state.recent ? 'Continuar aprendiendo' : 'Empieza tu primera lección'} →</a><a class="text-link" href="#/ruta/${next.route.id}">Ver mapa</a></div></section>` : '<section class="card"><h2>Completaste las lecciones disponibles</h2><p>Vuelve a tus proyectos o explora los temas del mapa.</p><a class="text-link" href="#/rutas">Explorar rutas →</a></section>'}
+  <section class="paths-section"><div class="section-heading"><div><h2>Elige tu camino</h2><p>Todas las rutas tienen un punto de entrada.</p></div><a class="text-link" href="#/rutas">Ver todas →</a></div><div class="route-shortcuts">${routes.map((r) => `<a class="route-card route-shortcut ${r.color}" href="#/ruta/${r.id}"><span class="shortcut-icon" aria-hidden="true">${e(glyphs[r.id])}</span><span>${e(r.name)}</span><span class="shortcut-arrow" aria-hidden="true">→</span></a>`).join('')}</div></section><div class="home-help"><p>¿Tu primera línea de código? <a class="text-link" href="#/ruta/fundamentos">Empieza por Fundamentos →</a></p><small>Aprende a tu ritmo. El progreso se guarda en este navegador.</small></div></div>`;
 }
 export function routesPage(routes, state, filter = 'all') {
   const filtered =
@@ -54,29 +89,23 @@ export function routesPage(routes, state, filter = 'all') {
       : filter === 'open'
         ? routes.filter((r) => nextLesson(r, new Set(state.completed)))
         : routes.filter((r) => r.id === state.goal);
-  return `<div class="page"><div class="page-intro"><div class="eyebrow"><span class="dot"></span> TU MAPA DE POSIBILIDADES</div><h1>Elige qué quieres construir.</h1><p>Empieza por Fundamentos o explora la introducción a IA. Cada ruta muestra los conocimientos necesarios y distingue lo disponible de lo que está en preparación.</p></div><div class="section-heading"><div class="filters"><button class="filter" data-filter="all" aria-pressed="${filter === 'all'}">Todas las rutas</button><button class="filter" data-filter="open" aria-pressed="${filter === 'open'}">Listas para empezar</button><button class="filter" data-filter="goal" aria-pressed="${filter === 'goal'}">Mi objetivo</button></div><label class="sr-only" for="goal-select">Mi objetivo</label><select id="goal-select" class="goal-select">${routes.map((r) => `<option value="${r.id}" ${state.goal === r.id ? 'selected' : ''}>${e(r.name)}</option>`).join('')}</select></div><div class="routes-grid">${filtered.map((r) => routeCard(r, state)).join('')}</div></div>`;
+  return `<div class="page"><div class="page-intro"><div class="eyebrow"><span class="dot"></span> TU MAPA DE POSIBILIDADES</div><h1>Elige qué quieres construir.</h1><p>Empieza por la especialidad que te interesa. Los repasos te acompañan cuando los necesitas; el avance se demuestra dentro de cada ruta.</p></div><div class="section-heading"><div class="filters"><button class="filter" data-filter="all" aria-pressed="${filter === 'all'}">Todas las rutas</button><button class="filter" data-filter="open" aria-pressed="${filter === 'open'}">Listas para empezar</button><button class="filter" data-filter="goal" aria-pressed="${filter === 'goal'}">Mi objetivo</button></div><label class="sr-only" for="goal-select">Mi objetivo</label><select id="goal-select" class="goal-select">${routes.map((r) => `<option value="${r.id}" ${state.goal === r.id ? 'selected' : ''}>${e(r.name)}</option>`).join('')}</select></div><div class="learning-preferences"><label for="learning-mode">¿Cómo prefieres aprender?</label><select id="learning-mode"><option value="guided" ${state.learningMode !== 'experienced' ? 'selected' : ''}>Paso a paso, con explicaciones</option><option value="experienced" ${state.learningMode === 'experienced' ? 'selected' : ''}>Tengo experiencia: empezar por la práctica</option></select><p>Puedes cambiarlo cuando quieras. La práctica y la comprobación completan cada paso.</p></div><div class="routes-grid">${filtered.map((r) => routeCard(r, state)).join('')}</div></div>`;
 }
 export function nodeState(route, lesson, state) {
-  return state.completed.includes(lessonKey(route.id, lesson.id))
-    ? 'done'
-    : isUnlocked(route, lesson.id, new Set(state.completed))
-      ? 'ready'
-      : isPublished(lesson)
-        ? 'locked'
-        : 'planned';
+  return accessState(route, lesson.id, new Set(state.completed)).status;
 }
 export function routePage(route, state) {
   const count = publishedCount(route),
     done = completedCount(route, state);
-  return `<div class="page"><a class="text-link" href="#/rutas">← Todas las rutas</a><div class="route-header ${route.color}" style="margin-top:18px"><div><div class="eyebrow">RUTA ${route.number} · ${e(route.eyebrow)}</div><h1>${e(route.name)}</h1><p>${e(route.description)}</p><div class="tags"><span class="badge live">${count} disponibles</span><span class="badge">${route.lessons.length - count} en preparación</span><span class="badge">${route.technologies.slice(0, 3).map(e).join(' · ')}</span></div></div><div class="route-summary"><strong>${done}/${count}</strong><small>lecciones disponibles completadas</small><div class="meter"><i style="width:${count ? Math.min((done / count) * 100, 100) : 0}%"></i></div></div></div><div class="legend"><span>▷ Disponible</span><span>✓ Completada</span><span>⌑ Requiere pasos previos</span><span>○ En preparación</span></div><div class="map-layout"><div>${route.levels
+  return `<div class="page"><a class="text-link" href="#/rutas">← Todas las rutas</a><div class="route-header ${route.color}" style="margin-top:18px"><div><div class="eyebrow">RUTA ${route.number} · ${e(route.eyebrow)}</div><h1>${e(route.name)}</h1><p>${e(route.description)}</p><div class="tags"><span class="badge live">${count} disponibles</span><span class="badge">${route.lessons.length - count} en preparación</span><span class="badge">${route.technologies.slice(0, 3).map(e).join(' · ')}</span></div></div><div class="route-summary"><strong>${done}/${count}</strong><small>lecciones disponibles completadas</small><div class="meter"><i style="width:${count ? Math.min((done / count) * 100, 100) : 0}%"></i></div></div></div><div class="legend"><span>▷ Disponible</span><span>✓ Completada</span><span>⌑ Requiere pasos previos</span><span>○ En preparación</span></div><details class="learning-support" id="route-orientation"><summary>¿Quieres orientarte antes de empezar? <span>Opcional · 3 preguntas</span></summary><p>Explora los conceptos iniciales para elegir cómo acompañarte. Puedes comenzar la ruta directamente cuando quieras.</p><div id="orientation-body"><p class="muted">Preparando preguntas…</p></div></details><div class="map-layout"><div>${route.levels
     .map(
       (lv, i) =>
-        `<section class="level" data-step="${String(i + 1).padStart(2, '0')}"><h2>${e(lv.name)}</h2><p>${e(lv.objective)}</p><div class="nodes">${lv.lessons
+        `<details class="level" ${lv.id === (nextLesson(route, new Set(state.completed)) ?? route.lessons[0]).levelId ? 'open' : ''} data-step="${String(i + 1).padStart(2, '0')}"><summary><h2>${e(lv.name)}</h2><span>${lv.lessons.filter(isPublished).length} disponibles / ${lv.lessons.length} temas</span></summary><p>${e(lv.objective)}</p><div class="nodes">${lv.lessons
           .map((m) => {
             const s = nodeState(route, m, state);
-            return `<button class="map-node ${s}" data-node="${m.id}" aria-pressed="false"><span class="node-status" aria-hidden="true">${{ done: '✓', ready: '▷', locked: '⌑', planned: '○' }[s]}</span><span class="node-name">${e(m.title)}</span><small>${s === 'done' ? 'Completada' : s === 'ready' ? m.minutes + ' min' : s === 'planned' ? 'En preparación' : 'Con requisitos'}</small></button>`;
+            return `<button class="map-node ${s} ${m.kind === 'optional' ? 'optional-node' : ''}" data-node="${m.id}" aria-pressed="false"><span class="node-status" aria-hidden="true">${{ done: '✓', ready: '▷', locked: '⌑', planned: '○' }[s]}</span><span class="node-name">${e(m.title)}</span><small>${s === 'done' ? 'Completada' : s === 'ready' ? m.minutes + ' min' : s === 'planned' ? 'En preparación' : 'Paso previo'}</small></button>`;
           })
-          .join('')}</div></section>`,
+          .join('')}</div></details>`,
     )
     .join(
       '',
@@ -88,8 +117,12 @@ export function inspector(route, lesson, state, routes) {
       const [rid, lid] = key.split('/');
       return routes.find((r) => r.id === rid)?.lessons.find((l) => l.id === lid);
     };
-  const missing = (lesson.dependsOn ?? []).filter((key) => !state.completed.includes(key));
-  return `<span class="badge ${status === 'ready' || status === 'done' ? 'live' : ''}">${{ done: 'Completada', ready: 'Lista para aprender', locked: 'Construye la base primero', planned: 'Contenido en preparación' }[status]}</span><h3>${e(lesson.title)}</h3><p>En esta etapa trabajarás estos conceptos:</p><div class="tags">${lesson.concepts.map((c) => `<span class="tag">${e(c)}</span>`).join('')}</div><p><strong>${lesson.kind === 'optional' ? 'Profundización opcional' : 'Parte del recorrido principal'}</strong></p>${missing.length ? `<p>Pasos previos:</p><ul>${missing.map((key) => `<li><a class="text-link" href="#/ruta/${key.split('/')[0]}/${key.split('/')[1]}">${e(byKey(key)?.title ?? key)}</a></li>`).join('')}</ul>` : '<p>Ya tienes la base necesaria para este paso.</p>'}${status === 'ready' || status === 'done' ? `<a class="btn" href="${lessonHref(route.id, lesson.id)}">${status === 'done' ? 'Repasar la lección' : 'Entrar al laboratorio'} →</a>` : status === 'planned' ? '<p>El tema forma parte del mapa, pero todavía no incluye una lección. No cuenta como contenido disponible.</p>' : '<p>Completa la práctica y la comprobación de los pasos previos para desbloquear esta lección.</p>'}`;
+  const { required: missing, recommended } = accessState(
+    route,
+    lesson.id,
+    new Set(state.completed),
+  );
+  return `<span class="badge ${status === 'ready' || status === 'done' ? 'live' : ''}">${{ done: 'Completada', ready: 'Lista para aprender', locked: 'Completa el paso anterior', planned: 'Contenido en preparación' }[status]}</span><h3>${e(lesson.title)}</h3><p>En esta etapa trabajarás estos conceptos:</p><div class="tags">${lesson.concepts.map((c) => `<span class="tag">${e(c)}</span>`).join('')}</div><p><strong>${lesson.kind === 'optional' ? 'Profundización opcional' : 'Parte del recorrido principal'}</strong></p>${missing.length ? `<p>Pasos previos:</p><ul>${missing.map((key) => `<li><a class="text-link" href="#/ruta/${key.split('/')[0]}/${key.split('/')[1]}">${e(byKey(key)?.title ?? key)}</a></li>`).join('')}</ul>` : status === 'planned' ? '<p>Este tema forma parte del recorrido previsto.</p>' : '<p>Puedes empezar aquí y consultar los repasos que necesites.</p>'}${recommended.length ? `<details class="route-recommendations"><summary>Referencias de otras rutas · opcionales</summary><ul>${recommended.map((key) => `<li><a class="text-link" href="#/ruta/${e(key)}">${e(byKey(key)?.title ?? key)}</a></li>`).join('')}</ul><p>Puedes consultar estas referencias sin completarlas para entrar aquí.</p></details>` : ''}${status === 'ready' || status === 'done' ? `<a class="btn" href="${lessonHref(route.id, lesson.id, state.learningMode === 'experienced' ? 'practicar' : 'aprender')}">${status === 'done' ? 'Repasar la lección' : 'Empezar la lección'} →</a>` : status === 'planned' ? '<p>El tema forma parte del mapa, pero todavía no incluye una lección. No cuenta como contenido disponible.</p>' : '<p>Completa la práctica y la comprobación de los pasos previos para desbloquear esta lección.</p>'}`;
 }
 export function progressPage(routes, state, concepts) {
   const evidence = conceptEvidence(state),

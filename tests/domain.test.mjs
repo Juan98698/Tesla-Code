@@ -42,7 +42,7 @@ test('latest evidence replaces earlier mistakes, while best score persists', () 
   assert.equal(state.lessons['r/l'].best, 100);
   assert.deepEqual(conceptEvidence(state).get('c'), { correct: 0, total: 1 });
 });
-test('lesson graph respects cross-route requirements and completed legacy lessons', () => {
+test('lesson access recommends cross-route knowledge and preserves completed legacy lessons', () => {
   const route = indexRoute({
     id: 'web',
     levels: [
@@ -56,7 +56,7 @@ test('lesson graph respects cross-route requirements and completed legacy lesson
       },
     ],
   });
-  assert.equal(isUnlocked(route, 'first', new Set()), false);
+  assert.equal(isUnlocked(route, 'first', new Set()), true);
   assert.equal(isUnlocked(route, 'first', new Set(['base/end'])), true);
   assert.equal(isUnlocked(route, 'later', new Set(['web/first'])), false);
   assert.equal(isUnlocked(route, 'first', new Set(['web/first'])), true);

@@ -139,6 +139,11 @@ for (const [key, meta] of lessons) {
   }
   const data = read(path),
     allowed = ancestors(key);
+  for (const cid of meta.requiresConcepts ?? []) {
+    const c = concepts.get(cid);
+    if (c && !c.introducedBy.startsWith(key.split('/')[0] + '/') && !c.refresher)
+      fail(`${path}: falta repaso opcional para el concepto transversal ${cid}`);
+  }
   for (const error of checkLessonTechnology(meta, data, technologyPolicy, today))
     fail(`${path}: ${error}`);
   for (const error of coverageErrors(meta, data)) fail(`${path}: ${error}`);
@@ -194,6 +199,12 @@ for (const [key, meta] of lessons) {
   if (data.widget && !knownWidgets.includes(data.widget)) fail(`${path}: widget no registrado`);
   for (const source of data.sources ?? [])
     if (!/^https:\/\//.test(source.url)) fail(`${path}: fuente no HTTPS`);
+}
+for (const c of registry.filter((c) => c.refresher)) {
+  const r = c.refresher;
+  if (!r.explanation?.trim() || !r.example?.trim() || !r.activity?.hint)
+    fail(`${c.id}: repaso conceptual incompleto`);
+  checkQuestion({ ...r.activity, concept: c.id }, `${c.id}/repaso`, new Set([c.introducedBy]));
 }
 for (const rid of routes) {
   const dir = `content/lessons/${rid}`;

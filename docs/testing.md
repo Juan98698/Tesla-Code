@@ -3,11 +3,12 @@
 ## Comandos
 
 - `npm test`: pruebas unitarias de dominio, componentes DOM, widgets, repositorios y controlador; más pruebas de regresión de las herramientas pedagógicas.
-- `npm run test:coverage`: Node 24/26; genera `coverage/lcov.info` y verifica que los 18 módulos de `js/` aparezcan en la cobertura. El informe no sustituye las aserciones.
+- `npm run test:coverage`: Node 24/26; genera `coverage/lcov.info` y verifica que los 20 módulos de `js/` aparezcan en la cobertura. El informe no sustituye las aserciones.
 - `python3 tests/python-examples.py`: ejecuta 37 ejemplos Python y el ejercicio Git en directorios temporales, contrasta salida esperada y comprueba contratos de los proyectos. Los ejemplos declarados deben coincidir con el código mostrado.
 - `npm run test:module`: piloto de 17 lecciones iniciales sin progreso artificial, en escritorio y móvil.
+- `npm run test:access`: entradas independientes en las seis rutas, orientación y repasos sin créditos, preferencia con experiencia, secuencia interna, movimiento reducido y ocho auditorías WCAG adicionales en escritorio/móvil.
 - `npm run test:e2e`: renderiza todas las lecciones publicadas y resuelve sus prácticas; verifica navegación, desbloqueos, persistencia, descarga, simuladores, diseños y accesibilidad.
-- `npm run test:all`: ejecuta el validador, control técnico local, cobertura, ejemplos, piloto y recorrido general.
+- `npm run test:all`: ejecuta el validador, control técnico local, cobertura, ejemplos, piloto, acceso independiente y recorrido general.
 - `npm run technology:check -- --online`: consulta fuentes oficiales y devuelve un fallo si cambian referencias o falta evidencia. No instala ni renueva versiones.
 
 Para las pruebas de navegador usa Chromium del sistema o instala el navegador de Playwright siguiendo README. Los servicios de pruebas se cierran al terminar. Los proyectos Python y Git no tocan el repositorio del estudiante ni sus archivos.

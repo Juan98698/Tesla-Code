@@ -23,13 +23,13 @@ flowchart LR
 
 ## Navegación y concurrencia
 
-Las URLs por fragmento representan la vista, ruta, lección y etapa. Todos los accesos a una lección comprueban estado publicado y requisitos, incluso si se escribe la URL directamente. El token de render evita que una carga anterior reemplace una vista más reciente. Un cambio de ruta desmonta el contenido anterior completo.
+Las URLs por fragmento representan la vista, ruta, lección y etapa. Todos los accesos a una lección comprueban el estado publicado y los pasos previos de su propia ruta, incluso si se escribe la URL directamente. `accessState` centraliza el estado y separa requisitos internos de referencias académicas transversales. El token de render evita que una carga anterior reemplace una vista más reciente. Un cambio de ruta desmonta el contenido anterior completo.
 
-Los requisitos son referencias de lección `ruta/id`, no coincidencias parciales de texto. El validador busca referencias inexistentes, ciclos y requisitos no publicados de lecciones publicadas. No se desbloquea saltando un tema todavía no redactado. Las lecciones ya completadas del formato anterior permanecen accesibles.
+Los requisitos son referencias de lección `ruta/id`, no coincidencias parciales de texto. Las referencias a otras rutas conservan su papel académico y se ofrecen como ayudas opcionales; no exigen cursar otra especialidad. El validador busca referencias inexistentes, ciclos y requisitos no publicados de lecciones publicadas. No se desbloquea saltando un tema todavía no redactado. Las lecciones ya completadas del formato anterior permanecen accesibles.
 
 ## Persistencia
 
-La versión 2 mantiene XP, racha, finalizaciones, prácticas, recompensas concedidas, favoritos, último acceso y objetivo. Los últimos 20 intentos de cada lección permiten mostrar dificultades; la mejor puntuación permite reconocer avances anteriores. Las rachas usan el día local, no UTC.
+La versión 2 mantiene XP, racha, finalizaciones, prácticas, recompensas concedidas, favoritos, último acceso, objetivo y preferencia de acompañamiento (`guided` o `experienced`). La normalización incorpora esta preferencia sin cambiar el esquema v2 ni perder logros. Los últimos 20 intentos de cada lección permiten mostrar dificultades; la mejor puntuación permite reconocer avances anteriores. Las rachas usan el día local, no UTC.
 
 La migración conserva los logros anteriores y no inventa resultados de preguntas. El progreso local es editable por su propietario: no constituye una certificación verificable. No almacena secretos ni llama a modelos remotos.
 
@@ -42,3 +42,9 @@ El contenido HTML pertenece al repositorio y pasa por validación. El texto intr
 ## Evolución
 
 Una cuenta sincronizada, ejecución completa de lenguajes o integración con APIs requerirá servicios adicionales. Las credenciales de proveedores deben quedar en un servidor. La arquitectura actual permite agregar adaptadores sin mezclar contenidos con transporte o persistencia. No se introducen microservicios, estado global externo o un framework sin una necesidad comprobada.
+
+## Presentación y apoyos
+
+`activities.js` contiene la interacción reutilizada por prácticas y repasos. `learning-support.js` presenta los conceptos transversales y la orientación de tres preguntas. Estas consultas no registran intentos de curso, finalizaciones o XP. La orientación permite elegir acompañamiento y comenzar el siguiente paso disponible.
+
+La capa `experience.css` organiza la nueva presentación sobre los estilos compartidos de ejercicios. La computadora del inicio se construye con HTML/CSS, muestra un ejemplo de la ruta y confina la lluvia de código a su pantalla; no evalúa ese código. Las animaciones se pueden pausar y respetan movimiento reducido. El tema oscuro es el predeterminado y se conserva la selección de tema del usuario.
