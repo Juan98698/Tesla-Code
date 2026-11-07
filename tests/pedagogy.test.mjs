@@ -71,6 +71,7 @@ function invalidContent(t, relative, mutate) {
   const directory = mkdtempSync(join(tmpdir(), 'teslacode-pedagogy-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   cpSync(resolve('content'), join(directory, 'content'), { recursive: true });
+  cpSync(resolve('package.json'), join(directory, 'package.json'));
   const file = join(directory, relative),
     json = read(file);
   mutate(json);

@@ -16,13 +16,13 @@ Frontend y Bases de datos parten de Básico. Backend y Algoritmia requieren el p
 
 ## IA: distintos objetivos, distintas dependencias
 
-La exploración inicial no exige código: modelos y datos, entrenamiento/inferencia, tokens/contexto, prompts/verificación, difusión, modelado de conceptos y selección de proyecto.
+La exploración inicial no exige código: modelos y datos, entrenamiento/inferencia, tokens/contexto, prompts/verificación, contexto/memoria/recuperación, evaluación por casos, difusión/flow matching, modelado de conceptos y selección de proyecto.
 
 Después se separan recorridos técnicos:
 
-- **Aplicaciones:** Python y datos del tronco común → APIs → salidas estructuradas/herramientas → embeddings → RAG → agentes y multimodalidad. No exige recorrer toda la formación de entrenamiento de modelos.
+- **Aplicaciones:** Python y datos del tronco común → APIs → salidas estructuradas/herramientas → geometría y gestión del contexto → embeddings → recuperación híbrida y reranking → RAG → evaluación de recuperación → agentes y evaluación de herramientas → multimodalidad. No exige recorrer toda la formación de entrenamiento de modelos.
 - **Modelos:** Python científico → álgebra antes de NumPy → optimización, probabilidad y estadística → preparación de datos → ML → redes → Transformers → arquitectura y ajuste de LLM.
-- **Difusión:** redes convolucionales e introducción a difusión → procesos directo/inverso → arquitecturas y espacios latentes → muestreo/condicionamiento → adaptación y evaluación.
+- **Difusión:** redes convolucionales e introducción a difusión → procesos directo/inverso → arquitecturas y espacios latentes → flow matching y flujos rectificados → muestreo/condicionamiento → adaptación y evaluación.
 - **Conceptos:** arquitectura de LLM y embeddings → representaciones de frases/SONAR → predicción conceptual → difusión semántica (que también exige difusión técnica) → evaluación y límites.
 - **Producción:** evaluación aplicada después de RAG. MLOps añade como requisito el proyecto predictivo; luego despliegue, costos, privacidad y proyecto final.
 
@@ -35,3 +35,7 @@ Cada lección publicada debe aportar una explicación, ejemplo, práctica con pi
 Los proyectos de código incluyen criterios de aceptación y casos para reproducir localmente. Las prácticas breves de la plataforma comprueban partes concretas; no se presentan como revisión automática del proyecto completo. La revisión humana y pruebas de usabilidad con principiantes siguen siendo necesarias.
 
 El mapa contiene más temas que las lecciones disponibles: se muestra el estado real de cada uno. La ampliación editorial debería continuar con los siguientes módulos de cada especialidad antes de habilitar dependencias posteriores.
+
+## Actualidad técnica
+
+Las lecciones y los temas en preparación enlazan tecnologías de `content/technology-policy.json`. Los contenidos disponibles tienen revisión técnica con fuentes, plazos y un alcance explícito de pruebas. La nueva planificación frontend distingue efectos externos, acciones de formularios, fronteras servidor/cliente, caché y revalidación. Backend presenta GraphQL/gRPC, microservicios y Kubernetes como especializaciones opcionales que no bloquean su tronco principal.

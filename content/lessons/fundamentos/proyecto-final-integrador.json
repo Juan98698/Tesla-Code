@@ -104,5 +104,24 @@
       "code": "import json\nfrom pathlib import Path\n\nclass RepositorioJSON:\n    def __init__(self, ruta):\n        self.ruta = Path(ruta)\n        self.datos = json.loads(self.ruta.read_text(encoding=\"utf-8\")) if self.ruta.exists() else {}\n        if not isinstance(self.datos, dict):\n            raise ValueError(\"Se esperaba un objeto JSON\")\n\n    def obtener(self, id):\n        return self.datos.get(id)\n\n    def guardar(self, id, texto):\n        nuevos = dict(self.datos)\n        nuevos[id] = texto\n        temporal = self.ruta.with_suffix(\".tmp\")\n        temporal.write_text(json.dumps(nuevos, ensure_ascii=False), encoding=\"utf-8\")\n        temporal.replace(self.ruta)\n        self.datos = nuevos\n\ndef registrar(repo, id, texto):\n    if not id.strip() or not texto.strip() or repo.obtener(id) is not None:\n        return False\n    repo.guardar(id, texto.strip())\n    return True\n\nrepo = RepositorioJSON(\"tareas.json\")\nprint(registrar(repo, \"T1\", \" Leer \"))\nprint(registrar(repo, \"T1\", \"Otra\"))\nrecuperado = RepositorioJSON(\"tareas.json\")\nprint(recuperado.obtener(\"T1\"))",
       "stdout": "True\nFalse\nLeer\n"
     }
-  ]
+  ],
+  "technicalReview": {
+    "verifiedOn": "2026-11-06",
+    "reviewDue": "2027-02-04",
+    "technologyRefs": [
+      "python"
+    ],
+    "testedVersions": [
+      {
+        "runtime": "python",
+        "versions": [
+          "3.12.14",
+          "3.15.2"
+        ],
+        "scope": "standard-library-example"
+      }
+    ],
+    "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
+    "policyDigest": "fe5cb02eac121a2cb1a18f6d127b6d442967a8edcfc0959146d82ad290468924"
+  }
 }

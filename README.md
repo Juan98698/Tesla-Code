@@ -4,7 +4,7 @@ Academia interactiva de programación en español. Combina rutas visuales, lecci
 
 ## Desarrollo
 
-Requiere Node.js >=20; CI usa Node.js 22.
+Requiere una línea LTS verificada: **Node.js 24 o 26**. La versión preferida está fijada en `.node-version` y `.nvmrc` (actualmente 26.13.0); CI prueba ambas líneas. `engine-strict` rechaza versiones fuera de ese rango. Para los ejemplos se recomienda Python 3.15; también se comprueba compatibilidad con Python 3.12, que sigue recibiendo correcciones de seguridad.
 
 ```sh
 npm ci
@@ -15,9 +15,11 @@ El servidor escucha en el puerto 3000. Abre el sitio mediante HTTP, no mediante 
 
 ```sh
 npm run check        # Contenido, dependencias curriculares y pruebas del dominio
+npm run technology:check # Vigencia de revisiones y líneas de soporte
+npm run technology:check -- --online # Contraste con registros y calendario oficiales
 npm run test:e2e     # Chromium: navegación, aprendizaje, simuladores y accesibilidad
 npm run test:module  # Piloto del módulo inicial: 17 lecciones, escritorio y móvil
-npm run test:coverage # Cobertura de los 18 módulos de aplicación (Node >=22)
+npm run test:coverage # Cobertura de los 18 módulos de aplicación (Node 24/26)
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
 python3 tests/python-examples.py # Ejemplos del curso (requiere Python 3)
@@ -35,9 +37,9 @@ También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran su propi
 ## Qué está disponible
 
 - Seis mapas de rutas: Fundamentos, Algoritmia, Frontend, Backend, Bases de datos e IA.
-- **83 lecciones publicadas** con explicación, práctica, pistas y evaluación. Los demás temas se muestran como **en preparación**, sin simular que incluyen un curso.
+- **85 lecciones publicadas** con explicación, práctica, pistas y evaluación. Los demás temas se muestran como **en preparación**, sin simular que incluyen un curso.
 - **Fundamentos completo: 68 lecciones**, desde Primeros pasos hasta Experto. Incluye Python, Git, colecciones, objetos, diseño, pruebas, concurrencia, seguridad, observabilidad y proyectos integradores.
-- IA: siete lecciones introductorias sobre modelos, inferencia, LLM, prompts, difusión, conceptos siguientes/LCM y criterios de proyecto. El mapa técnico distingue aplicaciones, modelos, difusión, investigación y producción.
+- IA: nueve lecciones introductorias sobre modelos, inferencia, LLM, prompts, contexto, memoria, evaluación, difusión/flow matching, conceptos siguientes/LCM y criterios de proyecto. El mapa técnico distingue aplicaciones, modelos, difusión, investigación y producción.
 - Primeras dos lecciones de las otras cuatro especializaciones, con requisitos entre rutas.
 - Laboratorios de variables, ciclos, condicionales, segmentación de texto y señal/ruido; proyectos de propinas y adivinación; intérprete acotado de pseudocódigo.
 
@@ -51,7 +53,7 @@ Se puede guardar una lección y exportar una copia del progreso en JSON. No hay 
 
 ## Organización y ampliación
 
-Consulta [arquitectura](docs/architecture.md), [mapa curricular](docs/curriculum.md) y [guía editorial](docs/content-guide.md) y [auditoría conceptual](docs/pedagogical-audit.md).
+Consulta [arquitectura](docs/architecture.md), [mapa curricular](docs/curriculum.md) y [guía editorial](docs/content-guide.md) y [auditoría conceptual](docs/pedagogical-audit.md) y [política de actualidad](docs/technology-currency.md).
 
 ```text
 content/curriculum/     Mapas, estados y requisitos de lecciones

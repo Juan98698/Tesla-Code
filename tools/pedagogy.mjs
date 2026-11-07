@@ -23,9 +23,18 @@ export function lessonDigest(meta, data, registry) {
     ...data.activities.map((a) => a.concept),
   ]);
   const curriculum = Object.fromEntries(
-    ['id', 'title', 'concepts', 'teaches', 'requiresConcepts', 'dependsOn', 'status', 'kind'].map(
-      (key) => [key, meta[key]],
-    ),
+    [
+      'id',
+      'title',
+      'concepts',
+      'teaches',
+      'requiresConcepts',
+      'dependsOn',
+      'status',
+      'kind',
+      'technologyRefs',
+      'learningGoals',
+    ].map((key) => [key, meta[key]]),
   );
   return digest({ curriculum, data, concepts: registry.filter((c) => used.has(c.id)) });
 }

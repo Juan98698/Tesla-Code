@@ -2,7 +2,7 @@
 
 Se revisaron los seis mapas curriculares y las explicaciones, ejemplos, cuestionarios y prácticas publicados. La revisión es asistida por Codex y se registra con huellas en `content/pedagogy-reviews.json`. No se ha realizado una evaluación independiente con docentes ni una prueba de aprendizaje longitudinal con estudiantes.
 
-La versión auditada contiene 327 temas en seis mapas, 83 lecciones publicadas y 270 conceptos introducidos con trazabilidad explicativa y evaluativa. Los 244 temas pendientes no se presentan como contenido ya validado.
+La versión auditada contiene 339 temas en seis mapas, 85 lecciones publicadas y 279 conceptos introducidos con trazabilidad explicativa y evaluativa. Los 254 temas pendientes no se presentan como contenido ya validado.
 
 ## Hallazgos corregidos en contenido disponible
 
