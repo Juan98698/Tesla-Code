@@ -49,3 +49,9 @@ La revisión inicial es asistida por Codex; su estado de revisión independiente
 ## Ejemplos ejecutables
 
 Las lecciones nuevas de Fundamentos declaran sus programas Python en `examples` con `id`, `language: "python"`, `code` y `stdout`. El código debe coincidir con el bloque mostrado; el runner lo ejecuta en un directorio temporal y comprueba la salida, además de los casos de contrato de los proyectos. Para un lenguaje nuevo agrega primero un runner y sus pruebas. El ejercicio Git usa `gitExample` y se verifica en un repositorio temporal sin remotos.
+
+## Versiones, fuentes y revisión técnica
+
+Todo tema declara `technologyRefs` con IDs de la política. Si está publicado, `technicalReview` debe incluir fechas vigentes, las mismas referencias, `policyDigest` y `testedVersions`. Una lista vacía significa que no se atribuye ejecución de un ejemplo dependiente de runtime. Las referencias de catálogo conservan `scope: reference-only`.
+
+No copies una versión de catálogo al apartado de pruebas sin ejecutarla. Para afirmar compatibilidad de un SDK nuevo, amplía antes el formato de evidencia y el runner: actualmente las pruebas de contenido declaradas corresponden a ejemplos de la biblioteca estándar de Python. Las fechas no se renuevan automáticamente. Consulta `docs/technology-currency.md` para el procedimiento completo.

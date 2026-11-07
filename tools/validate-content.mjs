@@ -1,6 +1,7 @@
 // Valida estructura y dependencias explícitas. La coherencia pedagógica requiere revisión editorial.
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { indexRoute } from '../js/domain/curriculum.js';
+import { checkTechnologyPolicy, checkLessonTechnology } from './technology-policy.mjs';
 import {
   digest,
   lessonDigest,
@@ -13,6 +14,15 @@ const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const fail = (message) => errors.push(message);
 const routes = read('content/curriculum/index.json').routes;
 const registry = read('content/concepts.json').concepts;
+const technologyPolicy = read('content/technology-policy.json');
+const today = new Date().toISOString().slice(0, 10);
+for (const error of checkTechnologyPolicy(
+  technologyPolicy,
+  read('package.json'),
+  today,
+  process.versions.node,
+))
+  fail(error);
 const reviews = existsSync('content/pedagogy-reviews.json')
   ? read('content/pedagogy-reviews.json')
   : { routes: {}, lessons: {} };
@@ -38,6 +48,8 @@ for (const rid of routes) {
     if (!Array.isArray(meta.dependsOn) || !Array.isArray(meta.teaches))
       fail(`${key}: faltan dependencias o conceptos`);
     lessons.set(key, meta);
+    for (const error of checkLessonTechnology(meta, null, technologyPolicy, today))
+      fail(`${key}: ${error}`);
     for (const cid of meta.teaches ?? []) {
       if (concepts.get(cid)?.introducedBy !== key)
         fail(`${key}: introducción inconsistente de ${cid}`);
@@ -127,6 +139,8 @@ for (const [key, meta] of lessons) {
   }
   const data = read(path),
     allowed = ancestors(key);
+  for (const error of checkLessonTechnology(meta, data, technologyPolicy, today))
+    fail(`${path}: ${error}`);
   for (const error of coverageErrors(meta, data)) fail(`${path}: ${error}`);
   for (const error of reviewErrors(reviews.lessons[key], lessonDigest(meta, data, registry)))
     fail(`${path}: ${error}`);

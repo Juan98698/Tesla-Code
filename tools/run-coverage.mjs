@@ -2,8 +2,13 @@ import { readdirSync, mkdirSync, readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { checkCoverage } from './coverage-policy.mjs';
-if (Number(process.versions.node.split('.')[0]) < 22)
-  throw Error('La cobertura requiere Node.js 22 o superior. npm test funciona sin este informe.');
+const policy = JSON.parse(readFileSync('content/technology-policy.json', 'utf8'));
+if (
+  !policy.runtimes.node.supported.some((item) => item.line === process.versions.node.split('.')[0])
+)
+  throw Error(
+    `La cobertura requiere una línea Node verificada: ${policy.runtimes.node.supported.map((item) => item.line).join(', ')}.`,
+  );
 const root = process.cwd();
 mkdirSync('coverage', { recursive: true });
 const tests = readdirSync('tests')
