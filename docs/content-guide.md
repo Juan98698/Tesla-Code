@@ -50,7 +50,9 @@ La revisión inicial es asistida por Codex; su estado de revisión independiente
 
 ## Ejemplos ejecutables
 
-Las lecciones nuevas de Fundamentos declaran sus programas Python en `examples` con `id`, `language: "python"`, `code` y `stdout`. El código debe coincidir con el bloque mostrado; el runner lo ejecuta en un directorio temporal y comprueba la salida, además de los casos de contrato de los proyectos. Para un lenguaje nuevo agrega primero un runner y sus pruebas. El ejercicio Git usa `gitExample` y se verifica en un repositorio temporal sin remotos.
+Las lecciones declaran sus programas Python en `examples` con `id`, `language: "python"`, `code` y `stdout`. El código debe coincidir con el bloque mostrado; el runner lo ejecuta en un directorio temporal y comprueba la salida, además de los casos de contrato de los proyectos. Cada ejemplo compatible recibe automáticamente un panel «Probar este ejemplo en la consola». Para un lenguaje nuevo agrega primero un runner y sus pruebas. El ejercicio Git usa `gitExample` y se verifica en un repositorio temporal sin remotos.
+
+Declara `stdin: ["dato", "otro dato"]` cuando el ejemplo requiera entradas iniciales para `input()`. Se muestran en el editor de entradas y se usan también al verificar el ejemplo con Pyodide. Si necesita capacidades locales como hilos, declara `environment: "local"` y un `environmentNote` que explique cómo ejecutarlo en el equipo. No marques como local un ejemplo para ocultar un error: contrasta la capacidad con las limitaciones del motor y conserva su comprobación con CPython. El entorno predeterminado es el navegador; `npm test` ejecuta todos sus ejemplos declarados con el motor fijado.
 
 ## Versiones, fuentes y revisión técnica
 
@@ -76,6 +78,8 @@ Un contrato mínimo de programa con entradas y salida exacta:
 ```
 
 `stdin` proporciona los textos de cada llamada a `input`; un mensaje como `input("Número: ")` forma parte de la salida. `globals` puede aportar variables del enunciado, como `{"datos": [-8, -3]}`, siempre explicando su procedencia. Para funciones, `entrypoint` identifica el nombre, y cada caso declara `args` y `expected`, comparados como valores JSON. No se comparan coincidencias textuales del código con la solución de referencia.
+
+Toda actividad Python incorpora **Ejecutar código**, consola y entradas libres, además de **Comprobar ejercicio**. Ejecutar muestra la salida sin evaluar ni conceder progreso; comprobar usa exclusivamente los casos del autor y muestra sus resultados esperados y obtenidos. En una ejecución libre, una función debe llamarse explícitamente y `print()` muestra su resultado; definirla o devolver un valor con `return` no imprime por sí solo. Las entradas se escriben antes de ejecutar, una por línea; no se ofrece un terminal interactivo durante la ejecución. Cada programa empieza de nuevo y los archivos del navegador son temporales. Considera esas condiciones al redactar las instrucciones.
 
 Usa varios datos cuando el contrato admita entradas variables; comprueba una solución equivalente y una implementación incorrecta representativa. No enseñes `input`, conversiones, índices o funciones por primera vez dentro del reto. `npm test` ejecuta todas las soluciones de referencia con el mismo runtime fijado; `npm run test:python` recorre el módulo en navegador real. Conserva las limitaciones de entorno y los supuestos visibles.
 

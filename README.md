@@ -22,6 +22,7 @@ npm run test:cache   # Actualización con caché previa y progreso existente
 npm run test:access  # Entradas libres, orientación, repasos y secuencia interna
 npm run test:module  # Piloto del módulo inicial: 17 lecciones, escritorio y móvil
 npm run test:python  # Primer módulo Python completo, ejecución real y recuperación del progreso
+npm run test:console # Consola, entradas, errores y ejemplos en escritorio y móvil
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
@@ -35,7 +36,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran servidores entre los puertos 4317 y 4322. No uses esos puertos para otro servicio durante la ejecución. [CONTRIBUTING.md](CONTRIBUTING.md) distingue la comprobación rápida de la batería completa.
+También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran servidores entre los puertos 4317 y 4325. No uses esos puertos para otro servicio durante la ejecución. [CONTRIBUTING.md](CONTRIBUTING.md) distingue la comprobación rápida de la batería completa.
 
 ## Qué está disponible
 
@@ -48,7 +49,9 @@ También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran servidor
 - Frontend, Backend y Bases de datos tienen dos lecciones publicadas cada una. Todas las rutas tienen entrada libre; la progresión obligatoria se conserva dentro de cada una, separada de sus dependencias académicas.
 - Laboratorios de variables, ciclos, condicionales, segmentación de texto y señal/ruido; proyectos de propinas y adivinación; intérprete acotado de pseudocódigo.
 
-Las simulaciones de IA son didácticas y locales: no ejecutan modelos ni consumen APIs. El editor de pseudocódigo acepta asignaciones numéricas, aritmética y `mostrar`. Los ejercicios marcados como Python ejecutan código real con **Pyodide 314.0.7 / Python 3.14.2**, muestran casos y errores y permiten detener, restaurar el código inicial y conservar borradores. El motor tiene límites de tiempo/salida y capacidades distintas de una instalación local; los ejemplos de hilos y otros proyectos de Fundamentos siguen siendo prácticas locales.
+Las simulaciones de IA son didácticas y locales: no ejecutan modelos ni consumen APIs. El editor de pseudocódigo acepta asignaciones numéricas, aritmética y `mostrar`. Las trece prácticas Python y los 43 ejemplos compatibles incluyen una consola con **Pyodide 314.0.7 / Python 3.14.2**. **Ejecutar código** muestra lo impreso y los errores; permite proporcionar entradas para `input()`, detener y limpiar la consola. **Comprobar ejercicio** evalúa los casos publicados y puede acreditar la práctica; experimentar por sí solo no concede progreso. Los borradores se conservan y se puede restaurar el código inicial.
+
+El motor tiene límites de tiempo/salida y capacidades distintas de una instalación local. El ejemplo de hilos explica cómo ejecutarlo en el equipo; los comandos de terminal y Git siguen siendo locales. Cada ejecución Python en el navegador empieza de nuevo y sus archivos son temporales.
 
 ## Progreso
 

@@ -47,6 +47,21 @@ test('runner authenticates messages by frame and job; cancels, times out and rec
   assert.equal((await success).results[0].passed, true);
   assert.deepEqual(statuses, ['loading', 'running']);
   assert.equal(frame(), null);
+  const outputs = [];
+  const stream = runner.run(
+    { ...job, mode: 'run' },
+    () => {},
+    (text) => outputs.push(text),
+  );
+  send('output', { output: 'ignored' }, window);
+  send('output', { output: null });
+  send('output', { output: 'x'.repeat(7000) });
+  send('result', { result: { results: [{ stdout: 'ok' }] } });
+  await stream;
+  assert.deepEqual(
+    outputs.map((text) => text.length),
+    [6000],
+  );
   const invalid = runner.run(job);
   send('result', { result: { results: [] } });
   await assert.rejects(invalid, /incompleta/);
@@ -153,6 +168,11 @@ test('worker adapter invokes the shared grader and reports initialization failur
   assert.equal(messages[0].type, 'running');
   assert.equal(messages[1].result.results[0].passed, true);
   assert.equal(calls[0], 'grader');
+  const emit = calls.find((call) => Array.isArray(call) && call[0] === '_console_emit')[1];
+  emit('x'.repeat(7000));
+  emit('throttled');
+  assert.equal(messages.filter((m) => m.type === 'output').length, 1);
+  assert.equal(messages.at(-1).output.length, 6000);
   await workerBootstrap(async () => {
     throw Error('network unavailable');
   });

@@ -34,6 +34,14 @@ Deshacer no restaura una copia antigua si ya hay nuevos logros, intentos o favor
 
 El motor usa Pyodide 314.0.7, que declara Python 3.14.2. Requiere conexión para la descarga inicial. No incluye cuota dura de memoria ni compatibilidad universal con paquetes, hilos, procesos o servicios del sistema. Los casos son visibles y el progreso es local: la plataforma no emite una certificación protegida contra manipulación.
 
+## Mejora prioritaria: consola Python
+
+8 de noviembre de 2026. Las trece actividades Python incorporan **Ejecutar código** para experimentar y **Comprobar ejercicio** para evaluar. Una consola visible muestra la salida incluso cuando el código pasa las pruebas, los errores con su línea y lo impreso antes de detener o agotar el tiempo. Incluye entradas previas para `input()`, limpieza y restauración; la ejecución libre no acredita prácticas ni concede XP.
+
+La etapa Aprender añade el mismo editor y consola a los 43 ejemplos Python compatibles, sin duplicar la implementación ni iniciar el motor al leer. El ejemplo de hilos permanece local con instrucciones. El intérprete acotado de pseudocódigo conserva su salida; los comandos de sistema/Git requieren terminal local. Los ejemplos futuros declarados y las actividades Python heredan esta presentación y sus comprobaciones.
+
+Verificación de esta mejora: 98 pruebas unitarias aprobadas; cobertura de los 28 módulos con 99,17 % de líneas, 94,50 % de ramas y 97,30 % de funciones. Los 43 ejemplos compatibles se ejecutan ahora automáticamente en Pyodide dentro de la suite; los 44 programas siguen pasando con CPython. Pasan las pruebas específicas de consola y el recorrido del módulo Python desde cero en escritorio/móvil, además del recorrido general de 102 lecciones y 140 actividades. Los controles automáticos incluyen accesibilidad en temas claro/oscuro, separación entre experimentar y acreditar, entradas, errores, tiempo máximo y cancelación al navegar. No sustituyen pruebas con estudiantes.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |

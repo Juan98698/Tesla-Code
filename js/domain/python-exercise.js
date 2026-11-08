@@ -52,20 +52,28 @@ import contextlib as _contextlib
 import io as _io
 import json as _json
 import sys as _sys
+import traceback as _traceback
 
 class _OutputLimit(Exception):
     pass
 
 class _BoundedOutput(_io.StringIO):
+    def __init__(self, live=False):
+        super().__init__()
+        self.live = live
     def write(self, text):
         if self.tell() + len(text) > 6000:
             raise _OutputLimit("La salida supera 6000 caracteres.")
-        return super().write(text)
+        count = super().write(text)
+        if self.live and callable(globals().get("_console_emit")):
+            _console_emit(self.getvalue())
+        return count
 
 def _evaluate_exercise(payload):
     results = []
     for case in payload["cases"]:
-        stream = _BoundedOutput()
+        exploratory = payload.get("mode") == "run"
+        stream = _BoundedOutput(exploratory)
         values = iter(case.get("stdin", []))
         previous_input = _builtins.input
         def read_input(prompt=""):
@@ -80,7 +88,7 @@ def _evaluate_exercise(payload):
             _builtins.input = read_input
             with _contextlib.redirect_stdout(stream), _contextlib.redirect_stderr(stream):
                 exec(compile(payload["code"], "ejercicio.py", "exec"), namespace)
-                if payload.get("entrypoint"):
+                if payload.get("entrypoint") and not exploratory:
                     fn = namespace.get(payload["entrypoint"])
                     if not callable(fn):
                         raise NameError("Define la función " + payload["entrypoint"] + ".")
@@ -89,12 +97,18 @@ def _evaluate_exercise(payload):
                     expected = _json.dumps(case["expected"], ensure_ascii=False, sort_keys=True)
                 else:
                     actual = stream.getvalue().replace("\\r\\n", "\\n")
-                    expected = case["stdout"].replace("\\r\\n", "\\n")
-            results.append({"name": case["name"], "passed": actual == expected,
+                    expected = case.get("stdout", "").replace("\\r\\n", "\\n")
+            results.append({"name": case["name"], "passed": None if exploratory else actual == expected,
+                            "stdout": stream.getvalue()[:6000],
                             "actual": actual[:6000], "expected": expected[:6000]})
         except BaseException as error:
             results.append({"name": case["name"], "passed": False,
                             "error": type(error).__name__ + ": " + str(error)[:1500],
+                            "traceback": ("".join(_traceback.format_list(
+                                [frame for frame in _traceback.extract_tb(error.__traceback__)
+                                 if frame.filename == "ejercicio.py"])) +
+                                "".join(_traceback.format_exception_only(type(error), error)))[-4000:],
+                            "stdout": stream.getvalue()[:6000],
                             "actual": stream.getvalue()[:6000]})
         finally:
             _builtins.input = previous_input
