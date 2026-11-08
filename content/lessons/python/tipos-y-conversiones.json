@@ -1,0 +1,216 @@
+{
+  "id": "tipos-y-conversiones",
+  "html": "<h2>Una misma apariencia puede tener significados distintos</h2><p>El entero 12 y la cadena \"12\" se parecen al mostrarlos, pero admiten operaciones diferentes. El tipo describe esa diferencia. <code>int</code> es el tipo de los enteros; <code>str</code>, el de las cadenas; <code>float</code>, el de números de punto flotante como 2.5.</p>\n <p>Los tipos pertenecen a los valores. Un nombre puede asociarse primero a un entero y después a una cadena, aunque hacerlo sin motivo dificulta entender el programa. Usaremos nombres coherentes con los datos que representan.</p>\n <h2>Convertir una entrada antes de calcular</h2><p>La función int recibe un valor y trata de construir un entero. Con la cadena \"12\" produce el entero 12. En el ejemplo, texto conserva su cadena original: guardamos el resultado de la conversión en otro nombre llamado cantidad.</p><pre data-language=\"python\">texto = &quot;12&quot;\ncantidad = int(texto)\nprint(cantidad + 3)\nprint(&quot;Cantidad: &quot; + str(cantidad))\nprint(type(texto))\nprint(type(cantidad))</pre><p>Ahora cantidad + 3 es una suma numérica y produce 15. Para unir cantidad a otro texto usamos str(cantidad), que produce la cadena \"12\". Una alternativa sería print(\"Cantidad:\", cantidad), porque print puede recibir varios valores y mostrarlos separados por espacios; no es necesario concatenarlos primero.</p>\n <p>La función type devuelve información sobre el tipo. Su impresión puede verse como &lt;class 'str'&gt; o &lt;class 'int'&gt;. Aquí solo necesitamos identificar esos nombres; la palabra class de esa representación no exige que sepas definir clases todavía. Más adelante estudiaremos objetos y clases como tema propio.</p>\n <h2>El contrato de una conversión</h2><p>Una conversión no inventa información faltante. int(\"tres\") falla con ValueError porque ese texto no tiene el formato numérico admitido. int(\"\") también falla. int(\"3.5\") no convierte un texto decimal directamente a entero. Si el contrato admite decimales, primero debes escoger el tipo adecuado, en lugar de eliminar silenciosamente parte del dato.</p>\n <p>float(\"3.5\") produce un número de punto flotante. El separador decimal para esta conversión es el punto. float(\"3,5\") falla: aceptar el formato local con coma requiere una decisión explícita de lectura y validación que no asumiremos en estos ejercicios.</p>\n <p>Cuando int recibe un valor flotante, trunca hacia cero: int(3.9) da 3 e int(-3.9) da −3. Eso no es lo mismo que la división //, que redondea hacia abajo. No uses una conversión con pérdida de información para aceptar una cantidad de personas fraccionaria sin preguntar qué significa en el problema.</p>\n <h2>Otros valores que encontrarás</h2><p>Python tiene valores booleanos True y False para expresar condiciones; la próxima unidad enseñará a producirlos mediante comparaciones y combinarlos. También existe None, que suele representar ausencia de un resultado o de un dato. None no es la cadena \"None\", una cadena vacía ni el número cero.</p>\n <p>No necesitas convertir entradas a booleano para esta lección. De hecho, bool(\"False\") no interpreta el significado de esa palabra como una respuesta negativa: una cadena no vacía se considera verdadera en ese contexto. Por eso el análisis de respuestas como «sí» y «no» requiere reglas que explicaremos antes de utilizarlo.</p>\n <h2>Validar sin prometer lo que el programa no hace</h2><p>Los ejercicios de hoy reciben textos que representan enteros en el formato acordado. Aprenderás a reconocer un ValueError, pero todavía no a recuperarte automáticamente de cualquier entrada. Más adelante enseñaremos condiciones y manejo de excepciones para esa responsabilidad.</p>\n <p>Un programa que funciona bajo un contrato limitado sigue siendo útil para aprender, siempre que el límite sea visible. Debemos probar datos diferentes dentro de ese contrato y distinguir un error de la solución de una entrada que el ejercicio no prometió admitir.</p>\n <p>Antes de cada operación, pregunta qué tipo tienes y cuál necesitas. El flujo para una cantidad escrita por una persona es: recibir texto, convertir a un número permitido, calcular y presentar. Mantener esas etapas separadas hace más fácil localizar los fallos.</p><dl><dt>tipo</dt><dd>El tipo de un valor determina las operaciones que admite y su significado; str representa texto, int enteros y float números de punto flotante.</dd><dt>conversión</dt><dd>Una conversión solicita una representación de otro tipo mediante una función como int, float o str; no cambia por sí sola el valor original.</dd><dt>ValueError</dt><dd>ValueError indica que un valor tiene un formato o contenido no admitido para una operación, como convertir &quot;tres&quot; en un entero con int.</dd></dl><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Recibimos el texto &quot;12&quot; y necesitamos sumarle tres unidades.</p><p>int produce el entero 12; sumar 3 da 15, mientras que la cadena original sigue siendo &quot;12&quot;.</p><p>La salida numérica es 15 y la conversión no depende de una concatenación accidental.</p><p><strong>Condición:</strong> Las entradas de los ejercicios son textos que representan enteros válidos; no se promete recuperar formatos inválidos todavía.</p></section>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "python.tipos-y-conversiones.1",
+      "prompt": "¿Qué tipo tiene el resultado de input()?",
+      "options": [
+        "str",
+        "int siempre.",
+        "float siempre."
+      ],
+      "answer": 0,
+      "explanation": "La entrada se recibe como texto."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "python.tipos-y-conversiones.2",
+      "prompt": "¿Qué produce int(\"12\") + 3?",
+      "options": [
+        "\"123\"",
+        "15",
+        "\"15\" como resultado de concatenación."
+      ],
+      "answer": 1,
+      "explanation": "La conversión permite sumar enteros."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "python.tipos-y-conversiones.3",
+      "prompt": "¿Qué ocurre al ejecutar int(\"tres\")?",
+      "options": [
+        "Se devuelve cero.",
+        "Se devuelve 3 por traducción.",
+        "Se produce ValueError."
+      ],
+      "answer": 2,
+      "explanation": "La conversión no interpreta palabras como números."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "python.tipos-y-conversiones.2",
+      "prompt": "¿int(texto) modifica automáticamente el contenido guardado en texto?",
+      "options": [
+        "No; devuelve un valor convertido.",
+        "Sí, siempre cambia el original.",
+        "Solo cuando contiene dos dígitos."
+      ],
+      "answer": 0,
+      "explanation": "Para conservar la conversión hay que asignarla o utilizarla."
+    }
+  ],
+  "activities": [
+    {
+      "id": "tipo",
+      "type": "text",
+      "concept": "python.tipos-y-conversiones.1",
+      "prompt": "¿Cuál es el nombre del tipo para un entero: str, int o float?",
+      "answers": [
+        "int"
+      ],
+      "hint": "Es el tipo del número 12 escrito sin comillas.",
+      "explanation": "int representa enteros."
+    },
+    {
+      "id": "sumar",
+      "type": "python",
+      "concept": "python.tipos-y-conversiones.2",
+      "prompt": "Lee dos textos que representan enteros, conviértelos y muestra su suma.",
+      "starter": "a = input()\nb = input()\nprint(a + b)",
+      "solution": "a = int(input())\nb = int(input())\nprint(a + b)",
+      "cases": [
+        {
+          "name": "Positivos",
+          "stdout": "15\n",
+          "stdin": [
+            "12",
+            "3"
+          ]
+        },
+        {
+          "name": "Con negativo",
+          "stdout": "2\n",
+          "stdin": [
+            "-5",
+            "7"
+          ]
+        },
+        {
+          "name": "Ceros",
+          "stdout": "0\n",
+          "stdin": [
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "hint": "En int(input()), primero se lee el texto y luego se convierte.",
+      "explanation": "Las entradas se suman numéricamente; no se concatenan."
+    },
+    {
+      "id": "presentar",
+      "type": "python",
+      "concept": "python.tipos-y-conversiones.2",
+      "prompt": "Lee una cantidad entera y muestra Cantidad: seguido de un espacio y su valor.",
+      "starter": "# Lee, convierte y presenta la cantidad.\n",
+      "solution": "cantidad = int(input())\nprint(\"Cantidad:\", cantidad)",
+      "cases": [
+        {
+          "name": "Cantidad normal",
+          "stdout": "Cantidad: 8\n",
+          "stdin": [
+            "8"
+          ]
+        },
+        {
+          "name": "Cero",
+          "stdout": "Cantidad: 0\n",
+          "stdin": [
+            "0"
+          ]
+        }
+      ],
+      "hint": "print acepta varios argumentos y agrega un espacio entre ellos.",
+      "explanation": "La presentación conserva el valor numérico convertido."
+    }
+  ],
+  "requiresConcepts": [
+    "python.texto-y-entrada.1",
+    "python.texto-y-entrada.2",
+    "python.texto-y-entrada.3",
+    "python.valores-y-operaciones.1",
+    "python.valores-y-operaciones.2",
+    "python.valores-y-operaciones.3"
+  ],
+  "outcome": "Distinguir tipos y convertir entradas de forma explícita, reconociendo los límites y errores de cada conversión.",
+  "sources": [
+    {
+      "title": "Tutorial oficial: números y texto",
+      "url": "https://docs.python.org/3.14/tutorial/introduction.html"
+    },
+    {
+      "title": "Funciones incorporadas: input, int, str y type",
+      "url": "https://docs.python.org/3.14/library/functions.html"
+    }
+  ],
+  "coverage": {
+    "python.tipos-y-conversiones.1": {
+      "explanationExcerpt": "El tipo de un valor determina las operaciones que admite y su significado; str representa texto, int enteros y float números de punto flotante.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "python.tipos-y-conversiones.2": {
+      "explanationExcerpt": "Una conversión solicita una representación de otro tipo mediante una función como int, float o str; no cambia por sí sola el valor original.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "python.tipos-y-conversiones.3": {
+      "explanationExcerpt": "ValueError indica que un valor tiene un formato o contenido no admitido para una operación, como convertir \"tres\" en un entero con int.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "id": "ejemplo-1",
+      "language": "python",
+      "code": "texto = \"12\"\ncantidad = int(texto)\nprint(cantidad + 3)\nprint(\"Cantidad: \" + str(cantidad))\nprint(type(texto))\nprint(type(cantidad))",
+      "stdout": "15\nCantidad: 12\n<class 'str'>\n<class 'int'>\n"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Las entradas de los ejercicios son textos que representan enteros válidos; no se promete recuperar formatos inválidos todavía."
+    ],
+    "workedExample": {
+      "problem": "Recibimos el texto \"12\" y necesitamos sumarle tres unidades.",
+      "reasoning": "int produce el entero 12; sumar 3 da 15, mientras que la cadena original sigue siendo \"12\".",
+      "result": "La salida numérica es 15 y la conversión no depende de una concatenación accidental."
+    },
+    "transferActivityIds": [
+      "tipo",
+      "sumar",
+      "presentar"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-07",
+    "reviewDue": "2027-02-04",
+    "technologyRefs": [
+      "foundations",
+      "python"
+    ],
+    "testedVersions": [
+      {
+        "runtime": "python",
+        "versions": [
+          "3.12.14",
+          "3.14.2"
+        ],
+        "scope": "standard-library-example"
+      }
+    ],
+    "note": "Ejemplos visibles ejecutados con CPython 3.12.14; Pyodide 3.14.2 solo se atribuye si todos los ejemplos de esta lección pasaron. Las soluciones de actividades Python se prueban aparte en tests/python-exercises.test.mjs. Concurrencia de hilos permanece como práctica local.",
+    "policyDigest": "9d06c952c1e8b7a46107c57b4c7791f9b751a04dbc1fc4217037e66aa9829352"
+  }
+}

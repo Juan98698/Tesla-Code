@@ -1,58 +1,71 @@
 {
   "id": "funciones-y-recursion-algoritmica",
-  "html": "<p>Una función permite reutilizar un procedimiento y precisar qué recibe y entrega. def doble(n): define la función doble con el parámetro n. doble(5) la llama usando 5 como argumento; return entrega 10 a quien la llamó y termina esa llamada. print solo muestra ese resultado. El signo * multiplica y - resta.</p><p>El factorial de un entero positivo multiplica todos los enteros desde ese número hasta uno: factorial de 3 = 3 × 2 × 1 = 6. Se define factorial de 0 como 1. El contrato exige un entero no negativo. factorial se llama a sí misma con n - 1: esto es recursión.</p><p>factorial(3) espera 3 × factorial(2); esta espera 2 × factorial(1); esta espera 1 × factorial(0). El caso base devuelve 1; al regresar se calculan 1, después 2 y finalmente 6. Cada llamada pendiente conserva su contexto en la pila de llamadas, que retoma primero la última llamada que entró.</p><p>Con un número negativo, restar uno se aleja de cero: el contrato no admite ese caso. Escribir un caso base que nunca se alcanza no garantiza terminación. Python limita la profundidad de llamadas; este ejemplo no es adecuado para enteros muy grandes. Recursión no significa mayor rapidez y puede consumir más memoria que una solución iterativa.</p><dl><dt>función algorítmica</dt><dd>Una función agrupa un procedimiento con nombre, recibe parámetros y puede devolver un resultado a quien la llama.</dd><dt>recursión inicial</dt><dd>La recursión resuelve un problema mediante llamadas al mismo procedimiento con entradas que se acercan al caso base.</dd><dt>terminación recursiva</dt><dd>La terminación recursiva necesita un caso base y una medida que progrese hacia él para todas las entradas admitidas.</dd></dl><p>En Python, == compara si dos valores son iguales y produce True o False. Así, n == 0 permite escoger el caso base. El signo = realiza una asignación y no se puede sustituir por == para guardar un valor. Los paréntesis de factorial(n - 1) calculan el nuevo argumento antes de llamar de nuevo.</p><pre data-language=\"python\">def doble(n):\n    return n * 2\n\ndef factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n\nprint(doble(5))\nprint(factorial(3))</pre><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: Calculas factorial(3) con el caso base en cero.</p><p>Razonamiento: Las llamadas reducen el argumento y guardan trabajo pendiente; al devolver uno desde el caso base se multiplican uno, dos y tres.</p><p>Resultado: La función devuelve 6; el progreso hacia el caso base depende del contrato de enteros no negativos.</p><p><strong>Condiciones del ejemplo:</strong> El factorial admite enteros no negativos y pequeños. Un argumento negativo no progresa hacia el caso base.</p></section>",
+  "html": "<h2>Dar nombre a una solución</h2>\n <p>Imagina que necesitas calcular el doble de varias cantidades. Puedes repetir los pasos cada vez, pero darles un nombre permite utilizarlos y comprobarlos por separado. Una función es ese procedimiento con nombre. No necesitas conocer Python: usaremos la misma notación de pasos explicada en esta ruta.</p>\n <p>En <code>FUNCIÓN DOBLE(n)</code>, DOBLE es el nombre y n es un parámetro: el nombre que reciben los datos dentro del procedimiento. Escribir DOBLE(5) es una llamada. El valor concreto 5 es el argumento. Durante esa llamada, n vale 5; otra llamada puede recibir un valor distinto.</p>\n <p><code>DEVOLVER</code> entrega un valor a la instrucción que llamó a la función y termina esa llamada. No significa mostrar algo en una pantalla. Si escribimos resultado ← DOBLE(5), el nombre resultado queda asociado al valor 10; después podemos mostrarlo, compararlo o pasarlo a otra función. La flecha asigna y el signo × multiplica.</p><pre data-language=\"pseudocode\">FUNCIÓN DOBLE(n)\n    DEVOLVER n × 2\nFIN FUNCIÓN\nresultado ← DOBLE(5)\nMOSTRAR resultado</pre><h2>Primero comprende una llamada</h2><p>Traza el ejemplo: se recibe 5, se calcula 5 × 2, se devuelve 10 y la llamada termina. No hay ninguna repetición ni una nueva llamada a DOBLE dentro de sus pasos. Antes de continuar, repite la traza con 0 y con −3. Sus resultados son 0 y −6. Cambia el argumento, pero no la regla.</p>\n <h2>Una función que reduce su propio problema</h2><p>Ahora queremos multiplicar los enteros desde 1 hasta n. Ese producto se llama factorial. Para n = 3, el producto es 1 × 2 × 3 = 6. Definimos factorial de 0 como 1: es la convención del producto vacío, que permite terminar el procedimiento sin añadir otro factor. Solo aceptaremos enteros no negativos.</p>\n <p>La relación factorial(n) = n × factorial(n − 1) reduce el problema cuando n es positivo. La función se vuelve a llamar con una entrada menor. Esa llamada a sí misma es recursión. La igualdad expresa una relación matemática; la flecha sigue reservada para asignar un resultado.</p><pre data-language=\"pseudocode\">FUNCIÓN FACTORIAL(n)\n    SI n = 0 ENTONCES\n        DEVOLVER 1\n    FIN SI\n    DEVOLVER n × FACTORIAL(n − 1)\nFIN FUNCIÓN</pre><h2>Seguir las llamadas y sus retornos</h2><p>FACTORIAL(3) no obtiene inmediatamente el producto: deja pendiente multiplicar 3 por FACTORIAL(2). Esta deja pendiente 2 por FACTORIAL(1), y esta, 1 por FACTORIAL(0). La última devuelve 1 sin hacer otra llamada. Al regresar se obtienen, en orden, 1 × 1 = 1, 2 × 1 = 2 y 3 × 2 = 6.</p>\n <p>Las llamadas pendientes conservan su contexto: el argumento recibido y el trabajo que queda. Se retoma primero la llamada más reciente. Esta organización se conoce como pila de llamadas. Dibujar cuatro tarjetas y retirarlas desde la última ayuda a entenderla; todavía no necesitas implementar una estructura de pila.</p>\n <h2>Cómo sabemos que termina</h2><p>El caso base es n = 0. La medida de progreso es el entero n: disminuye en uno y no puede bajar indefinidamente sin alcanzar cero si comienza siendo no negativo. Ambas condiciones son necesarias. Con n = −1, restar uno se alejaría de cero; por eso esa entrada está fuera del contrato. Tampoco hemos definido este factorial para decimales.</p>\n <p>Un caso base escrito no basta si nunca se alcanza. Una función que llama FACTORIAL(n) desde FACTORIAL(n) conservaría la entrada y no progresaría. La recursión tampoco garantiza rapidez: mantiene llamadas pendientes y, en un lenguaje real, puede alcanzar límites de memoria o profundidad. Una repetición puede calcular el mismo producto manteniendo un acumulador. Compararemos sus recursos después.</p><dl><dt>función algorítmica</dt><dd>Una función reúne pasos con nombre, recibe datos mediante parámetros y devuelve un resultado a quien la llama.</dd><dt>recursión inicial</dt><dd>La recursión resuelve una entrada mediante llamadas a la misma función con entradas más pequeñas según una medida explícita.</dd><dt>terminación recursiva</dt><dd>La terminación recursiva necesita un caso base y un progreso que lo alcance para todas las entradas permitidas.</dd></dl><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Queremos calcular FACTORIAL(3) conservando el trabajo pendiente de cada llamada.</p><p>Las entradas descienden 3, 2, 1, 0; después regresan los resultados 1, 1, 2 y 6.</p><p>El resultado final es 6 y ninguna llamada se repite con la misma entrada.</p><p><strong>Condición:</strong> El factorial admite enteros no negativos; este ejemplo se traza con valores pequeños.</p></section>",
   "quiz": [
     {
       "id": "q1",
       "type": "choice",
       "concept": "algoritmia.funcion-algoritmica",
-      "prompt": "¿Qué hace return en doble?",
+      "prompt": "En DOBLE(5), ¿qué papel tiene 5?",
       "options": [
-        "Entrega un valor a quien llamó la función",
-        "Solo escribe en consola",
-        "Repite la función sin fin"
+        "Es el argumento recibido por el parámetro n.",
+        "Es el nombre de la función.",
+        "Es siempre la salida."
       ],
       "answer": 0,
-      "explanation": "El resultado puede usarse en otra expresión."
+      "explanation": "El argumento es el valor concreto de la llamada."
     },
     {
       "id": "q2",
       "type": "choice",
-      "concept": "algoritmia.recursion-inicial",
-      "prompt": "¿Qué hace recursiva a factorial?",
+      "concept": "algoritmia.funcion-algoritmica",
+      "prompt": "¿Qué hace DEVOLVER?",
       "options": [
-        "Se llama a sí misma con un argumento menor",
-        "Usa multiplicación",
-        "Tiene varias líneas"
+        "Imprime siempre una línea.",
+        "Entrega un resultado y termina la llamada.",
+        "Repite toda la función."
       ],
-      "answer": 0,
-      "explanation": "Una llamada al mismo procedimiento reduce el problema."
+      "answer": 1,
+      "explanation": "Mostrar y devolver son operaciones distintas."
     },
     {
       "id": "q3",
       "type": "choice",
-      "concept": "algoritmia.terminacion-recursiva",
-      "prompt": "¿Qué permite alcanzar el caso base en el dominio admitido?",
+      "concept": "algoritmia.recursion-inicial",
+      "prompt": "¿Qué trabajo queda pendiente en FACTORIAL(3)?",
       "options": [
-        "n entero no negativo y reducción por uno",
-        "Un caso base aunque no se alcance",
-        "Llamar siempre con el mismo n"
+        "Volver a calcular siempre FACTORIAL(3).",
+        "Multiplicar 0 por 3.",
+        "Multiplicar 3 por el resultado de FACTORIAL(2)."
       ],
-      "answer": 0,
-      "explanation": "La reducción lleva los enteros no negativos a cero."
+      "answer": 2,
+      "explanation": "Cada llamada conserva su trabajo pendiente."
     },
     {
       "id": "q4",
       "type": "choice",
-      "concept": "algoritmia.recursion-inicial",
-      "prompt": "¿Por qué las llamadas pendientes usan memoria?",
+      "concept": "algoritmia.terminacion-recursiva",
+      "prompt": "¿Por qué termina para enteros no negativos?",
       "options": [
-        "Conservan su contexto hasta recibir el resultado",
-        "Toda multiplicación crea un archivo",
-        "print duplica la entrada"
+        "n disminuye hasta el caso base cero.",
+        "Porque todas las funciones terminan.",
+        "Porque contiene la palabra DEVOLVER."
       ],
       "answer": 0,
-      "explanation": "La pila permite retomar las llamadas que todavía esperan."
+      "explanation": "El contrato y el progreso garantizan alcanzar el caso base."
+    },
+    {
+      "id": "q5",
+      "type": "choice",
+      "concept": "algoritmia.terminacion-recursiva",
+      "prompt": "¿Qué ocurre con la entrada −2 bajo este contrato?",
+      "options": [
+        "Tiene factorial −2.",
+        "No está admitida.",
+        "Termina al restar uno dos veces."
+      ],
+      "answer": 1,
+      "explanation": "Restar uno a un negativo se aleja del caso base."
     }
   ],
   "activities": [
@@ -60,90 +73,105 @@
       "id": "aplicar",
       "type": "text",
       "concept": "algoritmia.terminacion-recursiva",
-      "prompt": "¿Qué devuelve factorial(0) según el caso base?",
+      "prompt": "¿Qué devuelve FACTORIAL(0) según el caso base?",
       "answers": [
         "1"
       ],
-      "hint": "Es la definición que termina las llamadas.",
-      "explanation": "Devuelve uno sin otra llamada recursiva."
+      "hint": "El caso base devuelve directamente el producto vacío.",
+      "explanation": "Devuelve uno y no inicia otra llamada."
+    },
+    {
+      "id": "traza-retornos",
+      "type": "text",
+      "concept": "algoritmia.recursion-inicial",
+      "prompt": "Traza FACTORIAL(4). Escribe los resultados que regresan, desde FACTORIAL(0) hasta FACTORIAL(4), separados por comas.",
+      "answers": [
+        "1, 1, 2, 6, 24",
+        "1,1,2,6,24"
+      ],
+      "hint": "Empieza por uno y multiplica sucesivamente por 1, 2, 3 y 4.",
+      "explanation": "Las llamadas regresan en orden inverso a su creación."
+    },
+    {
+      "id": "reparar-progreso",
+      "type": "text",
+      "concept": "algoritmia.terminacion-recursiva",
+      "prompt": "En DEVOLVER n × FACTORIAL(n), ¿qué argumento debe reemplazar al segundo n para acercarse al caso base?",
+      "answers": [
+        "n - 1",
+        "n−1",
+        "n − 1",
+        "n-1"
+      ],
+      "hint": "La entrada debe disminuir exactamente en uno.",
+      "explanation": "n − 1 hace progresar la llamada para los enteros positivos admitidos."
     }
   ],
   "requiresConcepts": [
-    "algoritmia.traduccion-a-codigo",
-    "algoritmia.sintaxis-de-implementacion",
-    "algoritmia.contrato-de-entrada"
+    "algoritmia.pseudocodigo",
+    "algoritmia.secuencia-de-pasos",
+    "algoritmia.decision",
+    "algoritmia.repeticion",
+    "algoritmia.traza-manual",
+    "algoritmia.terminacion"
   ],
-  "outcome": "¿Qué devuelve factorial(0) según el caso base?",
+  "outcome": "Trazar llamadas y retornos y justificar que una función recursiva alcanza su caso base.",
   "sources": [
     {
-      "title": "OpenDSA · análisis de algoritmos",
+      "title": "OpenDSA: análisis de algoritmos",
       "url": "https://opendsa-server.cs.vt.edu/ODSA/Books/Everything/html/AlgorithmAnalysis.html"
     },
     {
-      "title": "Tutorial oficial de Python",
-      "url": "https://docs.python.org/3/tutorial/controlflow.html"
+      "title": "MIT OpenCourseWare: introducción a algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"
     }
   ],
   "coverage": {
     "algoritmia.funcion-algoritmica": {
-      "explanationExcerpt": "Una función agrupa un procedimiento con nombre, recibe parámetros y puede devolver un resultado a quien la llama.",
+      "explanationExcerpt": "Una función reúne pasos con nombre, recibe datos mediante parámetros y devuelve un resultado a quien la llama.",
       "assessmentIds": [
-        "q1"
+        "q1",
+        "q2"
       ]
     },
     "algoritmia.recursion-inicial": {
-      "explanationExcerpt": "La recursión resuelve un problema mediante llamadas al mismo procedimiento con entradas que se acercan al caso base.",
-      "assessmentIds": [
-        "q2",
-        "q4"
-      ]
-    },
-    "algoritmia.terminacion-recursiva": {
-      "explanationExcerpt": "La terminación recursiva necesita un caso base y una medida que progrese hacia él para todas las entradas admitidas.",
+      "explanationExcerpt": "La recursión resuelve una entrada mediante llamadas a la misma función con entradas más pequeñas según una medida explícita.",
       "assessmentIds": [
         "q3"
       ]
+    },
+    "algoritmia.terminacion-recursiva": {
+      "explanationExcerpt": "La terminación recursiva necesita un caso base y un progreso que lo alcance para todas las entradas permitidas.",
+      "assessmentIds": [
+        "q4",
+        "q5"
+      ]
     }
+  },
+  "examples": [],
+  "learningDesign": {
+    "assumptions": [
+      "El factorial admite enteros no negativos; este ejemplo se traza con valores pequeños."
+    ],
+    "workedExample": {
+      "problem": "Queremos calcular FACTORIAL(3) conservando el trabajo pendiente de cada llamada.",
+      "reasoning": "Las entradas descienden 3, 2, 1, 0; después regresan los resultados 1, 1, 2 y 6.",
+      "result": "El resultado final es 6 y ninguna llamada se repite con la misma entrada."
+    },
+    "transferActivityIds": [
+      "aplicar",
+      "traza-retornos",
+      "reparar-progreso"
+    ]
   },
   "technicalReview": {
     "verifiedOn": "2026-11-07",
-    "reviewDue": "2027-02-04",
+    "reviewDue": "2027-05-05",
     "technologyRefs": [
-      "foundations",
-      "python"
+      "foundations"
     ],
-    "testedVersions": [
-      {
-        "runtime": "python",
-        "versions": [
-          "3.12.14",
-          "3.15.2"
-        ],
-        "scope": "standard-library-example"
-      }
-    ],
-    "note": "Contenido y contratos revisados; los ejemplos Python se contrastan con el runner del repositorio.",
-    "policyDigest": "3deb8585ca2fa9f354114de202cbace1e317a49b68a42d1edf6909e61c43b421"
-  },
-  "examples": [
-    {
-      "id": "principal",
-      "language": "python",
-      "code": "def doble(n):\n    return n * 2\n\ndef factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n\nprint(doble(5))\nprint(factorial(3))",
-      "stdout": "10\n6\n"
-    }
-  ],
-  "learningDesign": {
-    "assumptions": [
-      "El factorial admite enteros no negativos y pequeños. Un argumento negativo no progresa hacia el caso base."
-    ],
-    "workedExample": {
-      "problem": "Situación: Calculas factorial(3) con el caso base en cero.",
-      "reasoning": "Razonamiento: Las llamadas reducen el argumento y guardan trabajo pendiente; al devolver uno desde el caso base se multiplican uno, dos y tres.",
-      "result": "Resultado: La función devuelve 6; el progreso hacia el caso base depende del contrato de enteros no negativos."
-    },
-    "transferActivityIds": [
-      "aplicar"
-    ]
+    "testedVersions": [],
+    "note": "Revisión de conceptos, notación, fuentes y condiciones; no se atribuye ejecución a ejemplos de pseudocódigo o explicaciones sin programas.",
+    "policyDigest": "a219497c0cd5d59e45322551975de61055635324ddd1bae937d9d0c27bc4caeb"
   }
 }

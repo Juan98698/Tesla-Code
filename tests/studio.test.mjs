@@ -17,6 +17,8 @@ test('playgrounds return real local transformations for every specialty and reje
   assert.equal(playgroundSettings('unknown'), playgroundSettings('fundamentos'));
   assert.equal(runPlayground('fundamentos', '-1').body.despues, 0);
   assert.equal(runPlayground('unknown', '2').body.despues, 3);
+  assert.equal(runPlayground('python', '3').body.total, 29);
+  assert.equal(runPlayground('python', '0').body.total, 5);
   assert.equal(runPlayground('algoritmia', '-8, -3, -6').body.mayor, -3);
   assert.equal(runPlayground('algoritmia', '.5, -2, 0').body.mayor, 0.5);
   assert.equal(runPlayground('backend', '/saludo').status, '200 OK');
@@ -36,6 +38,8 @@ test('playgrounds return real local transformations for every specialty and reje
   for (const [id, value] of [
     ['fundamentos', ''],
     ['fundamentos', 'abc'],
+    ['python', '-1'],
+    ['python', '1.5'],
     ['fundamentos', '1000001'],
     ['ia', 'x'.repeat(161)],
     ['algoritmia', '1,,2'],
@@ -102,6 +106,6 @@ test('workbench tabs, experiments and route selection never manufacture course p
   root.querySelector('#studio-value').value = '3';
   submit(root.querySelector('form'));
   assert.equal(root.querySelector('#studio-error').hidden, true);
-  assert.deepEqual(selected, Array(6).fill('backend'));
+  assert.deepEqual(selected, Array(routes.length).fill('backend'));
   assert.deepEqual(state, before);
 });

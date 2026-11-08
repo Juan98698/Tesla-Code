@@ -15,9 +15,9 @@ test('algorithm entry builds a solution before introducing Python and recursion 
       'metodo-para-resolver-problemas',
       'pseudocodigo-y-estructuras',
       'trazar-y-verificar-soluciones',
-      'implementar-algoritmos-en-python',
       'funciones-y-recursion-algoritmica',
       'medir-tiempo-y-memoria',
+      'matematicas-para-complejidad',
     ],
   );
   for (const lesson of r.lessons.slice(0, 4)) {

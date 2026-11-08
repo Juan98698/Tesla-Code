@@ -1,3 +1,4 @@
+import { installPythonRuntime, solveActivity } from './support/python.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
@@ -50,8 +51,9 @@ try {
       (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : chromium.executablePath()),
     args: ['--no-sandbox'],
   });
-  const context = await browser.newContext({ reducedMotion: 'reduce' }),
-    page = await context.newPage(),
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  await installPythonRuntime(context);
+  const page = await context.newPage(),
     errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('response', (response) => {
@@ -60,7 +62,7 @@ try {
   await page.goto(origin);
   await page.locator('.hero').waitFor();
   assert.equal(await page.locator('.route-card').count(), 3);
-  assert.equal(await page.locator('#studio-route-select option').count(), 6);
+  assert.equal(await page.locator('#studio-route-select option').count(), routes.length);
   await page.getByRole('link', { name: /Empieza tu primera lección/ }).click();
   await page.locator('#lesson').waitFor();
   assert.match(await page.locator('h1').innerText(), /primer paso/);
@@ -177,9 +179,8 @@ try {
     await page.locator('#activities [data-activity]').first().waitFor();
     for (const a of data.activities) {
       const section = page.locator(`[data-activity="${a.id}"]`);
-      await section.locator('input').fill(a.answers[0]);
-      await section.locator('button[type=submit]').click();
-      assert.match(await section.locator('[role=status]').innerText(), /resolviste/);
+      await solveActivity(page, a);
+      assert.match(await section.locator('.practice-feedback').innerText(), /resolviste/);
     }
     if (meta.id === 'variables') {
       await page.locator('.runner textarea').fill('a = 4\na = a + 3\nmostrar(a)');

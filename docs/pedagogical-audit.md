@@ -1,8 +1,12 @@
 # Auditoría teórica y conceptual
 
+Este documento conserva la auditoría de la versión de 90 lecciones. El [registro de implementación](implementation-status.md) documenta los cambios posteriores de Algoritmia, Python, ejecución y progreso, junto con la deuda todavía pendiente.
+
 Se revisaron los seis mapas curriculares y las explicaciones, ejemplos, cuestionarios y prácticas publicados. La revisión es asistida por Codex y se registra con huellas en `content/pedagogy-reviews.json`. No se ha realizado una evaluación independiente con docentes ni una prueba de aprendizaje longitudinal con estudiantes.
 
 La versión auditada contiene 343 temas en seis mapas, 90 lecciones publicadas y 299 conceptos introducidos con trazabilidad explicativa y evaluativa. Los 253 temas pendientes no se presentan como contenido ya validado.
+
+El [diagnóstico posterior](diagnostico-plataforma.md), contrastado con observaciones del usuario sobre esta misma versión, registra dependencias académicas artificiales y actividades insuficientes para demostrar producción autónoma. Estos hallazgos siguen pendientes aunque los controles estructurales existentes pasen. El [plan integral de mejora](plan-mejora-plataforma.md) establece su corrección y evaluación; las conclusiones de esta auditoría deben leerse junto con esas limitaciones.
 
 ## Revisión del 7 de noviembre de 2026
 

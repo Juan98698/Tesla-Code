@@ -1,3 +1,4 @@
+import { installPythonRuntime, solveActivity } from './support/python.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
@@ -26,6 +27,7 @@ await withBrowser(4320, async (browser, origin) => {
       viewport: { width, height: 1000 },
       reducedMotion: 'reduce',
     });
+    await installPythonRuntime(context);
     const page = await context.newPage(),
       errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
@@ -40,7 +42,7 @@ await withBrowser(4320, async (browser, origin) => {
     assert.ok(
       await page.locator('.brand img').evaluate((el) => el.complete && el.naturalWidth > 0),
     );
-    assert.equal(await page.locator('#studio-route-select option').count(), 6);
+    assert.equal(await page.locator('#studio-route-select option').count(), routes.length);
     for (const route of routes) {
       await page.locator('#studio-route-select').selectOption(route.id);
       await page.locator(`[data-studio-route="${route.id}"]`).waitFor();
@@ -85,8 +87,7 @@ await withBrowser(4320, async (browser, origin) => {
       await page.locator('#activities [data-activity]').first().waitFor();
       for (const activity of data.activities) {
         const section = page.locator('#activities [data-activity="' + activity.id + '"]');
-        await section.locator('input').fill(activity.answers[0]);
-        await section.locator('button[type=submit]').click();
+        await solveActivity(page, activity);
       }
       await answerQuiz(page, data);
       const state = await snapshot(page);
@@ -185,14 +186,17 @@ await withBrowser(4320, async (browser, origin) => {
     await page.reload();
     await page.locator('#qbox').waitFor();
     const finished = await snapshot(page);
-    assert.equal(finished.completed.filter((key) => key.startsWith('algoritmia/')).length, 7);
+    assert.equal(
+      finished.completed.filter((key) => key.startsWith('algoritmia/')).length,
+      algorithmLessons.length,
+    );
     assert.equal(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
       true,
     );
     assert.deepEqual(errors, []);
     console.log(
-      `PASS acceso ${width}px: seis entradas libres, secuencia interna, diagnóstico opcional, repasos sin créditos, modo con experiencia, progreso real y movimiento reducido.`,
+      `PASS acceso ${width}px: entradas libres, secuencia interna, diagnóstico opcional, repasos sin créditos, modo con experiencia, progreso real y movimiento reducido.`,
     );
     await context.close();
   }

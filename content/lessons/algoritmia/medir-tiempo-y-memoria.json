@@ -1,127 +1,158 @@
 {
   "id": "medir-tiempo-y-memoria",
-  "html": "<p>Mide con entradas de tamaños y características diferentes. El tiempo depende de la máquina, del entorno y de la implementación. Repite mediciones y separa preparación de datos de la operación que estás evaluando.</p><p>Además del tiempo, observa memoria auxiliar. Recorrer una lista manteniendo una suma usa pocas variables extra; crear otra lista del mismo tamaño necesita espacio adicional proporcional a la entrada. Antes de formalizar el crecimiento con Big O estudiarás funciones, potencias y logaritmos. Un acumulador conserva un resultado parcial, como la suma de los números ya visitados.</p><pre data-language=\"text\">sumar una lista: un acumulador\ncrear una copia: otra lista de igual tamaño</pre><details class=\"concept-notes\"><summary>Conceptos clave: repasa su significado</summary><dl><dt>tiempo de ejecución</dt><dd>El tiempo de ejecución es la duración observada de una operación en un entorno concreto. Puede cambiar entre mediciones; documenta entorno, entradas y repeticiones.</dd><dt>tamaño de entrada</dt><dd>El tamaño de entrada cuantifica los datos del problema, como el número de elementos de una lista. Especifica qué representa n antes de comparar crecimientos.</dd></dl></details><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Situación: Comparas sumar una lista con un acumulador y crear otra lista de igual longitud.</p><p>Razonamiento: Ambas recorren los datos, pero la copia conserva un espacio para cada elemento adicional, mientras la suma mantiene un resultado parcial.</p><p>Resultado: La copia necesita memoria auxiliar proporcional a la entrada; medir segundos responde otra pregunta.</p><p><strong>Condiciones del ejemplo:</strong> Se siguen pasos finitos sobre los datos admitidos; el ejemplo se explica antes de pedir su aplicación.</p></section><p>La memoria auxiliar es el espacio adicional que utiliza una solución aparte de sus datos de entrada y de la salida si se declara ese criterio.</p>",
+  "html": "<h2>Qué significa «este algoritmo es rápido»</h2><p>Antes de comparar, define el problema, los datos y el recurso. Un algoritmo incorrecto que responde inmediatamente no resuelve mejor el problema. Dos programas también pueden devolver lo mismo y emplear cantidades distintas de memoria. Medir tiempo y estudiar espacio son preguntas relacionadas, pero diferentes.</p>\n <p>Considera sumar una lista de números. Su tamaño de entrada n es la cantidad de elementos, no el valor del número mayor. Las listas [1000, 2000] y [1, 2] tienen ambas tamaño 2. En otros problemas el tamaño puede ser el número de caracteres o de conexiones de un grafo; debe declararse cada vez.</p>\n <h2>Un conteo reproducible a mano</h2><p>Usaremos una suma por elemento. La variable total empieza en cero y se actualiza tras cada visita. En la notación siguiente, PARA CADA visita todos los elementos en su orden; ← asigna; + suma; MOSTRAR presenta el resultado. Una lista vacía no tiene visitas y conserva total = 0.</p><pre data-language=\"pseudocode\">total ← 0\nPARA CADA numero DE datos HACER\n    total ← total + numero\nFIN PARA\nMOSTRAR total</pre><p>Con datos [4, 1, 3], la traza de total es 0 → 4 → 5 → 8. Se hacen tres sumas. Con seis elementos se hacen seis; con doce, doce. Las instrucciones de inicialización y salida agregan trabajo fijo. Si nuestro indicador cuenta únicamente sumas, debemos decirlo: no hemos contado cada operación de la máquina.</p>\n <p>Este modelo supone que sumar y guardar un número cuesta una unidad. Para números de tamaño acotado es una aproximación útil; si estudiamos enteros con millones de dígitos, el tamaño de los números también importa y habría que ampliar el modelo.</p>\n <h2>Medición con reloj</h2><p>Cuando implementes el algoritmo, medirás duraciones. Un registro útil incluye versión del lenguaje, dispositivo, entrada, número de repeticiones y qué instrucciones se cronometraron. Crear la lista dentro de la medición responde a una pregunta distinta de recibirla ya creada. La primera ejecución también puede incluir carga o inicialización.</p>\n <p>Repite con entradas de varios tamaños y conserva varias mediciones. Una tarea diminuta puede durar menos de lo que distingue el reloj y otros programas pueden alterar el resultado. La mediana, el valor central de las mediciones ordenadas, reduce la influencia de una observación extrema; no elimina todos los factores. Tampoco convierte una observación en una prueba matemática para cualquier tamaño.</p>\n <h2>Separar entrada, salida y espacio auxiliar</h2><p>El recorrido anterior mantiene un acumulador y el elemento actual. Bajo el modelo de números acotados, esa cantidad de almacenamiento no crece con n. La lista de entrada sí crece, pero no la contamos como auxiliar porque ya se recibió.</p>\n <p>Ahora imagina copiar todos los valores a otra lista antes de sumarlos. Conservas n posiciones adicionales. Para tres entradas son tres; para seis, seis. Copiar puede ser razonable si necesitas conservar una versión independiente, pero tiene un coste que debemos explicar. Dos nombres que apuntan a la misma lista no constituyen una copia.</p>\n <p>La salida también necesita un convenio: en la suma es un solo número; en un algoritmo que produce otra lista puede tener n elementos. Aquí informaremos por separado entrada, salida y memoria auxiliar. Así evitamos llamar «espacio constante» a un programa que mantiene una copia completa oculta.</p>\n <h2>Errores habituales y siguiente paso</h2><p>No concluyas que un algoritmo escala mejor por una sola prueba de pocos elementos. No confundas n con el valor de los datos ni los segundos con el número de operaciones. Primero registra conteos, condiciones y memoria; las próximas lecciones permitirán describir cómo crecen esas cantidades mediante funciones y cotas.</p><dl><dt>tiempo de ejecución</dt><dd>El tiempo de ejecución es la duración observada de un programa bajo un entorno, una entrada y un procedimiento de medición definidos.</dd><dt>memoria auxiliar</dt><dd>La memoria auxiliar es el almacenamiento adicional utilizado por el algoritmo, separado de la entrada y de la salida según el convenio declarado.</dd><dt>tamaño de entrada</dt><dd>El tamaño de entrada cuantifica los datos del problema; para recorrer una lista, n representa su cantidad de elementos.</dd></dl><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Comparamos sumar [4, 1, 3] directamente con copiar la lista y después sumarla.</p><p>Ambas estrategias realizan tres sumas; la segunda conserva además tres posiciones para una copia.</p><p>El resultado es 8 en ambas, pero la copia requiere espacio auxiliar que crece con la entrada.</p><p><strong>Condición:</strong> Se cuenta una suma por elemento y se supone que cada número ocupa una cantidad acotada de memoria.</p></section>",
   "quiz": [
     {
       "id": "q1",
       "type": "choice",
       "concept": "algoritmia.tamano-de-entrada",
-      "prompt": "¿Qué debe variar en una medición?",
+      "prompt": "En [100, 200, 300], si n cuenta elementos, ¿cuánto vale?",
       "options": [
-        "El tamaño y tipo de entrada",
-        "Solo el color de pantalla",
-        "Solo el nombre del archivo"
+        "3",
+        "600",
+        "300"
       ],
       "answer": 0,
-      "explanation": "El tamaño y tipo de entrada. Relaciónalo con el ejemplo de la lección."
+      "explanation": "El tamaño definido es la cantidad de datos."
     },
     {
       "id": "q2",
       "type": "choice",
-      "concept": "algoritmia.memoria-auxiliar",
-      "prompt": "¿Qué requiere espacio adicional proporcional?",
+      "concept": "algoritmia.tiempo-de-ejecucion",
+      "prompt": "Una ejecución tarda menos en otro ordenador. ¿Qué demuestra?",
       "options": [
-        "Una copia de la lista",
-        "Un único acumulador",
-        "Un comentario"
+        "Una prueba de mejor complejidad.",
+        "Una duración bajo otro entorno.",
+        "Que el resultado siempre es correcto."
       ],
-      "answer": 0,
-      "explanation": "Una copia de la lista. Relaciónalo con el ejemplo de la lección."
+      "answer": 1,
+      "explanation": "El entorno modifica el tiempo observado."
     },
     {
       "id": "q3",
       "type": "choice",
-      "concept": "algoritmia.tiempo-de-ejecucion",
-      "prompt": "¿Una sola medición basta para comparar siempre?",
+      "concept": "algoritmia.memoria-auxiliar",
+      "prompt": "¿Qué cambia al crear una copia de n elementos?",
       "options": [
-        "No",
-        "Sí",
-        "Solo si da un número pequeño"
+        "Se elimina la lista original.",
+        "El espacio adicional siempre sigue siendo uno.",
+        "Se mantienen n posiciones adicionales."
       ],
-      "answer": 0,
-      "explanation": "No. Relaciónalo con el ejemplo de la lección."
+      "answer": 2,
+      "explanation": "La copia ocupa almacenamiento adicional."
     },
     {
       "id": "q4",
       "type": "choice",
       "concept": "algoritmia.tiempo-de-ejecucion",
-      "prompt": "¿Por qué separar preparación y operación?",
+      "prompt": "¿Por qué separar la creación de entradas del recorrido medido?",
       "options": [
-        "Para medir lo que quieres comparar",
-        "Para ocultar el resultado",
-        "Para evitar pruebas"
+        "Para definir qué trabajo se está comparando.",
+        "Porque crear datos no tarda nunca.",
+        "Para garantizar resultados más pequeños."
       ],
       "answer": 0,
-      "explanation": "Para medir lo que quieres comparar. Relaciónalo con el ejemplo de la lección."
+      "explanation": "La preparación puede dominar una medición pequeña."
     }
   ],
   "activities": [
     {
       "id": "aplicar",
       "type": "text",
+      "concept": "algoritmia.memoria-auxiliar",
       "prompt": "¿Crear una copia de una lista necesita espacio adicional? Escribe sí o no.",
       "answers": [
         "sí",
         "si"
       ],
-      "hint": "Se almacenan nuevamente sus elementos.",
-      "explanation": "La copia necesita espacio adicional proporcional a la lista.",
-      "concept": "algoritmia.memoria-auxiliar"
+      "hint": "La copia conserva posiciones para los valores.",
+      "explanation": "Sí; aquí cada elemento copiado ocupa una posición adicional."
+    },
+    {
+      "id": "contar-sumas",
+      "type": "text",
+      "concept": "algoritmia.tamano-de-entrada",
+      "prompt": "Con 8 números, ¿cuántas sumas ejecuta el recorrido mostrado?",
+      "answers": [
+        "8"
+      ],
+      "hint": "Cuenta una actualización por elemento.",
+      "explanation": "Se realizan ocho sumas; la inicialización no está incluida en ese indicador."
+    },
+    {
+      "id": "comparar-copias",
+      "type": "text",
+      "concept": "algoritmia.memoria-auxiliar",
+      "prompt": "Si conservas una copia de 12 valores y la entrada crece a 24, ¿cuántas posiciones adicionales ocupa ahora la copia?",
+      "answers": [
+        "24"
+      ],
+      "hint": "La copia tiene una posición por elemento.",
+      "explanation": "El espacio adicional se duplica al duplicar esa entrada."
     }
   ],
   "requiresConcepts": [
-    "algoritmia.funcion-algoritmica",
-    "algoritmia.recursion-inicial",
-    "algoritmia.terminacion-recursiva",
-    "algoritmia.correccion",
+    "algoritmia.repeticion",
+    "algoritmia.traza-manual",
     "algoritmia.eficiencia",
     "algoritmia.restriccion-del-problema"
   ],
-  "outcome": "¿Crear una copia de una lista necesita espacio adicional? Escribe sí o no.",
-  "sources": [],
+  "outcome": "Definir n, contar trabajo y distinguir tiempo medido de memoria auxiliar.",
+  "sources": [
+    {
+      "title": "OpenDSA: análisis de algoritmos",
+      "url": "https://opendsa-server.cs.vt.edu/ODSA/Books/Everything/html/AlgorithmAnalysis.html"
+    },
+    {
+      "title": "MIT OpenCourseWare: introducción a algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"
+    }
+  ],
   "coverage": {
     "algoritmia.tiempo-de-ejecucion": {
-      "explanationExcerpt": " Conceptos clave: repasa su significado tiempo de ejecución El tiempo de ejecución es la duración observada de una operación en un entorno concreto. Puede cambiar entre mediciones; documenta entorno, entradas y repeticiones. tamaño de entrada El tamaño de entrada cuantifica los datos del problema, como el número de elementos de una lista.",
+      "explanationExcerpt": "El tiempo de ejecución es la duración observada de un programa bajo un entorno, una entrada y un procedimiento de medición definidos.",
       "assessmentIds": [
-        "q3",
+        "q2",
         "q4"
       ]
     },
     "algoritmia.memoria-auxiliar": {
-      "explanationExcerpt": "La memoria auxiliar es el espacio adicional que utiliza una solución aparte de sus datos de entrada y de la salida si se declara ese criterio.",
+      "explanationExcerpt": "La memoria auxiliar es el almacenamiento adicional utilizado por el algoritmo, separado de la entrada y de la salida según el convenio declarado.",
       "assessmentIds": [
-        "q2"
+        "q3"
       ]
     },
     "algoritmia.tamano-de-entrada": {
-      "explanationExcerpt": "menta entorno, entradas y repeticiones. tamaño de entrada El tamaño de entrada cuantifica los datos del problema, como el número de elementos de una lista. Especifica qué representa n antes de comparar crecimientos.",
+      "explanationExcerpt": "El tamaño de entrada cuantifica los datos del problema; para recorrer una lista, n representa su cantidad de elementos.",
       "assessmentIds": [
         "q1"
       ]
     }
   },
-  "technicalReview": {
-    "verifiedOn": "2026-11-06",
-    "reviewDue": "2027-02-04",
-    "technologyRefs": [
-      "foundations",
-      "python"
-    ],
-    "testedVersions": [],
-    "note": "Revisión de alcance, fuentes y compatibilidad. Una referencia de biblioteca no implica haber ejecutado ese SDK.",
-    "policyDigest": "3deb8585ca2fa9f354114de202cbace1e317a49b68a42d1edf6909e61c43b421"
-  },
+  "examples": [],
   "learningDesign": {
     "assumptions": [
-      "Se siguen pasos finitos sobre los datos admitidos; el ejemplo se explica antes de pedir su aplicación."
+      "Se cuenta una suma por elemento y se supone que cada número ocupa una cantidad acotada de memoria."
     ],
     "workedExample": {
-      "problem": "Situación: Comparas sumar una lista con un acumulador y crear otra lista de igual longitud.",
-      "reasoning": "Razonamiento: Ambas recorren los datos, pero la copia conserva un espacio para cada elemento adicional, mientras la suma mantiene un resultado parcial.",
-      "result": "Resultado: La copia necesita memoria auxiliar proporcional a la entrada; medir segundos responde otra pregunta."
+      "problem": "Comparamos sumar [4, 1, 3] directamente con copiar la lista y después sumarla.",
+      "reasoning": "Ambas estrategias realizan tres sumas; la segunda conserva además tres posiciones para una copia.",
+      "result": "El resultado es 8 en ambas, pero la copia requiere espacio auxiliar que crece con la entrada."
     },
     "transferActivityIds": [
-      "aplicar"
+      "aplicar",
+      "contar-sumas",
+      "comparar-copias"
     ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-07",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations"
+    ],
+    "testedVersions": [],
+    "note": "Revisión de conceptos, notación, fuentes y condiciones; no se atribuye ejecución a ejemplos de pseudocódigo o explicaciones sin programas.",
+    "policyDigest": "a219497c0cd5d59e45322551975de61055635324ddd1bae937d9d0c27bc4caeb"
   }
 }

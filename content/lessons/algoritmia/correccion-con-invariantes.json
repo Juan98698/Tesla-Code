@@ -1,0 +1,160 @@
+{
+  "id": "correccion-con-invariantes",
+  "html": "<h2>Una propiedad que explica el estado</h2><p>Volvamos al máximo de una lista. Una traza concreta muestra cómo cambia el candidato, pero queremos explicar por qué siempre funcionará para las entradas admitidas. La idea central es describir qué significa el candidato en cada punto del recorrido.</p>\n <p>El contrato exige una lista finita no vacía de números comparables. «Comparable» significa que podemos decidir si un número es mayor, menor o igual que otro. La postcondición pide devolver un elemento mayor o igual que todos los demás. Las precondiciones se comprueban o se documentan antes de ejecutar; no deben esconderse detrás de un resultado casual.</p>\n <p>Diremos que un prefijo son los primeros elementos de la lista hasta una posición. Para [−8, −3, −6], los prefijos no vacíos son [−8], [−8, −3] y [−8, −3, −6]. El invariante será: «mayor es el máximo de los elementos ya procesados».</p><pre data-language=\"pseudocode\">mayor ← primer elemento de datos\nPARA CADA valor DE los elementos restantes HACER\n    SI valor &gt; mayor ENTONCES\n        mayor ← valor\n    FIN SI\nFIN PARA\nDEVOLVER mayor</pre><h2>Inicialización: por qué es verdad antes del ciclo</h2><p>Procesamos primero un solo elemento y asignamos su valor a mayor. El máximo de un conjunto con un único elemento es ese elemento. Por eso el invariante ya se cumple antes de visitar el resto. Inicializar en cero fallaría con números negativos: cero no tendría por qué ser el máximo del prefijo ni pertenecer a él.</p>\n <h2>Mantenimiento: qué demuestra una iteración</h2><p>Supongamos que mayor es el máximo de todos los elementos visitados hasta ahora. Consideramos el siguiente valor. Si supera al candidato, se convierte en el nuevo máximo y lo guardamos. Si no lo supera, el candidato sigue siendo mayor o igual que todos los valores del prefijo ampliado. Ambos casos conservan el invariante.</p>\n <p>En particular, un empate no requiere reemplazar el candidato para obtener el valor máximo. Si el objetivo fuera devolver la primera o última posición donde aparece, el contrato y el estado tendrían que ampliarse. No atribuyas al algoritmo un resultado que nunca se propuso calcular.</p>\n <h2>Conclusión y terminación</h2><p>Al terminar, todos los elementos están procesados. El invariante afirma entonces que mayor es el máximo de toda la lista, justo la postcondición. Este razonamiento tiene la forma de una inducción: base antes del ciclo, paso que conserva la propiedad y aplicación al estado final.</p>\n <p>Falta justificar que llegaremos a ese estado. La cantidad de elementos restantes es un entero no negativo. Cada iteración consume uno y la lista es finita, de modo que el recorrido termina. Conservar una propiedad durante una repetición infinita no bastaría para entregar un resultado.</p>\n <h2>Casos límite que comprueban el contrato</h2><p>Con un solo elemento no se ejecuta el ciclo: la inicialización ya entrega el resultado. Con solo números negativos se conserva uno de ellos; con empates se devuelve el valor máximo. La lista vacía no permite tomar un primer elemento y está excluida. Una aplicación que la admita debe definir otro resultado o un error antes de utilizar este algoritmo.</p>\n <p>La propiedad «mayor es positivo» no es un invariante adecuado: ni siquiera se cumple con todas las entradas admitidas. «El programa sigue funcionando» tampoco precisa una relación verificable. Un buen invariante describe los datos procesados y el estado necesario para demostrar el objetivo.</p>\n <p>Practicar invariantes no reemplaza los tests. Una prueba matemática puede descansar en un supuesto que la implementación viola; los tests detectan errores concretos del programa. Mantener contrato, justificación y casos de prueba juntos ayuda a revisar las tres partes.</p><dl><dt>invariante de ciclo</dt><dd>Un invariante de ciclo es una propiedad que se cumple al inicio y se conserva después de cada iteración, relacionando el estado actual con el trabajo ya realizado.</dd><dt>inducción sobre iteraciones</dt><dd>La inducción sobre iteraciones justifica que una propiedad vale antes del ciclo y que cada paso la conserva, por lo que vale al finalizar.</dd><dt>precondiciones y resultado</dt><dd>Las precondiciones son las condiciones exigidas antes de ejecutar; la postcondición expresa lo que debe cumplirse al terminar correctamente.</dd></dl><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Justificamos el máximo de [−8, −3, −6] y generalizamos a listas finitas no vacías.</p><p>El primer elemento inicia un máximo válido; cada comparación conserva el máximo del prefijo y reduce los elementos restantes.</p><p>Al finalizar, el prefijo es toda la lista y el candidato −3 cumple la postcondición.</p><p><strong>Condición:</strong> La entrada es una lista finita no vacía de números comparables; se devuelve el valor máximo, no su posición.</p></section>",
+  "quiz": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "concept": "algoritmia.invariante-de-ciclo",
+      "prompt": "¿Qué describe el candidato después de procesar un prefijo?",
+      "options": [
+        "El máximo de los elementos ya procesados.",
+        "El máximo de los que todavía no vimos.",
+        "Un número siempre positivo."
+      ],
+      "answer": 0,
+      "explanation": "El invariante vincula estado y trabajo realizado."
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "concept": "algoritmia.induccion",
+      "prompt": "¿Qué hay que revisar para conservar el invariante?",
+      "options": [
+        "Solo el último valor.",
+        "Inicialización y mantenimiento por cada iteración.",
+        "Solo una lista positiva."
+      ],
+      "answer": 1,
+      "explanation": "La estructura inductiva necesita base y paso."
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "concept": "algoritmia.precondiciones",
+      "prompt": "¿Por qué se excluye la lista vacía en este algoritmo?",
+      "options": [
+        "Porque toda lista vacía consume mucha memoria.",
+        "Porque cero no existe.",
+        "La inicialización necesita un primer elemento."
+      ],
+      "answer": 2,
+      "explanation": "El contrato habilita la operación inicial."
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "concept": "algoritmia.induccion",
+      "prompt": "¿Qué demuestra que el recorrido termina?",
+      "options": [
+        "Quedan finitos elementos y cada iteración procesa uno.",
+        "Que el candidato sea grande.",
+        "Que exista una condición SI."
+      ],
+      "answer": 0,
+      "explanation": "Una medida no negativa disminuye hasta cero."
+    }
+  ],
+  "activities": [
+    {
+      "id": "aplicar",
+      "type": "text",
+      "concept": "algoritmia.invariante-de-ciclo",
+      "prompt": "En [−8, −3, −6], después de procesar los dos primeros valores, ¿cuánto vale mayor?",
+      "answers": [
+        "-3",
+        "−3"
+      ],
+      "hint": "El prefijo procesado es [−8, −3].",
+      "explanation": "−3 es el máximo de ese prefijo."
+    },
+    {
+      "id": "restantes",
+      "type": "text",
+      "concept": "algoritmia.induccion",
+      "prompt": "Hay 7 elementos y ya se procesaron 4. ¿Cuántos pasos de visita quedan?",
+      "answers": [
+        "3"
+      ],
+      "hint": "La cantidad restante es total menos procesados.",
+      "explanation": "Tres; esta cantidad disminuye al visitar cada elemento."
+    },
+    {
+      "id": "inicializacion",
+      "type": "text",
+      "concept": "algoritmia.precondiciones",
+      "prompt": "La entrada es [−9]. ¿Qué resultado debe devolver el recorrido, aunque el ciclo no se ejecute?",
+      "answers": [
+        "-9",
+        "−9"
+      ],
+      "hint": "El único elemento es también el máximo.",
+      "explanation": "La inicialización cumple la postcondición para una lista de tamaño uno."
+    }
+  ],
+  "requiresConcepts": [
+    "algoritmia.razonamiento-y-demostracion.1",
+    "algoritmia.razonamiento-y-demostracion.2",
+    "algoritmia.razonamiento-y-demostracion.3",
+    "algoritmia.repeticion",
+    "algoritmia.traza-manual"
+  ],
+  "outcome": "Justificar inicialización, mantenimiento, terminación y postcondición de un recorrido.",
+  "sources": [
+    {
+      "title": "OpenDSA: análisis de algoritmos",
+      "url": "https://opendsa-server.cs.vt.edu/ODSA/Books/Everything/html/AlgorithmAnalysis.html"
+    },
+    {
+      "title": "MIT OCW: introducción a algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"
+    }
+  ],
+  "coverage": {
+    "algoritmia.invariante-de-ciclo": {
+      "explanationExcerpt": "Un invariante de ciclo es una propiedad que se cumple al inicio y se conserva después de cada iteración, relacionando el estado actual con el trabajo ya realizado.",
+      "assessmentIds": [
+        "q1"
+      ]
+    },
+    "algoritmia.induccion": {
+      "explanationExcerpt": "La inducción sobre iteraciones justifica que una propiedad vale antes del ciclo y que cada paso la conserva, por lo que vale al finalizar.",
+      "assessmentIds": [
+        "q2",
+        "q4"
+      ]
+    },
+    "algoritmia.precondiciones": {
+      "explanationExcerpt": "Las precondiciones son las condiciones exigidas antes de ejecutar; la postcondición expresa lo que debe cumplirse al terminar correctamente.",
+      "assessmentIds": [
+        "q3"
+      ]
+    }
+  },
+  "examples": [],
+  "learningDesign": {
+    "assumptions": [
+      "La entrada es una lista finita no vacía de números comparables; se devuelve el valor máximo, no su posición."
+    ],
+    "workedExample": {
+      "problem": "Justificamos el máximo de [−8, −3, −6] y generalizamos a listas finitas no vacías.",
+      "reasoning": "El primer elemento inicia un máximo válido; cada comparación conserva el máximo del prefijo y reduce los elementos restantes.",
+      "result": "Al finalizar, el prefijo es toda la lista y el candidato −3 cumple la postcondición."
+    },
+    "transferActivityIds": [
+      "aplicar",
+      "restantes",
+      "inicializacion"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-07",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations"
+    ],
+    "testedVersions": [],
+    "note": "Revisión de conceptos, notación, fuentes y condiciones; no se atribuye ejecución a ejemplos de pseudocódigo o explicaciones sin programas.",
+    "policyDigest": "a219497c0cd5d59e45322551975de61055635324ddd1bae937d9d0c27bc4caeb"
+  }
+}

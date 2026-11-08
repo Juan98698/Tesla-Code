@@ -9,6 +9,7 @@ const symbols = {
   backend: '>_',
   'bases-de-datos': '▤',
   ia: '✳',
+  python: 'Py',
 };
 const points = {
   backend: [
@@ -73,7 +74,15 @@ export function studioHome(routes, state, next, href) {
   const settings = playgroundSettings(route.id),
     completed = new Set(state.completed);
   const milestones = studioMilestones(route, entry);
-  const featured = ['frontend', 'bases-de-datos', 'ia', 'backend', 'algoritmia', 'fundamentos']
+  const featured = [
+    'python',
+    'frontend',
+    'bases-de-datos',
+    'ia',
+    'backend',
+    'algoritmia',
+    'fundamentos',
+  ]
     .map((id) => routes.find((r) => r.id === id))
     .filter((r) => r && r.id !== route.id)
     .slice(0, 3);

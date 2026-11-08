@@ -14,6 +14,16 @@ Este documento conserva las decisiones aprobadas y su implementación: rutas con
 
 Ejemplos: un desarrollador Backend puede comenzar Frontend sin completar Fundamentos; un desarrollador Frontend puede comenzar Backend y repasar SQL cuando lo necesite, sin cursar previamente toda Bases de datos. El mismo criterio se aplica a Algoritmia e IA.
 
+## Condiciones para Python y ejemplos de otros lenguajes
+
+El usuario respalda incorporar una ruta propia de Python con contenidos actuales. Su desarrollo debe partir de cero: ninguna lección que use Python, JavaScript u otro lenguaje puede presuponer experiencia previa no enseñada en el recorrido. La sintaxis, herramientas y conceptos necesarios se explican y practican antes de exigir su aplicación. Los apoyos deben estar disponibles también para quien entra directamente a una especialidad.
+
+La profundidad y la secuencia entre lecciones son requisitos explícitos: el temario debe cubrir el alcance anunciado con explicaciones, ejemplos, errores frecuentes, práctica progresiva y proyectos integradores. Cada conocimiento necesario se introduce antes de utilizarlo; se revisa la continuidad dentro de cada módulo y entre módulos. Una lista extensa de títulos o explicaciones breves sin práctica suficiente no satisface esta condición.
+
+La elección de versiones y herramientas debe contrastarse con fuentes oficiales y probarse en el entorno utilizado por el estudiante. Se mantienen revisiones de soporte y deprecaciones; no se considera obsoleto un fundamento por su antigüedad.
+
+El [plan de mejora](plan-mejora-plataforma.md) propone un núcleo de Algoritmia en pseudocódigo y laboratorios Python complementarios, con evidencia separada de implementación. Esta modalidad todavía no está implementada ni modifica las reglas de progresión actuales.
+
 ## Dirección visual elegida
 
 - Vista de trabajo basada en la primera propuesta aprobada: grafito, paneles con profundidad, mapa de hitos a la izquierda, laboratorio a la derecha y tarjetas de especialidades debajo. En móvil se muestra primero el laboratorio.
