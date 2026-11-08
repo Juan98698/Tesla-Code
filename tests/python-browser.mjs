@@ -35,7 +35,7 @@ await withBrowser(4322, async (browser, origin) => {
     earned = await page.evaluate(() => JSON.parse(localStorage.getItem('teslacode:progress:v2')));
     assert.equal(earned.completed.length, published.length);
     await page.goto(origin + '/#/leccion/python/ejecutar-y-leer-codigo/practicar');
-    const editor = page.locator('[data-activity="reparar"] textarea');
+    const editor = page.locator('[data-activity="reparar"] .code-editor');
     await editor.waitFor();
     await editor.fill('print("mi borrador")');
     await page.reload();
@@ -44,7 +44,10 @@ await withBrowser(4322, async (browser, origin) => {
     await editor.fill('while True:\n    pass');
     const section = page.locator('[data-activity="reparar"]');
     await section.locator('button[type=submit]').click();
-    await section.getByText('Ejecutando los casos de prueba…', { exact: true }).waitFor();
+    await section
+      .locator('.console-status')
+      .filter({ hasText: 'Ejecutando los casos de prueba…' })
+      .waitFor();
     await page.goto(origin + '/#/ruta/python');
     await page.locator('#node-inspector').waitFor();
     assert.equal(await page.locator('iframe').count(), 0);

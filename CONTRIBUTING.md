@@ -18,7 +18,7 @@ Antes de entregar cambios:
 
 1. Lee [la guía editorial](docs/content-guide.md) si cambias contenido y [la arquitectura](docs/architecture.md) si cambias comportamiento.
 2. Conserva IDs de lecciones, preguntas y actividades para proteger el progreso. Separa cambios de contrato de simples cambios de presentación.
-3. Ejecuta las pruebas pertinentes. Para un cambio del ejecutor usa unidades y `npm run test:python`; para navegación, `test:access` y `test:e2e`.
+3. Ejecuta las pruebas pertinentes. Para un cambio del ejecutor usa unidades, `npm run test:python` y `npm run test:console`; para navegación, `test:access` y `test:e2e`.
 4. Aplica `npm run format`, que también actualiza la edición de recursos. Revisa el diff y las huellas editoriales; no renueves aprobaciones para ocultar un fallo.
 5. Describe comportamiento, verificación y limitaciones en la pull request.
 

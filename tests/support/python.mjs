@@ -31,7 +31,7 @@ export async function installPythonRuntime(context) {
 }
 export async function solveActivity(page, activity) {
   const section = page.locator('#activities [data-activity="' + activity.id + '"]');
-  if (activity.type === 'python') await section.locator('textarea').fill(activity.solution);
+  if (activity.type === 'python') await section.locator('.code-editor').fill(activity.solution);
   else await section.locator('input').fill(activity.answers[0]);
   await section.locator('button[type=submit]').click();
   try {

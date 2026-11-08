@@ -30,10 +30,56 @@ test('published Python solutions execute in the same pinned runtime as the brows
     'Browser and installed engines must use the same release',
   );
   runtime.runPython(PYTHON_HARNESS);
-  const evaluate = (code, cases, entrypoint) => {
-    runtime.globals.set('_exercise_payload', JSON.stringify({ code, cases, entrypoint }));
+  const evaluate = (code, cases, entrypoint, mode) => {
+    runtime.globals.set('_exercise_payload', JSON.stringify({ code, cases, entrypoint, mode }));
     return JSON.parse(runtime.runPython('_evaluate_exercise(_json.loads(_exercise_payload))'));
   };
+  const emitted = [];
+  runtime.globals.set('_console_emit', (text) => emitted.push(text));
+  const free = evaluate(
+    'print(input("Nombre: "))',
+    [{ name: 'free', stdin: ['Ana'] }],
+    undefined,
+    'run',
+  );
+  assert.equal(free.results[0].stdout, 'Nombre: Ana\n');
+  assert.equal(free.results[0].passed, null);
+  assert.equal(emitted.at(-1), 'Nombre: Ana\n');
+  const failure = evaluate('print("antes")\n1 / 0', [{ name: 'error' }], undefined, 'run');
+  assert.equal(failure.results[0].stdout, 'antes\n');
+  assert.match(failure.results[0].traceback, /ejercicio.py.*line 2/s);
+  assert.ok(!failure.results[0].traceback.includes('_evaluate_exercise'));
+  assert.equal(evaluate('x = 2', [{ name: 'silent' }], undefined, 'run').results[0].stdout, '');
+  const fn = evaluate(
+    'def twice(n):\n    print("debug")\n    return n * 2',
+    [{ name: 'f', args: [2], expected: 4 }],
+    'twice',
+  );
+  assert.equal(fn.results[0].actual, '4');
+  assert.equal(fn.results[0].stdout, 'debug\n');
+  let examples = 0;
+  for (const route of readdirSync('content/lessons')) {
+    for (const file of readdirSync('content/lessons/' + route).filter((name) =>
+      name.endsWith('.json'),
+    )) {
+      const data = JSON.parse(readFileSync('content/lessons/' + route + '/' + file));
+      for (const example of data.examples ?? []) {
+        if (example.environment === 'local') continue;
+        const path = '/console-example-' + examples++;
+        runtime.FS.mkdirTree(path);
+        runtime.runPython('import os\nos.chdir("' + path + '")');
+        const result = evaluate(
+          example.code,
+          [{ name: example.id, stdin: example.stdin ?? [] }],
+          undefined,
+          'run',
+        );
+        assert.equal(result.results[0].error, undefined, route + '/' + file);
+        assert.equal(result.results[0].stdout, example.stdout, route + '/' + file);
+      }
+    }
+  }
+  assert.ok(examples >= 43);
   for (const exercise of exercises) {
     assert.deepEqual(pythonExerciseErrors(exercise), [], exercise.key);
     const result = evaluate(exercise.solution, exercise.cases, exercise.entrypoint);

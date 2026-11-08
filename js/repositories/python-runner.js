@@ -10,6 +10,14 @@ export async function workerBootstrap(importRuntime = (url) => import(url)) {
       const python = await loadPyodide({ indexURL: data.indexURL, stdout() {}, stderr() {} });
       self.postMessage({ type: 'running' });
       python.runPython(data.harness);
+      let emittedAt = -Infinity;
+      python.globals.set('_console_emit', (output) => {
+        const now = performance.now();
+        if (now - emittedAt >= 50) {
+          emittedAt = now;
+          self.postMessage({ type: 'output', output: String(output).slice(0, 6000) });
+        }
+      });
       python.globals.set('_exercise_payload', JSON.stringify(data.job));
       const result = python.runPython('_evaluate_exercise(_json.loads(_exercise_payload))');
       self.postMessage({ type: 'result', result: JSON.parse(result) });
@@ -94,7 +102,7 @@ export function createPythonRunner({
   return {
     cancel,
     dispose: cancel,
-    run(job, onStatus = () => {}) {
+    run(job, onStatus = () => {}, onOutput = () => {}) {
       cancel();
       if (
         typeof job.code !== 'string' ||
@@ -144,6 +152,9 @@ export function createPythonRunner({
               timeout,
             );
             onStatus('running');
+          } else if (message.type === 'output') {
+            if (job.mode === 'run' && typeof message.output === 'string')
+              onOutput(message.output.slice(0, PYTHON_LIMITS.output));
           } else if (message.type === 'result') {
             if (
               !Array.isArray(message.result?.results) ||

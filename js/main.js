@@ -20,6 +20,7 @@ import { mountQuiz } from './features/quiz.js';
 import { widgets } from './widgets/index.js';
 import { mountSupport, mountOrientation } from './features/learning-support.js';
 import { mountProgressImport } from './features/progress-import.js';
+import { mountCodeExamples } from './features/code-activity.js';
 
 let routes = [],
   concepts = new Map(),
@@ -246,6 +247,8 @@ async function render() {
             }
           };
         });
+        if (tab === 'aprender')
+          disposeView = mountCodeExamples($('lesson'), data, { context: key });
         if (tab === 'aprender' && data.widget) {
           const widget = await widgets[data.widget]();
           if (version !== renderVersion) return;

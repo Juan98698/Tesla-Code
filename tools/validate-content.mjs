@@ -173,6 +173,19 @@ for (const [key, meta] of lessons) {
         fail(`${path}: IDs de ejemplo duplicados`);
       for (const example of data.examples) {
         if (
+          example.environment !== undefined &&
+          !['browser', 'local'].includes(example.environment)
+        )
+          fail(path + ': entorno de ejemplo desconocido');
+        if (example.environment === 'local' && !example.environmentNote?.trim())
+          fail(path + ': explica cómo ejecutar el ejemplo local');
+        if (
+          example.stdin !== undefined &&
+          (!Array.isArray(example.stdin) ||
+            example.stdin.some((value) => typeof value !== 'string'))
+        )
+          fail(path + ': entradas de ejemplo inválidas');
+        if (
           !example.id ||
           example.language !== 'python' ||
           typeof example.code !== 'string' ||
