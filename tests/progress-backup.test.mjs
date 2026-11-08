@@ -32,6 +32,13 @@ test('export/import round trip preserves evidence; merging copies cannot farm XP
 test('merging retains the strongest score and the latest bounded evidence without duplicating attempts', () => {
   const a = earned('python/first'),
     b = earned('python/first');
+  a.lessons['python/first'].attempts = [
+    {
+      at: '2026-11-08T10:00:00.000Z',
+      score: 100,
+      results: [{ id: 'q1', concept: 'demo.value', correct: true }],
+    },
+  ];
   b.lessons['python/first'].attempts = [{ at: '2026-11-08T12:00:00.000Z', score: 0, results: [] }];
   b.streak = { count: 3, lastDay: '2026-11-08' };
   const merged = mergeProgress(a, b);

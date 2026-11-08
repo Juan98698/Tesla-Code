@@ -241,7 +241,8 @@ test('progress and practice views show real evidence and valid bookmarks', (t) =
   assert.equal(root.querySelectorAll('.evidence-row').length, 1);
   root.innerHTML = views.practicePage(routes, state);
   assert.match(root.textContent, /Guardado para volver/);
-  assert.equal(root.querySelectorAll('[data-lab]').length, 4);
+  assert.equal(root.querySelectorAll('[data-lab]').length, 3);
+  assert.ok(root.querySelector('[data-lab="practice-hub"]'));
   assert.equal(root.querySelector('[href*="bad/missing"]'), null);
 });
 test('lesson renders each stage, source links and completion without exposing another route', (t) => {

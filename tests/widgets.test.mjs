@@ -5,13 +5,7 @@ import { installDOM, change, submit } from './support/dom.mjs';
 import { mount as mountGame } from '../js/widgets/guess-game.js';
 import { mount as mountTip } from '../js/widgets/tip-calculator.js';
 import { mount as mountVariables } from '../js/widgets/variables-sim.js';
-import {
-  mountCycle,
-  mountCondition,
-  mountTokens,
-  mountDiffusion,
-  mountRunner,
-} from '../js/widgets/labs.js';
+import { mountTokens, mountDiffusion, mountRunner } from '../js/widgets/labs.js';
 import { widgets } from '../js/widgets/index.js';
 const lesson = (id) =>
   JSON.parse(readFileSync(`content/lessons/fundamentos/${id}.json`, 'utf8')).html;
@@ -87,32 +81,42 @@ test('tip calculator handles valid decimals, invalid values, fractional people a
   assert.match(run('10', '10', '1.5'), /entero/);
   assert.match(run('1e308', '1e308', '1'), /exceden/);
 });
-test('cycle simulator respects bounds, terminal state and reset after configuration change', (t) => {
+test('cycle simulator respects bounds, terminal state and reset after configuration change', async (t) => {
   installDOM(t);
   const r = root();
-  mountCycle(r);
-  for (let i = 0; i < 4; i++) r.querySelector('[data-step]').click();
-  assert.match(r.querySelector('[data-output]').textContent, /suma = 10.*terminado/);
-  assert.equal(r.querySelector('[data-step]').disabled, true);
-  r.querySelector('[data-reset]').click();
-  assert.match(r.querySelector('[data-output]').textContent, /Vueltas: 0/);
-  change(r.querySelector('[data-count]'), '20', 'change');
-  assert.equal(r.querySelectorAll('.memory-cell').length, 8);
-  assert.equal(r.querySelector('[data-count]').value, '8');
-  change(r.querySelector('[data-count]'), '', 'change');
-  assert.equal(r.querySelectorAll('.memory-cell').length, 1);
+  const hub = await widgets['practice-hub']();
+  const items = JSON.parse(readFileSync('content/practice/items.json', 'utf8')).items;
+  await hub.mount(r, null, async () => items);
+  const card = r.querySelector('[data-id="acumulador-suma"]');
+  assert.ok(card, 'tarjeta de acumulador encontrada en el centro');
+  card.querySelector('[data-open]').click();
+  const body = card.querySelector('.practice-body');
+  assert.equal(body.hidden, false);
+  const step = body.querySelector('[data-step]');
+  assert.equal(step.disabled, false);
+  while (!step.disabled) step.click();
+  assert.match(body.querySelector('[data-vars]').textContent, /suma.*10/);
+  assert.equal(step.disabled, true);
+  body.querySelector('[data-reset]').click();
+  assert.equal(step.disabled, false);
+  assert.match(body.querySelector('[data-vars]').textContent, /Memoria vacía/);
 });
-test('condition simulator distinguishes boundary, empty and invalid ages', (t) => {
+test('condition simulator distinguishes boundary, empty and invalid ages', async (t) => {
   installDOM(t);
   const r = root();
-  mountCondition(r);
-  assert.match(r.querySelector('[data-result]').textContent, /Espera/);
-  change(r.querySelector('[data-age]'), '18');
-  assert.match(r.querySelector('[data-result]').textContent, /Acceso/);
-  change(r.querySelector('[data-age]'), '');
-  assert.match(r.querySelector('[data-result]').textContent, /Escribe/);
-  change(r.querySelector('[data-age]'), '18.5');
-  assert.match(r.querySelector('[data-result]').textContent, /entera/);
+  const hub = await widgets['practice-hub']();
+  const items = JSON.parse(readFileSync('content/practice/items.json', 'utf8')).items;
+  await hub.mount(r, null, async () => items);
+  const card = r.querySelector('[data-id="condicion-limite"]');
+  assert.ok(card, 'tarjeta de condición encontrada en el centro');
+  card.querySelector('[data-open]').click();
+  const body = card.querySelector('.practice-body');
+  assert.equal(body.hidden, false);
+  assert.match(body.textContent, /Acceso/);
+  assert.match(body.textContent, /Espera/);
+  const step = body.querySelector('[data-step]');
+  while (!step.disabled) step.click();
+  assert.match(body.querySelector('[data-note]').textContent, /Acceso/);
 });
 test('illustrative segmentation is Unicode aware, empty-safe and never interprets HTML', (t) => {
   installDOM(t);

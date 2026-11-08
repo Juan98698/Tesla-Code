@@ -3,63 +3,6 @@ import { runProgram } from '../domain/runner.js';
 function frame(root, title, description, html) {
   root.innerHTML = `<section class="lab-widget"><div class="eyebrow">EXPERIMENTA</div><h3>${title}</h3><p>${description}</p>${html}</section>`;
 }
-export function mountCycle(root) {
-  frame(
-    root,
-    'Un ciclo, una vuelta a la vez',
-    'Predice la suma. Después ejecuta cada vuelta y observa el acumulador.',
-    '<label>Vueltas <input type="number" min="1" max="8" value="4" data-count></label><div class="memory-cells" data-cells></div><div class="btns"><button class="btn small" data-step>Ejecutar una vuelta</button><button class="btn ghost small" data-reset>Reiniciar</button></div><p class="practice-feedback" role="status" data-output></p>',
-  );
-  const q = (s) => root.querySelector(s);
-  let step = 0,
-    sum = 0;
-  const count = () => Math.max(1, Math.min(8, Number.parseInt(q('[data-count]').value, 10) || 1));
-  function draw() {
-    q('[data-cells]').innerHTML = Array.from(
-      { length: count() },
-      (_, i) =>
-        `<div class="memory-cell ${i < step ? 'active' : ''}"><small>Vuelta</small>${i + 1}</div>`,
-    ).join('');
-    q('[data-output]').textContent =
-      `Vueltas: ${step} · suma = ${sum}${step === count() ? ' · Ciclo terminado.' : ''}`;
-    q('[data-step]').disabled = step === count();
-  }
-  function reset() {
-    q('[data-count]').value = String(count());
-    step = 0;
-    sum = 0;
-    draw();
-  }
-  q('[data-count]').onchange = reset;
-  q('[data-reset]').onclick = reset;
-  q('[data-step]').onclick = () => {
-    step++;
-    sum += step;
-    draw();
-  };
-  reset();
-}
-export function mountCondition(root) {
-  frame(
-    root,
-    'Una condición, dos caminos',
-    'Cambia la edad. Comprueba qué ocurre justo en el límite de 18 años.',
-    '<label>Edad <input type="number" min="0" max="120" value="17" data-age></label><pre>si edad &gt;= 18 entonces\n    mostrar("Acceso")\nsino\n    mostrar("Espera")\nfin si</pre><p class="practice-feedback" role="status" data-result></p>',
-  );
-  const input = root.querySelector('[data-age]'),
-    out = root.querySelector('[data-result]');
-  function draw() {
-    const age = Number(input.value);
-    out.textContent =
-      input.value === ''
-        ? 'Escribe una edad.'
-        : !Number.isInteger(age) || age < 0 || age > 120
-          ? 'Escribe una edad entera entre 0 y 120.'
-          : `${age} >= 18 → ${age >= 18 ? 'verdadero · Salida: Acceso' : 'falso · Salida: Espera'}`;
-  }
-  input.oninput = draw;
-  draw();
-}
 export function mountTokens(root) {
   frame(
     root,

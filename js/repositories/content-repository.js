@@ -22,3 +22,4 @@ export async function loadCurricula() {
 }
 export const loadLesson = (route, lesson) => getJson(`content/lessons/${route}/${lesson}.json`);
 export const loadConcepts = () => getJson('content/concepts.json');
+export const loadPractice = () => getJson('content/practice/items.json').then((data) => data.items);

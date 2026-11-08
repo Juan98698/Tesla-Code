@@ -66,11 +66,21 @@ function updateCompletion(route, meta, data) {
   save();
   return complete;
 }
+const labContext = {
+  isSolved: (id) => state.practices.includes(`lab/${id}`),
+  solve(id) {
+    const key = `lab/${id}`;
+    if (state.practices.includes(key)) return;
+    state.practices.push(key);
+    state.streak = updateStreak(state.streak);
+    save();
+  },
+};
 async function mountLabs(root, version) {
   for (const el of root.querySelectorAll('[data-lab]')) {
     const widget = await widgets[el.dataset.lab]();
     if (version !== renderVersion) return;
-    widget.mount(el);
+    widget.mount(el, labContext);
   }
 }
 async function render() {
