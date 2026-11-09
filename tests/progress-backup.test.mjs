@@ -6,9 +6,9 @@ import { MAX_BACKUP_BYTES, mergeProgress, parseBackup } from '../js/domain/progr
 import { mountProgressImport, importMarkup } from '../js/features/progress-import.js';
 import { installDOM, until } from './support/dom.mjs';
 
-function earned(key) {
+function earned(key, now = new Date('2026-11-07T12:00:00.000Z')) {
   const state = emptyProgress();
-  recordAttempt(state, key, [{ id: 'q1', concept: 'demo.value', correct: true }]);
+  recordAttempt(state, key, [{ id: 'q1', concept: 'demo.value', correct: true }], now);
   state.practices.push(key + '/apply');
   completeIfReady(state, key, { activities: [{ id: 'apply' }] });
   return state;
@@ -40,6 +40,7 @@ test('merging retains the strongest score and the latest bounded evidence withou
     },
   ];
   b.lessons['python/first'].attempts = [{ at: '2026-11-08T12:00:00.000Z', score: 0, results: [] }];
+  a.streak = { count: 2, lastDay: '2026-11-07' };
   b.streak = { count: 3, lastDay: '2026-11-08' };
   const merged = mergeProgress(a, b);
   assert.equal(merged.lessons['python/first'].best, 100);
