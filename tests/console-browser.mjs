@@ -17,7 +17,7 @@ await withBrowser(4325, async (browser, origin) => {
       viewport: { width, height: 950 },
       reducedMotion: 'reduce',
     });
-    await installPythonRuntime(context);
+    await installPythonRuntime(context, origin);
     const page = await context.newPage(),
       errors = [];
     page.on('pageerror', (error) => errors.push(error.message));

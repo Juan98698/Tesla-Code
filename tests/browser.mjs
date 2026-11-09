@@ -15,7 +15,7 @@ const published = routes.flatMap((r) =>
 );
 await withBrowser(4317, async (browser, origin) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
-  await installPythonRuntime(context);
+  await installPythonRuntime(context, origin);
   const page = await context.newPage(),
     errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -30,16 +30,18 @@ await withBrowser(4317, async (browser, origin) => {
   await page.locator('#lesson').waitFor();
   assert.match(await page.locator('h1').innerText(), /primer paso/);
   await page.getByRole('tab', { name: /Practicar/ }).click();
-  await page.locator('[data-activity]').waitFor();
-  await page.locator('[data-activity] input').fill('.json');
-  await page.locator('[data-activity] button[type=submit]').click();
+  const initialActivity = page.locator('[data-activity]').first();
+  await initialActivity.waitFor();
+  await initialActivity.locator('input').fill('.json');
+  await initialActivity.locator('button[type=submit]').click();
   assert.match(await page.locator('.practice-feedback').first().innerText(), /Todavía/);
-  await page.getByRole('button', { name: 'Necesito una pista' }).click();
-  assert.equal(await page.locator('.hint').isVisible(), true);
-  await page.locator('[data-activity] input').fill('.txt');
-  await page.locator('[data-activity] button[type=submit]').click();
+  await initialActivity.getByRole('button', { name: 'Necesito una pista' }).click();
+  assert.equal(await initialActivity.locator('.hint').isVisible(), true);
+  await initialActivity.locator('input').fill('.txt');
+  await initialActivity.locator('button[type=submit]').click();
   assert.match(await page.locator('.practice-feedback').first().innerText(), /resolviste/);
   const first = published.find((p) => p.meta.id === 'tu-primer-paso');
+  for (const activity of first.data.activities.slice(1)) await solveActivity(page, activity);
   async function solveQuiz(data) {
     await page.getByRole('tab', { name: /Comprobar/ }).click();
     await page.locator('#qbox h3.q').waitFor();

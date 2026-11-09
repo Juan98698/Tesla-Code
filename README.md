@@ -26,7 +26,7 @@ npm run test:console # Consola, entradas, errores y ejemplos en escritorio y mó
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
-python3 tests/python-examples.py # Ejemplos del curso (requiere Python 3)
+npm run test:examples # Ejemplos Python y Git (requiere Python y Bash)
 ```
 
 Para las pruebas de navegador se usa Chromium del sistema si existe. En otra máquina:
@@ -47,6 +47,7 @@ En Windows las pruebas detectan Chrome o Edge si Chromium de Playwright no está
 - Siete mapas: Fundamentos, Algoritmia, Python, Frontend, Backend, Bases de datos e IA.
 - **102 lecciones publicadas de 411 temas planificados** con explicación, ejemplos razonados, condiciones explícitas, práctica, pistas y evaluación. Los demás temas se muestran como **en preparación**, sin simular que incluyen un curso.
 - **Fundamentos: 68 de 68 lecciones publicadas**, desde Primeros pasos hasta Experto. Incluye Python, Git, colecciones, objetos, diseño, pruebas, concurrencia, seguridad, observabilidad y proyectos integradores. La cobertura publicada no equivale a una validación independiente del aprendizaje.
+- Primeros pasos: sus dos lecciones incluyen fuentes, ejemplos razonados, errores frecuentes y tres actividades cada una: comprensión, práctica guiada y transferencia. La revisión asistida reduce la deuda editorial a 81 lecciones; la revisión independiente sigue pendiente.
 - IA: nueve lecciones introductorias sobre modelos, inferencia, LLM, prompts, contexto, memoria, evaluación, difusión/flow matching, conceptos siguientes/LCM y criterios de proyecto. El mapa técnico distingue aplicaciones, modelos, difusión, investigación y producción.
 - Algoritmia: **12 de 45 lecciones**: once del núcleo conceptual y en pseudocódigo, hasta invariantes, y un laboratorio Python opcional con código ejecutable. Cada una tiene tres prácticas. El laboratorio no bloquea el núcleo ni presupone conocer el lenguaje.
 - Python: **7 de 67 lecciones**: un primer módulo desde cero hasta un presupuesto con entradas variables. Enseña cada instrucción antes de utilizarla, con predicción, reparación y construcción; incluye doce actividades de código. Los diez módulos restantes están planificados.

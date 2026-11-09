@@ -166,8 +166,11 @@ test('controller coordinates navigation, learning, search, preferences, export a
   assert.match(document.getElementById('qbox').textContent, /Resuelve también/);
   clickText('#qbox button', 'Ir a la práctica →');
   await until(() => document.getElementById('activities'));
-  document.querySelector('[data-activity] input').value = data.activities[0].answers[0];
-  submit(document.querySelector('[data-activity] form'));
+  for (const activity of data.activities) {
+    const section = document.querySelector(`[data-activity="${activity.id}"]`);
+    section.querySelector('input').value = activity.answers[0];
+    submit(section.querySelector('form'));
+  }
   assert.match(document.getElementById('lesson-status').textContent, /Completada/);
   document.querySelector('[data-tab=comprobar]').click();
   await until(() => document.getElementById('qbox'));

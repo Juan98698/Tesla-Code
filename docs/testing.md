@@ -21,6 +21,8 @@ En Windows se detectan también Chrome y Edge instalados. `CHROMIUM_PATH`, `PYTH
 
 Las pruebas Python del navegador interceptan la URL de la CDN y sirven los archivos reales de `pyodide` instalados por npm: no sustituyen la ejecución por respuestas simuladas. Una aserción comprueba que la distribución instalada y la URL fijada tienen la misma versión. Esto elimina la variabilidad de la CDN en CI; no mide latencia de descarga en una conexión móvil real.
 
+La interceptación obtiene esos archivos del servidor HTTP local mediante [`route.fetch`](https://playwright.dev/docs/api/class-route#route-fetch) y reutiliza la respuesta al cumplir la petición original. Así evita copiar el gran buffer WASM por el canal del cliente de Playwright en cada ejecución aislada; la respuesta temporal se libera después de entregarla. Se conservan la URL de distribución, CORS y el aislamiento del ejecutor. Los límites de carga y ejecución del motor Python permanecen sin cambios.
+
 Las pruebas del corrector ejecutan soluciones de referencia, implementaciones incorrectas y funciones equivalentes. Cubren errores de sintaxis, excepciones, entradas insuficientes, mensajes de `input`, salida parcial y límite de salida. También ejecutan todos los ejemplos declarados para navegador —43 en esta edición— en directorios temporales separados de Pyodide, con sus entradas y salidas esperadas. Las unidades del adaptador cubren fallos de carga, cancelación, mensajes de otra ejecución, frecuencia/tamaño de salida y recuperación. La restauración comprueba copias corruptas, límites, versiones, persistencia fallida y recompensas únicas.
 
 ## Cobertura y alcance

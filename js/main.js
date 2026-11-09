@@ -326,7 +326,7 @@ async function render() {
                       ? `¡Completaste la ruta ${route.name}! Revisa tus logros y elige un nuevo camino.`
                       : 'Completaste las lecciones disponibles de esta ruta. Los demás temas siguen en preparación.'
                   : summary.passed
-                    ? 'Superaste la comprobación. Resuelve también la actividad de práctica para completar la lección.'
+                    ? 'Superaste la comprobación. Resuelve también las actividades de práctica para completar la lección.'
                     : 'Revisa las explicaciones y vuelve a intentarlo. Tus dificultades aparecerán en Mi progreso.',
                 actions:
                   complete && next

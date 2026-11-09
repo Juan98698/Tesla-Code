@@ -2,6 +2,8 @@
 
 El módulo recorre las dos lecciones de Primeros pasos y las quince de Inicio, hasta la calculadora de propinas. Se ejecuta con `npm run test:module` en Chromium, usando contextos nuevos de escritorio (1440 px) y móvil (390 px). No inyecta lecciones aprobadas en localStorage.
 
+Primeros pasos es el primer módulo curricular: sus dos lecciones incorporan ahora tres actividades cada una, fuentes y errores frecuentes. El piloto automatizado cubre además las quince lecciones de Inicio. Las finalizaciones anteriores conservan su acceso y XP; para estudiantes nuevos, una sola práctica resuelta no basta para completar las lecciones ampliadas.
+
 ## Escenarios verificados
 
 - El inicio lleva a la primera lección y una URL adelantada respeta el bloqueo.

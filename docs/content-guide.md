@@ -15,7 +15,7 @@
 
 Las fuentes externas se enlazan con HTTPS en `sources`. Redacta contenido propio y respeta licencias; no copies cursos, gráficos o mapas de otras plataformas sin autorización.
 
-`content/editorial-backlog.json` conserva 83 publicaciones heredadas que todavía requieren revisión de profundidad y fuentes. No se añaden publicaciones nuevas a esa excepción. Al revisar una, completa sus prácticas y referencias y retírala del registro. El mínimo de tres actividades es verificable, pero repetir tres preguntas equivalentes no cumple la intención pedagógica. La revisión debe juzgar qué aprende y transfiere cada una, sin imponer un número de palabras como prueba de calidad.
+`content/editorial-backlog.json` conserva 81 publicaciones heredadas que todavía requieren revisión de profundidad y fuentes. Las dos lecciones de Primeros pasos salieron del registro el 9 de noviembre de 2026 tras una revisión asistida; su revisión independiente sigue pendiente. No se añaden publicaciones nuevas a esa excepción. Al revisar una, completa sus prácticas y referencias y retírala del registro. El mínimo de tres actividades es verificable, pero repetir tres preguntas equivalentes no cumple la intención pedagógica. La revisión debe juzgar qué aprende y transfiere cada una, sin imponer un número de palabras como prueba de calidad.
 
 ## Control obligatorio de publicación
 

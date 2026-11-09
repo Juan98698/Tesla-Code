@@ -1,8 +1,7 @@
-import { readFile } from 'node:fs/promises';
 import { PYODIDE_INDEX } from '../../js/repositories/python-runner.js';
 
 // Runtime real, fijado en package-lock; evita depender de la red durante CI.
-export async function installPythonRuntime(context) {
+export async function installPythonRuntime(context, origin) {
   const allowed = new Set([
     'pyodide.mjs',
     'pyodide-lock.json',
@@ -22,11 +21,23 @@ export async function installPythonRuntime(context) {
       wasm: 'application/wasm',
       zip: 'application/zip',
     };
-    await route.fulfill({
-      body: await readFile('node_modules/pyodide/' + file),
-      contentType: types[file.split('.').at(-1)],
-      headers: { 'Access-Control-Allow-Origin': '*' },
+    // Keep the real pinned files in Playwright's transport instead of copying a large
+    // WASM buffer through the client/driver channel for every isolated execution.
+    const response = await route.fetch({
+      url: new URL('node_modules/pyodide/' + file, origin).href,
     });
+    try {
+      if (!response.ok()) throw Error('No se pudo servir el runtime local: ' + file);
+      await route.fulfill({
+        response,
+        headers: {
+          'Content-Type': types[file.split('.').at(-1)],
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    } finally {
+      await response.dispose();
+    }
   });
 }
 export async function solveActivity(page, activity) {
