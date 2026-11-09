@@ -33,10 +33,34 @@ await withBrowser(4321, async (browser, origin) => {
       reducedMotion: reduced ? 'reduce' : 'no-preference',
     });
     const page = await context.newPage(),
-      errors = [];
+      errors = [],
+      animationRequests = [];
+    page.on('request', (request) => {
+      if (request.url().includes('teslacode-spin.webp')) animationRequests.push(request.url());
+    });
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(origin);
     await page.locator('.hero').waitFor();
+    const logo = page.locator(width > 1000 ? '.brand img' : '.mobile-brand img');
+    await page.waitForFunction(
+      ({ selector, reduced }) => {
+        const image = document.querySelector(selector);
+        return (
+          image.complete &&
+          image.naturalWidth === 128 &&
+          image.src.includes(reduced ? 'teslacode-still.webp' : 'teslacode-spin.webp')
+        );
+      },
+      { selector: width > 1000 ? '.brand img' : '.mobile-brand img', reduced },
+    );
+    assert.equal(animationRequests.length, reduced ? 0 : 1);
+    if (width === 1440) {
+      const frame = await logo.screenshot();
+      let changed = false;
+      for (let attempt = 0; attempt < 12 && !changed; attempt++)
+        changed = !frame.equals(await logo.screenshot());
+      assert.ok(changed, 'The displayed logo advances through its animated frames');
+    }
     await page.waitForFunction(
       (active) =>
         document.querySelector('[data-depth-scene]').dataset.sceneActive === String(active),
@@ -85,6 +109,9 @@ await withBrowser(4321, async (browser, origin) => {
       await page.locator('#motion-toggle').click();
       await page.waitForFunction(
         () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'false',
+      );
+      await page.waitForFunction(() =>
+        document.querySelector('.brand img').src.includes('teslacode-still.webp'),
       );
       await page.locator('#motion-toggle').click();
     }
@@ -153,6 +180,7 @@ await withBrowser(4321, async (browser, origin) => {
     ]) {
       await page.goto(origin + '/' + hash);
       await page.locator(selector).waitFor();
+      assert.match(await logo.getAttribute('src'), /teslacode-still\.webp/);
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
         false,
@@ -166,6 +194,31 @@ await withBrowser(4321, async (browser, origin) => {
       `PASS experiencia ${width}px: selección por la escena, foco, movimiento, teclado/táctil, scroll, temas y accesibilidad.`,
     );
   }
+  for (const [saveData, hash] of [
+    [true, '#/inicio'],
+    [false, '#/leccion/fundamentos/tu-primer-paso/aprender'],
+  ]) {
+    const context = await browser.newContext();
+    await context.addInitScript((saveData) => {
+      Object.defineProperty(navigator, 'connection', { value: { saveData } });
+    }, saveData);
+    const page = await context.newPage(),
+      requests = [];
+    page.on('request', (request) => {
+      if (request.url().includes('teslacode-spin.webp')) requests.push(request.url());
+    });
+    await page.goto(origin + '/' + hash);
+    await page.locator(saveData ? '.hero' : '#lesson').waitFor();
+    await page.evaluate(
+      () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+    );
+    assert.match(await page.locator('.brand img').getAttribute('src'), /teslacode-still\.webp/);
+    assert.deepEqual(requests, []);
+    await context.close();
+  }
+  console.log(
+    'PASS: giro real del logo; sin descarga de animación con movimiento reducido, ahorro de datos o entrada directa a una lección.',
+  );
   const fallback = await chromium.launch({
     executablePath: browserExecutable(),
     args: ['--no-sandbox', '--disable-webgl'],

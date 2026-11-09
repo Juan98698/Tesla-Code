@@ -80,6 +80,16 @@ La comparación se reproduce con `npm run review:ui -- etiqueta`, manteniendo in
 
 Verificación de este lote con Node 26.12.1: 126 pruebas unitarias aprobadas; los 33 módulos cumplen los umbrales por archivo, con cobertura global de 99,04 % de líneas, 95,27 % de ramas y 97,44 % de funciones. Pasan la coherencia de recursos, el validador de contenido, el formato, la actualización de caché conservando progreso, el acceso independiente y el recorrido general de las 102 lecciones y 144 actividades. El piloto automatizado completa las 17 lecciones iniciales desde cero en escritorio y móvil. Las pruebas de experiencia incluyen activación con Enter/Espacio y foco tras reconstruir la escena. Las auditorías WCAG automáticas no sustituyen pruebas con lectores de pantalla o participantes.
 
+## Logo giratorio optimizado
+
+9 de noviembre de 2026. Se integra en la navegación el giro de `TeslaGifCode.webp`, aportado por el usuario, con fondo negro azulado y borde cian en ambos temas. El original de Descargas se conserva. La versión de entrega mantiene sus 77 fotogramas y tiempos, con encuadre cuadrado de 128 px: 168 744 B frente a 3 705 132 B, una reducción del 95,4 %. El primer fotograma estático pesa 3998 B y también sirve como favicon. El procedimiento y la procedencia están en `assets/README.md`.
+
+La animación solo se solicita para el logo visible durante el inicio. Se sustituye por el fotograma estático durante las lecciones, con pausa, pestaña oculta, movimiento reducido, ahorro de datos o fallo de carga. No se añaden dependencias ni bucles de JavaScript por fotograma. El control del inicio pasa a llamarse «Pausar animaciones» y gobierna la escena y el logo. Se elimina además la transición de fondo de los botones de rutas, que podía producir contraste insuficiente durante el cambio de tema.
+
+Con el mismo procedimiento local de tres muestras por viewport descrito arriba, los recursos transferidos del inicio pasan de 346 481 a 334 635 B; el JavaScript pasa de 132 216 a 134 711 B y las peticiones de 45 a 47. El CLS permanece en 0 en las seis muestras. El p95 de intervalos rAF queda entre 16,8 y 17,0 ms; no se observaron intervalos superiores a 32 ms en los 720 intervalos registrados. Los informes se encuentran en `coverage/ui-review/after/` y `coverage/ui-review/animated-logo/`. Son medidas locales, sin documento HTML principal, y no representan rendimiento móvil físico ni mediciones de GPU o de usuarios reales.
+
+Verificación: 128 pruebas unitarias y cobertura de los 34 módulos aprobadas; el módulo del logo alcanza 100 % de líneas, ramas y funciones. Pasan formato, contenido, coherencia/actualización de recursos, acceso independiente y experiencia visual entre 320 y 1440 px. El navegador comprueba cambios entre fotogramas visibles, pausa, navegación a lecciones y ausencia de solicitudes de la animación cuando corresponde. Se mantienen las auditorías automáticas de accesibilidad en ambos temas.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |

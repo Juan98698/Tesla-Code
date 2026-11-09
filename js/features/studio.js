@@ -1,5 +1,6 @@
 import { escapeHtml as e } from '../core/html.js';
 import { mountDepthScene } from './depth-scene.js';
+import { mountBrandMotion } from './brand-motion.js';
 import { accessState, isPublished, lessonKey } from '../domain/curriculum.js';
 import { playgroundSettings, runPlayground } from '../domain/playground.js';
 const symbols = {
@@ -140,6 +141,7 @@ export function studioHome(routes, state, next, href) {
 }
 export function mountStudio(root, routes, onRoute) {
   const disposeDepth = mountDepthScene(root);
+  const disposeBrand = mountBrandMotion(root.ownerDocument);
   const chooseRoute = (id, selector) => {
     const view = root.ownerDocument.defaultView;
     const top = view.scrollY;
@@ -213,5 +215,8 @@ export function mountStudio(root, routes, onRoute) {
       chooseRoute(event.target.value, '#studio-route-select');
   };
   draw();
-  return disposeDepth;
+  return () => {
+    disposeDepth();
+    disposeBrand();
+  };
 }

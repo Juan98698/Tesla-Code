@@ -148,9 +148,9 @@ async function render() {
         control.setAttribute('aria-pressed', String(paused));
         control.setAttribute(
           'aria-label',
-          paused ? 'Activar efecto holográfico' : 'Pausar efecto holográfico',
+          paused ? 'Activar animaciones del inicio' : 'Pausar animaciones del inicio',
         );
-        control.textContent = paused ? 'Activar efecto' : 'Pausar efecto';
+        control.textContent = paused ? 'Activar animaciones' : 'Pausar animaciones';
       };
       refreshMotion();
       control.onclick = () => {

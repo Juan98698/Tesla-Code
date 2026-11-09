@@ -31,7 +31,7 @@ El [plan de mejora](plan-mejora-plataforma.md) propone un núcleo de Algoritmia 
 - El inicio presenta una vista de hitos y un laboratorio local por ruta. El mapa completo conserva todos los pasos y muestra con claridad qué contenido sigue en preparación. Las tarjetas de rutas incluyen enlaces directos para comenzar.
 - Movimiento lento y brillo contenido, con respuesta al puntero solo en dispositivos adecuados. La escena se detiene fuera de pantalla, en pestañas ocultas y al pausar el efecto. Los dispositivos táctiles y la preferencia de movimiento reducido reciben la composición estática. Durante las lecciones no se monta la escena y los ejemplos razonados tienen una jerarquía propia.
 - La escena no implica que exista un asistente de IA ni un entorno de ejecución de lenguajes que la plataforma no haya implementado. Los números del inicio proceden del catálogo real.
-- El emblema T/perfil/terminal conserva el retrato realista, la iluminación eléctrica azul/cian y los circuitos de la referencia del usuario. La misma imagen se utiliza en marca e icono del navegador, sin sustituirla por un perfil plano. Hay maestros PNG y versiones WebP de entrega en `assets/brand/` y `assets/studio/`.
+- El emblema T/perfil/terminal conserva el retrato realista, la iluminación eléctrica azul/cian y los circuitos de la referencia del usuario. La navegación utiliza el giro del WebP aportado por el usuario, optimizado a 128 px, con fondo oscuro y borde cian en ambos temas. Solo se anima el logo visible del inicio; durante la lectura, con pausa, ahorro de datos o movimiento reducido se muestra el primer fotograma. Ese fotograma también es el favicon. Hay maestros PNG y versiones WebP de entrega en `assets/brand/` y `assets/studio/`.
 
 ## Guía de implementación
 

@@ -64,6 +64,8 @@ Las capas `experience.css` y `studio.css` organizan las vistas de aprendizaje y 
 
 `depth-scene.js` limita el movimiento a las capas decorativas. Agrupa los eventos del puntero en una sola actualización por frame y no mantiene un bucle de JavaScript en reposo. Observa la intersección, la visibilidad de la página y la preferencia de movimiento; en táctil o movimiento reducido mantiene una escena estática. `mountStudio` devuelve su función de limpieza y `main.js` la llama antes de cambiar de vista o reconstruir la portada. Se cancelan frames pendientes y se desconectan observadores/listeners. Los controles esenciales funcionan sin WebGL y las tarjetas de rutas también utilizan geometría CSS. Cambiar de ruta conserva el foco y la posición del control en la ventana. Las lecciones usan una composición tranquila, sin animación de la escena. El tema oscuro es el predeterminado y se conserva la selección de tema del usuario.
 
+`brand-motion.js` monta el logo animado únicamente durante la portada y comparte el control de pausa. Usa una imagen estática inicial y solicita el WebP animado solo cuando el logo correspondiente al viewport está visible. Restituye la imagen estática al pausar, ocultar la pestaña, activar movimiento reducido/ahorro de datos, fallar la imagen o desmontar la portada. Sus observadores y listeners se liberan junto a los de la escena; el navegador decodifica los fotogramas sin un bucle JavaScript propio.
+
 ## Coherencia entre ediciones
 
 `practice.css` contiene los estilos del editor y sus resultados; no aumenta el archivo general de componentes. La auditoría de reglas CSS heredadas sigue pendiente.
