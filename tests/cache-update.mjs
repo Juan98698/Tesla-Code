@@ -115,6 +115,7 @@ try {
   await page.goto(origin + '/index.html#/leccion/frontend/http-y-https/aprender');
   await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
   await page.goto(origin + '/index.html#/practica');
+  await page.locator('[data-id="acumulador-suma"] [data-open]').click();
   await page.locator('[data-step]').waitFor();
   const release = await page.locator('html').getAttribute('data-release');
   assert.notEqual(

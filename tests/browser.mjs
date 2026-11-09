@@ -143,11 +143,14 @@ try {
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#search-results').isHidden(), true);
   await page.goto(origin + '/#/practica');
+  await page.locator('[data-id="acumulador-suma"] [data-open]').click();
   await page.locator('[data-step]').waitFor();
   await page.locator('[data-step]').click();
-  assert.match(await page.locator('[data-output]').first().innerText(), /suma = 1/);
-  await page.locator('[data-age]').fill('18');
-  assert.match(await page.locator('[data-result]').innerText(), /Acceso/);
+  assert.match(await page.locator('[data-vars]').innerText(), /suma/);
+  await page.locator('[data-id="condicion-limite"] [data-open]').click();
+  await page.locator('[data-id="condicion-limite"] [data-step]').waitFor();
+  await page.locator('[data-id="condicion-limite"] [data-step]').click();
+  assert.match(await page.locator('[data-id="condicion-limite"] [data-vars]').innerText(), /edad/);
   await page.locator('[data-text]').fill('<img src=x>');
   assert.equal(await page.locator('[data-tokens] img').count(), 0);
   await page.locator('[data-signal]').fill('100');
@@ -274,7 +277,10 @@ try {
       await page.goto(`${origin}/#/${hash}`);
       await page.reload();
       await page.locator('.page').waitFor();
-      if (hash === 'practica') await page.locator('[data-step]').waitFor();
+      if (hash === 'practica') {
+        await page.locator('[data-id="acumulador-suma"] [data-open]').click();
+        await page.locator('[data-step]').waitFor();
+      }
       await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
       const violations = await page.evaluate(async () => {
         const result = await axe.run(document, {
