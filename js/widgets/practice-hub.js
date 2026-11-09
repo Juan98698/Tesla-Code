@@ -1,34 +1,36 @@
 import { escapeHtml as e } from '../core/html.js';
-import { PRACTICE_TYPES, filterPractice } from '../domain/practice.js';
+import { PRACTICE_TYPES, TOPICS, filterPractice } from '../domain/practice.js';
 import { loadPractice } from '../repositories/content-repository.js';
 import { mountPractice } from './practice.js';
 
 export async function mount(el, ctx, load = loadPractice) {
   const items = await load();
-  let type = 'all';
+  const filters = { type: 'all', topic: 'all' };
   const solved = (id) => ctx?.isSolved(id) ?? false;
-  const chip = (key, label) =>
-    `<button type="button" class="practice-chip" data-filter="${key}" aria-pressed="${type === key}">${e(label)} <span>${filterPractice(items, key).length}</span></button>`;
   const badge = '<span class="badge live">Resuelta</span>';
-  const card = (item) =>
-    `<article class="card practice-card" data-id="${e(item.id)}"><div class="eyebrow">${e(PRACTICE_TYPES[item.type])} · ${e(item.level)}</div><h3>${e(item.title)}</h3><p>${e(item.goal)}</p><div class="practice-meta"><span>${item.minutes} min</span><span>${e(item.concept)}</span>${solved(item.id) ? badge : ''}</div><button type="button" class="btn small" data-open aria-expanded="false">Practicar</button><div class="practice-body" hidden></div></article>`;
-  const count = () => {
-    const shown = filterPractice(items, type);
-    return `${shown.filter((item) => solved(item.id)).length} de ${shown.length} resueltas`;
+  const chip = (group, key, label) => {
+    const next = { ...filters, [group]: key };
+    const total = filterPractice(items, next.type, next.topic).length;
+    return `<button type="button" class="practice-chip" data-group="${group}" data-value="${key}" aria-pressed="${filters[group] === key}">${e(label)} <span>${total}</span></button>`;
   };
-  function draw() {
-    el.innerHTML = `<div class="practice-filters" role="group" aria-label="Filtrar por tipo">${chip('all', 'Todo')}${Object.entries(
-      PRACTICE_TYPES,
+  const group = (name, label, entries) =>
+    `<div class="practice-filters" role="group" aria-label="${label}">${chip(name, 'all', 'Todo')}${Object.entries(
+      entries,
     )
-      .map(([key, label]) => chip(key, label))
-      .join(
-        '',
-      )}</div><p class="practice-count" role="status">${count()}</p><div class="practice-list">${filterPractice(items, type).map(card).join('')}</div>`;
+      .map(([key, text]) => chip(name, key, text))
+      .join('')}</div>`;
+  const card = (item) =>
+    `<article class="card practice-card" data-id="${e(item.id)}"><div class="eyebrow">${e(PRACTICE_TYPES[item.type])} · ${e(TOPICS[item.topic])}</div><h3>${e(item.title)}</h3><p>${e(item.goal)}</p><div class="practice-meta"><span>${item.minutes} min</span><span>${e(item.level)}</span><span>${e(item.concept)}</span>${solved(item.id) ? badge : ''}</div><button type="button" class="btn small" data-open aria-expanded="false">Practicar</button><div class="practice-body" hidden></div></article>`;
+  const shown = () => filterPractice(items, filters.type, filters.topic);
+  const count = () =>
+    `${shown().filter((item) => solved(item.id)).length} de ${shown().length} resueltas`;
+  function draw() {
+    el.innerHTML = `${group('type', 'Filtrar por tipo', PRACTICE_TYPES)}${group('topic', 'Filtrar por tema', TOPICS)}<p class="practice-count" role="status">${count()}</p><div class="practice-list">${shown().map(card).join('')}</div>`;
   }
   el.addEventListener('click', (event) => {
-    const filter = event.target.closest('[data-filter]');
+    const filter = event.target.closest('[data-group]');
     if (filter) {
-      type = filter.dataset.filter;
+      filters[filter.dataset.group] = filter.dataset.value;
       draw();
       return;
     }

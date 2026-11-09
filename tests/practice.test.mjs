@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { installDOM } from './support/dom.mjs';
 import {
   PRACTICE_TYPES,
+  TOPICS,
   filterPractice,
   gradeBugLine,
   gradeChoice,
@@ -20,9 +21,14 @@ const byId = (id) => items.find((item) => item.id === id);
 const root = () => document.getElementById('root');
 const click = (el) => el.click();
 
-test('todas las prácticas del contenido son válidas, únicas y cubren los cuatro tipos', () => {
+test('todas las prácticas del contenido son válidas, únicas y cubren todos los tipos', () => {
   assert.deepEqual(items.flatMap(validatePractice), []);
   assert.equal(new Set(items.map((item) => item.id)).size, items.length);
+  for (const topic of Object.keys(TOPICS))
+    assert.ok(
+      items.filter((item) => item.topic === topic).length >= 3,
+      `pocas prácticas de ${topic}`,
+    );
   for (const type of Object.keys(PRACTICE_TYPES))
     assert.ok(
       items.some((item) => item.type === type),
@@ -180,10 +186,10 @@ test('el centro de práctica filtra por tipo, abre retos y registra lo resuelto'
   const solvedIds = [];
   const ctx = { isSolved: (id) => solvedIds.includes(id), solve: (id) => solvedIds.push(id) };
   await mountHub(r, ctx, async () => items);
-  assert.equal(r.querySelectorAll('.practice-chip').length, 5);
+  assert.equal(r.querySelectorAll('.practice-chip').length, 12);
   assert.equal(r.querySelectorAll('.practice-card').length, items.length);
   assert.match(r.querySelector('.practice-count').textContent, new RegExp(`0 de ${items.length}`));
-  click(r.querySelector('[data-filter="bug"]'));
+  click(r.querySelector('[data-group="type"][data-value="bug"]'));
   const bugs = items.filter((item) => item.type === 'bug');
   assert.equal(r.querySelectorAll('.practice-card').length, bugs.length);
   click(r.querySelector('.practice-list'));
@@ -204,12 +210,12 @@ test('el centro de práctica filtra por tipo, abre retos y registra lo resuelto'
   assert.equal(card.querySelector('.practice-body').hidden, false);
   const [firstOptionHost] = card.querySelectorAll('[data-fix] .opt');
   assert.ok(firstOptionHost);
-  click(r.querySelector('[data-filter="all"]'));
+  click(r.querySelector('[data-group="type"][data-value="all"]'));
   assert.equal(r.querySelectorAll('.badge').length, 1);
   const sinContexto = document.createElement('div');
   await mountHub(sinContexto, undefined, async () => items);
   click(sinContexto.querySelector('[data-open]'));
-  click(sinContexto.querySelector('[data-filter="predict"]'));
+  click(sinContexto.querySelector('[data-group="type"][data-value="predict"]'));
   click(sinContexto.querySelector('[data-open]'));
 });
 
@@ -240,4 +246,95 @@ test('los laboratorios de las lecciones cargan su práctica desde el contenido',
   await (await widgets['cycle-lab']()).mount(missing);
   const hub = await widgets['practice-hub']();
   assert.equal(typeof hub.mount, 'function');
+});
+
+test('el validador revisa tema, idioma, ejemplos y situaciones', () => {
+  const bad = (patch, base) =>
+    validatePractice({ ...structuredClone(byId(base)), ...patch }).join('|');
+  assert.match(bad({ topic: 'otro' }, 'ejemplo-mientras'), /tema desconocido/);
+  assert.match(bad({ language: ' ' }, 'predice-none'), /language inválido/);
+  assert.match(bad({ lines: [] }, 'ejemplo-mientras'), /necesita código/);
+  assert.match(bad({ python: [] }, 'ejemplo-mientras'), /python inválido/);
+  assert.match(bad({ parts: [{ title: 'solo', text: 'una' }] }, 'ejemplo-mientras'), /2 partes/);
+  assert.match(bad({ check: {} }, 'ejemplo-mientras'), /check inválido/);
+  assert.match(
+    bad({ scenarios: [byId('decide-ciclos').scenarios[0]] }, 'decide-ciclos'),
+    /2 situaciones/,
+  );
+});
+
+test('filtrar combina tipo y tema', () => {
+  const both = filterPractice(items, 'decide', 'ciclos');
+  assert.ok(
+    both.length >= 1 && both.every((item) => item.type === 'decide' && item.topic === 'ciclos'),
+  );
+  assert.ok(filterPractice(items, 'all', 'funciones').every((item) => item.topic === 'funciones'));
+});
+
+test('aprende: muestra pseudocódigo, Python y partes, y se resuelve con la comprobación', (t) => {
+  installDOM(t);
+  const r = root();
+  const solved = [];
+  const item = byId('ejemplo-hacer-mientras');
+  mountPractice(r, item, { onSolved: () => solved.push(true) });
+  assert.equal(r.querySelectorAll('.lab-part').length, item.parts.length);
+  assert.deepEqual(
+    [...r.querySelectorAll('.lab-lang')].map((n) => n.textContent),
+    ['Pseudocódigo', 'Python'],
+  );
+  click(r.querySelectorAll('[data-check] .opt')[1]);
+  assert.deepEqual(solved, []);
+  click(r.querySelectorAll('[data-check] .opt')[item.check.answer]);
+  assert.deepEqual(solved, [true]);
+  mountPractice(r, { ...structuredClone(item), python: undefined });
+  assert.equal(r.querySelectorAll('.lab-lang').length, 1);
+});
+
+test('decide: avanza situación por situación y resuelve al terminar', (t) => {
+  installDOM(t);
+  const r = root();
+  const solved = [];
+  const item = byId('decide-funciones');
+  mountPractice(r, item, { onSolved: () => solved.push(true) });
+  item.scenarios.forEach((scenario, i) => {
+    assert.match(
+      r.querySelector('[data-progress]').textContent,
+      new RegExp(`${i + 1} de ${item.scenarios.length}`),
+    );
+    assert.equal(r.querySelector('[data-next]').hidden, true);
+    click(
+      r.querySelectorAll('[data-scenario] .opt')[(scenario.answer + 1) % scenario.options.length],
+    );
+    assert.equal(r.querySelector('[data-next]').hidden, true);
+    click(r.querySelectorAll('[data-scenario] .opt')[scenario.answer]);
+    if (i < item.scenarios.length - 1) {
+      assert.deepEqual(solved, []);
+      click(r.querySelector('[data-next]'));
+    }
+  });
+  assert.deepEqual(solved, [true]);
+});
+
+test('el idioma de la práctica se indica cuando no es pseudocódigo', (t) => {
+  installDOM(t);
+  const r = root();
+  mountPractice(r, byId('predice-none'));
+  assert.match(r.querySelector('.lab-lang').textContent, /Python/);
+  mountPractice(r, byId('predice-modulo'));
+  assert.equal(r.querySelector('.lab-lang'), null);
+});
+
+test('el centro de práctica filtra también por tema', async (t) => {
+  installDOM(t);
+  const r = root();
+  await mountHub(r, undefined, async () => items);
+  click(r.querySelector('[data-group="topic"][data-value="funciones"]'));
+  const funciones = items.filter((item) => item.topic === 'funciones');
+  assert.equal(r.querySelectorAll('.practice-card').length, funciones.length);
+  click(r.querySelector('[data-group="type"][data-value="example"]'));
+  assert.ok(r.querySelectorAll('.practice-card').length < funciones.length);
+  assert.equal(
+    r.querySelector('[data-group="topic"][aria-pressed="true"]').dataset.value,
+    'funciones',
+  );
 });

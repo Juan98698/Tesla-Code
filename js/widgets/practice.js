@@ -13,6 +13,9 @@ const HOW = {
   predict: 'Lee el programa con calma, elige lo que mostrará y comprueba tu respuesta.',
   bug: 'Hay una línea con un error. Tócala y después elige la corrección.',
   order: 'Toca las líneas en el orden en que deben escribirse para que el programa funcione.',
+  example: 'Lee la explicación, compara el pseudocódigo con Python y comprueba lo que entendiste.',
+  decide:
+    'Lee cada situación y elige la herramienta que mejor encaja. Si te equivocas, intenta de nuevo.',
 };
 
 function codeLines(list, next = -1, pick = false) {
@@ -28,7 +31,7 @@ function codeLines(list, next = -1, pick = false) {
 }
 
 function frame(root, item, body) {
-  root.innerHTML = `<section class="lab-widget practice-lab" data-type="${item.type}"><div class="eyebrow">${e(PRACTICE_TYPES[item.type])} · ${e(item.concept)}</div><h3>${e(item.title)}</h3><p class="lab-goal"><strong>Objetivo.</strong> ${e(item.goal)}</p><p class="lab-how">${HOW[item.type]}</p>${body}</section>`;
+  root.innerHTML = `<section class="lab-widget practice-lab" data-type="${item.type}"><div class="eyebrow">${e(PRACTICE_TYPES[item.type])} · ${e(item.concept)}</div><h3>${e(item.title)}</h3><p class="lab-goal"><strong>Objetivo.</strong> ${e(item.goal)}</p><p class="lab-how">${HOW[item.type]}</p>${item.language ? `<p class="lab-lang">Código en ${e(item.language)}</p>` : ''}${body}</section>`;
 }
 
 export function mountChoice(el, choice, onResult = () => {}) {
@@ -196,7 +199,53 @@ function mountOrder(root, item, hooks) {
   draw();
 }
 
-const mounters = { trace: mountTrace, predict: mountPredict, bug: mountBug, order: mountOrder };
+function mountExample(root, item, hooks) {
+  const parts = item.parts
+    .map((part) => `<div class="lab-part"><h4>${e(part.title)}</h4><p>${e(part.text)}</p></div>`)
+    .join('');
+  const python = item.python
+    ? `<p class="lab-lang">Python</p><div class="lab-code" tabindex="0" role="region" aria-label="Código en Python">${codeLines(item.python)}</div>`
+    : '';
+  frame(
+    root,
+    item,
+    `<p class="lab-lang">Pseudocódigo</p><div class="lab-code" tabindex="0" role="region" aria-label="Código en pseudocódigo">${codeLines(item.lines)}</div>${python}<div class="lab-parts">${parts}</div><div data-check></div>`,
+  );
+  mountChoice(root.querySelector('[data-check]'), item.check, (ok) => ok && hooks.onSolved?.(item));
+}
+
+function mountDecide(root, item, hooks) {
+  frame(
+    root,
+    item,
+    '<p class="lab-progress" data-progress></p><div data-scenario></div><div class="btns"><button type="button" class="btn small" data-next hidden>Siguiente situación</button></div>',
+  );
+  const q = (selector) => root.querySelector(selector);
+  let index = 0;
+  function show() {
+    q('[data-progress]').textContent = `Situación ${index + 1} de ${item.scenarios.length}`;
+    q('[data-next]').hidden = true;
+    mountChoice(q('[data-scenario]'), item.scenarios[index], (ok) => {
+      if (!ok) return;
+      if (index === item.scenarios.length - 1) hooks.onSolved?.(item);
+      else q('[data-next]').hidden = false;
+    });
+  }
+  q('[data-next]').addEventListener('click', () => {
+    index += 1;
+    show();
+  });
+  show();
+}
+
+const mounters = {
+  trace: mountTrace,
+  predict: mountPredict,
+  bug: mountBug,
+  order: mountOrder,
+  example: mountExample,
+  decide: mountDecide,
+};
 
 export function mountPractice(root, item, hooks = {}) {
   mounters[item.type](root, item, hooks);
