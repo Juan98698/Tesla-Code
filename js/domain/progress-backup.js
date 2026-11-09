@@ -1,4 +1,4 @@
-import { normalizeProgress } from '../core/storage.js';
+import { normalizeProgress } from './progress-state.js';
 import { XP } from './gamification.js';
 
 export const MAX_BACKUP_BYTES = 2 * 1024 * 1024;

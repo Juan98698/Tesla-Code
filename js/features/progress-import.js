@@ -81,20 +81,20 @@ export function mountProgressImport(
     reset();
     message.textContent = 'Importación cancelada.';
   };
-  confirm.onclick = () => {
+  confirm.onclick = async () => {
     if (!candidate) return;
     try {
-      storage.setItem(backupKey, JSON.stringify({ before: state, after: candidate }));
-      const next = candidate;
+      const next = mergeProgress(state, candidate);
+      storage.setItem(backupKey, JSON.stringify({ before: state, after: next }));
       reset();
-      onApply(next, 'Progreso combinado. Puedes deshacer esta importación.');
+      await onApply(next, 'Progreso combinado. Puedes deshacer esta importación.');
       undo.hidden = false;
       message.textContent = 'Progreso combinado. Puedes deshacer esta importación.';
     } catch {
       message.textContent = 'No pudimos guardar la importación. Se conserva tu progreso actual.';
     }
   };
-  undo.onclick = () => {
+  undo.onclick = async () => {
     try {
       const snapshot = storage.getItem(backupKey);
       const record = JSON.parse(snapshot);
@@ -107,7 +107,7 @@ export function mountProgressImport(
       }
       storage.removeItem(backupKey);
       try {
-        onApply(previous, 'Se recuperó el progreso anterior a la importación.');
+        await onApply(previous, 'Se recuperó el progreso anterior a la importación.');
       } catch (error) {
         storage.setItem(backupKey, snapshot);
         throw error;

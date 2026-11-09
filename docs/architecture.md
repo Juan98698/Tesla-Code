@@ -34,6 +34,8 @@ La versión 2 mantiene XP, racha, finalizaciones, prácticas, recompensas conced
 
 La migración conserva los logros anteriores y no inventa resultados de preguntas. El progreso local es editable por su propietario: no constituye una certificación verificable. No almacena secretos ni llama a modelos remotos.
 
+Las escrituras usan un Web Lock del mismo origen cuando el navegador lo admite. Dentro del bloqueo, el repositorio vuelve a leer el progreso y combina logros e intentos de otras pestañas sin duplicar XP. Las preferencias y altas/bajas de favoritos se comparan con la última lectura de esa pestaña. Los eventos de almacenamiento actualizan el estado y los indicadores sin desmontar una lección activa. Sin Web Locks se conserva la combinación antes de escribir, aunque no se garantiza atomicidad entre escrituras simultáneas. Una importación o su deshacer exige que el estado almacenado siga coincidiendo con el esperado antes de reemplazarlo. La normalización pura vive en `domain/progress-state.js` y `core/storage.js` conserva sus exportaciones anteriores.
+
 `progress-backup.js` valida copias v1/v2 de hasta 2 MiB y combina logros mediante conjuntos e intentos deduplicados. El XP se obtiene de recompensas únicas y el mayor remanente antiguo sin desglose, evitando sumar dos veces una copia. `progress-import.js` muestra la vista previa y guarda los estados anterior y combinado antes de aplicar. Deshacer restaura la copia solo si desde la importación no cambiaron logros, intentos ni favoritos: así no elimina avances posteriores. Un fallo de persistencia conserva el estado activo. Los borradores usan claves separadas por lección/actividad y no forman parte de la exportación.
 
 ## Ejecución y texto

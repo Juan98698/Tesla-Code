@@ -1,7 +1,7 @@
 import { mountStudio } from './features/studio.js';
 import { $ } from './core/dom.js';
 import { escapeHtml as e } from './core/html.js';
-import { progressRepository } from './core/storage.js';
+import { progressRepository, PROGRESS_KEY, withProgressLock } from './core/storage.js';
 import { loadCurricula, loadLesson, loadConcepts } from './repositories/content-repository.js';
 import { indexRoute, isUnlocked, nextLesson, lessonKey, isPublished } from './domain/curriculum.js';
 import { recordAttempt, completeIfReady } from './domain/progress.js';
@@ -28,6 +28,7 @@ let routes = [],
   filter = 'all',
   toastTimer;
 let disposeView = () => {};
+let pendingSaves = 0;
 const state = progressRepository.load();
 function toast(message) {
   clearTimeout(toastTimer);
@@ -35,12 +36,30 @@ function toast(message) {
   $('toast').hidden = false;
   toastTimer = setTimeout(() => ($('toast').hidden = true), 4200);
 }
-function save() {
-  const persisted = progressRepository.save(state);
+function refreshProgress() {
   $('xp').textContent = `${state.xp} XP`;
   $('racha').textContent = `♨ ${state.streak.count} ${state.streak.count === 1 ? 'día' : 'días'}`;
-  if (!persisted)
-    toast('No pudimos guardar en este navegador. Conserva una copia desde Mi progreso.');
+}
+function save() {
+  pendingSaves++;
+  const persist = () => {
+    const persisted = progressRepository.save(state);
+    refreshProgress();
+    if (!persisted)
+      toast('No pudimos guardar en este navegador. Conserva una copia desde Mi progreso.');
+  };
+  const done = () => {
+    pendingSaves--;
+  };
+  refreshProgress();
+  try {
+    const task = withProgressLock(persist);
+    if (task?.then) return task.catch(() => toast('No pudimos guardar el progreso.')).finally(done);
+    done();
+  } catch {
+    done();
+    toast('No pudimos guardar el progreso.');
+  }
 }
 function selectNode(route, id) {
   const lesson =
@@ -198,11 +217,15 @@ async function render() {
     } else if (view === 'progreso') {
       root.innerHTML = progressPage(routes, state, concepts);
       disposeView = mountProgressImport(root, state, (next, notice) => {
-        if (!progressRepository.save(next)) throw Error('No se pudo guardar el progreso.');
-        Object.assign(state, next);
-        save();
-        render();
-        toast(notice);
+        const expected = structuredClone(state);
+        return withProgressLock(() => {
+          if (!progressRepository.save(next, { expected }))
+            throw Error('El progreso cambió o no se pudo guardar.');
+          Object.assign(state, next);
+          refreshProgress();
+          render();
+          toast(notice);
+        });
       });
       $('export-progress').onclick = () => {
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }),
@@ -438,6 +461,14 @@ function bindShell() {
     }
   });
   window.addEventListener('hashchange', render);
+  window.addEventListener('storage', (event) => {
+    if (event.key !== PROGRESS_KEY || pendingSaves) return;
+    Object.assign(state, progressRepository.load());
+    refreshProgress();
+    // Keep an active editor, quiz or console intact while synchronizing achievements.
+    if (document.body.dataset.view !== 'leccion') render();
+    toast('Progreso actualizado desde otra pestaña.');
+  });
 }
 export const ready = (async () => {
   const [curricula, registry] = await Promise.all([loadCurricula(), loadConcepts()]);
