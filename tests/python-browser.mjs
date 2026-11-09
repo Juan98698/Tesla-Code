@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
+import { screenshotPath } from './support/runtime.mjs';
 import { installPythonRuntime, solveActivity } from './support/python.mjs';
 
 const read = (p) => JSON.parse(readFileSync(p));
@@ -72,7 +73,10 @@ await withBrowser(4322, async (browser, origin) => {
       );
     }
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    await page.screenshot({ path: '/tmp/teslacode-python-' + width + '.png', fullPage: true });
+    await page.screenshot({
+      path: screenshotPath('teslacode-python-' + width + '.png'),
+      fullPage: true,
+    });
     assert.deepEqual(errors, []);
     console.log(
       'PASS Python',

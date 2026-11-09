@@ -2,6 +2,7 @@ import { installPythonRuntime, solveActivity } from './support/python.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
+import { screenshotPath } from './support/runtime.mjs';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const routes = read('content/curriculum/index.json').routes.map((id) =>
   read(`content/curriculum/${id}.json`),
@@ -66,7 +67,7 @@ await withBrowser(4320, async (browser, origin) => {
       await audit(page, `${width}: workbench ${theme}`);
     }
     await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
-    await page.screenshot({ path: `/tmp/teslacode-final-${width}.png`, fullPage: true });
+    await page.screenshot({ path: screenshotPath(`teslacode-final-${width}.png`), fullPage: true });
     await page.locator('#motion-toggle').click(); // Optional opt-in cannot override reduced motion.
     assert.equal(
       await page.locator('.holo-computer').evaluate((el) => getComputedStyle(el).animationName),
@@ -112,7 +113,9 @@ await withBrowser(4320, async (browser, origin) => {
       assert.equal(await page.locator('.worked-example').count(), 1);
       assert.equal(await page.locator('.learning-support').count(), 0);
       if (meta.id === entry(algo).id)
-        await page.screenshot({ path: '/tmp/teslacode-algoritmia-intro-' + width + '.png' });
+        await page.screenshot({
+          path: screenshotPath('teslacode-algoritmia-intro-' + width + '.png'),
+        });
       await completeAlgorithmLesson(meta);
     }
     const earnedIntro = await snapshot(page);

@@ -1,8 +1,7 @@
 import { installPythonRuntime, solveActivity } from './support/python.mjs';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
-import { spawn } from 'node:child_process';
-import { chromium } from 'playwright';
+import { readFileSync } from 'node:fs';
+import { withBrowser } from './support/browser.mjs';
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const routes = read('content/curriculum/index.json').routes.map((id) =>
   read(`content/curriculum/${id}.json`),
@@ -14,43 +13,7 @@ const published = routes.flatMap((r) =>
       .map((l) => ({ route: r, meta: l, data: read(`content/lessons/${r.id}/${l.id}.json`) })),
   ),
 );
-const origin = 'http://127.0.0.1:4317';
-const server = spawn(
-  process.execPath,
-  [
-    'node_modules/serve/build/main.js',
-    '.',
-    '--listen',
-    'tcp://127.0.0.1:4317',
-    '--no-clipboard',
-    '--no-port-switching',
-  ],
-  { env: { ...process.env, NO_UPDATE_CHECK: '1' }, stdio: ['ignore', 'pipe', 'pipe'] },
-);
-let serverLog = '';
-server.stdout.on('data', (d) => (serverLog += d));
-server.stderr.on('data', (d) => (serverLog += d));
-let browser;
-try {
-  let started = false;
-  for (let i = 0; i < 80; i++) {
-    if (server.exitCode !== null) throw Error(serverLog);
-    try {
-      const res = await fetch(origin);
-      if (res.ok) {
-        started = true;
-        break;
-      }
-    } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  assert.ok(started, 'test server starts');
-  browser = await chromium.launch({
-    executablePath:
-      process.env.CHROMIUM_PATH ||
-      (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : chromium.executablePath()),
-    args: ['--no-sandbox'],
-  });
+await withBrowser(4317, async (browser, origin) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   await installPythonRuntime(context);
   const page = await context.newPage(),
@@ -313,7 +276,4 @@ try {
   await bpage.locator('.hero').waitFor();
   await blocked.close();
   console.log('PASS: almacenamiento bloqueado conserva la aplicación operativa.');
-} finally {
-  await browser?.close();
-  server.kill('SIGTERM');
-}
+});

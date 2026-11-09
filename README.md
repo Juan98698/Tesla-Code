@@ -38,6 +38,10 @@ npm run test:e2e
 
 También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran servidores entre los puertos 4317 y 4325. No uses esos puertos para otro servicio durante la ejecución. [CONTRIBUTING.md](CONTRIBUTING.md) distingue la comprobación rápida de la batería completa.
 
+En Windows las pruebas detectan Chrome o Edge si Chromium de Playwright no está instalado. Las capturas se guardan en la carpeta temporal del sistema. En PowerShell, si el lanzador `npm.ps1` apunta a una instalación global inaccesible, usa `npm.cmd` con los mismos argumentos. `npm run test:examples` selecciona `python` en Windows y `python3` en otros sistemas; puedes indicar otro ejecutable con `PYTHON`. El ejemplo Git requiere Bash: en Windows se busca el de Git for Windows, y `BASH_PATH` permite seleccionar otro. No se utiliza automáticamente el lanzador de WSL.
+
+`npm run test:progress` verifica aprendizaje paralelo en dos pestañas, conservación del progreso desde una tercera y recompensas únicas.
+
 ## Qué está disponible
 
 - Siete mapas: Fundamentos, Algoritmia, Python, Frontend, Backend, Bases de datos e IA.

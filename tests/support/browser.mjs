@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import { chromium } from 'playwright';
+import { browserExecutable } from './runtime.mjs';
 export async function withBrowser(port, run) {
   const origin = `http://127.0.0.1:${port}`;
   const server = spawn(
@@ -16,7 +16,11 @@ export async function withBrowser(port, run) {
     { env: { ...process.env, NO_UPDATE_CHECK: '1' }, stdio: ['ignore', 'pipe', 'pipe'] },
   );
   let logs = '',
-    browser;
+    browser,
+    startupError;
+  server.on('error', (error) => {
+    startupError = error;
+  });
   server.stdout.on('data', (chunk) => {
     logs += chunk;
   });
@@ -25,10 +29,12 @@ export async function withBrowser(port, run) {
   });
   try {
     let ready = false;
-    for (let i = 0; i < 80; i++) {
+    const deadline = Date.now() + 30000;
+    while (Date.now() < deadline) {
+      if (startupError) throw startupError;
       if (server.exitCode !== null) throw Error(logs);
       try {
-        if ((await fetch(origin)).ok) {
+        if ((await fetch(origin, { signal: AbortSignal.timeout(1000) })).ok) {
           ready = true;
           break;
         }
@@ -37,15 +43,17 @@ export async function withBrowser(port, run) {
     }
     if (!ready) throw Error(`El servidor de prueba no inició: ${logs}`);
     browser = await chromium.launch({
-      executablePath:
-        process.env.CHROMIUM_PATH ||
-        (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : chromium.executablePath()),
+      executablePath: browserExecutable(),
       args: ['--no-sandbox'],
     });
     return await run(browser, origin);
   } finally {
     await browser?.close();
-    server.kill('SIGTERM');
+    if (server.exitCode === null && !startupError) {
+      const exited = new Promise((resolve) => server.once('exit', resolve));
+      server.kill('SIGTERM');
+      await exited;
+    }
   }
 }
 export async function answerQuiz(page, data, correct = true) {
@@ -75,4 +83,5 @@ export async function answerQuiz(page, data, correct = true) {
     }
     await page.locator('#qbox .fb button').click();
   }
+  await page.locator('#qbox .result-orbit').waitFor();
 }

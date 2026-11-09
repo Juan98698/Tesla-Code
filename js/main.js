@@ -47,6 +47,7 @@ function save() {
     refreshProgress();
     if (!persisted)
       toast('No pudimos guardar en este navegador. Conserva una copia desde Mi progreso.');
+    return persisted;
   };
   const done = () => {
     pendingSaves--;
@@ -56,6 +57,7 @@ function save() {
     const task = withProgressLock(persist);
     if (task?.then) return task.catch(() => toast('No pudimos guardar el progreso.')).finally(done);
     done();
+    return task;
   } catch {
     done();
     toast('No pudimos guardar el progreso.');
@@ -82,8 +84,8 @@ function updateCompletion(route, meta, data) {
     $('lesson-status').textContent = complete ? '✓ Completada' : 'Aprende · Practica · Comprueba';
     $('lesson-status').classList.toggle('live', complete);
   }
-  save();
-  return complete;
+  const saved = save();
+  return { complete, saved };
 }
 const labContext = {
   isSolved: (id) => state.practices.includes(`lab/${id}`),
@@ -314,9 +316,9 @@ async function render() {
             questions: data.quiz,
             onFinish: (summary) => {
               recordAttempt(state, key, summary.results);
-              const complete = updateCompletion(route, meta, data),
+              const { complete, saved } = updateCompletion(route, meta, data),
                 next = nextLesson(route, new Set(state.completed));
-              return {
+              const result = {
                 text: complete
                   ? next
                     ? 'Práctica y comprobación completas. Puedes avanzar o volver a explorar.'
@@ -353,6 +355,7 @@ async function render() {
                           },
                         ],
               };
+              return saved?.then ? saved.then(() => result) : result;
             },
           });
       }

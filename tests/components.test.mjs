@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { installDOM, submit } from './support/dom.mjs';
+import { installDOM, submit, until } from './support/dom.mjs';
 import { $, button, span } from '../js/core/dom.js';
 import { escapeHtml, codeBlock, shuffle } from '../js/core/html.js';
 import { mountQuiz } from '../js/features/quiz.js';
@@ -10,6 +10,43 @@ import * as views from '../js/features/catalog.js';
 import { indexRoute } from '../js/domain/curriculum.js';
 import { emptyProgress } from '../js/core/storage.js';
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
+
+test('quiz waits for persistence before offering navigation and supports retrying a failed save', async (t) => {
+  installDOM(t);
+  const root = $('root');
+  let resolveSave;
+  const saving = new Promise((resolve) => {
+    resolveSave = resolve;
+  });
+  const question = {
+    id: 'q',
+    type: 'choice',
+    concept: 'c',
+    prompt: 'Una pregunta',
+    options: ['Sí'],
+    answer: 0,
+    explanation: 'Correcto.',
+  };
+  mountQuiz({ box: root, questions: [question], onFinish: () => saving });
+  root.querySelector('.opt').click();
+  root.querySelector('.fb button').click();
+  assert.equal(root.querySelector('.result-orbit'), null);
+  assert.match(root.textContent, /Guardando/);
+  resolveSave({ text: 'Guardado' });
+  await until(() => root.querySelector('.result-orbit'));
+  assert.match(root.textContent, /Guardado/);
+  let attempts = 0;
+  mountQuiz({
+    box: root,
+    questions: [question],
+    onFinish: () => (++attempts === 1 ? Promise.reject(Error('blocked')) : { text: 'Recuperado' }),
+  });
+  root.querySelector('.opt').click();
+  root.querySelector('.fb button').click();
+  await until(() => root.querySelector('[role=alert]'));
+  root.querySelector('button').click();
+  assert.match(root.textContent, /Recuperado/);
+});
 const routes = read('content/curriculum/index.json').routes.map((id) =>
   indexRoute(read(`content/curriculum/${id}.json`)),
 );

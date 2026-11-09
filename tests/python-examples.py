@@ -8,9 +8,24 @@ import builtins
 import json
 import os
 import subprocess
+import shutil
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def bash_executable():
+    if os.environ.get('BASH_PATH'):
+        return os.environ['BASH_PATH']
+    if os.name == 'nt':
+        git = shutil.which('git')
+        if git:
+            for relative in ('bin/bash.exe', 'usr/bin/bash.exe'):
+                candidate = Path(git).resolve().parents[1] / relative
+                if candidate.is_file():
+                    return str(candidate)
+        raise RuntimeError('El ejemplo Git requiere Git Bash; configura BASH_PATH si está en otra ubicación.')
+    return 'bash'
 
 
 class CodeBlocks(HTMLParser):
@@ -56,7 +71,7 @@ EXAMPLES = {
 # Cada ejemplo se ejecuta por separado y debe coincidir con el código mostrado.
 cases = []
 for path in sorted((ROOT / 'content' / 'lessons').glob('*/*.json')):
-    content = json.loads(path.read_text())
+    content = json.loads(path.read_text(encoding='utf-8'))
     parser = CodeBlocks()
     parser.feed(content['html'])
     examples = content.get('examples', [])
@@ -125,13 +140,13 @@ try:
                 assert repository.obtener('U') is None
                 assert Repository('contrato.json').obtener('U') is None
                 for invalid in ['{broken', '[]']:
-                    Path('corrupto.json').write_text(invalid)
+                    Path('corrupto.json').write_text(invalid, encoding='utf-8')
                     try:
                         Repository('corrupto.json')
                         raise AssertionError('Debe rechazarse el archivo inválido')
                     except (ValueError, json.JSONDecodeError):
                         pass
-                    assert Path('corrupto.json').read_text() == invalid
+                    assert Path('corrupto.json').read_text(encoding='utf-8') == invalid
                 # Repetir el programa conserva los datos existentes y rechaza duplicados.
                 repeated = StringIO()
                 with redirect_stdout(repeated):
@@ -140,7 +155,7 @@ try:
             os.chdir(original_directory)
     git_examples = 0
     for path in (ROOT / 'content' / 'lessons' / 'fundamentos').glob('*.json'):
-        content = json.loads(path.read_text())
+        content = json.loads(path.read_text(encoding='utf-8'))
         if 'gitExample' not in content:
             continue
         example = content['gitExample']
@@ -149,13 +164,16 @@ try:
         assert example['script'] in parser.blocks, f'{path.stem}: Git probado difiere del mostrado'
         with TemporaryDirectory(prefix='teslacode-git-example-') as directory:
             prefix = 'git() { command git -c core.hooksPath=/dev/null -c commit.gpgsign=false "$@"; }\n'
-            subprocess.run(['bash', '-eu', '-c', prefix + example['script']], cwd=directory, check=True, capture_output=True, text=True)
+            environment = {**os.environ, 'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_CONFIG_NOSYSTEM': '1', 'LC_ALL': 'C', 'LANG': 'C'}
+            result = subprocess.run([bash_executable(), '-eu', '-c', prefix + example['script']], cwd=directory, capture_output=True, encoding='utf-8', errors='replace', env=environment)
+            if result.returncode:
+                raise RuntimeError('Falló el ejemplo Git: ' + result.stderr)
             branch = subprocess.check_output(['git', 'branch', '--show-current'], cwd=directory, text=True).strip()
             count = subprocess.check_output(['git', 'rev-list', '--count', 'HEAD'], cwd=directory, text=True).strip()
             assert branch == example['expectedBranch']
             assert int(count) == example['expectedCommits']
             for name, expected in example['expectedFiles'].items():
-                assert (Path(directory) / name).read_text() == expected
+                assert (Path(directory) / name).read_text(encoding='utf-8') == expected
             assert subprocess.check_output(['git', 'status', '--porcelain'], cwd=directory, text=True) == ''
             git_examples += 1
     print(f'PASS: {git_examples} ejemplo Git; ramas, fusión, archivos e historial comprobados.')

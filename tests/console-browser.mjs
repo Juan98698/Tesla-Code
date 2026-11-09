@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser } from './support/browser.mjs';
+import { screenshotPath } from './support/runtime.mjs';
 import { installPythonRuntime } from './support/python.mjs';
 import { emptyProgress } from '../js/core/storage.js';
 const read = (p) => JSON.parse(readFileSync(p));
@@ -90,7 +91,10 @@ await withBrowser(4325, async (browser, origin) => {
       );
     }
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    await page.screenshot({ path: '/tmp/teslacode-console-' + width + '.png', fullPage: true });
+    await page.screenshot({
+      path: screenshotPath('teslacode-console-' + width + '.png'),
+      fullPage: true,
+    });
     for (const [key, expected] of [
       ['fundamentos/ciclos-y-entradas-python', 'Inicio: 2\n3\n'],
       ['algoritmia/implementar-algoritmos-en-python', '-3\n'],

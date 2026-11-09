@@ -4,6 +4,7 @@ import { createServer } from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
+import { browserExecutable, screenshotPath } from './support/runtime.mjs';
 const root = process.cwd(),
   read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const legacyProgress = {
@@ -66,9 +67,7 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 let browser;
 try {
   browser = await chromium.launch({
-    executablePath:
-      process.env.CHROMIUM_PATH ||
-      (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : chromium.executablePath()),
+    executablePath: browserExecutable(),
     args: ['--no-sandbox'],
   });
   const context = await browser.newContext({
@@ -140,10 +139,16 @@ try {
   await page.locator('#studio-route-select').selectOption('backend');
   await page.getByText('Tu ruta: Backend', { exact: true }).waitFor();
   await page.locator('#studio-form button').click();
-  await page.screenshot({ path: '/tmp/teslacode-warm-cache-desktop.png', fullPage: true });
+  await page.screenshot({
+    path: screenshotPath('teslacode-warm-cache-desktop.png'),
+    fullPage: true,
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-  await page.screenshot({ path: '/tmp/teslacode-warm-cache-mobile.png', fullPage: true });
+  await page.screenshot({
+    path: screenshotPath('teslacode-warm-cache-mobile.png'),
+    fullPage: true,
+  });
   assert.deepEqual(errors, []);
   await context.close();
   console.log(

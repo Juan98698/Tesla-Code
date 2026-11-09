@@ -37,6 +37,7 @@ export function mountQuiz({ box, questions, onFinish }) {
         index === deck.length - 1 ? 'Ver mi resultado →' : 'Siguiente pregunta →',
         'btn',
         () => {
+          next.disabled = true;
           index++;
           index < deck.length ? show() : finish();
         },
@@ -104,10 +105,19 @@ export function mountQuiz({ box, questions, onFinish }) {
       passed: isPassing(correct, deck.length),
       results,
     });
-    box.innerHTML = `<div class="result-orbit ${pct >= 80 ? 'passed' : ''}">${pct}<small>%</small></div><h3>${pct >= 80 ? 'Buen trabajo. Sigue construyendo.' : 'Cada intento te enseña algo.'}</h3><p>${escapeHtml(summary.text)}</p>`;
-    box.append(button('Volver a practicar', 'btn ghost', start));
-    for (const action of summary.actions ?? [])
-      box.append(button(action.label, 'btn', action.onClick));
+    const display = (summary) => {
+      box.innerHTML = `<div class="result-orbit ${pct >= 80 ? 'passed' : ''}">${pct}<small>%</small></div><h3>${pct >= 80 ? 'Buen trabajo. Sigue construyendo.' : 'Cada intento te enseña algo.'}</h3><p>${escapeHtml(summary.text)}</p>`;
+      box.append(button('Volver a practicar', 'btn ghost', start));
+      for (const action of summary.actions ?? [])
+        box.append(button(action.label, 'btn', action.onClick));
+    };
+    if (summary?.then) {
+      box.innerHTML = '<p role="status">Guardando tu resultado…</p>';
+      summary.then(display, () => {
+        box.innerHTML = '<p role="alert">No pudimos guardar el resultado. Vuelve a intentarlo.</p>';
+        box.append(button('Volver a intentar', 'btn', finish));
+      });
+    } else display(summary);
   }
   start();
 }

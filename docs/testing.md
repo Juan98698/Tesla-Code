@@ -3,18 +3,21 @@
 ## Comandos
 
 - `npm test`: pruebas unitarias de dominio, componentes DOM, widgets, repositorios y controlador; más pruebas de regresión de las herramientas pedagógicas.
-- `npm run test:coverage`: Node 24/26; genera `coverage/lcov.info` y verifica que los 28 módulos de `js/` aparezcan en la cobertura. El informe no sustituye las aserciones.
-- `python3 tests/python-examples.py`: ejecuta 44 ejemplos Python publicados y el ejercicio Git en directorios temporales, contrasta salida esperada y comprueba contratos de los proyectos. Las entradas simuladas conservan el comportamiento de los mensajes de `input`. Los ejemplos declarados deben coincidir con el código mostrado.
+- `npm run test:coverage`: Node 24/26; genera `coverage/lcov.info` y verifica que todos los módulos de `js/` aparezcan en la cobertura. El informe no sustituye las aserciones.
+- `npm run test:examples`: ejecuta 44 ejemplos Python publicados y el ejercicio Git en directorios temporales, contrasta salida esperada y comprueba contratos de los proyectos. Selecciona Python según el sistema y utiliza UTF-8. Las entradas simuladas conservan el comportamiento de los mensajes de `input`. Los ejemplos declarados deben coincidir con el código mostrado.
 - `npm run test:cache`: navegación con módulos/estilos/datos antiguos realmente cacheados, entradas libres y preservación del perfil anterior.
 - `npm run test:module`: piloto de 17 lecciones iniciales sin progreso artificial, en escritorio y móvil.
 - `npm run test:access`: entradas independientes en las siete rutas, recorrido de las lecciones publicadas de Algoritmia sin inyectar progreso, orientación y repasos sin créditos, preferencia con experiencia, secuencia interna, movimiento reducido y auditorías WCAG en escritorio/móvil.
 - `npm run test:python`: las siete lecciones iniciales desde cero en 1440 y 390 px, ejecución real, borradores, navegación durante un bucle, tiempo máximo, aislamiento del DOM/almacenamiento, auditoría automática en ambos temas e importación con vista previa/cancelación/deshacer e idempotencia.
 - `npm run test:console`: consola en 1440 y 390 px con impresión, entradas personalizadas, sintaxis y excepciones con línea, ausencia de salida, cancelación y tiempo máximo conservando lo impreso; ejemplos de Fundamentos/Algoritmia/Python y accesibilidad en ambos temas. Comprueba que experimentar no concede progreso y que comprobar usa los casos del autor.
 - `npm run test:e2e`: renderiza todas las lecciones publicadas y resuelve sus prácticas; verifica navegación, desbloqueos, persistencia, descarga, simuladores, diseños y accesibilidad.
-- `npm run test:all`: ejecuta el validador, control técnico local, cobertura, ejemplos, piloto, acceso independiente, recorrido general, módulo Python y consola.
+- `npm run test:progress`: dos pestañas completan lecciones en paralelo y una tercera cambia de objetivo; verifica la conservación conjunta de logros y la ausencia de XP duplicado al repetir una comprobación.
+- `npm run test:all`: ejecuta el validador, control técnico local, cobertura, ejemplos, piloto, acceso independiente, recorrido general, módulo Python, consola y progreso entre pestañas.
 - `npm run technology:check -- --online`: consulta fuentes oficiales y devuelve un fallo si cambian referencias o falta evidencia. No instala ni renueva versiones.
 
 Para las pruebas de navegador usa Chromium del sistema o instala el navegador de Playwright siguiendo README. Los servicios de pruebas se cierran al terminar. Los proyectos Python y Git no tocan el repositorio del estudiante ni sus archivos.
+
+En Windows se detectan también Chrome y Edge instalados. `CHROMIUM_PATH`, `PYTHON` y `BASH_PATH` permiten seleccionar los ejecutables; para Git se evita confundir Git Bash con el lanzador de WSL. Las capturas usan la carpeta temporal del sistema. La prueba de acceso activa «Saltar al contenido» con teclado y comprueba que conserva la URL. El cuestionario espera el guardado antes de mostrar las acciones del resultado.
 
 Las pruebas Python del navegador interceptan la URL de la CDN y sirven los archivos reales de `pyodide` instalados por npm: no sustituyen la ejecución por respuestas simuladas. Una aserción comprueba que la distribución instalada y la URL fijada tienen la misma versión. Esto elimina la variabilidad de la CDN en CI; no mide latencia de descarga en una conexión móvil real.
 
