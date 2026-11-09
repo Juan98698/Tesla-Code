@@ -136,7 +136,7 @@ async function render() {
   try {
     if (view === 'inicio') {
       root.innerHTML = homePage(routes, state);
-      mountStudio(root, routes, (id) => {
+      disposeView = mountStudio(root, routes, (id) => {
         state.goal = id;
         state.recent = null;
         save();

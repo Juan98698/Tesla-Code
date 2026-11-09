@@ -65,6 +65,22 @@ test('milestone previews preserve real lesson identities, current progress and r
   }
   assert.equal(studioMilestones({ id: 'demo', lessons: [{ id: 'a', kind: 'core' }] }).length, 1);
 });
+
+test('the depth scene selects real routes with keyboard focus and without granting learning credit', (t) => {
+  installDOM(t);
+  const root = document.getElementById('root'),
+    state = emptyProgress(),
+    selected = [];
+  root.innerHTML = homePage(routes, state);
+  const dispose = mountStudio(root, routes, (id) => selected.push(id));
+  const button = root.querySelector('[data-orbit-route="python"]');
+  button.click();
+  assert.deepEqual(selected, ['python']);
+  assert.equal(document.activeElement, button);
+  assert.equal(state.xp, 0);
+  assert.deepEqual(state.completed, []);
+  dispose();
+});
 test('workbench tabs, experiments and route selection never manufacture course progress', (t) => {
   const dom = installDOM(t),
     root = document.getElementById('root'),
@@ -74,7 +90,7 @@ test('workbench tabs, experiments and route selection never manufacture course p
   for (const route of routes) {
     state.goal = route.id;
     root.innerHTML = homePage(routes, state);
-    mountStudio(root, routes, (id) => selected.push(id));
+    const dispose = mountStudio(root, routes, (id) => selected.push(id));
     assert.match(root.querySelector('h1').textContent, /Construye/);
     assert.equal(root.querySelectorAll('.studio-node').length, 6);
     root.querySelector('[data-preview-tab=request]').click();
@@ -96,10 +112,11 @@ test('workbench tabs, experiments and route selection never manufacture course p
     }
     change(root.querySelector('#studio-route-select'), 'backend', 'change');
     change(root.querySelector('#studio-route-select'), 'not-a-route', 'change');
+    dispose();
   }
   state.goal = 'fundamentos';
   root.innerHTML = homePage(routes, state);
-  mountStudio(root, routes, () => {});
+  const dispose = mountStudio(root, routes, () => {});
   root.querySelector('#studio-value').value = '';
   submit(root.querySelector('form'));
   assert.equal(root.querySelector('#studio-error').hidden, false);
@@ -108,4 +125,5 @@ test('workbench tabs, experiments and route selection never manufacture course p
   assert.equal(root.querySelector('#studio-error').hidden, true);
   assert.deepEqual(selected, Array(routes.length).fill('backend'));
   assert.deepEqual(state, before);
+  dispose();
 });

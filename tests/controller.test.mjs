@@ -79,6 +79,10 @@ test('controller coordinates navigation, learning, search, preferences, export a
   document.getElementById('theme-toggle').click();
   assert.equal(localStorage.getItem('teslacode:theme'), 'light');
   document.getElementById('theme-toggle').click();
+  assert.equal(document.activeElement.id, 'studio-route-select');
+  document.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: '/', bubbles: true }));
+  assert.equal(document.activeElement.id, 'studio-route-select');
+  document.activeElement.blur();
   document.body.focus();
   document.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: '/', bubbles: true }));
   assert.equal(document.activeElement.id, 'search');

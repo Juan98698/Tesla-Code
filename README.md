@@ -66,7 +66,7 @@ Se puede guardar una lección, exportar el progreso en JSON e importar una copia
 
 ## Interfaz y acompañamiento
 
-Vista de trabajo en grafito con mapa conectado, laboratorio lateral, computadora holográfica y tarjetas de especialidades. Incluye ejemplos locales por ruta, animaciones pausables y temas claro/oscuro. La identidad conserva el perfil realista azul/cian de la referencia. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros.
+Estudio de exploración en grafito con una escena CSS 3D para elegir entre las siete rutas, mapa conectado, laboratorio legible y tarjetas de especialidades con volumen. La escena responde al puntero en equipos compatibles; se detiene fuera de pantalla, al ocultar la pestaña o al pausar el efecto. En dispositivos táctiles y con movimiento reducido permanece estática. Funciona sin WebGL ni bibliotecas gráficas adicionales. Incluye ejemplos locales por ruta y temas claro/oscuro, y conserva el perfil azul/cian de la marca. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros.
 
 Consulta [la coherencia de publicación](docs/release-coherence.md) y [la dirección de producto](docs/product-direction.md) para las decisiones de acceso e identidad.
 

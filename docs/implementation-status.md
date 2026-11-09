@@ -56,6 +56,30 @@ Verificación local de unidades en Windows con Node 26.12.1: 123 pruebas aprobad
 
 La batería completa `npm run test:all` termina correctamente con Chrome del sistema: actualización de caché, acceso independiente, 102 lecciones y 144 actividades, módulo Python, aislamiento, límites, recuperación/importación, consola y aprendizaje en paralelo entre pestañas. Los recorridos incluyen escritorio/móvil y auditorías automáticas de accesibilidad. Durante la validación se redujo la copia de buffers del runtime en la infraestructura de pruebas, manteniendo los archivos fijados y los límites del motor; no se atribuye una mejora medida de rendimiento a la aplicación en producción. Estas comprobaciones no sustituyen la revisión docente ni el piloto con participantes.
 
+## Remodelación visual para la presentación
+
+9 de noviembre de 2026. El inicio incorpora una escena CSS 3D con un núcleo y siete controles de ruta. La selección actualiza el objetivo, los hitos y el laboratorio sin conceder XP; conserva el foco y la posición del control. Se rediseñan la portada, la navegación, las tarjetas de especialidad, los paneles de práctica y la jerarquía visual de las lecciones. La marca existente y los contratos de progreso se conservan.
+
+El movimiento responde al puntero solo con ratón adecuado. Se detiene fuera de pantalla, con la pestaña oculta, con movimiento reducido o al pulsar la pausa. En dispositivos táctiles la escena permanece estática; los controles siguen siendo HTML nativo. No se incorporan motores gráficos, fuentes externas ni dependencias nuevas. La ilustración de computadora anterior se conserva como recurso, pero deja de descargarse en el inicio.
+
+### Comparación local del inicio
+
+Chrome 156.0.8078.80 en Windows, servidor HTTP local, tres contextos nuevos por ancho, cachés de navegador/sistema calientes y movimiento normal. Se observaron 120 intervalos de `requestAnimationFrame` por muestra. Los 390 px simulan un viewport, no un teléfono físico. Los bytes corresponden a recursos de la página y excluyen el documento HTML principal.
+
+| Medición                           | Antes (1440 / 390 px) | Después (1440 / 390 px) |
+| ---------------------------------- | --------------------- | ----------------------- |
+| Recursos transferidos por apertura | 445 977 / 445 977 B   | 346 481 / 346 481 B     |
+| JavaScript sin compresión          | 125 634 / 125 634 B   | 132 216 / 132 216 B     |
+| CLS observado                      | 0,0109 / 0,0510       | 0 / 0                   |
+| Mediana del p95 de intervalos rAF  | 17,0 / 16,9 ms        | 16,8 / 16,8 ms          |
+| Mediana de LCP                     | 2680 / 1544 ms        | 1536 / 1112 ms          |
+
+El ahorro de transferencia es del 22,3 %. El JavaScript aumenta 6582 B para la escena y los controles. No hubo desbordamiento horizontal ni descarga inicial de Pyodide. La muestra final de escritorio incluye un LCP atípico de 10 812 ms, con 8454 ms en la navegación del documento; las otras dos dieron 1536 y 1252 ms. Los tiempos dependen del servidor y del equipo local: no prueban una mejora de velocidad en producción, no miden INP y no representan Core Web Vitals de usuarios reales. Los intervalos rAF tampoco equivalen a una medición completa de GPU.
+
+La comparación se reproduce con `npm run review:ui -- etiqueta`, manteniendo iniciado el servidor local. Los informes JSON y las capturas quedan en `coverage/ui-review/`, excluido de Git. La interfaz se comprobó visualmente en escritorio y móvil y mediante controles automáticos a 320, 390, 768, 1024 y 1440 px, con temas claro/oscuro, pausa, movimiento reducido y WebGL deshabilitado.
+
+Verificación de este lote con Node 26.12.1: 126 pruebas unitarias aprobadas; los 33 módulos cumplen los umbrales por archivo, con cobertura global de 99,04 % de líneas, 95,27 % de ramas y 97,44 % de funciones. Pasan la coherencia de recursos, el validador de contenido, el formato, la actualización de caché conservando progreso, el acceso independiente y el recorrido general de las 102 lecciones y 144 actividades. El piloto automatizado completa las 17 lecciones iniciales desde cero en escritorio y móvil. Las pruebas de experiencia incluyen activación con Enter/Espacio y foco tras reconstruir la escena. Las auditorías WCAG automáticas no sustituyen pruebas con lectores de pantalla o participantes.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |
