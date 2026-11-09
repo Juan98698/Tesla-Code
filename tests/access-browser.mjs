@@ -33,6 +33,15 @@ await withBrowser(4320, async (browser, origin) => {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(origin + '/#/inicio');
     await page.locator('.hero').waitFor();
+    const currentUrl = page.url();
+    await page.getByRole('link', { name: 'Saltar al contenido' }).focus();
+    await page.keyboard.press('Enter');
+    assert.equal(page.url(), currentUrl);
+    assert.equal(
+      await page.locator('#content').evaluate((el) => el === document.activeElement),
+      true,
+    );
+    assert.equal(await page.locator('.hero').count(), 1);
     assert.equal(await page.locator('.hero-art').isVisible(), true);
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
     assert.equal(

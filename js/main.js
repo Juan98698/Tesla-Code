@@ -370,6 +370,10 @@ async function render() {
   }
 }
 function bindShell() {
+  document.querySelector('.skip-link').onclick = (event) => {
+    event.preventDefault();
+    $('content').focus();
+  };
   let theme;
   try {
     theme = localStorage.getItem('teslacode:theme');
