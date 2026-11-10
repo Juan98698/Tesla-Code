@@ -90,6 +90,31 @@ Con el mismo procedimiento local de tres muestras por viewport descrito arriba, 
 
 Verificación: 128 pruebas unitarias y cobertura de los 34 módulos aprobadas; el módulo del logo alcanza 100 % de líneas, ramas y funciones. Pasan formato, contenido, coherencia/actualización de recursos, acceso independiente y experiencia visual entre 320 y 1440 px. El navegador comprueba cambios entre fotogramas visibles, pausa, navegación a lecciones y ausencia de solicitudes de la animación cuando corresponde. Se mantienen las auditorías automáticas de accesibilidad en ambos temas.
 
+## Laboratorio y progreso con profundidad; marca persistente
+
+9 de noviembre de 2026. El laboratorio incorpora una escena de planos CSS que responde al puntero, tarjetas elevadas y un panel de filtros para los 30 retos existentes. Se conservan los seis tipos de práctica y los filtros por tema; cambiar de filtro mantiene el foco. Las simulaciones de IA y los accesos a lecciones/guardados permanecen funcionales. Mi progreso añade una plataforma con indicador circular, cuatro métricas reales, tarjetas de rutas y un área de exportación/recuperación. Los porcentajes cuentan únicamente lecciones publicadas, sin modificar logros almacenados ni conceder XP por explorar la interfaz.
+
+La marca aumenta a 96 px en escritorio y 48–56 px en móvil/tableta; en la barra compacta de lecciones mide 56 px. El logo continúa animándose al navegar entre secciones, incluidas las lecciones. Se monta una sola vez en la navegación y solo solicita la animación para una imagen visible. La pausa está disponible en toda la plataforma y se conservan las excepciones por movimiento reducido, ahorro de datos y pestaña oculta. Se utilizan los mismos recursos de 128 px y no se añaden motores gráficos ni dependencias.
+
+La vigilancia tecnológica vuelve a pasar en línea tras revisar Next 16.4.6, Vite 8.3.7 y FastAPI 0.162.2. Las cinco entradas que las citan son temas en preparación; no hay APIs ni ejemplos publicados que migrar. Se actualizan las referencias y sus fuentes sin desactivar el control ni renovar las huellas de lecciones ajenas. La evidencia está en `technology-currency.md`.
+
+### Coste medido de las nuevas vistas
+
+Chrome 156 en Windows, HTTP local, tres contextos nuevos en 1440 y 390 px por vista, cachés de navegador/sistema calientes y movimiento normal, con 120 intervalos rAF por muestra. Los bytes excluyen el documento HTML principal. Los informes están en `coverage/ui-review/lab-before/`, `lab-after/`, `progress-before/` y `progress-after/`; se reproducen mediante `npm run review:ui -- etiqueta lab` o `npm run review:ui -- etiqueta progress`.
+
+| Recursos en apertura directa           | Antes     | Después   |
+| -------------------------------------- | --------- | --------- |
+| Laboratorio, transferencia             | 178 985 B | 353 162 B |
+| Laboratorio, JavaScript sin compresión | 144 353 B | 149 111 B |
+| Mi progreso, transferencia             | 165 291 B | 339 187 B |
+| Mi progreso, JavaScript sin compresión | 134 711 B | 138 862 B |
+
+La mayor parte del incremento corresponde al WebP animado de 168 744 B que ahora también se solicita al entrar directamente en estas secciones. El recurso se comparte al navegar; antes solo se animaba en la portada. No se presenta este cambio como una reducción de transferencia. El CLS observado permanece en 0 en todas las muestras y el p95 de intervalos rAF está entre 16,8 y 16,9 ms. No hay desbordamiento horizontal ni descarga inicial de Pyodide. Son pruebas locales de viewport, sin medición de GPU ni dispositivos físicos, y no demuestran rendimiento de usuarios reales.
+
+Las 129 pruebas unitarias pasan y los 34 módulos cumplen los umbrales de cobertura: 99,04 % de líneas, 95,51 % de ramas y 97,11 % de funciones. La verificación visual y automática cubre entre 320 y 1440 px, ambos temas, giro visible, pausa fuera de la portada y ausencia de descarga del logo oculto. Las comprobaciones automáticas de accesibilidad no sustituyen pruebas con lectores de pantalla o participantes.
+
+La batería completa `npm run test:all` termina correctamente con Node 26.12.1 y Chrome del sistema: ejemplos Python/Git, caché, 17 lecciones iniciales desde cero en ambos tamaños, acceso independiente, 102 lecciones y 144 actividades, ejecución Python, consola, importación/deshacer y aprendizaje simultáneo entre pestañas. También pasan el contraste tecnológico en línea y `npm run format:check`. Estas pruebas locales no sustituyen revisión docente ni pruebas con participantes.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |

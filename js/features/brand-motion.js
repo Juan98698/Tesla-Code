@@ -1,6 +1,6 @@
 import { assetUrl } from '../core/assets.js';
 
-// A small animated WebP is requested only for a visible home-page logo.
+// A small animated WebP is requested only for a visible navigation logo.
 // Swapping back to the still image also stops decoding the animation.
 export function mountBrandMotion(doc) {
   const images = [...doc.querySelectorAll('[data-brand-motion]')];

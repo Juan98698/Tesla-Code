@@ -8,6 +8,7 @@ export async function mount(el, ctx, load = loadPractice) {
   const filters = { type: 'all', topic: 'all' };
   const solved = (id) => ctx?.isSolved(id) ?? false;
   const badge = '<span class="badge live">Resuelta</span>';
+  const symbols = { example: '{ }', decide: '?', trace: '↳', predict: '→', bug: '!', order: '≡' };
   const chip = (group, key, label) => {
     const next = { ...filters, [group]: key };
     const total = filterPractice(items, next.type, next.topic).length;
@@ -20,18 +21,22 @@ export async function mount(el, ctx, load = loadPractice) {
       .map(([key, text]) => chip(name, key, text))
       .join('')}</div>`;
   const card = (item) =>
-    `<article class="card practice-card" data-id="${e(item.id)}"><div class="eyebrow">${e(PRACTICE_TYPES[item.type])} · ${e(TOPICS[item.topic])}</div><h3>${e(item.title)}</h3><p>${e(item.goal)}</p><div class="practice-meta"><span>${item.minutes} min</span><span>${e(item.level)}</span><span>${e(item.concept)}</span>${solved(item.id) ? badge : ''}</div><button type="button" class="btn small" data-open aria-expanded="false">Practicar</button><div class="practice-body" hidden></div></article>`;
+    `<article class="card practice-card" data-id="${e(item.id)}"><div class="practice-card-top" aria-hidden="true"><span class="practice-emblem">${symbols[item.type]}</span><small>EXPERIMENTO / ${String(items.indexOf(item) + 1).padStart(2, '0')}</small></div><div class="eyebrow">${e(PRACTICE_TYPES[item.type])} · ${e(TOPICS[item.topic])}</div><h3>${e(item.title)}</h3><p>${e(item.goal)}</p><div class="practice-meta"><span>${item.minutes} min</span><span>${e(item.level)}</span><span>${e(item.concept)}</span>${solved(item.id) ? badge : ''}</div><button type="button" class="btn small" data-open aria-expanded="false">Practicar</button><div class="practice-body" hidden></div></article>`;
   const shown = () => filterPractice(items, filters.type, filters.topic);
   const count = () =>
     `${shown().filter((item) => solved(item.id)).length} de ${shown().length} resueltas`;
   function draw() {
-    el.innerHTML = `${group('type', 'Filtrar por tipo', PRACTICE_TYPES)}${group('topic', 'Filtrar por tema', TOPICS)}<p class="practice-count" role="status">${count()}</p><div class="practice-list">${shown().map(card).join('')}</div>`;
+    el.innerHTML = `<div class="lab-filter-panel">${group('type', 'Filtrar por tipo', PRACTICE_TYPES)}${group('topic', 'Filtrar por tema', TOPICS)}</div><div class="lab-session"><p class="practice-count" role="status">${count()}</p><span>${items.length} retos disponibles · Elige cómo experimentar</span></div><div class="practice-list">${shown().map(card).join('')}</div>`;
   }
   el.addEventListener('click', (event) => {
     const filter = event.target.closest('[data-group]');
     if (filter) {
       filters[filter.dataset.group] = filter.dataset.value;
+      const { group, value } = filter.dataset;
       draw();
+      el.querySelector(`[data-group="${group}"][data-value="${value}"]`).focus({
+        preventScroll: true,
+      });
       return;
     }
     const open = event.target.closest('[data-open]');

@@ -1,0 +1,637 @@
+/* Dimensional workspaces: CSS geometry, native controls and real progress. */
+.workspace-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  align-items: center;
+  gap: 32px;
+  padding: 32px 0 42px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 32px;
+}
+.workspace-hero h1 {
+  font-size: clamp(36px, 4vw, 62px);
+  line-height: 1.06;
+  letter-spacing: -2.4px;
+  max-width: 720px;
+  margin: 22px 0;
+}
+.workspace-hero h1 em {
+  font-style: normal;
+  color: var(--launch);
+}
+.workspace-hero-copy > p {
+  max-width: 530px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.workspace-hero .launch-primary {
+  margin-top: 12px;
+}
+.laboratory-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  color: var(--arc);
+  font:
+    10px/1.6 ui-monospace,
+    Consolas,
+    monospace;
+  margin-top: 26px;
+}
+.laboratory-dashboard > section,
+.progress-dashboard > section {
+  margin-bottom: 48px;
+  min-width: 0;
+}
+.laboratory-dashboard .section-heading,
+.progress-dashboard .section-heading {
+  align-items: end;
+  gap: 20px;
+}
+.laboratory-dashboard .section-heading h2,
+.progress-dashboard .section-heading h2 {
+  font-size: 27px;
+  letter-spacing: -0.8px;
+  margin: 8px 0;
+}
+.lab-assembly {
+  height: 330px;
+  position: relative;
+  perspective: 900px;
+  isolation: isolate;
+  overflow: clip;
+}
+.assembly-grid {
+  position: absolute;
+  width: 300px;
+  height: 260px;
+  left: calc(50% - 150px);
+  top: 55px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 29px, #68c9df18 30px 31px),
+    repeating-linear-gradient(90deg, transparent 0 29px, #68c9df18 30px 31px);
+  transform: rotateX(57deg) rotateZ(-35deg);
+  mask-image: radial-gradient(ellipse, black 20%, transparent 70%);
+}
+.assembly-platform {
+  position: absolute;
+  left: calc(50% - 100px);
+  top: 42px;
+  width: 200px;
+  height: 160px;
+  border: 1px solid #71b9d2;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #223d53, #0a1b29);
+  transform: rotateX(calc(48deg + var(--pointer-y, 0deg)))
+    rotateZ(calc(-32deg + var(--pointer-x, 0deg)));
+  box-shadow:
+    -9px 10px 0 #102638,
+    -10px 11px 0 #47758b,
+    -21px 30px 32px #0004;
+  transition: transform 180ms ease-out;
+  padding: 18px;
+  color: #c3e7f3;
+}
+.assembly-platform > span {
+  font:
+    10px/1.5 ui-monospace,
+    Consolas,
+    monospace;
+  letter-spacing: 1px;
+}
+.platform-back {
+  top: 12px;
+  opacity: 0.85;
+  background: #132436;
+}
+.platform-middle {
+  top: 65px;
+  background: #163e48;
+}
+.platform-front {
+  top: 120px;
+  color: #d9ffb4;
+  background: linear-gradient(135deg, #2e5940, #142d28);
+  border-color: #8bbb94;
+  box-shadow:
+    -9px 10px 0 #132d26,
+    -10px 11px 0 #6c9c79,
+    -21px 30px 32px #0004;
+}
+.platform-front > strong {
+  font:
+    54px/1 ui-monospace,
+    Consolas,
+    monospace;
+  display: block;
+  margin: 12px 0 8px;
+}
+.assembly-cells {
+  display: flex;
+  gap: 7px;
+}
+.assembly-cells i {
+  width: 26px;
+  height: 12px;
+  border: 1px solid #a7da91;
+  background: #ceff7e1c;
+}
+.assembly-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  text-align: center;
+  color: var(--arc);
+  font:
+    9px/1.5 ui-monospace,
+    Consolas,
+    monospace;
+  letter-spacing: 1.2px;
+}
+.assembly-label .launch-signal {
+  display: inline-block;
+  margin-right: 5px;
+}
+.lab-filter-panel {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--studio-panel);
+  padding: 20px 22px 8px;
+}
+.lab-filter-panel .practice-filters {
+  margin: 0 0 14px;
+  gap: 8px;
+}
+.practice-chip {
+  border-radius: 9px;
+  padding: 10px 13px;
+  background: var(--bg);
+  box-shadow: 0 3px 0 #0002;
+  font-size: 12px;
+}
+.practice-chip[aria-pressed='true'] {
+  background: var(--launch);
+  border-color: var(--launch);
+  color: var(--launch-ink);
+}
+.practice-chip[aria-pressed='true'] span {
+  color: inherit;
+}
+.lab-session {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.lab-session .practice-count {
+  color: var(--ink);
+  margin: 0;
+  font-weight: 650;
+}
+.laboratory-dashboard .practice-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.laboratory-dashboard .practice-card {
+  position: relative;
+  border-radius: 18px;
+  background: var(--studio-panel);
+  padding: 24px;
+  border-color: var(--line);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--surface2) 70%, var(--bg));
+  transition: border-color 180ms;
+  align-self: start;
+}
+.practice-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+.practice-emblem,
+.progress-route-emblem {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 46px;
+  flex: none;
+  border: 1px solid var(--arc);
+  background: color-mix(in srgb, var(--arc) 10%, var(--surface));
+  color: var(--arc);
+  border-radius: 9px;
+  font:
+    22px/1 ui-monospace,
+    Consolas,
+    monospace;
+  transform: perspective(250px) rotateY(-18deg) rotateX(10deg);
+  box-shadow:
+    -4px 4px 0 var(--surface2),
+    -5px 5px 0 var(--line);
+}
+.practice-card-top > small {
+  color: var(--muted);
+  font:
+    10px ui-monospace,
+    Consolas,
+    monospace;
+}
+.laboratory-dashboard .practice-card .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+}
+.laboratory-dashboard .practice-card h3 {
+  font-size: 21px;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  margin: 10px 0;
+}
+.laboratory-dashboard .practice-card > p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.laboratory-dashboard .practice-meta {
+  margin: 20px 0;
+}
+.laboratory-dashboard .practice-body:not([hidden]) {
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.laboratory-dashboard .practice-lab h4 {
+  font-size: 16px;
+  line-height: 1.4;
+}
+.laboratory-dashboard .practice-list:has(.practice-body:not([hidden])) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.laboratory-dashboard .lab-grid > [data-lab] > *,
+.laboratory-dashboard .review-list > .card {
+  border-radius: 18px;
+  background: var(--studio-panel);
+  box-shadow: 0 5px 0 var(--surface2);
+}
+.laboratory-dashboard .review-list {
+  gap: 16px;
+}
+.progress-observatory {
+  position: relative;
+  height: 330px;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  overflow: clip;
+}
+.progress-orbit {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  border: 1px dashed #59bfd15c;
+  transform: rotateX(58deg) rotateZ(-24deg);
+  box-shadow: 0 0 0 28px #59bfd109;
+}
+.progress-pedestal {
+  position: absolute;
+  width: 260px;
+  height: 190px;
+  top: 115px;
+  border: 1px solid #467d8b;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #20434c, #112330);
+  transform: perspective(600px) rotateX(55deg) rotateZ(-30deg);
+  box-shadow:
+    -8px 10px 0 #142936,
+    -9px 11px 0 #3d6b7c,
+    -14px 28px 30px #0004;
+}
+.progress-dial {
+  width: 218px;
+  height: 218px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  padding: 8px;
+  background: conic-gradient(var(--launch) var(--progress), var(--studio-line) 0);
+  border: 1px solid var(--line);
+  transform: perspective(800px) rotateX(var(--pointer-y, -7deg)) rotateY(var(--pointer-x, -9deg));
+  box-shadow:
+    5px 9px 0 var(--surface2),
+    5px 10px 0 var(--line),
+    14px 22px 30px #0003;
+  transition: transform 180ms ease-out;
+  position: relative;
+  z-index: 1;
+}
+.progress-dial > div {
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+}
+.progress-dial .section-index {
+  font-size: 8px;
+}
+.progress-dial strong {
+  font-size: 64px;
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -4px;
+}
+.progress-dial strong small {
+  font-size: 22px;
+  margin-left: 3px;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+.progress-dial > div > span:last-child {
+  color: var(--muted);
+  font-size: 11px;
+}
+.progress-observatory > p {
+  position: absolute;
+  bottom: 4px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  z-index: 2;
+}
+.progress-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 44px;
+}
+.progress-metric {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--studio-panel);
+  box-shadow: 0 5px 0 var(--surface2);
+}
+.metric-coordinate {
+  color: var(--arc);
+  font:
+    10px ui-monospace,
+    Consolas,
+    monospace;
+  display: block;
+}
+.progress-metric > strong {
+  font-size: 40px;
+  font-weight: 750;
+  line-height: 1.5;
+  letter-spacing: -1.5px;
+}
+.progress-metric > span:not(.metric-coordinate),
+.progress-metric > small {
+  display: block;
+}
+.progress-metric > span:not(.metric-coordinate) {
+  font-size: 13px;
+  font-weight: 650;
+}
+.progress-metric > small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+  margin-top: 6px;
+}
+.progress-dashboard .progress-routes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.progress-dashboard .progress-route {
+  background: var(--studio-panel);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 5px 0 var(--surface2);
+}
+.progress-route .progress-route-heading {
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+.progress-route-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.progress-route-heading strong {
+  font-size: 16px;
+  display: block;
+  line-height: 1.4;
+}
+.progress-route-heading > div > small {
+  color: var(--muted);
+  font-size: 11px;
+  display: block;
+  margin-top: 6px;
+}
+.route-percentage {
+  font-size: 27px;
+  font-weight: 700;
+  color: var(--arc);
+}
+.route-percentage small {
+  font-size: 12px;
+}
+.progress-dashboard .meter {
+  height: 7px;
+}
+.progress-dashboard .meter i {
+  background: linear-gradient(90deg, var(--arc), var(--launch));
+}
+.progress-dashboard .progress-route p {
+  margin-top: 16px;
+  font-size: 10px;
+}
+.progress-route p > span {
+  color: var(--arc);
+  float: right;
+}
+.progress-evidence .empty-state {
+  background: var(--studio-panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 36px;
+}
+.evidence-symbol {
+  display: inline-block;
+  color: var(--arc);
+  font-size: 38px;
+  text-shadow: -3px 4px var(--line);
+}
+.progress-dashboard .progress-vault {
+  border: 1px solid var(--line);
+  background: var(--studio-panel);
+  border-radius: 20px;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 32px;
+  align-items: center;
+}
+.vault-copy h2 {
+  margin: 15px 0;
+  font-size: 28px;
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+.vault-copy p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.vault-copy > small {
+  display: block;
+  color: var(--muted);
+  margin-top: 12px;
+  font-size: 10px;
+}
+.progress-vault .progress-import {
+  margin: 0;
+  padding: 22px;
+  background: var(--bg);
+  border-radius: 14px;
+}
+.progress-vault .progress-import h2 {
+  font-size: 19px;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+.progress-vault .progress-import p,
+.progress-vault .progress-import label {
+  font-size: 12px;
+  line-height: 1.7;
+}
+@media (max-width: 1200px) {
+  .laboratory-dashboard .practice-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .workspace-hero {
+    gap: 20px;
+  }
+  .progress-metric {
+    padding: 20px;
+  }
+}
+@media (max-width: 800px) {
+  .workspace-hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 14px;
+    gap: 10px;
+  }
+  .workspace-hero h1 {
+    font-size: 46px;
+  }
+  .lab-assembly {
+    height: 340px;
+    max-width: 400px;
+    width: 100%;
+    margin-inline: auto;
+  }
+  .progress-observatory {
+    height: 330px;
+    max-width: 400px;
+    width: 100%;
+    margin-inline: auto;
+  }
+  .progress-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .progress-dashboard .progress-vault {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 24px;
+  }
+}
+@media (max-width: 600px) {
+  .workspace-hero h1 {
+    font-size: clamp(34px, 10vw, 46px);
+    letter-spacing: -1.6px;
+  }
+  .workspace-hero-copy > p {
+    font-size: 14px;
+  }
+  .workspace-hero {
+    padding-bottom: 26px;
+    margin-bottom: 26px;
+  }
+  .laboratory-notes {
+    gap: 8px 14px;
+    font-size: 9px;
+  }
+  .laboratory-dashboard .practice-list,
+  .laboratory-dashboard .practice-list:has(.practice-body:not([hidden])),
+  .progress-dashboard .progress-routes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .laboratory-dashboard .section-heading,
+  .progress-dashboard .section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .laboratory-dashboard .section-heading h2,
+  .progress-dashboard .section-heading h2 {
+    font-size: 24px;
+  }
+  .lab-filter-panel {
+    padding: 16px 14px 4px;
+  }
+  .practice-chip {
+    font-size: 11px;
+    padding: 9px 11px;
+  }
+  .laboratory-dashboard .practice-card {
+    padding: 22px;
+  }
+  .progress-metric {
+    padding: 18px;
+  }
+  .progress-metric > strong {
+    font-size: 34px;
+  }
+  .progress-metric > span:not(.metric-coordinate) {
+    font-size: 12px;
+  }
+  .progress-dashboard .progress-route {
+    padding: 20px;
+  }
+  .progress-route .progress-route-heading {
+    gap: 12px;
+  }
+  .progress-route-heading strong {
+    font-size: 15px;
+  }
+  .progress-route p > span {
+    display: block;
+    float: none;
+    margin-top: 8px;
+  }
+  .progress-dashboard .progress-vault {
+    padding: 22px 16px;
+  }
+  .progress-vault .progress-import {
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assembly-platform,
+  .progress-dial {
+    transition: none;
+  }
+}

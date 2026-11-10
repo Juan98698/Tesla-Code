@@ -14,7 +14,7 @@ import {
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const policy = read('content/technology-policy.json'),
   project = read('package.json'),
-  today = '2026-11-07';
+  today = '2026-11-09';
 const clone = (value) => structuredClone(value);
 test('technology policy accepts only verified LTS ranges and valid review dates', () => {
   assert.deepEqual(checkTechnologyPolicy(policy, project, today, '26.13.0'), []);

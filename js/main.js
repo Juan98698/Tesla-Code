@@ -1,4 +1,6 @@
 import { mountStudio } from './features/studio.js';
+import { mountBrandMotion } from './features/brand-motion.js';
+import { mountDepthScene } from './features/depth-scene.js';
 import { $ } from './core/dom.js';
 import { escapeHtml as e } from './core/html.js';
 import { progressRepository, PROGRESS_KEY, withProgressLock } from './core/storage.js';
@@ -29,6 +31,27 @@ let routes = [],
   toastTimer;
 let disposeView = () => {};
 let pendingSaves = 0;
+function refreshMotionControls() {
+  const paused = document.documentElement.dataset.motion === 'off';
+  document.querySelectorAll('#motion-toggle, #brand-motion-toggle').forEach((control) => {
+    const label = paused ? 'Activar animaciones' : 'Pausar animaciones';
+    control.setAttribute('aria-pressed', String(paused));
+    control.setAttribute('aria-label', label);
+    control.title = label;
+    control.textContent = control.id === 'motion-toggle' ? label : paused ? '▶' : 'Ⅱ';
+  });
+}
+function bindMotionToggle(control) {
+  refreshMotionControls();
+  control.onclick = () => {
+    const value = document.documentElement.dataset.motion === 'off' ? 'on' : 'off';
+    document.documentElement.dataset.motion = value;
+    try {
+      localStorage.setItem('teslacode:motion', value);
+    } catch {}
+    refreshMotionControls();
+  };
+}
 const state = progressRepository.load();
 function toast(message) {
   clearTimeout(toastTimer);
@@ -142,25 +165,7 @@ async function render() {
         save();
         render();
       });
-      const control = $('motion-toggle');
-      const refreshMotion = () => {
-        const paused = document.documentElement.dataset.motion === 'off';
-        control.setAttribute('aria-pressed', String(paused));
-        control.setAttribute(
-          'aria-label',
-          paused ? 'Activar animaciones del inicio' : 'Pausar animaciones del inicio',
-        );
-        control.textContent = paused ? 'Activar animaciones' : 'Pausar animaciones';
-      };
-      refreshMotion();
-      control.onclick = () => {
-        const value = document.documentElement.dataset.motion === 'off' ? 'on' : 'off';
-        document.documentElement.dataset.motion = value;
-        try {
-          localStorage.setItem('teslacode:motion', value);
-        } catch {}
-        refreshMotion();
-      };
+      bindMotionToggle($('motion-toggle'));
     } else if (view === 'rutas') {
       root.innerHTML = routesPage(routes, state, filter);
       root.querySelectorAll('[data-filter]').forEach(
@@ -215,10 +220,12 @@ async function render() {
       };
     } else if (view === 'practica') {
       root.innerHTML = practicePage(routes, state);
+      disposeView = mountDepthScene(root);
       await mountLabs(root, version);
     } else if (view === 'progreso') {
       root.innerHTML = progressPage(routes, state, concepts);
-      disposeView = mountProgressImport(root, state, (next, notice) => {
+      const disposeDepth = mountDepthScene(root);
+      const disposeImport = mountProgressImport(root, state, (next, notice) => {
         const expected = structuredClone(state);
         return withProgressLock(() => {
           if (!progressRepository.save(next, { expected }))
@@ -229,6 +236,10 @@ async function render() {
           toast(notice);
         });
       });
+      disposeView = () => {
+        disposeDepth();
+        disposeImport();
+      };
       $('export-progress').onclick = () => {
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }),
           url = URL.createObjectURL(blob),
@@ -391,6 +402,12 @@ function bindShell() {
     : matchMedia('(prefers-reduced-motion: reduce)').matches
       ? 'off'
       : 'on';
+  bindMotionToggle($('brand-motion-toggle'));
+  let disposeBrand = mountBrandMotion(document);
+  window.addEventListener('pagehide', () => disposeBrand());
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) disposeBrand = mountBrandMotion(document);
+  });
   function setTheme(value) {
     document.documentElement.dataset.theme = value;
     $('theme-toggle').setAttribute(

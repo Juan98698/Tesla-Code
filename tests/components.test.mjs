@@ -282,6 +282,36 @@ test('progress and practice views show real evidence and valid bookmarks', (t) =
   assert.ok(root.querySelector('[data-lab="practice-hub"]'));
   assert.equal(root.querySelector('[href*="bad/missing"]'), null);
 });
+test('dimensional progress uses published lessons and real achievements without changing stored state', (t) => {
+  installDOM(t);
+  const root = $('root'),
+    state = emptyProgress();
+  state.completed = ['fundamentos/tu-primer-paso', 'frontend/vite-y-empaquetado'];
+  state.xp = 80;
+  state.practices = ['lab/one'];
+  state.streak.count = 2;
+  const before = structuredClone(state);
+  root.innerHTML = views.progressPage(routes, state, concepts);
+  assert.match(root.querySelector('.progress-dial').textContent, /1 de 102 lecciones/);
+  assert.deepEqual(
+    [...root.querySelectorAll('.progress-metric > strong')].map((el) => el.textContent),
+    ['1', '80', '1', '2'],
+  );
+  assert.equal(root.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'), '1');
+  assert.deepEqual(state, before);
+  state.completed = routes.flatMap((route) =>
+    route.lessons
+      .filter((lesson) => lesson.status === 'published')
+      .map((lesson) => `${route.id}/${lesson.id}`),
+  );
+  root.innerHTML = views.progressPage(routes, state, concepts);
+  assert.match(root.querySelector('.progress-dial').textContent, /100%/);
+  assert.equal(root.querySelector('.workspace-hero-copy a').getAttribute('href'), '#/rutas');
+  root.innerHTML = views.progressPage([{ ...routes[0], lessons: [] }], emptyProgress(), concepts);
+  assert.match(root.querySelector('.progress-dial').textContent, /0 de 0 lecciones/);
+  assert.ok(root.querySelector('#progress-file'));
+});
+
 test('lesson renders each stage, source links and completion without exposing another route', (t) => {
   installDOM(t);
   const root = $('root'),

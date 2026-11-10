@@ -190,6 +190,7 @@ test('el centro de práctica filtra por tipo, abre retos y registra lo resuelto'
   assert.equal(r.querySelectorAll('.practice-card').length, items.length);
   assert.match(r.querySelector('.practice-count').textContent, new RegExp(`0 de ${items.length}`));
   click(r.querySelector('[data-group="type"][data-value="bug"]'));
+  assert.equal(document.activeElement.dataset.value, 'bug');
   const bugs = items.filter((item) => item.type === 'bug');
   assert.equal(r.querySelectorAll('.practice-card').length, bugs.length);
   click(r.querySelector('.practice-list'));

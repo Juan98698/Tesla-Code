@@ -4,6 +4,10 @@ import { chromium } from 'playwright';
 import { browserExecutable } from '../tests/support/runtime.mjs';
 
 const label = process.argv[2] || 'current';
+const [view, hash, ready] = {
+  lab: ['lab', '#/practica', '.practice-list'],
+  progress: ['progress', '#/progreso', '#progress-file'],
+}[process.argv[3]] || ['home', '', '.hero'];
 if (!/^[a-z0-9-]+$/.test(label)) throw Error('Usa una etiqueta simple para la revisión.');
 const origin = process.env.REVIEW_ORIGIN || 'http://127.0.0.1:3000';
 const output = resolve('coverage/ui-review', label);
@@ -45,8 +49,8 @@ try {
             buffered: true,
           });
       });
-      await page.goto(origin);
-      await page.locator('.hero').waitFor();
+      await page.goto(origin + '/' + hash);
+      await page.locator(ready).waitFor();
       await page.evaluate(async () => {
         await document.fonts.ready;
         await Promise.all([...document.images].map((image) => image.decode().catch(() => {})));
@@ -79,17 +83,23 @@ try {
           pyodideRequests: resources.filter((resource) => /pyodide/.test(resource.name)).length,
         };
       });
-      samples.push({ width, sample, ...metrics });
+      samples.push({ view, width, sample, ...metrics });
       if (!sample) {
         await page.screenshot({
-          path: resolve(output, `home-${width}.png`),
+          path: resolve(output, `${view}-viewport-${width}.png`),
+          animations: 'disabled',
+        });
+        await page.screenshot({
+          path: resolve(output, `${view}-${width}.png`),
           fullPage: true,
           animations: 'disabled',
         });
-        for (const [name, hash, selector] of [
-          ['routes', '#/rutas', '.routes-grid'],
-          ['lesson', '#/leccion/fundamentos/tu-primer-paso/aprender', '#lesson'],
-        ]) {
+        for (const [name, hash, selector] of view === 'home'
+          ? [
+              ['routes', '#/rutas', '.routes-grid'],
+              ['lesson', '#/leccion/fundamentos/tu-primer-paso/aprender', '#lesson'],
+            ]
+          : []) {
           await page.goto(origin + '/' + hash);
           await page.locator(selector).waitFor();
           await page.screenshot({

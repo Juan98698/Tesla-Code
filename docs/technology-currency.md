@@ -26,6 +26,18 @@ Cada tema declara `technologyRefs`. Una lección publicada añade `technicalRevi
 
 ## Controles automáticos
 
+### Revisión del 9 de noviembre de 2026
+
+El contraste oficial señaló tres nuevas versiones de referencia. Se revisaron sus publicaciones y los temas que las citan: cinco temas planificados, sin lecciones publicadas ni ejemplos ejecutables asociados. No son dependencias de TeslaCode y no se instalan para actualizar este registro.
+
+| Referencia                | Revisión oficial                                                                                                                                                                                                                 | Alcance en este proyecto                                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Next.js 16.4.5 → 16.4.6   | [Etiqueta oficial](https://github.com/vercel/next.js/releases/tag/v16.4.6) y [metadatos npm](https://registry.npmjs.org/next/latest). La etiqueta no incorpora notas detalladas; no se infiere compatibilidad de todas sus APIs. | Los tres temas previstos sobre Next, fronteras y caché permanecen en preparación. Sin código que migrar ni huellas publicadas que renovar.       |
+| Vite 8.3.6 → 8.3.7        | [Publicación oficial](https://github.com/vitejs/vite/releases/tag/v8.3.7): actualización de Rolldown y mantenimiento de pruebas/construcción.                                                                                    | El tema previsto de empaquetado no contiene comandos ni configuración publicados. No se atribuye una prueba de Vite al servidor estático actual. |
+| FastAPI 0.162.0 → 0.162.2 | [Notas oficiales](https://fastapi.tiangolo.com/release-notes/#01622): documentación, traducciones e instrucciones de desarrollo asistido en 0.162.1/0.162.2.                                                                     | La alternativa Python/FastAPI sigue planificada. Las lecciones de Python estándar no dependen de FastAPI.                                        |
+
+Se actualizan solo estas referencias y sus fechas de verificación; los vencimientos existentes se conservan. El watcher sigue fallando ante versiones nuevas o fuentes inaccesibles, porque solicita una revisión real; no se desactiva ni se ignoran parches automáticamente.
+
 - `npm run validate` comprueba también soporte y contratos técnicos, además del grafo y las revisiones pedagógicas.
 - `npm run technology:check` comprueba fechas, fuentes, referencias de temas y versiones preferidas.
 - `npm run technology:check -- --online` consulta el calendario y los parches de Node, y los registros oficiales npm/PyPI. Un cambio produce una solicitud de revisión en la salida y un fallo del control. No se considera saludable una fuente que no responde.

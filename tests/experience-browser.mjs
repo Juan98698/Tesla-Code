@@ -42,6 +42,10 @@ await withBrowser(4321, async (browser, origin) => {
     await page.goto(origin);
     await page.locator('.hero').waitFor();
     const logo = page.locator(width > 1000 ? '.brand img' : '.mobile-brand img');
+    assert.ok(
+      (await logo.evaluate((image) => image.getBoundingClientRect().width)) >=
+        (width > 1000 ? 96 : 48),
+    );
     await page.waitForFunction(
       ({ selector, reduced }) => {
         const image = document.querySelector(selector);
@@ -176,17 +180,32 @@ await withBrowser(4321, async (browser, origin) => {
       ['#/rutas', '.routes-grid'],
       ['#/ruta/fundamentos', '.map-layout'],
       ['#/leccion/fundamentos/tu-primer-paso/aprender', '#lesson'],
+      ['#/practica', '.practice-list'],
       ['#/progreso', '#progress-file'],
     ]) {
       await page.goto(origin + '/' + hash);
       await page.locator(selector).waitFor();
-      assert.match(await logo.getAttribute('src'), /teslacode-still\.webp/);
+      await page.waitForFunction(
+        ({ selector, reduced }) =>
+          document
+            .querySelector(selector)
+            .src.includes(reduced ? 'teslacode-still.webp' : 'teslacode-spin.webp'),
+        { selector: width > 1000 ? '.brand img' : '.mobile-brand img', reduced },
+      );
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
         false,
         `${width}: ${hash}`,
       );
       await audit(page, `${width}: ${hash}`);
+      if (hash === '#/progreso' && !reduced) {
+        await page.locator('#brand-motion-toggle').click();
+        await page.waitForFunction(
+          (selector) => document.querySelector(selector).src.includes('teslacode-still.webp'),
+          width > 1000 ? '.brand img' : '.mobile-brand img',
+        );
+        await page.locator('#brand-motion-toggle').click();
+      }
     }
     assert.deepEqual(errors, []);
     await context.close();
@@ -212,13 +231,37 @@ await withBrowser(4321, async (browser, origin) => {
     await page.evaluate(
       () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
     );
-    assert.match(await page.locator('.brand img').getAttribute('src'), /teslacode-still\.webp/);
-    assert.deepEqual(requests, []);
+    await page.waitForFunction(
+      (saveData) =>
+        document
+          .querySelector('.brand img')
+          .src.includes(saveData ? 'teslacode-still.webp' : 'teslacode-spin.webp'),
+      saveData,
+    );
+    assert.equal(requests.length, saveData ? 0 : 1);
     await context.close();
   }
   console.log(
-    'PASS: giro real del logo; sin descarga de animación con movimiento reducido, ahorro de datos o entrada directa a una lección.',
+    'PASS: logo ampliado y animado en todas las secciones visibles; sin descarga de animación con movimiento reducido o ahorro de datos.',
   );
+  const hiddenContext = await browser.newContext();
+  await hiddenContext.addInitScript(() =>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-brand-motion]').forEach((image) => (image.hidden = true));
+    }),
+  );
+  const hiddenPage = await hiddenContext.newPage(),
+    hiddenRequests = [];
+  hiddenPage.on('request', (request) => {
+    if (request.url().includes('teslacode-spin.webp')) hiddenRequests.push(request.url());
+  });
+  await hiddenPage.goto(origin + '/#/rutas');
+  await hiddenPage.locator('.routes-grid').waitFor();
+  await hiddenPage.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  );
+  assert.deepEqual(hiddenRequests, [], 'A hidden logo never requests its animation');
+  await hiddenContext.close();
   const fallback = await chromium.launch({
     executablePath: browserExecutable(),
     args: ['--no-sandbox', '--disable-webgl'],
