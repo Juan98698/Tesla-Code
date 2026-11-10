@@ -46,7 +46,7 @@ await withBrowser(4320, async (browser, origin) => {
     assert.equal(await page.locator('.hero-art').isVisible(), true);
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
     assert.equal(
-      await page.locator('.core-cube').evaluate((el) => getComputedStyle(el).animationName),
+      await page.locator('.tesla-hologram').evaluate((el) => getComputedStyle(el).animationName),
       'none',
     );
     assert.ok(
@@ -70,7 +70,7 @@ await withBrowser(4320, async (browser, origin) => {
     await page.screenshot({ path: screenshotPath(`teslacode-final-${width}.png`), fullPage: true });
     await page.locator('#motion-toggle').click(); // Optional opt-in cannot override reduced motion.
     assert.equal(
-      await page.locator('.core-cube').evaluate((el) => getComputedStyle(el).animationName),
+      await page.locator('.tesla-hologram').evaluate((el) => getComputedStyle(el).animationName),
       'none',
     );
     await page.locator('#motion-toggle').click();

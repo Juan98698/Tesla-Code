@@ -100,3 +100,63 @@ test('static hosts and roots without a scene need no observers or animation work
   assert.equal(root.firstElementChild.dataset.sceneActive, 'false');
   dispose();
 });
+
+test('Tesla follows a document pointer with bounded independent eyes and cleans up on remount', (t) => {
+  const dom = installDOM(
+    t,
+    '<main id="root"><div data-depth-scene data-gaze-tracking></div></main>',
+  );
+  const root = document.getElementById('root'),
+    scene = root.firstElementChild;
+  t.mock.method(globalThis, 'matchMedia', (query) => ({ matches: !query.includes('reduced') }));
+  const frames = new Map();
+  let serial = 0;
+  t.mock.method(dom.window, 'requestAnimationFrame', (callback) => {
+    frames.set(++serial, callback);
+    return serial;
+  });
+  t.mock.method(dom.window, 'cancelAnimationFrame', (id) => frames.delete(id));
+  t.mock.method(scene, 'getBoundingClientRect', () => ({
+    left: 500,
+    top: 100,
+    width: 400,
+    height: 300,
+  }));
+  const move = (clientX, clientY) =>
+    document.dispatchEvent(new dom.window.MouseEvent('pointermove', { clientX, clientY }));
+  const flush = () => {
+    const callbacks = [...frames.values()];
+    frames.clear();
+    callbacks.forEach((callback) => callback());
+  };
+  for (let mount = 0; mount < 3; mount++) {
+    const dispose = mountDepthScene(root);
+    move(100, -100);
+    move(0, -200);
+    assert.equal(frames.size, 1, 'One frame for a burst of events outside the scene');
+    flush();
+    assert.equal(scene.style.getPropertyValue('--pointer-x'), '-7deg');
+    assert.equal(scene.style.getPropertyValue('--pointer-y'), '7deg');
+    assert.equal(scene.style.getPropertyValue('--gaze-x'), '-4px');
+    assert.equal(scene.style.getPropertyValue('--gaze-y'), '-2.5px');
+    move(2000, 2000);
+    flush();
+    assert.equal(scene.style.getPropertyValue('--pointer-x'), '7deg');
+    assert.equal(scene.style.getPropertyValue('--pointer-y'), '-7deg');
+    assert.equal(scene.style.getPropertyValue('--gaze-x'), '4px');
+    assert.equal(scene.style.getPropertyValue('--gaze-y'), '2.5px');
+    document.dispatchEvent(new dom.window.Event('pointerleave'));
+    assert.equal(scene.style.getPropertyValue('--gaze-x'), '');
+    assert.equal(scene.style.getPropertyValue('--pointer-x'), '');
+    move(700, 220);
+    flush();
+    assert.equal(scene.style.getPropertyValue('--gaze-x'), '0px');
+    assert.equal(scene.style.getPropertyValue('--gaze-y'), '0px');
+    move(800, 300);
+    dispose();
+    assert.equal(scene.style.getPropertyValue('--gaze-y'), '');
+    assert.equal(frames.size, 0);
+    move(800, 300);
+    assert.equal(frames.size, 0, 'No retained document listener after disposal');
+  }
+});

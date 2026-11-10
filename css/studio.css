@@ -324,87 +324,82 @@ body[data-view='inicio'] {
   border-style: dashed;
   border-color: #539ec12b;
 }
-.core-shadow {
+.tesla-hologram {
   position: absolute;
   left: 50%;
-  top: 73%;
-  width: 140px;
+  top: 48%;
+  width: 184px;
+  height: 248px;
+  transform: translate(-50%, -50%) scale(var(--tesla-scale, 1));
+  transform-style: preserve-3d;
+}
+.tesla-beam {
+  position: absolute;
+  inset: 16px 12px 8px;
+  background: linear-gradient(0deg, #58ddff1c, #58ddff04 65%, transparent);
+  clip-path: polygon(4% 0, 96% 0, 76% 100%, 24% 100%);
+}
+.tesla-torso {
+  position: absolute;
+  left: 0;
+  bottom: 10px;
+  width: 184px;
+  height: 138px;
+}
+.tesla-head {
+  position: absolute;
+  left: 21px;
+  top: 0;
+  width: 142px;
+  height: 185px;
+  transform-origin: 50% 82%;
+  transform: perspective(700px) rotateX(var(--pointer-y, 0deg)) rotateY(var(--pointer-x, 0deg))
+    rotateZ(calc(var(--pointer-x, 0deg) * 0.25)) translateX(var(--gaze-x, 0px));
+  transition: transform 180ms ease-out;
+  filter: drop-shadow(0 0 4px #64ddff35);
+}
+.tesla-head svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.tesla-eye {
+  transform: translate(var(--gaze-x, 0px), var(--gaze-y, 0px));
+  transition: transform 120ms ease-out;
+}
+.tesla-projector {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 130px;
   height: 28px;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse, #a9ff632e, transparent 70%);
+  border: 1px solid #72d8e587;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #6bdeff40, #102c3d 57%, #081623 72%);
+  box-shadow:
+    0 5px 0 #07131d,
+    0 8px 18px #45d5ff16;
 }
-.depth-object {
+.tesla-projector i {
+  position: absolute;
+  inset: 5px 17px;
+  border: 1px solid #7fe7f099;
+  border-radius: 50%;
+}
+.tesla-projector i + i {
+  inset: 9px 36px;
+  border-color: #b5ffdd;
+}
+.tesla-projector span {
   position: absolute;
   left: 50%;
-  top: 47%;
-  width: 116px;
-  height: 116px;
-  transform: translate(-50%, -50%) rotateX(var(--pointer-y, 0deg)) rotateY(var(--pointer-x, 0deg));
-  transform-style: preserve-3d;
-  transition: transform 0.18s ease-out;
-}
-.core-cube {
-  width: 116px;
-  height: 116px;
-  position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(-24deg) rotateY(-32deg) rotateZ(6deg);
-}
-.cube-face {
-  position: absolute;
-  inset: 0;
-  border: 1px solid #70bcb7;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  backface-visibility: hidden;
-  background: #102d33;
-}
-.cube-front {
-  transform: translateZ(58px);
-  background: linear-gradient(135deg, #173e3e, #0a242b);
-  box-shadow: inset 0 0 28px #99ff8b13;
-}
-.cube-front > span {
-  color: #d6ff9c;
-  font-size: 62px;
-  line-height: 1;
-  font-weight: 750;
-  letter-spacing: -9px;
-  padding-right: 8px;
-}
-.cube-front > span > span {
-  color: #76c6d1;
-}
-.cube-front small {
-  font-size: 7px;
-  color: #bbdfdf;
-  letter-spacing: 2.5px;
-  margin-top: 12px;
-}
-.cube-right {
-  transform: rotateY(90deg) translateZ(58px);
-  background: linear-gradient(125deg, #164451, #0a2734);
-  color: #8ce0de;
-  font:
-    31px ui-monospace,
-    monospace;
-}
-.cube-left {
-  transform: rotateY(-90deg) translateZ(58px);
-}
-.cube-back {
-  transform: rotateY(180deg) translateZ(58px);
-}
-.cube-top {
-  transform: rotateX(90deg) translateZ(58px);
-  background: repeating-linear-gradient(90deg, transparent 0 18px, #c2efc41a 19px 20px), #265541;
-  color: #d5ffb3;
-  font-size: 41px;
-}
-.cube-bottom {
-  transform: rotateX(-90deg) translateZ(58px);
+  bottom: 8px;
+  width: 4px;
+  height: 34px;
+  transform: translateX(-50%);
+  background: linear-gradient(0deg, #a6f4ff9c, transparent);
 }
 .scene-spark {
   position: absolute;
@@ -555,15 +550,16 @@ body[data-view='inicio'] {
   background: var(--bg);
   border-radius: 20px;
 }
-[data-scene-active='true'] .core-cube {
-  animation: core-hover 6s ease-in-out infinite;
+[data-scene-active='true'] .tesla-hologram {
+  animation: tesla-hover 6s ease-in-out infinite;
 }
-@keyframes core-hover {
+@keyframes tesla-hover {
   50% {
-    translate: 0 -9px;
+    translate: 0 -4px;
   }
 }
-:root[data-motion='off'] .depth-object {
+:root[data-motion='off'] .tesla-head,
+:root[data-motion='off'] .tesla-eye {
   transition: none;
 }
 .workspace-heading {
@@ -1915,8 +1911,8 @@ body[data-view='leccion'] .route-label {
     width: 295px;
     height: 295px;
   }
-  .core-cube {
-    transform: scale(0.82) rotateX(-24deg) rotateY(-32deg) rotateZ(6deg);
+  .tesla-hologram {
+    --tesla-scale: 0.82;
   }
   .scene-caption {
     left: 0;
@@ -2103,10 +2099,11 @@ body[data-view='leccion'] .route-label {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .core-cube {
+  .tesla-hologram {
     animation: none !important;
   }
-  .depth-object {
+  .tesla-head,
+  .tesla-eye {
     transition: none;
   }
   .studio-computer .holo-computer {
@@ -2119,13 +2116,7 @@ body[data-view='leccion'] .route-label {
   }
 }
 @supports not (transform-style: preserve-3d) {
-  .core-cube {
-    transform: none;
-  }
-  .cube-face:not(.cube-front) {
-    display: none;
-  }
-  .cube-front {
+  .tesla-head {
     transform: none;
   }
 }

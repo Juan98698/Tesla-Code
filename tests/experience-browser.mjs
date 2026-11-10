@@ -71,6 +71,10 @@ await withBrowser(4321, async (browser, origin) => {
         document.querySelector('[data-depth-scene]').dataset.sceneActive === String(active),
       !touch && !reduced,
     );
+    assert.equal(await page.locator('.tesla-head').count(), 1);
+    assert.equal(await page.locator('[data-tesla-eye]').count(), 2);
+    assert.equal(await page.locator('.core-cube').count(), 0);
+    await waitForFiniteAnimations(page);
     const geometry = await page.locator('.orbit-chip').evaluateAll((buttons) =>
       buttons.map((button) => {
         const box = button.getBoundingClientRect();
@@ -98,20 +102,70 @@ await withBrowser(4321, async (browser, origin) => {
       `${width}: no horizontal overflow`,
     );
     if (width === 1440) {
-      await page.mouse.move(1100, 350);
+      const look = async (x, y, sign) => {
+        await page.mouse.move(x, y);
+        await page.waitForFunction(
+          (sign) =>
+            Math.sign(
+              parseFloat(
+                document.querySelector('[data-depth-scene]').style.getPropertyValue('--gaze-x'),
+              ),
+            ) === sign,
+          sign,
+        );
+        await waitForFiniteAnimations(page);
+        return page.evaluate(() => ({
+          head: getComputedStyle(document.querySelector('.tesla-head')).transform,
+          eyes: [...document.querySelectorAll('[data-tesla-eye]')].map(
+            (eye) => getComputedStyle(eye).transform,
+          ),
+        }));
+      };
+      const left = await look(260, 180, -1),
+        right = await look(1380, 450, 1);
+      assert.notEqual(left.head, right.head, 'The head turns toward the document cursor');
+      left.eyes.forEach((eye, i) =>
+        assert.notEqual(eye, right.eyes[i], 'Each pupil follows independently of the head'),
+      );
+      const positions = await page.locator('.orbit-chip').evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const { x, y } = button.getBoundingClientRect();
+          return { x, y };
+        }),
+      );
+      positions.forEach((position, i) =>
+        assert.deepEqual(
+          position,
+          { x: geometry[i].x, y: geometry[i].y },
+          'Looking around never moves route controls',
+        ),
+      );
+      await page.evaluate(() => document.dispatchEvent(new Event('pointerleave')));
       await page.waitForFunction(
         () =>
-          document.querySelector('[data-depth-scene]').style.getPropertyValue('--pointer-x') !== '',
+          document.querySelector('[data-depth-scene]').style.getPropertyValue('--gaze-x') === '',
       );
       await page.locator('.studio-discover').scrollIntoViewIfNeeded();
       await page.waitForFunction(
         () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'false',
+      );
+      assert.equal(
+        await page
+          .locator('[data-depth-scene]')
+          .evaluate((scene) => scene.style.getPropertyValue('--gaze-x')),
+        '',
       );
       await page.evaluate(() => scrollTo(0, 0));
       await page.waitForFunction(
         () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'true',
       );
       await page.locator('#motion-toggle').click();
+      assert.equal(
+        await page
+          .locator('[data-depth-scene]')
+          .evaluate((scene) => scene.style.getPropertyValue('--gaze-x')),
+        '',
+      );
       await page.waitForFunction(
         () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'false',
       );
@@ -119,6 +173,22 @@ await withBrowser(4321, async (browser, origin) => {
         document.querySelector('.brand img').src.includes('teslacode-still.webp'),
       );
       await page.locator('#motion-toggle').click();
+    }
+    if (touch || reduced) {
+      await page.mouse.move(width - 10, 150);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(done)));
+      assert.equal(
+        await page
+          .locator('[data-depth-scene]')
+          .evaluate((scene) => scene.style.getPropertyValue('--gaze-x')),
+        '',
+      );
+      assert.equal(
+        await page
+          .locator('.tesla-hologram')
+          .evaluate((element) => getComputedStyle(element).animationName),
+        'none',
+      );
     }
     for (const route of routes) {
       await page.getByRole('button', { name: `Elegir ruta ${route.name}`, exact: true }).click();
@@ -307,6 +377,7 @@ await withBrowser(4321, async (browser, origin) => {
     const page = await fallback.newPage();
     await page.goto(origin);
     await page.locator('.hero').waitFor();
+    assert.equal(await page.locator('.tesla-head svg').isVisible(), true);
     assert.equal(
       await page.evaluate(() => Boolean(document.createElement('canvas').getContext('webgl'))),
       false,

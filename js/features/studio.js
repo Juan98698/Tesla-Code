@@ -1,5 +1,6 @@
 import { escapeHtml as e } from '../core/html.js';
 import { mountDepthScene } from './depth-scene.js';
+import { teslaHologram } from './tesla-hologram.js';
 import { accessState, isPublished, lessonKey } from '../domain/curriculum.js';
 import { playgroundSettings, runPlayground } from '../domain/playground.js';
 const symbols = {
@@ -108,11 +109,11 @@ export function studioHome(routes, state, next, href) {
       <div class="launch-actions"><a class="btn launch-primary" href="${startHref}">${state.recent ? 'Continuar aprendiendo' : 'Empieza tu primera lección'} <span aria-hidden="true">↗</span></a><a class="studio-explore" href="#/rutas">Explorar las ${routes.length} rutas <span aria-hidden="true">→</span></a></div>
       <div class="launch-proof"><div><strong>${String(routes.length).padStart(2, '0')}</strong><span>rutas para explorar</span></div><div><strong>${totalLessons}</strong><span>lecciones disponibles</span></div><div><strong>Tu ritmo.</strong><span>Tu siguiente versión.</span></div></div>
     </div>
-    <div class="hero-art knowledge-scene" data-depth-scene role="group" aria-label="Elige tu ruta en la red de conocimiento">
+    <div class="hero-art knowledge-scene" data-depth-scene data-gaze-tracking role="group" aria-label="Elige tu ruta junto al holograma de Nikola Tesla">
       <div class="scene-coordinate" aria-hidden="true">IDEAS → HABILIDADES → PROYECTOS</div>
-      <div class="depth-decoration" aria-hidden="true"><div class="orbit-floor"></div><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div><div class="core-shadow"></div><div class="depth-object"><div class="core-cube"><div class="cube-face cube-front"><span>T<span>_</span></span><small>TESLA CODE</small></div><div class="cube-face cube-back"></div><div class="cube-face cube-right"><span>&lt;/&gt;</span></div><div class="cube-face cube-left"></div><div class="cube-face cube-top"><span>+</span></div><div class="cube-face cube-bottom"></div></div></div><span class="scene-spark spark-one"></span><span class="scene-spark spark-two"></span><span class="scene-spark spark-three"></span></div>
+      <div class="depth-decoration" aria-hidden="true"><div class="orbit-floor"></div><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div>${teslaHologram()}<span class="scene-spark spark-one"></span><span class="scene-spark spark-two"></span><span class="scene-spark spark-three"></span></div>
       <div class="orbit-routes">${routes.map((r, i) => `<button class="orbit-chip ${r.id === route.id ? 'selected' : ''}" type="button" data-orbit-route="${r.id}" style="--orbit:${i}" aria-label="Elegir ruta ${e(r.name)}" aria-pressed="${r.id === route.id}"><span aria-hidden="true">${e(symbols[r.id])}</span><strong>${e(shortNames[r.id] ?? r.name)}</strong><i aria-hidden="true"></i></button>`).join('')}</div>
-      <div class="scene-caption"><span class="scene-caption-mark" aria-hidden="true">↗</span><div><strong>Todo empieza con curiosidad.</strong><span>Elige una habilidad. Conecta tu futuro.</span></div></div>
+      <div class="scene-caption"><span class="scene-caption-mark" aria-hidden="true">↗</span><div><strong>Nikola Tesla · Todo empieza con curiosidad.</strong><span>Elige una habilidad. Conecta tu futuro.</span></div></div>
       <button class="motion-control" id="motion-toggle" type="button" aria-label="Pausar efecto holográfico" aria-pressed="false">Pausar efecto</button>
     </div>
   </header>
