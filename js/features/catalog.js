@@ -6,6 +6,8 @@ import {
   isUnlocked,
   nextLesson,
   accessState,
+  includeArchives,
+  routeEdition,
 } from '../domain/curriculum.js';
 import { conceptEvidence } from '../domain/progress.js';
 import { importMarkup } from './progress-import.js';
@@ -24,6 +26,13 @@ export const completedCount = (route, state) =>
     .length;
 export const lessonHref = (route, lesson, tab = 'aprender') =>
   `#/leccion/${route}/${lesson}/${tab}`;
+export function editionNotice(route, state = { completed: [] }) {
+  if (route.archivedEdition)
+    return '<div class="callout"><strong>Edición anterior · pseudocódigo y ejemplos Python</strong><p>Tus enlaces, prácticas y logros anteriores se conservan aquí. La nueva edición JavaScript tiene su propio recorrido y actividades.</p><a class="text-link" href="#/ruta/fundamentos">Ir a Fundamentos con JavaScript →</a></div>';
+  if (route.archive)
+    return `<div class="callout"><strong>JavaScript desde cero · primera entrega</strong><p>El primer módulo está completo. Los siguientes bloques aparecen en preparación. Tus ${completedCount(route.archive, state)} lecciones completadas de la edición anterior conservan su historial y XP; no completan las nuevas prácticas JavaScript.</p><a class="text-link" href="#/ruta/${route.id}/archivo">Consultar la edición anterior →</a></div>`;
+  return '';
+}
 export function routeCard(route, state) {
   const count = publishedCount(route),
     done = completedCount(route, state);
@@ -71,7 +80,7 @@ export function nodeState(route, lesson, state) {
 export function routePage(route, state) {
   const count = publishedCount(route),
     done = completedCount(route, state);
-  return `<div class="page"><a class="text-link" href="#/rutas">← Todas las rutas</a><div class="route-header ${route.color}" style="margin-top:18px"><div><div class="eyebrow">RUTA ${route.number} · ${e(route.eyebrow)}</div><h1>${e(route.name)}</h1><p>${e(route.description)}</p><div class="tags"><span class="badge live">${count} disponibles</span><span class="badge">${route.lessons.length - count} en preparación</span><span class="badge">${route.technologies.slice(0, 3).map(e).join(' · ')}</span></div></div><div class="route-summary"><strong>${done}/${count}</strong><small>lecciones disponibles completadas</small><div class="meter"><i style="width:${count ? Math.min((done / count) * 100, 100) : 0}%"></i></div></div></div><p class="muted">El mapa muestra el orden de estudio. Al seleccionar un tema puedes consultar sus conocimientos relacionados.</p><div class="legend"><span>▷ Disponible</span><span>✓ Completada</span><span>⌑ Requiere pasos previos</span><span>○ En preparación</span></div><details class="learning-support" id="route-orientation"><summary>¿Quieres orientarte antes de empezar? <span>Opcional · 3 preguntas</span></summary><p>Explora los conceptos iniciales para elegir cómo acompañarte. Puedes comenzar la ruta directamente cuando quieras.</p><div id="orientation-body"><p class="muted">Preparando preguntas…</p></div></details><div class="map-layout"><div>${route.levels
+  return `<div class="page"><a class="text-link" href="#/rutas">← Todas las rutas</a>${editionNotice(route, state)}<div class="route-header ${route.color}" style="margin-top:18px"><div><div class="eyebrow">RUTA ${route.number} · ${e(route.eyebrow)}</div><h1>${e(route.name)}</h1><p>${e(route.description)}</p><div class="tags"><span class="badge live">${count} disponibles</span><span class="badge">${route.lessons.length - count} en preparación</span><span class="badge">${route.technologies.slice(0, 3).map(e).join(' · ')}</span></div></div><div class="route-summary"><strong>${done}/${count}</strong><small>lecciones disponibles completadas</small><div class="meter"><i style="width:${count ? Math.min((done / count) * 100, 100) : 0}%"></i></div></div></div><p class="muted">El mapa muestra el orden de estudio. Al seleccionar un tema puedes consultar sus conocimientos relacionados.</p><div class="legend"><span>▷ Disponible</span><span>✓ Completada</span><span>⌑ Requiere pasos previos</span><span>○ En preparación</span></div><details class="learning-support" id="route-orientation"><summary>¿Quieres orientarte antes de empezar? <span>Opcional · 3 preguntas</span></summary><p>Explora los conceptos iniciales para elegir cómo acompañarte. Puedes comenzar la ruta directamente cuando quieras.</p><div id="orientation-body"><p class="muted">Preparando preguntas…</p></div></details><div class="map-layout"><div>${route.levels
     .map(
       (lv, i) =>
         `<details class="level" ${lv.id === (nextLesson(route, new Set(state.completed)) ?? route.lessons[0]).levelId ? 'open' : ''} data-step="${String(i + 1).padStart(2, '0')}"><summary><h2>${e(lv.name)}</h2><span>${lv.lessons.filter(isPublished).length} disponibles / ${lv.lessons.length} temas</span></summary><p>${e(lv.objective)}</p><div class="nodes">${lv.lessons
@@ -89,7 +98,10 @@ export function inspector(route, lesson, state, routes) {
   const status = nodeState(route, lesson, state),
     byKey = (key) => {
       const [rid, lid] = key.split('/');
-      return routes.find((r) => r.id === rid)?.lessons.find((l) => l.id === lid);
+      return routeEdition(
+        routes.find((r) => r.id === rid),
+        lid,
+      )?.lessons.find((l) => l.id === lid);
     };
   const { required: missing, recommended } = accessState(
     route,
@@ -111,7 +123,13 @@ export function progressPage(routes, state, concepts) {
   const percent = total ? Math.min(100, Math.round((doneTotal / total) * 100)) : 0;
   const next = continuation(routes, state);
   return `<div class="page progress-dashboard"><header class="workspace-hero progress-hero"><div class="workspace-hero-copy"><div class="eyebrow">TU ESFUERZO DEJA HUELLA</div><h1>Tu siguiente versión,<br><em>en construcción.</em></h1><p>Cada idea que comprendes y cada reto que resuelves construyen lo que sabes hacer. Aquí puedes ver tu recorrido real.</p><a class="btn launch-primary" href="${next ? lessonHref(next.route.id, next.lesson.id, state.learningMode === 'experienced' ? 'practicar' : 'aprender') : '#/rutas'}">${next ? 'Dar mi siguiente paso' : 'Explorar las rutas'} <span aria-hidden="true">↗</span></a></div><div class="progress-observatory" data-depth-scene><div class="progress-orbit" aria-hidden="true"></div><div class="progress-pedestal" aria-hidden="true"></div><div class="progress-dial" style="--progress:${percent}%"><div><span class="section-index">TU RECORRIDO</span><strong>${percent}<small>%</small></strong><span>${doneTotal} de ${total} lecciones</span></div></div><p>Habilidades que crecen contigo.</p></div></header>
-  <div class="progress-metrics">${[
+  ${routes
+    .filter((r) => r.archive)
+    .map(
+      (r) =>
+        `<section class="callout" aria-label="Historial de la edición anterior"><strong>Tu historial anterior se conserva</strong><p>${completedCount(r.archive, state)} de ${publishedCount(r.archive)} lecciones de ${e(r.archive.name)}. Los XP acumulados se mantienen; el porcentaje de JavaScript se calcula con sus nuevas lecciones.</p><a class="text-link" href="#/ruta/${r.id}/archivo">Consultar historial y materiales anteriores →</a></section>`,
+    )
+    .join('')}<div class="progress-metrics">${[
     ['01', doneTotal, 'Lecciones completadas', 'Comprende, practica y comprueba'],
     ['02', state.xp, 'XP acumulados', 'Cada logro suma una sola vez'],
     ['03', state.practices.length, 'Prácticas resueltas', 'Tu experiencia al experimentar'],
@@ -136,7 +154,10 @@ export function progressPage(routes, state, concepts) {
 export function practicePage(routes, state) {
   const bookmarks = state.bookmarks.filter((key) => {
     const [rid, lid] = key.split('/');
-    return routes.find((r) => r.id === rid)?.lessons.some((l) => l.id === lid);
+    return routeEdition(
+      routes.find((r) => r.id === rid),
+      lid,
+    )?.lessons.some((l) => l.id === lid);
   });
   const available = routes.flatMap((r) =>
     r.lessons
@@ -148,7 +169,10 @@ export function practicePage(routes, state) {
       ? `<div class="section-heading" style="margin-top:32px"><h2>Guardado para volver</h2></div><div class="review-list">${bookmarks
           .map((key) => {
             const [rid, lid] = key.split('/'),
-              r = routes.find((r) => r.id === rid),
+              r = routeEdition(
+                routes.find((r) => r.id === rid),
+                lid,
+              ),
               l = r.lessons.find((l) => l.id === lid);
             return `<a class="card" href="${lessonHref(rid, lid)}">${e(l.title)} <span>→</span></a>`;
           })

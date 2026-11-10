@@ -1,12 +1,12 @@
 import { escapeHtml as e } from '../core/html.js';
 import { isPublished, isUnlocked, lessonKey } from '../domain/curriculum.js';
-import { lessonHref } from './catalog.js';
+import { lessonHref, editionNotice } from './catalog.js';
 import { supportPanel } from './learning-support.js';
 export { mountActivities } from './activities.js';
 export function lessonPage(route, meta, data, state, tab, concepts = new Map()) {
   const key = lessonKey(route.id, meta.id),
     done = state.completed.includes(key);
-  return `<div class="page lesson-layout"><details class="lesson-outline"><summary>Contenido de la ruta <span>→</span></summary><div class="outline-content"><a class="text-link" href="#/ruta/${route.id}">← Mapa de la ruta</a><h2>${e(route.name)}</h2>${route.levels
+  return `<div class="page lesson-layout"><details class="lesson-outline"><summary>Contenido de la ruta <span>→</span></summary><div class="outline-content"><a class="text-link" href="#/ruta/${route.id}${route.archivedEdition ? '/archivo' : ''}">← Mapa de la ruta</a><h2>${e(route.name)}</h2>${route.levels
     .map(
       (lv) =>
         `<details ${lv.id === meta.levelId ? 'open' : ''}><summary>${e(lv.name)}</summary>${lv.lessons
@@ -18,7 +18,7 @@ export function lessonPage(route, meta, data, state, tab, concepts = new Map()) 
     )
     .join(
       '',
-    )}</div></details><article class="lesson-main"><div class="lesson-heading"><div><div class="eyebrow">${e(route.name)} / ${e(meta.level)}</div><h1>${e(meta.title)}</h1><span class="badge">◷ ${meta.minutes} min orientativos</span> <span class="badge ${done ? 'live' : ''}" id="lesson-status">${done ? '✓ Completada' : 'Aprende · Practica · Comprueba'}</span></div><button class="icon-button" id="bookmark" aria-label="Guardar lección" aria-pressed="${state.bookmarks.includes(key)}">${state.bookmarks.includes(key) ? '★' : '☆'}</button></div><div class="lesson-tabs" role="tablist" aria-label="Etapas de aprendizaje">${[
+    )}</div></details><article class="lesson-main">${route.archivedEdition ? editionNotice(route) : ''}<div class="lesson-heading"><div><div class="eyebrow">${e(route.name)} / ${e(meta.level)}</div><h1>${e(meta.title)}</h1><span class="badge">◷ ${meta.minutes} min orientativos</span> <span class="badge ${done ? 'live' : ''}" id="lesson-status">${done ? '✓ Completada' : 'Aprende · Practica · Comprueba'}</span></div><button class="icon-button" id="bookmark" aria-label="Guardar lección" aria-pressed="${state.bookmarks.includes(key)}">${state.bookmarks.includes(key) ? '★' : '☆'}</button></div><div class="lesson-tabs" role="tablist" aria-label="Etapas de aprendizaje">${[
     ['aprender', '01', 'Aprender'],
     ['practicar', '02', 'Practicar'],
     ['comprobar', '03', 'Comprobar'],

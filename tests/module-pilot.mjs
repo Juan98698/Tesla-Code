@@ -17,6 +17,9 @@ await withBrowser(4318, async (browser, origin) => {
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(origin);
     await page.getByRole('link', { name: /Empieza tu primera lección/ }).click();
+    await page.locator('#lesson').waitFor();
+    assert.match(await page.locator('h1').innerText(), /primera línea/);
+    await page.goto(origin + '/#/leccion/fundamentos/' + module[0].id + '/aprender');
     for (let index = 0; index < module.length; index++) {
       const meta = module[index],
         data = read(`content/lessons/fundamentos/${meta.id}.json`);

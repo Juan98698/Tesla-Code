@@ -6,7 +6,7 @@ import { recordAttempt, completeIfReady } from '../js/domain/progress.js';
 import { indexRoute, isUnlocked } from '../js/domain/curriculum.js';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
-const route = indexRoute(read('content/curriculum/fundamentos.json'));
+const route = indexRoute(read('content/curriculum/fundamentos.json')).archive;
 const module = route.levels.find((level) => level.id === 'primeros-pasos');
 test('new learners need every practice while published completions retain their access and XP', () => {
   const state = emptyProgress();

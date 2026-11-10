@@ -1,8 +1,9 @@
 // Valida estructura y dependencias explícitas. La coherencia pedagógica requiere revisión editorial.
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { indexRoute } from '../js/domain/curriculum.js';
+import { indexRoute, includeArchives } from '../js/domain/curriculum.js';
 import { checkTechnologyPolicy, checkLessonTechnology } from './technology-policy.mjs';
 import { pythonExerciseErrors } from '../js/domain/python-exercise.js';
+import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 import {
   digest,
   lessonDigest,
@@ -48,7 +49,7 @@ for (const rid of routes) {
   entryKeys.add(`${rid}/${route.lessons[0]?.id}`);
   for (const error of curriculumSequenceErrors(source)) fail('Ruta ' + rid + ': ' + error);
   if (route.id !== rid) fail(`Ruta inconsistente: ${rid}`);
-  for (const meta of route.lessons) {
+  for (const meta of includeArchives([route]).flatMap((edition) => edition.lessons)) {
     const key = `${rid}/${meta.id}`;
     if (lessons.has(key)) fail(`Lección duplicada: ${key}`);
     if (!['published', 'planned'].includes(meta.status)) fail(`${key}: estado inválido`);
@@ -136,6 +137,8 @@ function checkQuestion(q, where, allowed) {
       fail(`${where}: respuestas vacías`);
   } else if (q.type === 'python') {
     for (const error of pythonExerciseErrors(q)) fail(`${where}: ${error}`);
+  } else if (q.type === 'javascript') {
+    for (const error of javascriptExerciseErrors(q)) fail(`${where}: ${error}`);
   } else fail(`${where}: tipo desconocido ${q.type}`);
 }
 for (const [key, meta] of lessons) {
@@ -161,7 +164,10 @@ for (const [key, meta] of lessons) {
   for (const error of coverageErrors(meta, data)) fail(`${path}: ${error}`);
   for (const error of reviewErrors(reviews.lessons[key], lessonDigest(meta, data, registry)))
     fail(`${path}: ${error}`);
-  for (const error of learningDesignErrors(meta, data, { entry: entryKeys.has(key) }))
+  for (const error of learningDesignErrors(meta, data, {
+    entry: entryKeys.has(key),
+    entryLanguage: meta.language,
+  }))
     fail(path + ': ' + error);
   allowed.add(key);
   if (data.id !== key.split('/')[1]) fail(`${path}: id inconsistente`);
@@ -187,7 +193,7 @@ for (const [key, meta] of lessons) {
           fail(path + ': entradas de ejemplo inválidas');
         if (
           !example.id ||
-          example.language !== 'python' ||
+          !['python', 'javascript'].includes(example.language) ||
           typeof example.code !== 'string' ||
           typeof example.stdout !== 'string'
         )
@@ -206,7 +212,7 @@ for (const [key, meta] of lessons) {
   if (new Set((data.quiz ?? []).map((q) => q.id)).size !== data.quiz?.length)
     fail(`${path}: ids de pregunta duplicados`);
   for (const q of data.quiz ?? []) {
-    if (q.type === 'python')
+    if (['python', 'javascript'].includes(q.type))
       fail(`${path}/${q.id}: el código pertenece a la práctica, no al quiz.`);
     checkQuestion(q, `${path}/${q.id}`, allowed);
   }

@@ -152,8 +152,8 @@ export function runPlayground(id, raw) {
     };
   }
   return {
-    request: `contador = ${value}\ncontador = contador + 1`,
+    request: `let contador = ${value};\ncontador = contador + 1;\nconsole.log(contador);`,
     body: { antes: value, despues: value + 1 },
-    status: 'Valor actualizado',
+    status: 'Simulación JavaScript · Ejecuta código real dentro de Fundamentos',
   };
 }

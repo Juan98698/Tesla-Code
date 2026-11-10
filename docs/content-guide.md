@@ -6,7 +6,7 @@
 4. Crea `content/lessons/<ruta>/<id>.json`. Incluye `outcome`, `html`, `requiresConcepts`, al menos cuatro preguntas, fuentes y tres prácticas que combinen comprensión, ayuda guiada y transferencia. Los IDs de preguntas y actividades deben ser estables para no otorgar XP de nuevo por un cambio de orden.
 5. Agrega un ejemplo trabajado y una práctica de transferencia. No uses en el reto una operación que no hayas explicado. Si introduces una herramienta externa, explica cómo acceder a ella y cómo comprobar el resultado.
 6. Las preguntas declaran `concept` con un ID del registro. Tipos: `choice` (`options`, `answer`), `order` (`steps`) o `text` (`answers`). `answer` indexa el orden original; la interfaz conserva esa identidad al barajar.
-7. Las prácticas usan `text` (`answers`) o `python` (`starter`, `solution` y `cases`), con `hint` y `explanation`. Python ejecutable no es un tipo de pregunta del quiz. Para añadir otro motor hay que extender la vista, el adaptador, la validación y las pruebas.
+7. Las prácticas usan `text` (`answers`), `python` o `javascript` (`starter`, `solution` y `cases` para ambos lenguajes), con `hint` y `explanation`. Python ejecutable no es un tipo de pregunta del quiz. Para añadir otro motor hay que extender la vista, el adaptador, la validación y las pruebas.
 8. Los widgets se registran en `js/widgets/index.js`. Explica qué simulan y sus límites. Si se montan dentro del HTML existente, conserva sus IDs de enlace; los widgets `*-lab` reciben un contenedor independiente.
 9. Cambia `status` a `published` solo cuando archivo, requisitos, conceptos y actividades estén completos. Un requisito en preparación bloquea publicación. `kind: optional` identifica profundización: no puede ser paso obligatorio ni requisito académico de una lección principal.
 10. Ejecuta `npm run check`, `npm run test:e2e` y `npm run format`. Revisa también exactitud, ambigüedad, accesibilidad y adecuación a una persona principiante.
@@ -95,11 +95,11 @@ La orientación inicial reutiliza tres preguntas de selección de la primera lec
 
 ## Secuencia y ejemplos razonados
 
-Cada ruta declara `entryApproach: "conceptual"`. Su primera lección publicada parte de cero, sin requisitos académicos previos ni bloques de lenguaje ejecutable. En Algoritmia el núcleo continúa en pseudocódigo después de problema, diseño y traza; Python es un laboratorio opcional con traducción instrucción por instrucción. La ruta Python enseña su lenguaje desde cero.
+Las entradas conceptuales declaran `entryApproach: "conceptual"` y no presuponen conocimientos previos. La edición JavaScript de Fundamentos declara `entryApproach: "javascript-first"`: su primera lección explica editor, ejecutar, salida y cada símbolo de console.log antes de pedir la primera instrucción. Su metadata declara `language: "javascript"` y cada bloque ejecutable tiene un ejemplo con resultado verificado. Empezar con código no autoriza omitir esa explicación. En Algoritmia el núcleo continúa en pseudocódigo; Python conserva su recorrido independiente.
 
 El orden visible debe colocar cada requisito interno antes de su consumidor. Un tema principal no puede exigir una especialización opcional. Las dependencias entre rutas siguen siendo recomendaciones acompañadas por repasos; no sustituyen una explicación necesaria.
 
-Todo bloque `pre` declara `data-language`: `text`, `pseudocode`, `python`, `shell`, `http`, `sql`, `javascript` o `json`. La etiqueta identifica la representación, no habilita ejecución. Cada bloque Python requiere un ejemplo declarado con salida comprobable, ejecutado por CI.
+Todo bloque `pre` declara `data-language`: `text`, `pseudocode`, `python`, `shell`, `http`, `sql`, `javascript` o `json`. La etiqueta identifica la representación, no habilita ejecución. Cada bloque Python y cada bloque de la nueva edición JavaScript requieren un ejemplo declarado con salida comprobable, ejecutado por CI.
 
 Cada lección publicada incluye `learningDesign`:
 
@@ -118,3 +118,9 @@ Cada lección publicada incluye `learningDesign`:
 Los fragmentos y condiciones deben aparecer en el texto mostrado, y las actividades identificadas deben existir. `requiresConcepts` debe coincidir en mapa y contenido. Cada concepto evaluado se declara como enseñanza actual o requisito explícito: ya no basta con que aparezca en cualquier antecesor.
 
 Estos controles rechazan omisiones verificables; no descubren automáticamente todo término sin explicar ni demuestran que una actividad transfiera conocimiento. Revisa las preguntas contra lo que realmente piden: por ejemplo, identificar `application/json` evalúa una cabecera, no el método HTTP. No registres una revisión mientras esa correspondencia no esté contrastada.
+
+## Prácticas de la primera edición JavaScript
+
+Declara `type: "javascript"`, `starter`, `solution` y `cases: [{name, stdin, stdout}]`. `stdin` es una lista de textos opcional; cada llamada al prompt adaptado consume una línea. Las salidas se comparan conservando espacios y saltos de línea. El primer módulo limita sus casos numéricos a enteros no negativos válidos y explica esa condición. No exijas rechazo de entradas inválidas antes de enseñar validación. Los ejemplos declaran `language: "javascript"`, código, salida y entradas cuando corresponda; añade un bloque `pre` idéntico en el texto.
+
+La primera consola ejecuta scripts clásicos síncronos, sin DOM ni red. `prompt()` es una adaptación de entradas precargadas: no presenta ventanas, no simula cancelaciones y falla si faltan líneas. Ejecutar no concede XP. Comprobar usa los casos del autor y no las entradas de exploración. El borrador se identifica por lección/actividad, con IDs propios para la edición nueva. Los casos validan resultados; los cuestionarios y la revisión docente complementan lo que no acredita la comparación de salida.

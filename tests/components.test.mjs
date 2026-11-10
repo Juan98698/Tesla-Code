@@ -223,7 +223,7 @@ test('catalog views reflect available, locked, planned and completed states with
   root.innerHTML = views.homePage(routes, state);
   assert.equal(root.querySelectorAll('.route-card').length, 3);
   assert.equal(root.querySelectorAll('#studio-route-select option').length, routes.length);
-  assert.match(root.querySelector('.continue-card .btn').href, /tu-primer-paso/);
+  assert.ok(root.querySelector('.continue-card .btn').href.endsWith('/' + first.id + '/aprender'));
   assert.equal(views.nodeState(base, first, state), 'ready');
   assert.equal(views.nodeState(base, next, state), 'locked');
   assert.equal(
@@ -292,12 +292,16 @@ test('dimensional progress uses published lessons and real achievements without 
   state.streak.count = 2;
   const before = structuredClone(state);
   root.innerHTML = views.progressPage(routes, state, concepts);
-  assert.match(root.querySelector('.progress-dial').textContent, /1 de 102 lecciones/);
+  assert.match(root.querySelector('.progress-dial').textContent, /0 de 42 lecciones/);
+  assert.match(
+    root.querySelector('[aria-label="Historial de la edición anterior"]').textContent,
+    /1 de 68 lecciones/,
+  );
   assert.deepEqual(
     [...root.querySelectorAll('.progress-metric > strong')].map((el) => el.textContent),
-    ['1', '80', '1', '2'],
+    ['0', '80', '1', '2'],
   );
-  assert.equal(root.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'), '1');
+  assert.equal(root.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'), '0');
   assert.deepEqual(state, before);
   state.completed = routes.flatMap((route) =>
     route.lessons

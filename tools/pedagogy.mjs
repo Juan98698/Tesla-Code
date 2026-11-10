@@ -120,10 +120,24 @@ export function reviewErrors(review, currentDigest) {
 
 // Detecta omisiones concretas; no sustituye la lectura editorial.
 export function curriculumSequenceErrors(route) {
+  if (route.currentEdition)
+    return [
+      ...curriculumSequenceErrors({
+        ...route,
+        currentEdition: undefined,
+        levels: route.levels.filter((level) => level.edition === route.currentEdition),
+      }),
+      ...curriculumSequenceErrors({
+        ...route,
+        ...route.legacy,
+        currentEdition: undefined,
+        levels: route.levels.filter((level) => level.edition !== route.currentEdition),
+      }),
+    ];
   const errors = [];
   const lessons = route.levels.flatMap((level) => level.lessons);
   const positions = new Map(lessons.map((lesson, index) => [lesson.id, index]));
-  if (route.entryApproach !== 'conceptual')
+  if (!['conceptual', 'javascript-first'].includes(route.entryApproach))
     errors.push('La ruta debe declarar una entrada conceptual independiente.');
   const first = lessons[0];
   if (!first || first.status !== 'published')
@@ -179,7 +193,7 @@ export function curriculumSequenceErrors(route) {
   return errors;
 }
 
-export function learningDesignErrors(meta, data, { entry = false } = {}) {
+export function learningDesignErrors(meta, data, { entry = false, entryLanguage } = {}) {
   const errors = [];
   const text = explanationText(data.html ?? '');
   const design = data.learningDesign;
@@ -221,13 +235,20 @@ export function learningDesignErrors(meta, data, { entry = false } = {}) {
     const language = block[1].match(/\bdata-language="([^"]+)"/)?.[1];
     if (!languages.has(language))
       errors.push('Un bloque de ejemplo no declara su lenguaje o representación.');
-    if (entry && !['text', 'pseudocode'].includes(language))
+    if (
+      entry &&
+      !['text', 'pseudocode', ...(entryLanguage === 'javascript' ? ['javascript'] : [])].includes(
+        language,
+      )
+    )
       errors.push('La entrada conceptual introduce código ejecutable antes del diseño.');
-    if (language === 'python') {
+    if (language === 'python' || (language === 'javascript' && meta.language === 'javascript')) {
       const program = explanationText(block[2]);
       if (!(data.examples ?? []).some((example) => explanationText(example.code) === program))
         errors.push(
-          'Un bloque Python no tiene un ejemplo ejecutable que compruebe sus resultados.',
+          'Un bloque ' +
+            (language === 'python' ? 'Python' : 'JavaScript') +
+            ' no tiene un ejemplo ejecutable que compruebe sus resultados.',
         );
     }
   }

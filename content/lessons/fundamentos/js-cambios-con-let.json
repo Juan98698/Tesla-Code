@@ -1,0 +1,201 @@
+{
+  "id": "js-cambios-con-let",
+  "outcome": "Usar let para representar un cambio y trazar el valor que tiene una variable en cada instrucción.",
+  "requiresConcepts": [
+    "js-editor-consola",
+    "js-console-log",
+    "js-valores-literales",
+    "js-secuencia",
+    "js-errores-iniciales",
+    "js-comentarios",
+    "js-const-inicial",
+    "js-nombres"
+  ],
+  "html": "<p>Un nombre de taller puede permanecer fijo durante un programa; el estado de una inscripción puede pasar de pendiente a confirmada. Ya conoces una forma de declarar datos, pero ahora necesitamos representar un cambio intencional y observar cuándo ocurre. No hay que adivinar: vamos a seguir las instrucciones una por una.</p>\n <h3>Declarar y después cambiar</h3><p>let permite declarar un nombre y asignarle otro valor más adelante durante la misma ejecución. En <code>let estado = \"pendiente\";</code> presentas el nombre y su valor inicial. Después puedes escribir <code>estado = \"confirmada\";</code>. Esa segunda instrucción utiliza el nombre que ya existe; no repite la palabra <code>let</code>.</p><p>Reasignar cambia el valor asociado a un nombre existente; no vuelve a declarar esa variable. En este programa, escribir otra declaración <code>let estado</code> en el mismo lugar de trabajo provoca un error por nombre repetido. Tampoco uses un nombre nuevo por accidente: <code>Estado</code>, con mayúscula, no es el mismo identificador.</p>\n <h3>Elegir entre const y let</h3><p>Usa <code>const</code> para un nombre al que no planeas asignar otro valor y <code>let</code> cuando el cambio es parte del problema. No se trata de cambiar datos al azar. Piensa primero qué situación estás representando. Una reasignación de <code>const</code> produce un error; esa declaración protege el vínculo con su valor inicial.</p><p>Hoy inicializamos todos los nombres al declararlos. Más adelante conocerás lo que ocurre con declaraciones sin valor y con otros tipos de datos. No necesitas aprender una tercera forma de declaración para resolver estos problemas.</p>\n <h3>Leer una traza</h3><p>Una traza registra qué sucede en cada paso. Crea una tabla con «instrucción», «valor de estado» y «salida nueva». Después de la declaración el valor es pendiente y todavía no hay salida. La primera llamada a <code>console.log</code> imprime pendiente. La reasignación cambia el valor a confirmada, pero no imprime nada. La última llamada imprime confirmada.</p><p>La primera línea ya impresa no se transforma cuando cambia la variable: la consola conserva el texto que recibió en aquel momento. Si solo imprimes al final, no verás los valores anteriores. La posición de cada llamada te permite observar momentos distintos de la ejecución.</p>\n <h3>Comprueba una predicción</h3><p>Antes de ejecutar el ejemplo, apunta ambas líneas esperadas. Luego mueve la primera llamada por debajo de la reasignación: ahora las dos llamadas consultan el valor nuevo. Vuelve a la versión inicial con Restaurar y explica por qué cambia la salida. Al ejecutar otra vez, todo empieza desde la declaración inicial; la variable no conserva el estado de una ejecución anterior.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Una inscripción empieza pendiente y pasa a confirmada. Quieres ver ambos momentos en la salida.</p><p>Declaras estado con let, imprimes antes del cambio, reasignas el nombre existente y vuelves a imprimir.</p><p>La consola conserva pendiente en la primera línea y agrega confirmada en la segunda, porque cada llamada leyó un momento diferente.</p><p><strong>Condiciones:</strong> El cambio ocurre en un único programa y usamos valores simples; cada ejecución vuelve a comenzar desde su declaración inicial.</p></section>\n<h3>Predice y prueba</h3><pre data-language=\"javascript\">let estado = \"pendiente\";\nconsole.log(estado);\nestado = \"confirmada\";\nconsole.log(estado);</pre><p>Salida esperada:</p><pre data-language=\"text\">pendiente\nconfirmada</pre>\n<h3>Predice y prueba</h3><pre data-language=\"javascript\">const taller = \"JavaScript\";\nlet cupos = 3;\nconsole.log(taller, cupos);\ncupos = 2;\nconsole.log(taller, cupos);</pre><p>Salida esperada:</p><pre data-language=\"text\">JavaScript 3\nJavaScript 2</pre>\n<div class=\"callout\"><strong>Antes de avanzar</strong><p>Predice una salida, ejecuta, compara y explica una decisión. Después completa las tres prácticas y la comprobación. Ejecutar un ejemplo no concede XP.</p></div>",
+  "examples": [
+    {
+      "id": "js-cambios-con-let-e1",
+      "language": "javascript",
+      "code": "let estado = \"pendiente\";\nconsole.log(estado);\nestado = \"confirmada\";\nconsole.log(estado);",
+      "stdout": "pendiente\nconfirmada\n"
+    },
+    {
+      "id": "js-cambios-con-let-e2",
+      "language": "javascript",
+      "code": "const taller = \"JavaScript\";\nlet cupos = 3;\nconsole.log(taller, cupos);\ncupos = 2;\nconsole.log(taller, cupos);",
+      "stdout": "JavaScript 3\nJavaScript 2\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "js-cambios-con-let-q1",
+      "type": "choice",
+      "concept": "js-let-inicial",
+      "prompt": "Necesitas cambiar el estado durante el programa. ¿Qué declaración elegirías?",
+      "options": [
+        "let",
+        "const",
+        "console.log"
+      ],
+      "answer": 0,
+      "explanation": "let permite las reasignaciones que el problema necesita."
+    },
+    {
+      "id": "js-cambios-con-let-q2",
+      "type": "choice",
+      "concept": "js-let-inicial",
+      "prompt": "Después de let estado = \"pendiente\";, ¿cómo lo cambias?",
+      "options": [
+        "let estado = \"lista\"; en el mismo lugar",
+        "estado = \"lista\";",
+        "console = \"lista\";"
+      ],
+      "answer": 1,
+      "explanation": "La reasignación utiliza el nombre existente sin volver a declararlo."
+    },
+    {
+      "id": "js-cambios-con-let-q3",
+      "type": "choice",
+      "concept": "js-reasignacion",
+      "prompt": "Cambias una variable después de imprimirla. ¿Se modifica la línea ya impresa?",
+      "options": [
+        "Sí, se actualiza sola",
+        "Solo si el nombre es corto",
+        "No, la primera impresión conserva su texto"
+      ],
+      "answer": 2,
+      "explanation": "La consola registró el valor que recibió al ejecutar aquella llamada."
+    },
+    {
+      "id": "js-cambios-con-let-q4",
+      "type": "choice",
+      "concept": "js-reasignacion",
+      "prompt": "¿Qué registra una traza?",
+      "options": [
+        "Solo el título del archivo",
+        "Lo que ocurre paso a paso",
+        "Una calificación aleatoria"
+      ],
+      "answer": 1,
+      "explanation": "Permite relacionar cada instrucción con los datos y salidas de ese momento."
+    },
+    {
+      "id": "js-cambios-con-let-q5",
+      "type": "choice",
+      "concept": "js-let-inicial",
+      "prompt": "¿Reasignar una variable imprime su nuevo valor automáticamente?",
+      "options": [
+        "No, hace falta una instrucción de salida",
+        "Sí, siempre",
+        "Solo con const"
+      ],
+      "answer": 0,
+      "explanation": "Asignar y mostrar son acciones distintas."
+    }
+  ],
+  "activities": [
+    {
+      "id": "js-cambios-con-let-a1",
+      "type": "javascript",
+      "concept": "js-let-inicial",
+      "prompt": "Comprensión: corrige la declaración para que se vean pendiente y lista, en ese orden.",
+      "starter": "const estado = \"pendiente\";\nconsole.log(estado);\nestado = \"lista\";\nconsole.log(estado);",
+      "solution": "let estado = \"pendiente\";\nconsole.log(estado);\nestado = \"lista\";\nconsole.log(estado);",
+      "cases": [
+        {
+          "name": "Resultado esperado",
+          "stdout": "pendiente\nlista\n"
+        }
+      ],
+      "hint": "El nombre necesita recibir otro valor durante la ejecución.",
+      "explanation": "La declaración elegida permite el cambio previsto."
+    },
+    {
+      "id": "js-cambios-con-let-a2",
+      "type": "javascript",
+      "concept": "js-let-inicial",
+      "prompt": "Práctica guiada: muestra el valor inicial 3 antes de cambiarlo a 2 y muestra después el nuevo valor.",
+      "starter": "let cupos = 3;\ncupos = 2;\nconsole.log(cupos);",
+      "solution": "let cupos = 3;\nconsole.log(cupos);\ncupos = 2;\nconsole.log(cupos);",
+      "cases": [
+        {
+          "name": "Resultado esperado",
+          "stdout": "3\n2\n"
+        }
+      ],
+      "hint": "Coloca una impresión antes de la reasignación y otra después.",
+      "explanation": "La traza muestra ambos momentos sin modificar la salida anterior."
+    },
+    {
+      "id": "js-cambios-con-let-a3",
+      "type": "javascript",
+      "concept": "js-let-inicial",
+      "prompt": "Tu reto: un pedido pasa de recibido a listo. Usa un dato que cambie y muestra Estado: recibido y después Estado: listo.",
+      "starter": "",
+      "solution": "let estado = \"recibido\";\nconsole.log(\"Estado:\", estado);\nestado = \"listo\";\nconsole.log(\"Estado:\", estado);",
+      "cases": [
+        {
+          "name": "Resultado esperado",
+          "stdout": "Estado: recibido\nEstado: listo\n"
+        }
+      ],
+      "hint": "Piensa en declarar, mostrar, cambiar y volver a mostrar.",
+      "explanation": "Representaste una transición y mostraste sus dos estados."
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: JavaScript desde sus reglas y tipos",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types"
+    },
+    {
+      "title": "MDN: console.log()",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/console/log_static"
+    },
+    {
+      "title": "MDN: let",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "El cambio ocurre en un único programa y usamos valores simples; cada ejecución vuelve a comenzar desde su declaración inicial."
+    ],
+    "workedExample": {
+      "problem": "Una inscripción empieza pendiente y pasa a confirmada. Quieres ver ambos momentos en la salida.",
+      "reasoning": "Declaras estado con let, imprimes antes del cambio, reasignas el nombre existente y vuelves a imprimir.",
+      "result": "La consola conserva pendiente en la primera línea y agrega confirmada en la segunda, porque cada llamada leyó un momento diferente."
+    },
+    "transferActivityIds": [
+      "js-cambios-con-let-a3"
+    ]
+  },
+  "coverage": {
+    "js-let-inicial": {
+      "explanationExcerpt": "let permite declarar un nombre y asignarle otro valor más adelante durante la misma ejecución.",
+      "assessmentIds": [
+        "js-cambios-con-let-q1",
+        "js-cambios-con-let-q2",
+        "js-cambios-con-let-q5"
+      ]
+    },
+    "js-reasignacion": {
+      "explanationExcerpt": "Reasignar cambia el valor asociado a un nombre existente; no vuelve a declarar esa variable.",
+      "assessmentIds": [
+        "js-cambios-con-let-q3",
+        "js-cambios-con-let-q4"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-09",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Reglas contrastadas con MDN: scripts clásicos, consola, const/let, valores y prompt adaptado. Ejemplos y soluciones se comprueban con JavaScript real en las suites de esta entrega; no se atribuye una versión universal al motor del navegador.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  }
+}

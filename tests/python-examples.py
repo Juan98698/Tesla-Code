@@ -74,7 +74,7 @@ for path in sorted((ROOT / 'content' / 'lessons').glob('*/*.json')):
     content = json.loads(path.read_text(encoding='utf-8'))
     parser = CodeBlocks()
     parser.feed(content['html'])
-    examples = content.get('examples', [])
+    examples = [example for example in content.get('examples', []) if example.get('language') == 'python']
     if examples:
         for example in examples:
             assert example['language'] == 'python', f'{path.stem}: falta runner para este lenguaje'

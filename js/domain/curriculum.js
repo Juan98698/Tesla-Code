@@ -1,11 +1,34 @@
 export const isPublished = (lesson) => lesson?.status === 'published';
 export const lessonKey = (routeId, lessonId) => `${routeId}/${lessonId}`;
 export function indexRoute(route) {
-  const lessons = route.levels.flatMap((level) =>
+  const levels = route.currentEdition
+    ? route.levels.filter((level) => level.edition === route.currentEdition)
+    : route.levels;
+  const lessons = levels.flatMap((level) =>
     level.lessons.map((lesson) => ({ ...lesson, level: level.name, levelId: level.id })),
   );
-  return { ...route, lessons, pos: Object.fromEntries(lessons.map((lesson, i) => [lesson.id, i])) };
+  const indexed = {
+    ...route,
+    levels,
+    lessons,
+    pos: Object.fromEntries(lessons.map((lesson, i) => [lesson.id, i])),
+  };
+  if (route.currentEdition)
+    indexed.archive = indexRoute({
+      ...route,
+      ...route.legacy,
+      currentEdition: undefined,
+      levels: route.levels.filter((level) => level.edition !== route.currentEdition),
+      archivedEdition: true,
+    });
+  return indexed;
 }
+export const routeEdition = (route, id) =>
+  route?.archive && (id === 'archivo' || Object.hasOwn(route.archive.pos, id))
+    ? route.archive
+    : route;
+export const includeArchives = (routes) =>
+  routes.flatMap((route) => (route.archive ? [route, route.archive] : [route]));
 export function missingPrerequisites(lesson, completed) {
   return (lesson.dependsOn ?? []).filter((key) => !completed.has(key));
 }

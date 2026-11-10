@@ -28,7 +28,9 @@ await withBrowser(4317, async (browser, origin) => {
   assert.equal(await page.locator('#studio-route-select option').count(), routes.length);
   await page.getByRole('link', { name: /Empieza tu primera lección/ }).click();
   await page.locator('#lesson').waitFor();
-  assert.match(await page.locator('h1').innerText(), /primer paso/);
+  assert.match(await page.locator('h1').innerText(), /primera línea/);
+  await page.goto(origin + '/#/leccion/fundamentos/tu-primer-paso/aprender');
+  await page.locator('#lesson').waitFor();
   await page.getByRole('tab', { name: /Practicar/ }).click();
   const initialActivity = page.locator('[data-activity]').first();
   await initialActivity.waitFor();

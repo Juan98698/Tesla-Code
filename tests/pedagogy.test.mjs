@@ -155,7 +155,9 @@ test('visible curriculum order rejects later prerequisites and mandatory optiona
 
 test('worked examples require visible reasoning, conditions and a real transfer activity', () => {
   const d = read('content/lessons/fundamentos/tu-primer-paso.json');
-  const m = read('content/curriculum/fundamentos.json').levels[0].lessons[0];
+  const m = read('content/curriculum/fundamentos.json').levels.find(
+    (level) => level.id === 'primeros-pasos',
+  ).lessons[0];
   assert.deepEqual(learningDesignErrors(m, d, { entry: true }), []);
   const missing = structuredClone(d);
   missing.html = missing.html.replace(missing.learningDesign.workedExample.reasoning, '');

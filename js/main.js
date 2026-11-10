@@ -5,7 +5,15 @@ import { $ } from './core/dom.js';
 import { escapeHtml as e } from './core/html.js';
 import { progressRepository, PROGRESS_KEY, withProgressLock } from './core/storage.js';
 import { loadCurricula, loadLesson, loadConcepts } from './repositories/content-repository.js';
-import { indexRoute, isUnlocked, nextLesson, lessonKey, isPublished } from './domain/curriculum.js';
+import {
+  indexRoute,
+  isUnlocked,
+  nextLesson,
+  lessonKey,
+  isPublished,
+  routeEdition,
+  includeArchives,
+} from './domain/curriculum.js';
 import { recordAttempt, completeIfReady } from './domain/progress.js';
 import { updateStreak } from './domain/gamification.js';
 import {
@@ -133,7 +141,10 @@ async function render() {
   const version = ++renderVersion;
   const raw = location.hash.replace(/^#\/?/, '').split('/');
   const [view = 'inicio', rid, lid, requestedTab] = raw;
-  const route = routes.find((r) => r.id === rid);
+  const route = routeEdition(
+    routes.find((r) => r.id === rid),
+    lid,
+  );
   const nav = { ruta: 'rutas', leccion: 'rutas' }[view] ?? view;
   document.body.dataset.view = view;
   document.querySelectorAll('[data-nav]').forEach((link) => {
@@ -436,7 +447,7 @@ function bindShell() {
     const hits =
       query.length < 2
         ? []
-        : routes
+        : includeArchives(routes)
             .flatMap((r) =>
               r.lessons
                 .filter((l) => fold(`${l.title} ${l.concepts.join(' ')}`).includes(query))

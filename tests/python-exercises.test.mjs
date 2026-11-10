@@ -63,7 +63,9 @@ test('published Python solutions execute in the same pinned runtime as the brows
       name.endsWith('.json'),
     )) {
       const data = JSON.parse(readFileSync('content/lessons/' + route + '/' + file));
-      for (const example of data.examples ?? []) {
+      for (const example of (data.examples ?? []).filter(
+        (example) => example.language === 'python',
+      )) {
         if (example.environment === 'local') continue;
         const path = '/console-example-' + examples++;
         runtime.FS.mkdirTree(path);
