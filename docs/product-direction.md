@@ -14,6 +14,18 @@ Este documento conserva las decisiones aprobadas y su implementación: rutas con
 
 Ejemplos: un desarrollador Backend puede comenzar Frontend sin completar Fundamentos; un desarrollador Frontend puede comenzar Backend y repasar SQL cuando lo necesite, sin cursar previamente toda Bases de datos. El mismo criterio se aplica a Algoritmia e IA.
 
+## Fundamentos y lógica con JavaScript como primer lenguaje
+
+Decisión del usuario, 9 de noviembre de 2026. El primer público previsto es RIWI Medellín. Fundamentos debe convertirse en una ruta integrada para personas que nunca han programado, con JavaScript desde el primer contacto hasta el desarrollo aplicado avanzado. La lógica se explica y practica junto al lenguaje. Python conserva su ruta independiente y no es un requisito de entrada.
+
+El material de RIWI compartido por el usuario documenta la sesión 6 y los minirretos 9–12 de la semana 1 de Algoritmia 2. Menciona otras tres semanas, pero no aporta sus contenidos desarrollados. No se presenta esa muestra como el currículo completo ni se atribuyen a RIWI las ampliaciones propias de TeslaCode. Según ese fragmento, Algoritmia 2 utiliza PSeInt antes del módulo de JavaScript; elegir JavaScript desde cero para TeslaCode es la dirección solicitada por el usuario.
+
+Se adopta la idea de minirretos encadenados que construyen productos, reforzando la enseñanza que precede a cada reto. La persona debe entender el problema, el vocabulario, la sintaxis y las herramientas antes de aplicarlos. No se presupone conocimiento de variables, funciones, terminal, HTML ni métodos de objetos. Las instrucciones explican incluso cómo escribir y ejecutar el primer programa y cómo reconocer su salida.
+
+Cada concepto tendrá un lugar explícito de introducción, explicación, ejemplo ejecutable, práctica guiada y aplicación autónoma. La revisión también inspeccionará los conocimientos usados en pistas, soluciones, código inicial y casos de prueba; no basta con comprobar los títulos del temario. Los proyectos integran lo enseñado y los nuevos conocimientos aparecen primero en una lección previa. La completitud se evalúa dentro del alcance declarado, mediante trazabilidad, revisión técnica y pruebas con principiantes; no se promete ausencia absoluta de vacíos por tener muchos temas o pasar pruebas automáticas.
+
+La ruta debe contar con consola JavaScript real, separando experimentar de comprobar y conservar progreso. El motor, los validadores, la versión del contenido y la compatibilidad con avances anteriores deben verificarse antes de sustituir las lecciones actuales. Un cambio de lenguaje no acredita automáticamente competencias nuevas. La [secuencia y las condiciones de entrega](plan-mejora-plataforma.md#fundamentos-y-lógica-con-javascript--prioridad-del-9-de-noviembre) forman parte del plan; esta decisión no declara implementada la migración.
+
 ## Condiciones para Python y ejemplos de otros lenguajes
 
 El usuario respalda incorporar una ruta propia de Python con contenidos actuales. Su desarrollo debe partir de cero: ninguna lección que use Python, JavaScript u otro lenguaje puede presuponer experiencia previa no enseñada en el recorrido. La sintaxis, herramientas y conceptos necesarios se explican y practican antes de exigir su aplicación. Los apoyos deben estar disponibles también para quien entra directamente a una especialidad.
@@ -22,7 +34,7 @@ La profundidad y la secuencia entre lecciones son requisitos explícitos: el tem
 
 La elección de versiones y herramientas debe contrastarse con fuentes oficiales y probarse en el entorno utilizado por el estudiante. Se mantienen revisiones de soporte y deprecaciones; no se considera obsoleto un fundamento por su antigüedad.
 
-El [plan de mejora](plan-mejora-plataforma.md) propone un núcleo de Algoritmia en pseudocódigo y laboratorios Python complementarios, con evidencia separada de implementación. Esta modalidad todavía no está implementada ni modifica las reglas de progresión actuales.
+El [plan de mejora](plan-mejora-plataforma.md) conserva el antecedente de Algoritmia en pseudocódigo y laboratorios Python complementarios. La nueva prioridad de Fundamentos en JavaScript amplía la dirección editorial; las fases antiguas no se interpretan como una obligación de cursar Python primero. La implementación y las reglas vigentes se registran por separado.
 
 ## Dirección visual del estudio de exploración
 
