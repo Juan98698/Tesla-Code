@@ -26,6 +26,14 @@ Cada concepto tendrá un lugar explícito de introducción, explicación, ejempl
 
 Primera entrega, 10 de noviembre de 2026: consola JavaScript real para programas síncronos y ocho lecciones secuenciales publicadas, hasta una tarjeta con plan de práctica. Se separan experimentar y comprobar, con casos de entrada/salida y progreso independiente. Los otros 17 bloques del [plan](plan-mejora-plataforma.md#fundamentos-y-lógica-con-javascript--prioridad-del-9-de-noviembre) siguen en preparación. Las 68 lecciones anteriores conservan contenido, URLs e historial en una edición consultable. Sus logros no acreditan automáticamente las nuevas prácticas JavaScript. DOM, módulos, asincronía y entornos locales necesitan las entregas previstas para esas capacidades.
 
+## IA generativa como recorrido central
+
+Decisión del usuario, 10 de noviembre de 2026. LLM, modelos de difusión y NCM forman parte del recorrido principal; IA generativa conecta esas familias. Se exige explicación desde cero, ejemplo resuelto, práctica guiada, error para corregir y reto independiente, con los conocimientos necesarios enseñados antes de usarlos. NCM se distingue del trabajo concreto LCM de Meta y no se equipara a comprensión humana.
+
+El [temario de IA](ia-curriculum.md) organiza 96 temas en 13 bloques. Se publican 13 lecciones de exploración: nueve revisadas y cuatro puentes/proyectos nuevos, con 52 prácticas y 68 preguntas. Los 83 temas técnicos restantes conservan su estado en preparación. JavaScript precede a las APIs de aplicaciones; Python, matemáticas, datos y redes se preparan antes de la ingeniería de modelos. Las decisiones de proyecto justifican la familia elegida sin forzar una combinación innecesaria.
+
+Los casos de exploración producen informes de análisis a partir de material preparado. No ejecutan un proveedor ni califican escritura libre mediante palabras clave. Las finalizaciones históricas se conservan y no acreditan los cuatro pasos nuevos. La revisión de autoría y secuencia es asistida; la validación docente y el piloto con principiantes siguen pendientes.
+
 ## Condiciones para Python y ejemplos de otros lenguajes
 
 El usuario respalda incorporar una ruta propia de Python con contenidos actuales. Su desarrollo debe partir de cero: ninguna lección que use Python, JavaScript u otro lenguaje puede presuponer experiencia previa no enseñada en el recorrido. La sintaxis, herramientas y conceptos necesarios se explican y practican antes de exigir su aplicación. Los apoyos deben estar disponibles también para quien entra directamente a una especialidad.
@@ -48,6 +56,10 @@ El [plan de mejora](plan-mejora-plataforma.md) conserva el antecedente de Algori
 El laboratorio extiende esta identidad con planos de construcción, tarjetas de retos elevadas y filtros de tipos/temas. El progreso utiliza un indicador circular sobre una plataforma, métricas reales, tarjetas de rutas y un espacio para copias recuperables. Ambas vistas responden al puntero en equipos adecuados y mantienen el contenido esencial en HTML.
 
 ## Guía de implementación
+
+El 10 de noviembre de 2026 el usuario cambió la dirección del fondo: `TeslaTres.png` se extiende a toda la plataforma, con paneles translúcidos y símbolos de programación flotantes. Una introducción audiovisual termina con un fundido a ese laboratorio. El retrato interactivo queda disponible bajo demanda para mantener un solo Tesla protagonista en la composición inicial. Las rutas conservan sus botones y la transparencia se modula para leer código, lecciones y controles en ambos temas.
+
+La entrega de video prioriza calidad y cobertura completa de la pantalla: 1920×1080 reprocesado desde 720p, 240 fotogramas y audio completo. El encuadre se adapta sin deformación ni franjas y recorta el entorno cuando cambia la proporción. En vertical acompaña el desplazamiento de Tesla. La descarga de 10,28 MB ocurre una vez por sesión al entrar al inicio o al pulsar «Intro»; con movimiento reducido, ahorro de datos o entrada a una lección no se carga automáticamente. El sitio conserva una composición estática cuando se pausa el movimiento.
 
 1. Separar los requisitos académicos de las condiciones de acceso. Mantener los conceptos y sus fuentes de introducción aunque una referencia entre rutas pase a ser una recomendación.
 2. Centralizar la decisión de acceso y sus motivos en el dominio. Aplicarla de manera consistente al catálogo, mapa, recomendaciones, búsqueda y enlaces directos.

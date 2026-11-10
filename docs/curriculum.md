@@ -1,18 +1,12 @@
 # Currículo y recorrido
 
-## Tronco común
+## Fundamentos como primer lenguaje
 
-1. Primeros pasos: archivo, carpeta, extensión, editor, ejecución y salida.
-2. Inicio: máquina, información, algoritmos, variables, tipos, operadores, entrada/salida, legibilidad, trazas y depuración.
-3. Básico: decisiones, lógica, ciclos, funciones, alcance y casos límite.
-4. Puente: Python real, diferencias respecto al pseudocódigo y primeros commits con Git.
-5. Intermedio: listas, matrices, cadenas, diccionarios, conjuntos, búsqueda, recursión, módulos, archivos, excepciones y proyecto de tareas.
-6. Avanzado: clases, encapsulamiento, herencia, composición, programación funcional, complejidad, pruebas, ramas, revisión y proyecto de biblioteca.
-7. Experto: patrones, los cinco principios SOLID, refactorización, arquitectura, concurrencia, rendimiento, seguridad, observabilidad, CI/CD y proyecto final.
+El recorrido principal es Fundamentos y lógica con JavaScript. Su primer módulo publica ocho lecciones: primera ejecución, valores y secuencia, errores y comentarios, const, let, operaciones, entradas y conversión y proyecto de tarjeta. Incluye 24 prácticas de código, 15 ejemplos ejecutables y 40 preguntas. Los otros 17 bloques del plan continúan en preparación.
 
-Los siete niveles de Fundamentos están publicados: 68 lecciones. El piloto automatizado cubre las 17 lecciones de Primeros pasos e Inicio; no equivale a una prueba con estudiantes reales.
+Las 68 lecciones de la edición anterior conservan sus IDs, enlaces e historial en el archivo de Fundamentos. No son el itinerario JavaScript ni acreditan automáticamente sus nuevas lecciones.
 
-Todas las rutas permiten empezar por su primera lección publicada, con una entrada conceptual sin requisitos previos. Fundamentos es el comienzo recomendado para principiantes. Los pasos previos de la misma ruta regulan su progresión; las referencias a otras rutas documentan conocimientos recomendados y no bloquean el acceso. Los siete repasos compartidos de Python, variables, listas y condiciones aparecen al implementar en Algoritmia, después del diseño. La orientación opcional sugiere explicaciones o práctica sin conceder finalizaciones.
+Todas las rutas permiten empezar por su primera lección publicada. Fundamentos es el comienzo recomendado para principiantes. Los pasos de la misma ruta regulan la progresión; otras rutas aportan recomendaciones y repasos, sin bloquear el acceso. Una orientación no concede finalizaciones ni XP.
 
 ## Inicio de Algoritmia
 
@@ -42,19 +36,17 @@ Se conserva el puente de Fundamentos como repaso disponible. No se acreditan aut
 
 En las demás especialidades, accesibilidad precede a CSS y React, las pruebas HTTP de backend se aprenden después del contrato OpenAPI y antes de persistencia/arquitectura, y la seguridad de aplicaciones con IA precede a agentes y uso autónomo de herramientas. La exfiltración de datos privados se distingue de la contaminación entre datos de entrenamiento y evaluación.
 
-## IA: distintos objetivos, distintas dependencias
+## IA generativa desde cero
 
-La exploración inicial no exige código: modelos y datos, entrenamiento/inferencia, tokens/contexto, prompts/verificación, contexto/memoria/recuperación, evaluación por casos, difusión/flow matching, modelado de conceptos y selección de proyecto.
+LLM, difusión y NCM son partes centrales de una secuencia de 96 temas en 13 bloques. Están publicadas 13 lecciones de exploración: nueve revisadas y cuatro puentes/proyectos nuevos. Incluyen 52 prácticas, 39 casos con 95 decisiones y 68 preguntas. Las otras 83 lecciones siguen en preparación.
 
-Después se separan recorridos técnicos:
+La exploración enseña porcentajes y muestreo antes de LLM, píxeles y semillas antes de difusión, y vectores/codificación antes de NCM. Integra auditoría documental y una decisión de producto verificable. Cada lección tiene explicación desde cero, ejemplo resuelto, comprensión, práctica guiada, error para corregir y reto independiente.
 
-- **Aplicaciones:** Python y datos del tronco común → APIs → salidas estructuradas/herramientas → geometría y gestión del contexto → embeddings → recuperación híbrida y reranking → RAG → evaluación de recuperación → agentes y evaluación de herramientas → multimodalidad. No exige recorrer toda la formación de entrenamiento de modelos.
-- **Modelos:** Python científico → álgebra antes de NumPy → optimización, probabilidad y estadística → preparación de datos → ML → redes → Transformers → arquitectura y ajuste de LLM.
-- **Difusión:** redes convolucionales e introducción a difusión → procesos directo/inverso → arquitecturas y espacios latentes → flow matching y flujos rectificados → muestreo/condicionamiento → adaptación y evaluación.
-- **Conceptos:** arquitectura de LLM y embeddings → representaciones de frases/SONAR → predicción conceptual → difusión semántica (que también exige difusión técnica) → evaluación y límites.
-- **Producción:** evaluación aplicada después de RAG. MLOps añade como requisito el proyecto predictivo; luego despliegue, costos, privacidad y proyecto final.
+El mapa técnico prepara JavaScript y HTTP antes de APIs y enseña Python antes de sus herramientas. Matemáticas, datos, redes y representaciones preceden a la ingeniería de LLM, difusión y NCM. Se conservan los IDs previos y las finalizaciones históricas; los cuatro pasos añadidos no se acreditan automáticamente.
 
-NCM se usa en la conversación como Modelado de Conceptos Siguientes. En el contenido se distingue ese enfoque de la familia concreta LCM del trabajo de Meta. Allí el concepto se representa mediante una frase codificada; no se equipara a razonamiento humano ni se anuncia reemplazo universal de LLM.
+NCM se usa como Modelado de Conceptos Siguientes y se distingue del trabajo concreto LCM de Meta. Los casos usan material preparado, el token-lab es ilustrativo y el laboratorio visual no ejecuta difusión. No se anuncia un proveedor, SDK o modelo como probado sin evidencia.
+
+Consulta el [temario, metodología e inventario completo de IA](ia-curriculum.md). La revisión de lo publicado es asistida; el piloto con principiantes y la revisión independiente siguen pendientes.
 
 ## Criterios de aprendizaje
 

@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser } from './support/browser.mjs';
@@ -13,7 +14,7 @@ const keys = read('content/curriculum/index.json').routes.flatMap((id) =>
 );
 await withBrowser(4325, async (browser, origin) => {
   for (const width of [1440, 390]) {
-    const context = await browser.newContext({
+    const context = await learningContext(browser, {
       viewport: { width, height: 950 },
       reducedMotion: 'reduce',
     });

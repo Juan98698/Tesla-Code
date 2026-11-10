@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import { installPythonRuntime, solveActivity } from './support/python.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -14,7 +15,7 @@ const published = routes.flatMap((r) =>
   ),
 );
 await withBrowser(4317, async (browser, origin) => {
-  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const context = await learningContext(browser, { reducedMotion: 'reduce' });
   await installPythonRuntime(context, origin);
   const page = await context.newPage(),
     errors = [];
@@ -266,7 +267,7 @@ await withBrowser(4317, async (browser, origin) => {
     'PASS: 16 auditorías automatizadas WCAG A/AA sin infracciones detectadas. No sustituyen pruebas de accesibilidad con personas.',
   );
   // Una sesión sin acceso a localStorage sigue siendo utilizable.
-  const blocked = await browser.newContext();
+  const blocked = await learningContext(browser);
   await blocked.addInitScript(() => {
     Storage.prototype.getItem = () => {
       throw Error('blocked');

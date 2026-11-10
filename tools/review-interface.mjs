@@ -21,6 +21,8 @@ try {
   for (const width of [1440, 390]) {
     for (let sample = 0; sample < 3; sample++) {
       const context = await browser.newContext({ viewport: { width, height: 1000 } });
+      // Measure the learning view as a returning visitor, independently of the intro download.
+      await context.addInitScript(() => sessionStorage.setItem('teslacode:intro:v1', '1'));
       const page = await context.newPage();
       await page.addInitScript(() => {
         window.reviewMetrics = { lcp: 0, cls: 0, longTasks: 0 };
@@ -53,7 +55,11 @@ try {
       await page.locator(ready).waitFor();
       await page.evaluate(async () => {
         await document.fonts.ready;
-        await Promise.all([...document.images].map((image) => image.decode().catch(() => {})));
+        await Promise.all(
+          [...document.images]
+            .filter((image) => image.getClientRects().length)
+            .map((image) => image.decode().catch(() => {})),
+        );
         await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
       });
       const metrics = await page.evaluate(async () => {

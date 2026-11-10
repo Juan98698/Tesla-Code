@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
@@ -12,17 +13,40 @@ async function solve(page, origin, route, id) {
     const section = page.locator(`[data-activity="${activity.id}"]`);
     await section.locator('input').fill(activity.answers[0]);
     await section.locator('button[type=submit]').click();
+    await section.locator('.practice-feedback').waitFor({ state: 'visible' });
+    assert.equal(
+      await section.locator('.practice-feedback').getAttribute('class'),
+      'practice-feedback ok',
+      `${route}/${id}/${activity.id}: respuesta ${await section.locator('input').inputValue()}`,
+    );
   }
   await answerQuiz(page, data);
-  await page.waitForFunction(
-    ({ key, lesson }) => JSON.parse(localStorage.getItem(key)).completed.includes(lesson),
-    { key, lesson: `${route}/${id}` },
-  );
+  try {
+    await page.waitForFunction(
+      ({ key, lesson }) => JSON.parse(localStorage.getItem(key)).completed.includes(lesson),
+      { key, lesson: `${route}/${id}` },
+    );
+  } catch (error) {
+    console.error(
+      `${route}/${id}`,
+      await page.evaluate(
+        (key) => ({
+          state: JSON.parse(localStorage.getItem(key)),
+          result: document.querySelector('#qbox')?.textContent,
+          feedback: [...document.querySelectorAll('.practice-feedback')].map(
+            (el) => el.textContent,
+          ),
+        }),
+        key,
+      ),
+    );
+    throw error;
+  }
   return data.quiz.length * 10 + 50;
 }
 
 await withBrowser(4324, async (browser, origin) => {
-  const context = await browser.newContext();
+  const context = await learningContext(browser);
   const [a, b, stale] = await Promise.all([
     context.newPage(),
     context.newPage(),

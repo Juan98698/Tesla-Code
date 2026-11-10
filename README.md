@@ -25,6 +25,7 @@ npm run test:python  # Primer módulo Python completo, ejecución real y recuper
 npm run test:console # Consola, entradas, errores y ejemplos en escritorio y móvil
 npm run test:javascript # Primer módulo JavaScript: ocho lecciones desde cero y motor real aislado
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
+npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
 npm run test:examples # Ejemplos Python y Git (requiere Python y Bash)
@@ -37,7 +38,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran servidores entre los puertos 4317 y 4325. No uses esos puertos para otro servicio durante la ejecución. [CONTRIBUTING.md](CONTRIBUTING.md) distingue la comprobación rápida de la batería completa.
+También puedes indicar `CHROMIUM_PATH`. Las pruebas levantan y cierran servidores entre los puertos 4317 y 4337. No uses esos puertos para otro servicio durante la ejecución. [CONTRIBUTING.md](CONTRIBUTING.md) distingue la comprobación rápida de la batería completa.
 
 En Windows las pruebas detectan Chrome o Edge si Chromium de Playwright no está instalado. Las capturas se guardan en la carpeta temporal del sistema. En PowerShell, si el lanzador `npm.ps1` apunta a una instalación global inaccesible, usa `npm.cmd` con los mismos argumentos. `npm run test:examples` selecciona `python` en Windows y `python3` en otros sistemas; puedes indicar otro ejecutable con `PYTHON`. El ejemplo Git requiere Bash: en Windows se busca el de Git for Windows, y `BASH_PATH` permite seleccionar otro. No se utiliza automáticamente el lanzador de WSL.
 
@@ -48,11 +49,11 @@ La consola JavaScript usa el motor del navegador y se inicia al ejecutar. Esta e
 ## Qué está disponible
 
 - Siete mapas: Fundamentos, Algoritmia, Python, Frontend, Backend, Bases de datos e IA.
-- **42 lecciones publicadas en los recorridos actuales**, más **68 en la edición anterior de Fundamentos**, conservadas con sus enlaces y logros. El inventario completo tiene 436 entradas, incluidas las archivadas y los bloques futuros. Los temas pendientes aparecen **en preparación**.
+- **46 lecciones publicadas en los recorridos actuales**, más **68 en la edición anterior de Fundamentos**, conservadas con sus enlaces y logros. El inventario completo tiene 459 entradas, incluidas las archivadas y los bloques futuros. Los temas pendientes aparecen **en preparación**.
 - **Fundamentos con JavaScript: primer módulo completo de ocho lecciones**, 15 ejemplos ejecutables, 24 ejercicios de código y 40 preguntas. Enseña editor y consola, textos/números, secuencia, errores/comentarios, const, let, operaciones, lectura de entradas y conversión antes del proyecto de tarjeta y plan de práctica. Los otros 17 bloques permanecen en preparación; sus entradas representan bloques por desarrollar, no lecciones ya redactadas.
 - La edición anterior conserva sus 68 lecciones desde Primeros pasos hasta Experto. Se consulta desde el mapa de Fundamentos y desde sus URLs originales. Sus finalizaciones y XP permanecen; no acreditan las nuevas prácticas JavaScript.
 - Primeros pasos (edición anterior): sus dos lecciones incluyen fuentes, ejemplos razonados, errores frecuentes y tres actividades cada una: comprensión, práctica guiada y transferencia. La revisión asistida reduce la deuda editorial a 81 lecciones; la revisión independiente sigue pendiente.
-- IA: nueve lecciones introductorias sobre modelos, inferencia, LLM, prompts, contexto, memoria, evaluación, difusión/flow matching, conceptos siguientes/LCM y criterios de proyecto. El mapa técnico distingue aplicaciones, modelos, difusión, investigación y producción.
+- IA: 13 lecciones de exploración desde cero, con 52 prácticas, 39 casos de evidencia y 68 preguntas. LLM, difusión y NCM son centrales. El mapa de 96 temas añade puentes de JavaScript, Python y matemáticas, ingeniería y proyectos; 83 temas siguen en preparación. Consulta el [temario y sus límites](docs/ia-curriculum.md).
 - Algoritmia: **12 de 45 lecciones**: once del núcleo conceptual y en pseudocódigo, hasta invariantes, y un laboratorio Python opcional con código ejecutable. Cada una tiene tres prácticas. El laboratorio no bloquea el núcleo ni presupone conocer el lenguaje.
 - Python: **7 de 67 lecciones**: un primer módulo desde cero hasta un presupuesto con entradas variables. Enseña cada instrucción antes de utilizarla, con predicción, reparación y construcción; incluye doce actividades de código. Los diez módulos restantes están planificados.
 - Frontend, Backend y Bases de datos tienen dos lecciones publicadas cada una. Todas las rutas tienen entrada libre; la progresión obligatoria se conserva dentro de cada una, separada de sus dependencias académicas.
@@ -70,7 +71,11 @@ Se puede guardar una lección, exportar el progreso en JSON e importar una copia
 
 ## Interfaz y acompañamiento
 
-Estudio de exploración en grafito con una escena CSS 3D para elegir entre las siete rutas, mapa conectado, laboratorio legible y tarjetas de especialidades con volumen. La escena responde al puntero en equipos compatibles; se detiene fuera de pantalla, al ocultar la pestaña o al pausar el efecto. En dispositivos táctiles y con movimiento reducido permanece estática. Funciona sin WebGL ni bibliotecas gráficas adicionales. Incluye ejemplos locales por ruta y temas claro/oscuro, y conserva el perfil azul/cian de la marca. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros.
+Un laboratorio eléctrico de Nikola Tesla acompaña todas las vistas con paneles de cristal, profundidad y símbolos de programación flotantes. El texto y las consolas mantienen fondos suficientes para leer en ambos temas. Las siete rutas siguen siendo botones accesibles. «Activar holograma» carga el retrato interactivo solo cuando se solicita; responde al puntero y libera recursos al desactivarlo. En táctil, movimiento reducido o fallo de WebGL conserva una imagen estática.
+
+La primera entrada al inicio muestra una introducción de 10 segundos, sin sonido hasta activarlo, con pausa y acceso directo al sitio. Termina con un fundido al fondo global. «Intro» permite repetirla. Se reproduce automáticamente una vez por sesión; no descarga video al entrar directamente a una lección, con ahorro de datos, movimiento reducido o animaciones pausadas. El MP4 de entrega ocupa 10,28 MB y conserva los 240 fotogramas y el audio original. Se reprocesó de 720p a 1920×1080 con nitidez moderada; no equivale a una grabación Full HD nativa. Llena la pantalla sin franjas ni deformación; el encuadre recorta el entorno según el formato y acompaña a Tesla en móvil.
+
+La escena y los símbolos se detienen al ocultar la pestaña o pausar el movimiento. Puedes elegir explicaciones paso a paso o empezar por la práctica; la orientación opcional y los repasos no conceden logros. Consulta [procedencia y procesamiento de los medios](assets/atmosphere/README.md).
 
 Consulta [la coherencia de publicación](docs/release-coherence.md) y [la dirección de producto](docs/product-direction.md) para las decisiones de acceso e identidad.
 

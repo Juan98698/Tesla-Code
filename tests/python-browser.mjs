@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
@@ -10,7 +11,7 @@ const published = route.levels.flatMap((l) => l.lessons).filter((l) => l.status 
 await withBrowser(4322, async (browser, origin) => {
   let earned;
   for (const width of [1440, 390]) {
-    const context = await browser.newContext({
+    const context = await learningContext(browser, {
       viewport: { width, height: 950 },
       reducedMotion: 'reduce',
     });
@@ -86,7 +87,7 @@ await withBrowser(4322, async (browser, origin) => {
     );
     await context.close();
   }
-  const context = await browser.newContext();
+  const context = await learningContext(browser);
   await installPythonRuntime(context, origin);
   const page = await context.newPage();
   await page.goto(origin);

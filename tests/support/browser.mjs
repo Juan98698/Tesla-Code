@@ -1,6 +1,18 @@
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 import { browserExecutable } from './runtime.mjs';
+
+// Learning-flow fixtures dismiss the cinematic onboarding only. They never seed progress.
+// Intro-specific tests use a fresh browser.newContext() and exercise the real first visit.
+export async function learningContext(browser, options) {
+  const context = await browser.newContext(options);
+  await context.addInitScript(() => {
+    try {
+      sessionStorage.setItem('teslacode:intro:v1', '1');
+    } catch {}
+  });
+  return context;
+}
 // Inspect final opacity/geometry without stopping decorative infinite animations.
 export async function waitForFiniteAnimations(page) {
   await page.waitForFunction(

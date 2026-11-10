@@ -1,6 +1,7 @@
 import { mountStudio } from './features/studio.js';
 import { mountBrandMotion } from './features/brand-motion.js';
 import { mountDepthScene } from './features/depth-scene.js';
+import { mountAtmosphere } from './features/atmosphere.js';
 import { $ } from './core/dom.js';
 import { escapeHtml as e } from './core/html.js';
 import { progressRepository, PROGRESS_KEY, withProgressLock } from './core/storage.js';
@@ -415,9 +416,16 @@ function bindShell() {
       : 'on';
   bindMotionToggle($('brand-motion-toggle'));
   let disposeBrand = mountBrandMotion(document);
-  window.addEventListener('pagehide', () => disposeBrand());
+  let disposeAtmosphere = mountAtmosphere(document);
+  window.addEventListener('pagehide', () => {
+    disposeBrand();
+    disposeAtmosphere();
+  });
   window.addEventListener('pageshow', (event) => {
-    if (event.persisted) disposeBrand = mountBrandMotion(document);
+    if (event.persisted) {
+      disposeBrand = mountBrandMotion(document);
+      disposeAtmosphere = mountAtmosphere(document);
+    }
   });
   function setTheme(value) {
     document.documentElement.dataset.theme = value;

@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 // Exercises a real HTTP cache across documents, without intercepting requests.
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -70,7 +71,7 @@ try {
     executablePath: browserExecutable(),
     args: ['--no-sandbox'],
   });
-  const context = await browser.newContext({
+  const context = await learningContext(browser, {
       viewport: { width: 1672, height: 1040 },
       reducedMotion: 'reduce',
     }),

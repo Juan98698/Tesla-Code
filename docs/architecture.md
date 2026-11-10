@@ -1,5 +1,13 @@
 # Arquitectura
 
+## Atmósfera global e introducción
+
+`main.js` monta una única instancia de `features/atmosphere.js` sobre la estructura permanente de `index.html`; la navegación por fragmentos no remonta el video. `pagehide` libera listeners, observadores y decodificador; `pageshow` con restauración vuelve a montar el controlador. El fondo WebP y los símbolos SVG/CSS comparten la escena fija; solo la navegación fija aplica desenfoque. Las consolas conservan superficies legibles.
+
+El diálogo nativo de introducción carga el MP4 y su cartel únicamente al comenzar. `sessionStorage` registra que se vio, con respaldo en memoria si el almacenamiento falla; no escribe progreso ni XP. Reproduce automáticamente solo en el inicio y con movimiento permitido; pausa en pestañas ocultas y ofrece pausa, sonido, omitir y repetición. Al finalizar libera `src` y `poster` después del fundido. Si el video se interrumpe tras comenzar, espera su continuación sin un corte por tiempo de reproducción.
+
+El retrato interactivo sigue siendo una mejora progresiva bajo el botón «Activar holograma». Oculto no descarga su textura ni crea un contexto WebGL. Al desactivarlo se libera su controlador; las siete rutas siguen accesibles en HTML. La conversión de medios se hace fuera de la aplicación y no incorpora herramientas de codificación a producción.
+
 TeslaCode conserva una aplicación estática de módulos ES. El catálogo se carga al iniciar; las lecciones y simuladores, bajo demanda. Pyodide solo se descarga al ejecutar un ejemplo o una actividad Python.
 
 ```mermaid

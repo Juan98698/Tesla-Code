@@ -4,6 +4,7 @@ import { indexRoute, includeArchives } from '../js/domain/curriculum.js';
 import { checkTechnologyPolicy, checkLessonTechnology } from './technology-policy.mjs';
 import { pythonExerciseErrors } from '../js/domain/python-exercise.js';
 import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
+import { caseStudyErrors } from '../js/domain/case-study.js';
 import {
   digest,
   lessonDigest,
@@ -139,6 +140,8 @@ function checkQuestion(q, where, allowed) {
     for (const error of pythonExerciseErrors(q)) fail(`${where}: ${error}`);
   } else if (q.type === 'javascript') {
     for (const error of javascriptExerciseErrors(q)) fail(`${where}: ${error}`);
+  } else if (q.type === 'case-study') {
+    for (const error of caseStudyErrors(q)) fail(`${where}: ${error}`);
   } else fail(`${where}: tipo desconocido ${q.type}`);
 }
 for (const [key, meta] of lessons) {
@@ -212,7 +215,7 @@ for (const [key, meta] of lessons) {
   if (new Set((data.quiz ?? []).map((q) => q.id)).size !== data.quiz?.length)
     fail(`${path}: ids de pregunta duplicados`);
   for (const q of data.quiz ?? []) {
-    if (['python', 'javascript'].includes(q.type))
+    if (['python', 'javascript', 'case-study'].includes(q.type))
       fail(`${path}/${q.id}: el código pertenece a la práctica, no al quiz.`);
     checkQuestion(q, `${path}/${q.id}`, allowed);
   }

@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
@@ -28,7 +29,7 @@ await withBrowser(4321, async (browser, origin) => {
   for (const width of [1440, 1024, 768, 390, 320]) {
     const touch = width < 700,
       reduced = width === 1024;
-    const context = await browser.newContext({
+    const context = await learningContext(browser, {
       viewport: { width, height: 1000 },
       hasTouch: touch,
       reducedMotion: reduced ? 'reduce' : 'no-preference',
@@ -86,6 +87,7 @@ await withBrowser(4321, async (browser, origin) => {
       !touch && !reduced,
     );
     assert.equal(await page.locator('.tesla-head').count(), 1);
+    await page.getByRole('button', { name: 'Activar holograma', exact: true }).click();
     assert.equal(await page.locator('[data-tesla-image]').count(), 1);
     await page.locator('[data-tesla-image]').evaluate((image) => image.decode());
     assert.equal(
@@ -346,7 +348,7 @@ await withBrowser(4321, async (browser, origin) => {
     [true, '#/inicio'],
     [false, '#/leccion/fundamentos/tu-primer-paso/aprender'],
   ]) {
-    const context = await browser.newContext();
+    const context = await learningContext(browser);
     await context.addInitScript((saveData) => {
       Object.defineProperty(navigator, 'connection', { value: { saveData } });
     }, saveData);
@@ -373,7 +375,7 @@ await withBrowser(4321, async (browser, origin) => {
   console.log(
     'PASS: logo ampliado y animado en todas las secciones visibles; sin descarga de animación con movimiento reducido o ahorro de datos.',
   );
-  const hiddenContext = await browser.newContext();
+  const hiddenContext = await learningContext(browser);
   await hiddenContext.addInitScript(() =>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-brand-motion]').forEach((image) => (image.hidden = true));
@@ -393,7 +395,7 @@ await withBrowser(4321, async (browser, origin) => {
   await hiddenContext.close();
   // A fast runner can reach axe while the page is still fading in. Keep this
   // deterministic by slowing the real entrance, then verify real defects fail.
-  const animationContext = await browser.newContext({ reducedMotion: 'no-preference' });
+  const animationContext = await learningContext(browser, { reducedMotion: 'no-preference' });
   const animationPage = await animationContext.newPage();
   await animationPage.addInitScript(() => localStorage.setItem('teslacode:theme', 'light'));
   await animationPage.goto(origin + '/#/rutas');
@@ -432,9 +434,11 @@ await withBrowser(4321, async (browser, origin) => {
     args: ['--no-sandbox', '--disable-webgl'],
   });
   try {
-    const page = await fallback.newPage();
+    const fallbackContext = await learningContext(fallback);
+    const page = await fallbackContext.newPage();
     await page.goto(origin);
     await page.locator('.hero').waitFor();
+    await page.getByRole('button', { name: 'Activar holograma', exact: true }).click();
     assert.equal(await page.locator('.tesla-reference').isVisible(), true);
     await page.locator('.tesla-reference').evaluate((image) => image.decode());
     assert.equal(

@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
@@ -8,7 +9,7 @@ const module = route.levels
   .flatMap((level) => level.lessons);
 await withBrowser(4318, async (browser, origin) => {
   for (const width of [1440, 390]) {
-    const context = await browser.newContext({
+    const context = await learningContext(browser, {
       viewport: { width, height: 900 },
       reducedMotion: 'reduce',
     });

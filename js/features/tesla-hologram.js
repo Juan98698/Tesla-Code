@@ -1,8 +1,8 @@
 import { assetUrl } from '../core/assets.js';
 import { createPortraitRenderer } from './tesla-renderer.js';
 
-export function teslaHologram() {
-  return `<div class="tesla-hologram" data-tesla-hologram>
+export function teslaHologram(hidden = false) {
+  return `<div class="tesla-hologram" data-tesla-hologram${hidden ? ' hidden' : ''}>
     <div class="tesla-beam"></div>
     <div class="tesla-head" data-tesla-head>
       <img class="tesla-reference" src="${assetUrl('assets/hologram/nikola-reference.webp')}" width="512" height="560" alt="" decoding="async" loading="lazy" data-tesla-image>

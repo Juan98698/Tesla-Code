@@ -25,6 +25,7 @@ export async function installPythonRuntime(context, origin) {
     // WASM buffer through the client/driver channel for every isolated execution.
     const response = await route.fetch({
       url: new URL('node_modules/pyodide/' + file, origin).href,
+      maxRetries: 2,
     });
     try {
       if (!response.ok()) throw Error('No se pudo servir el runtime local: ' + file);
@@ -44,7 +45,12 @@ export async function solveActivity(page, activity) {
   const section = page.locator('#activities [data-activity="' + activity.id + '"]');
   if (['python', 'javascript'].includes(activity.type))
     await section.locator('.code-editor').fill(activity.solution);
-  else await section.locator('input').fill(activity.answers[0]);
+  else if (activity.type === 'case-study') {
+    for (const decision of activity.decisions)
+      await section
+        .locator(`[data-decision="${decision.id}"] input[value="${decision.answer}"]`)
+        .check();
+  } else await section.locator('input').fill(activity.answers[0]);
   await section.locator('button[type=submit]').click();
   try {
     await section.locator('.badge.live').waitFor({ timeout: 60000 });

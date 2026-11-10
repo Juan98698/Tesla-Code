@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
@@ -13,7 +14,7 @@ const examples = module.flatMap(
 await mkdir('coverage/javascript', { recursive: true });
 await withBrowser(4323, async (browser, origin) => {
   for (const width of [1440, 390]) {
-    const context = await browser.newContext({
+    const context = await learningContext(browser, {
         viewport: { width, height: 1000 },
         reducedMotion: 'reduce',
       }),
@@ -57,9 +58,9 @@ await withBrowser(4323, async (browser, origin) => {
               await axe.run(document, {
                 runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
               })
-            ).violations.map((v) => v.id),
+            ).violations.map((v) => ({ id: v.id, targets: v.nodes.map((n) => n.target) })),
           );
-          assert.deepEqual(violations, []);
+          assert.deepEqual(violations, [], `Ejemplo JavaScript: ${width}px / ${theme}`);
         }
         await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
         await example.screenshot({ path: `coverage/javascript/console-${width}.png` });

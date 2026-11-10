@@ -1,3 +1,4 @@
+import { learningContext } from './support/browser.mjs';
 import { installPythonRuntime, solveActivity } from './support/python.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -24,7 +25,7 @@ async function audit(page, label) {
 }
 await withBrowser(4320, async (browser, origin) => {
   for (const width of [1440, 390]) {
-    const context = await browser.newContext({
+    const context = await learningContext(browser, {
       viewport: { width, height: 1000 },
       reducedMotion: 'reduce',
     });
