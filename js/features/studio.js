@@ -1,6 +1,6 @@
 import { escapeHtml as e } from '../core/html.js';
 import { mountDepthScene } from './depth-scene.js';
-import { teslaHologram } from './tesla-hologram.js';
+import { teslaHologram, mountTeslaHologram } from './tesla-hologram.js';
 import { accessState, isPublished, lessonKey } from '../domain/curriculum.js';
 import { playgroundSettings, runPlayground } from '../domain/playground.js';
 const symbols = {
@@ -140,7 +140,8 @@ export function studioHome(routes, state, next, href) {
     .join('')}</div></section></div>`;
 }
 export function mountStudio(root, routes, onRoute) {
-  const disposeDepth = mountDepthScene(root);
+  const portrait = mountTeslaHologram(root);
+  const disposeDepth = mountDepthScene(root, portrait);
   const chooseRoute = (id, selector) => {
     const view = root.ownerDocument.defaultView;
     const top = view.scrollY;
@@ -214,5 +215,8 @@ export function mountStudio(root, routes, onRoute) {
       chooseRoute(event.target.value, '#studio-route-select');
   };
   draw();
-  return disposeDepth;
+  return () => {
+    disposeDepth();
+    portrait?.dispose();
+  };
 }

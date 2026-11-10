@@ -138,6 +138,33 @@ La revisión visual incluye la mirada en las cuatro direcciones. El busto aplana
 
 Verificación: 130 pruebas unitarias aprobadas y 35 módulos dentro de los umbrales de cobertura; `depth-scene.js` y `tesla-hologram.js` alcanzan el 100 % de líneas, ramas y funciones. Pasan experiencia entre 320 y 1440 px, acceso independiente, actualización real de caché, contenido, formato y coherencia de recursos. Las comprobaciones incluyen transformaciones independientes de cabeza y ojos, botones estables, tres montajes/desmontajes, pausa, salida de pantalla, teclado, táctil, movimiento reducido, ambos temas y WebGL deshabilitado. Las auditorías automáticas de accesibilidad no sustituyen pruebas con lectores de pantalla o participantes.
 
+## Retrato de referencia con relieve y mirada
+
+9 de noviembre de 2026. Tras la revisión visual del usuario, la portada reemplaza el SVG simplificado por el rostro de `ideaHolograma.png`, conservando cabello, facciones, bigote, traje y luz azul. Se utiliza únicamente el busto. El original RGBA de 1199 × 1312 px y 1 933 541 B se convierte a WebP de 512 × 560 px y 90 060 B, con transparencia. No se regenera el rostro y no se incorporan las poses de cuerpo completo de la hoja de referencia. Los originales permanecen en Descargas.
+
+Una malla frontal de relieve con 2009 vértices y 3840 triángulos permite girar la cabeza moderadamente, mezclando el movimiento del cuello hacia el traje fijo. El shader desplaza por separado los iris fotografiados dentro de máscaras suaves. WebGL se usa directamente, sin motor ni dependencias nuevas. Se dibuja bajo demanda, con DPR máximo 2; táctil y movimiento reducido no crean un contexto del retrato. Pausa, salida de pantalla y pestaña oculta suspenden el dibujo. La imagen HTML queda disponible al perder el contexto gráfico; restaurarlo reconstruye los recursos. El desmontaje libera buffers, shaders, textura, programa, contexto y observadores/listeners.
+
+### Coste y verificación local
+
+Chrome 156.0.8078.80 y Node 26.12.1 en Windows, HTTP local, tres contextos nuevos en 1440 y 390 px con ratón, cachés calientes y 120 intervalos rAF por muestra. Se compara el informe de la entrega anterior `coverage/ui-review/tesla-final/report.json` con `portrait-reference/report.json`, generado con `npm run review:ui -- portrait-reference`. La captura de 390 px es un viewport de escritorio, no un dispositivo móvil físico. Los bytes excluyen el documento HTML principal.
+
+| Métrica                          | SVG anterior  | Retrato de referencia |
+| -------------------------------- | ------------- | --------------------- |
+| Transferencia                    | 342 072 B     | 434 003 B             |
+| JavaScript sin compresión        | 145 316 B     | 148 122 B             |
+| Peticiones de recursos           | 49            | 51                    |
+| CLS en las seis muestras         | 0             | 0                     |
+| p95 de intervalos rAF            | 16,7–16,9 ms  | 16,8–17,1 ms          |
+| Intervalos superiores a 32 ms    | 0/720         | 0/720                 |
+| Tareas largas durante la carga   | 1 por muestra | 2 por muestra         |
+| Mediana LCP, escritorio / 390 px | 2528 / 964 ms | 1068 / 804 ms         |
+
+El nuevo detalle aumenta la transferencia 91 931 B y el JavaScript 2806 B. El cambio de LCP no demuestra una mejora de velocidad: los tiempos de documento/servidor varían y estas mediciones locales no aíslan su causa ni representan Core Web Vitals de usuarios reales. No se observaron desbordamientos ni descargas iniciales de Pyodide.
+
+En tres muestras adicionales de 120 fotogramas con movimientos reales del cursor, el p95 fue 16,9 ms, con 0/360 intervalos superiores a 32 ms. Se registraron 120 movimientos y 120 dibujos por muestra; durante otros 120 fotogramas en reposo hubo cero dibujos del retrato. La evidencia está en `portrait-reference/tracking.json`. Los intervalos rAF no equivalen a una medición completa de GPU.
+
+Pasan 135 pruebas unitarias y los 36 módulos cumplen cobertura por archivo; `tesla-hologram.js`, `tesla-renderer.js` y `depth-scene.js` alcanzan 100 % de líneas, ramas y funciones. Se verifican shaders compilados y retrato renderizado en el navegador, cambios de píxeles al mirar, ausencia de renderizado en reposo/pausa, pérdida/restauración del contexto, cero asignaciones WebGL en táctil/movimiento reducido, recursos liberados y rutas con teclado. Pasan experiencia entre 320 y 1440 px, ambos temas y accesibilidad automática, acceso independiente, caché real, contenido, formato y coherencia de recursos. Se revisan visualmente frente, izquierda, derecha, arriba y abajo, escritorio y móvil. No sustituye pruebas con participantes, lectores de pantalla ni móviles físicos.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |

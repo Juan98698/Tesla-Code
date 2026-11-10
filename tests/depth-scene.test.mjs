@@ -130,7 +130,12 @@ test('Tesla follows a document pointer with bounded independent eyes and cleans 
     callbacks.forEach((callback) => callback());
   };
   for (let mount = 0; mount < 3; mount++) {
-    const dispose = mountDepthScene(root);
+    const positions = [],
+      activity = [];
+    const dispose = mountDepthScene(root, {
+      onPointer: (...point) => positions.push(point),
+      onActive: (value) => activity.push(value),
+    });
     move(100, -100);
     move(0, -200);
     assert.equal(frames.size, 1, 'One frame for a burst of events outside the scene');
@@ -139,6 +144,7 @@ test('Tesla follows a document pointer with bounded independent eyes and cleans 
     assert.equal(scene.style.getPropertyValue('--pointer-y'), '7deg');
     assert.equal(scene.style.getPropertyValue('--gaze-x'), '-4px');
     assert.equal(scene.style.getPropertyValue('--gaze-y'), '-2.5px');
+    assert.deepEqual(positions.at(-1), [-1, -1]);
     move(2000, 2000);
     flush();
     assert.equal(scene.style.getPropertyValue('--pointer-x'), '7deg');
@@ -155,6 +161,7 @@ test('Tesla follows a document pointer with bounded independent eyes and cleans 
     move(800, 300);
     dispose();
     assert.equal(scene.style.getPropertyValue('--gaze-y'), '');
+    assert.equal(activity.at(-1), false);
     assert.equal(frames.size, 0);
     move(800, 300);
     assert.equal(frames.size, 0, 'No retained document listener after disposal');

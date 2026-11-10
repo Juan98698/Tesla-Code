@@ -36,6 +36,20 @@ await withBrowser(4321, async (browser, origin) => {
     const page = await context.newPage(),
       errors = [],
       animationRequests = [];
+    await page.addInitScript(() => {
+      window.portraitDraws = 0;
+      window.portraitContexts = 0;
+      const get = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (...args) {
+        if (this.matches('[data-tesla-surface]') && args[0] === 'webgl') window.portraitContexts++;
+        return get.apply(this, args);
+      };
+      const draw = WebGLRenderingContext.prototype.drawElements;
+      WebGLRenderingContext.prototype.drawElements = function (...args) {
+        window.portraitDraws++;
+        return draw.apply(this, args);
+      };
+    });
     page.on('request', (request) => {
       if (request.url().includes('teslacode-spin.webp')) animationRequests.push(request.url());
     });
@@ -72,7 +86,19 @@ await withBrowser(4321, async (browser, origin) => {
       !touch && !reduced,
     );
     assert.equal(await page.locator('.tesla-head').count(), 1);
-    assert.equal(await page.locator('[data-tesla-eye]').count(), 2);
+    assert.equal(await page.locator('[data-tesla-image]').count(), 1);
+    await page.locator('[data-tesla-image]').evaluate((image) => image.decode());
+    assert.equal(
+      await page.locator('[data-tesla-image]').evaluate((image) => image.naturalWidth),
+      512,
+    );
+    const gpu = await page.evaluate(() => {
+      const probe = document.createElement('canvas').getContext('webgl');
+      const available = Boolean(probe);
+      probe?.getExtension('WEBGL_lose_context')?.loseContext();
+      return available;
+    });
+    if (!touch && !reduced && gpu) await page.locator('[data-renderer="webgl"]').waitFor();
     assert.equal(await page.locator('.core-cube').count(), 0);
     await waitForFiniteAnimations(page);
     const geometry = await page.locator('.orbit-chip').evaluateAll((buttons) =>
@@ -114,19 +140,40 @@ await withBrowser(4321, async (browser, origin) => {
           sign,
         );
         await waitForFiniteAnimations(page);
-        return page.evaluate(() => ({
-          head: getComputedStyle(document.querySelector('.tesla-head')).transform,
-          eyes: [...document.querySelectorAll('[data-tesla-eye]')].map(
-            (eye) => getComputedStyle(eye).transform,
-          ),
-        }));
+        return page.locator('.tesla-head').screenshot({ animations: 'disabled' });
       };
       const left = await look(260, 180, -1),
         right = await look(1380, 450, 1);
-      assert.notEqual(left.head, right.head, 'The head turns toward the document cursor');
-      left.eyes.forEach((eye, i) =>
-        assert.notEqual(eye, right.eyes[i], 'Each pupil follows independently of the head'),
+      assert.equal(
+        left.equals(right),
+        false,
+        'The rendered portrait changes when looking left/right',
       );
+      if (gpu) {
+        assert.ok(await page.evaluate(() => window.portraitDraws > 0));
+        const draws = await page.evaluate(() => window.portraitDraws);
+        await page.evaluate(
+          () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+        );
+        assert.equal(
+          await page.evaluate(() => window.portraitDraws),
+          draws,
+          'No continuous rendering when the cursor rests',
+        );
+        await page.evaluate(() => {
+          window.restorePortrait = document
+            .querySelector('[data-tesla-surface]')
+            .getContext('webgl')
+            .getExtension('WEBGL_lose_context');
+          window.restorePortrait.loseContext();
+        });
+        await page.waitForFunction(
+          () => !document.querySelector('[data-tesla-hologram]').dataset.renderer,
+        );
+        assert.equal(await page.locator('.tesla-reference').isVisible(), true);
+        await page.evaluate(() => window.restorePortrait.restoreContext());
+        await page.locator('[data-renderer="webgl"]').waitFor();
+      }
       const positions = await page.locator('.orbit-chip').evaluateAll((buttons) =>
         buttons.map((button) => {
           const { x, y } = button.getBoundingClientRect();
@@ -160,6 +207,12 @@ await withBrowser(4321, async (browser, origin) => {
         () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'true',
       );
       await page.locator('#motion-toggle').click();
+      assert.equal(await page.locator('.tesla-reference').isVisible(), true);
+      const pausedDraws = await page.evaluate(() => window.portraitDraws);
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+      );
+      assert.equal(await page.evaluate(() => window.portraitDraws), pausedDraws);
       assert.equal(
         await page
           .locator('[data-depth-scene]')
@@ -188,6 +241,11 @@ await withBrowser(4321, async (browser, origin) => {
           .locator('.tesla-hologram')
           .evaluate((element) => getComputedStyle(element).animationName),
         'none',
+      );
+      assert.equal(
+        await page.evaluate(() => window.portraitContexts),
+        0,
+        'Static devices allocate no portrait WebGL context',
       );
     }
     for (const route of routes) {
@@ -377,7 +435,8 @@ await withBrowser(4321, async (browser, origin) => {
     const page = await fallback.newPage();
     await page.goto(origin);
     await page.locator('.hero').waitFor();
-    assert.equal(await page.locator('.tesla-head svg').isVisible(), true);
+    assert.equal(await page.locator('.tesla-reference').isVisible(), true);
+    await page.locator('.tesla-reference').evaluate((image) => image.decode());
     assert.equal(
       await page.evaluate(() => Boolean(document.createElement('canvas').getContext('webgl'))),
       false,

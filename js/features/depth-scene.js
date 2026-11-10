@@ -1,5 +1,5 @@
 // Only decorative layers move. Route buttons keep their screen position and native semantics.
-export function mountDepthScene(root) {
+export function mountDepthScene(root, effects = {}) {
   const scene = root.querySelector('[data-depth-scene]');
   if (!scene) return () => {};
   const doc = root.ownerDocument;
@@ -20,6 +20,7 @@ export function mountDepthScene(root) {
     scene.style.removeProperty('--pointer-y');
     scene.style.removeProperty('--gaze-x');
     scene.style.removeProperty('--gaze-y');
+    effects?.onPointer?.(0, 0);
   };
   const sync = () => {
     active =
@@ -30,6 +31,7 @@ export function mountDepthScene(root) {
       Boolean(pointer?.matches) &&
       doc.documentElement.dataset.motion !== 'off';
     scene.dataset.sceneActive = String(active);
+    effects?.onActive?.(active);
     if (!active) reset();
   };
   const move = (event) => {
@@ -49,6 +51,7 @@ export function mountDepthScene(root) {
         scene.style.setProperty('--gaze-x', `${x * 4}px`);
         scene.style.setProperty('--gaze-y', `${y * 2.5}px`);
       }
+      effects?.onPointer?.(x, y);
     });
   };
   const intersection = view.IntersectionObserver

@@ -327,9 +327,9 @@ body[data-view='inicio'] {
 .tesla-hologram {
   position: absolute;
   left: 50%;
-  top: 48%;
-  width: 184px;
-  height: 248px;
+  top: 54%;
+  width: 216px;
+  height: 236.36px;
   transform: translate(-50%, -50%) scale(var(--tesla-scale, 1));
   /* Composite the bust before the orbit layers: the tilted head must stay above the suit. */
   transform-style: flat;
@@ -340,35 +340,35 @@ body[data-view='inicio'] {
   background: linear-gradient(0deg, #58ddff1c, #58ddff04 65%, transparent);
   clip-path: polygon(4% 0, 96% 0, 76% 100%, 24% 100%);
 }
-.tesla-torso {
-  position: absolute;
-  left: 0;
-  bottom: 10px;
-  width: 184px;
-  height: 138px;
-}
 .tesla-head {
   position: absolute;
   z-index: 1;
-  left: 21px;
-  top: 0;
-  width: 142px;
-  height: 185px;
+  inset: 0;
   transform-origin: 50% 82%;
   transform: perspective(700px) rotateX(var(--pointer-y, 0deg)) rotateY(var(--pointer-x, 0deg))
     rotateZ(calc(var(--pointer-x, 0deg) * 0.25)) translateX(var(--gaze-x, 0px));
   transition: transform 180ms ease-out;
-  filter: drop-shadow(0 0 4px #64ddff35);
 }
-.tesla-head svg {
+.tesla-reference,
+.tesla-surface {
   display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
+  object-fit: contain;
 }
-.tesla-eye {
-  transform: translate(var(--gaze-x, 0px), var(--gaze-y, 0px));
-  transition: transform 120ms ease-out;
+.tesla-surface {
+  position: absolute;
+  inset: 0;
+}
+.tesla-surface[hidden] {
+  display: none;
+}
+.tesla-hologram[data-renderer='webgl'] .tesla-reference {
+  visibility: hidden;
+}
+.tesla-hologram[data-renderer='webgl'] .tesla-head {
+  transform: none;
+  transition: none;
 }
 .tesla-projector {
   position: absolute;
@@ -560,8 +560,7 @@ body[data-view='inicio'] {
     translate: 0 -4px;
   }
 }
-:root[data-motion='off'] .tesla-head,
-:root[data-motion='off'] .tesla-eye {
+:root[data-motion='off'] .tesla-head {
   transition: none;
 }
 .workspace-heading {
@@ -1600,6 +1599,9 @@ body[data-view='leccion'] .route-label {
   .orbit-chip strong {
     font-size: 9px;
   }
+  .orbit-chip:first-child {
+    --y: 5%;
+  }
   .orbit-ring {
     width: 260px;
     height: 260px;
@@ -2104,8 +2106,7 @@ body[data-view='leccion'] .route-label {
   .tesla-hologram {
     animation: none !important;
   }
-  .tesla-head,
-  .tesla-eye {
+  .tesla-head {
     transition: none;
   }
   .studio-computer .holo-computer {

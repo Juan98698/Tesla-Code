@@ -73,7 +73,8 @@ test('the depth scene selects real routes with keyboard focus and without granti
     selected = [];
   root.innerHTML = homePage(routes, state);
   assert.equal(root.querySelectorAll('.tesla-head').length, 1);
-  assert.equal(root.querySelectorAll('[data-tesla-eye]').length, 2);
+  assert.equal(root.querySelectorAll('[data-tesla-image]').length, 1);
+  assert.equal(root.querySelector('[data-tesla-surface]').hidden, true);
   assert.equal(root.querySelector('.core-cube'), null);
   assert.equal(root.querySelectorAll('[data-orbit-route]').length, routes.length);
   assert.equal(root.querySelector('.depth-decoration').getAttribute('aria-hidden'), 'true');

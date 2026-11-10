@@ -4,7 +4,11 @@ El emblema conserva el rostro detallado y la composición T/perfil/terminal de l
 
 Los PNG son maestros generados a partir de esas instrucciones. Los PNG y los WebP anteriores quedan disponibles como fuentes recuperables; la escena no descarga la imagen de la computadora ni un motor gráfico.
 
-La portada actual reemplaza el cubo por un busto estilizado de Nikola Tesla, dibujado como SVG original en `js/features/tesla-hologram.js`: pelo con raya lateral, bigote, traje y proyector cian. No procede de un retrato descargado ni añade imágenes o modelos externos. La cabeza usa profundidad CSS y las pupilas se desplazan dentro de recortes SVG. En táctil, movimiento reducido, pausa o pestaña oculta permanece estático; al salir de pantalla se detiene. Los controles de las siete rutas siguen siendo HTML independiente.
+La portada utiliza directamente el retrato frontal `ideaHolograma.png` aportado por el usuario el 9 de noviembre de 2026 (1199 × 1312 px, RGBA, 1 933 541 B). Sustituye la ilustración SVG anterior y conserva sus rasgos, cabello, ojos, bigote, traje e iluminación azul. La hoja de referencias adicional orienta el movimiento; sus poses de cuerpo completo no se incorporan al sitio. Los originales permanecen en Descargas.
+
+`hologram/nikola-reference.webp` es una conversión del retrato a 512 × 560 px, calidad 88, alfa 100 y esfuerzo 6 con Sharp 0.35.5 del entorno de herramientas: 90 060 B. Se conserva la transparencia, sin regenerar ni retocar el rostro y sin instalar dependencias en el proyecto. El recurso se sirve desde el propio sitio, con carga diferida y la misma edición de caché que los módulos.
+
+El renderizador nativo WebGL de `js/features/tesla-renderer.js` proyecta esta imagen sobre un relieve frontal ligero y desplaza la textura de los iris dentro de máscaras suaves. Dibuja bajo demanda y limita la resolución a DPR 2. La misma imagen funciona como alternativa estática en táctil, movimiento reducido, pausa y fallo de WebGL; al salir de pantalla se detiene el renderizado. Los siete controles de rutas siguen siendo HTML independiente.
 
 El 9 de noviembre de 2026 el usuario aportó `TeslaGifCode.webp`: 800 × 450 px, 77 fotogramas de 33 ms, bucle de 2541 ms y 3 705 132 B. La navegación utiliza derivados de ese mismo archivo, sin regenerar el retrato: encuadre central cuadrado, 128 × 128 px, WebP de calidad 72 para la animación y 85 para el primer fotograma estático. La conversión se hizo con Sharp 0.35.5 del entorno de herramientas, sin añadir dependencias al proyecto ni modificar el original de Descargas.
 
