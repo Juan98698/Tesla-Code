@@ -1,6 +1,19 @@
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 import { browserExecutable } from './runtime.mjs';
+// Inspect final opacity/geometry without stopping decorative infinite animations.
+export async function waitForFiniteAnimations(page) {
+  await page.waitForFunction(
+    () =>
+      !document
+        .getAnimations()
+        .some(
+          (animation) =>
+            animation.playState === 'running' &&
+            Number.isFinite(animation.effect?.getComputedTiming().endTime),
+        ),
+  );
+}
 export async function withBrowser(port, run) {
   const origin = `http://127.0.0.1:${port}`;
   const server = spawn(

@@ -19,6 +19,8 @@
 
 Para las pruebas de navegador usa Chromium del sistema o instala el navegador de Playwright siguiendo README. Los servicios de pruebas se cierran al terminar. Los proyectos Python y Git no tocan el repositorio del estudiante ni sus archivos.
 
+La auditoría de experiencia espera mediante `document.getAnimations()` a que terminen las animaciones/transiciones finitas en ejecución. Así comprueba la opacidad y geometría finales, en lugar de medir un fotograma intermedio de la entrada de página. No usa pausas fijas, no detiene las animaciones decorativas infinitas ni desactiva reglas WCAG. La regresión ralentiza la entrada real del catálogo y comprueba además que un color permanentemente ilegible siga provocando un fallo.
+
 En Windows se detectan también Chrome y Edge instalados. `CHROMIUM_PATH`, `PYTHON` y `BASH_PATH` permiten seleccionar los ejecutables; para Git se evita confundir Git Bash con el lanzador de WSL. Las capturas usan la carpeta temporal del sistema. La prueba de acceso activa «Saltar al contenido» con teclado y comprueba que conserva la URL. El cuestionario espera el guardado antes de mostrar las acciones del resultado.
 
 Las pruebas Python del navegador interceptan la URL de la CDN y sirven los archivos reales de `pyodide` instalados por npm: no sustituyen la ejecución por respuestas simuladas. Una aserción comprueba que la distribución instalada y la URL fijada tienen la misma versión. Esto elimina la variabilidad de la CDN en CI; no mide latencia de descarga en una conexión móvil real.

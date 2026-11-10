@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { withBrowser } from './support/browser.mjs';
+import { withBrowser, waitForFiniteAnimations } from './support/browser.mjs';
 import { browserExecutable } from './support/runtime.mjs';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -14,6 +14,7 @@ const output = resolve('coverage/ui-review/verified');
 await mkdir(output, { recursive: true });
 async function audit(page, label) {
   await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
+  await waitForFiniteAnimations(page);
   const violations = await page.evaluate(async () =>
     (
       await axe.run(document, {
@@ -262,6 +263,42 @@ await withBrowser(4321, async (browser, origin) => {
   );
   assert.deepEqual(hiddenRequests, [], 'A hidden logo never requests its animation');
   await hiddenContext.close();
+  // A fast runner can reach axe while the page is still fading in. Keep this
+  // deterministic by slowing the real entrance, then verify real defects fail.
+  const animationContext = await browser.newContext({ reducedMotion: 'no-preference' });
+  const animationPage = await animationContext.newPage();
+  await animationPage.addInitScript(() => localStorage.setItem('teslacode:theme', 'light'));
+  await animationPage.goto(origin + '/#/rutas');
+  await animationPage.locator('.routes-grid').waitFor();
+  await animationPage.addStyleTag({ content: '.page { animation-duration: 5s !important; }' });
+  await animationPage.evaluate(() => {
+    const entrance = document
+      .querySelector('.page')
+      .getAnimations()
+      .find((animation) => animation.animationName === 'enter');
+    entrance.currentTime = 100;
+  });
+  assert.ok(
+    (await animationPage
+      .locator('.page')
+      .evaluate((element) => Number(getComputedStyle(element).opacity))) < 1,
+  );
+  await audit(animationPage, 'Catalog contrast after the slow page entrance');
+  assert.equal(
+    await animationPage.locator('.page').evaluate((element) => getComputedStyle(element).opacity),
+    '1',
+  );
+  await animationPage.addStyleTag({ content: '.page-intro > p { color: #fff !important; }' });
+  await assert.rejects(
+    () => audit(animationPage, 'An actual contrast defect must still fail'),
+    (error) =>
+      error.code === 'ERR_ASSERTION' &&
+      error.actual.some((violation) => violation.id === 'color-contrast'),
+  );
+  await animationContext.close();
+  console.log(
+    'PASS: auditoría tras terminar la entrada; un contraste realmente insuficiente sigue haciendo fallar la prueba.',
+  );
   const fallback = await chromium.launch({
     executablePath: browserExecutable(),
     args: ['--no-sandbox', '--disable-webgl'],
