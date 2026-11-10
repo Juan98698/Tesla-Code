@@ -121,18 +121,20 @@ La batería completa `npm run test:all` termina correctamente con Node 26.12.1 y
 
 El seguimiento agrupa eventos en una actualización por frame y no mantiene un bucle JavaScript en reposo. Se desactiva con pausa, movimiento reducido, dispositivos táctiles, pestaña oculta o escena fuera de pantalla. Al desmontar se cancelan frames y se eliminan observadores y listeners, incluido el del documento. La ilustración SVG permanece disponible sin WebGL.
 
-Comparación con el cubo: Chrome 156.0.8078.80, Windows, servidor HTTP local, tres contextos nuevos por viewport (1440/390 px), cachés calientes y 120 intervalos rAF por muestra; misma herramienta `npm run review:ui -- tesla-before` / `tesla-after`. Los informes y capturas están en `coverage/ui-review/`, excluido de Git.
+Comparación con el cubo: Chrome 156.0.8078.80, Windows, servidor HTTP local, tres contextos nuevos por viewport (1440/390 px), cachés calientes y 120 intervalos rAF por muestra; misma herramienta `npm run review:ui -- tesla-before` / `tesla-final`. Los informes y capturas están en `coverage/ui-review/`, excluido de Git.
 
 | Métrica del inicio                    | Cubo      | Tesla        |
 | ------------------------------------- | --------- | ------------ |
-| Transferencia sin documento principal | 339 487 B | 342 032 B    |
+| Transferencia sin documento principal | 339 487 B | 342 072 B    |
 | JavaScript sin compresión             | 138 862 B | 145 316 B    |
 | Peticiones de recursos                | 48        | 49           |
 | CLS en las seis muestras              | 0         | 0            |
-| p95 de intervalos rAF                 | 16,8 ms   | 16,8–17,1 ms |
+| p95 de intervalos rAF                 | 16,8 ms   | 16,7–16,9 ms |
 | Intervalos superiores a 32 ms         | 0/720     | 0/720        |
 
-El incremento de transferencia es de 2545 B (0,75 %). No se observó desbordamiento horizontal ni descarga inicial de Pyodide. Una medición adicional en escritorio con 120 movimientos reales del cursor por muestra produjo p95 de 16,8 ms en las tres muestras, con 2/360 intervalos superiores a 32 ms; queda en `tesla-after/tracking.json`. Son observaciones locales de laboratorio, sin medición de GPU ni dispositivo móvil físico; no demuestran una mejora de velocidad en producción.
+El incremento de transferencia es de 2585 B (0,76 %). No se observó desbordamiento horizontal ni descarga inicial de Pyodide. Una medición adicional en escritorio con 120 movimientos reales del cursor por muestra produjo p95 entre 16,8 y 17,6 ms, con 5/360 intervalos superiores a 32 ms; queda en `tesla-final/tracking.json`. Las medianas de LCP en escritorio/móvil fueron 1212/612 ms con el cubo y 2528/964 ms con Tesla. También varían los tiempos del documento y del servidor local; no se ha aislado la causa de esa diferencia. Son observaciones locales de laboratorio, sin medición de GPU ni dispositivo móvil físico; no demuestran una mejora de velocidad en producción.
+
+La revisión visual incluye la mirada en las cuatro direcciones. El busto aplana la composición y mantiene la cabeza por encima del traje para impedir que sus planos se intersequen al girar.
 
 Verificación: 130 pruebas unitarias aprobadas y 35 módulos dentro de los umbrales de cobertura; `depth-scene.js` y `tesla-hologram.js` alcanzan el 100 % de líneas, ramas y funciones. Pasan experiencia entre 320 y 1440 px, acceso independiente, actualización real de caché, contenido, formato y coherencia de recursos. Las comprobaciones incluyen transformaciones independientes de cabeza y ojos, botones estables, tres montajes/desmontajes, pausa, salida de pantalla, teclado, táctil, movimiento reducido, ambos temas y WebGL deshabilitado. Las auditorías automáticas de accesibilidad no sustituyen pruebas con lectores de pantalla o participantes.
 
