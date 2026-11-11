@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import serve from 'serve-handler';
-import { createTutorHandler } from '../server/tutor/handler.mjs';
+import { createTutorHandler, tutorReady } from '../server/tutor/handler.mjs';
 
 export function createDevServer({
   root = resolve('dist'),
@@ -69,9 +69,33 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   if (!Number.isInteger(port) || port < 1 || port > 65535)
     throw Error('PORT debe ser un puerto válido.');
   const server = createDevServer({ port });
-  server.listen(port, '127.0.0.1', () =>
-    console.log(`TeslaCode: http://127.0.0.1:${port} · tutor con clave solo en el servidor`),
-  );
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(
+        `El puerto ${port} ya está ocupado. Esta nueva instancia de TeslaCode no se inició.`,
+      );
+      console.error(
+        'Detén el servidor anterior con Ctrl+C en su terminal y vuelve a ejecutar npm start.',
+      );
+      console.error(
+        `Si ya tienes TeslaCode abierto, comprueba http://127.0.0.1:${port}/api/tutor.`,
+      );
+      console.error(
+        `Para usar otro puerto en PowerShell: $env:PORT=${port < 65535 ? port + 1 : 3000}; npm start`,
+      );
+    } else {
+      console.error('No se pudo iniciar TeslaCode. Código: ' + (error.code || 'desconocido'));
+    }
+    process.exitCode = 1;
+  });
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`TeslaCode: http://127.0.0.1:${port} · tutor con clave solo en el servidor`);
+    console.log('Mantén esta terminal abierta. Para detener el servidor: Ctrl+C.');
+    if (!tutorReady(process.env))
+      console.log(
+        'El tutor necesita configuración local. Guarda .env.local y revisa npm run tutor:doctor.',
+      );
+  });
   for (const signal of ['SIGINT', 'SIGTERM'])
     process.on(signal, () => server.close(() => process.exit(0)));
 }

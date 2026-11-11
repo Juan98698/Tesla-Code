@@ -17,6 +17,8 @@ El modo local utiliza contadores en memoria, adecuados para desarrollo. No simul
 
 Un commit no activa la API local. Detén el servidor anterior con Ctrl+C y ejecuta `npm start` en la raíz del proyecto. Abre `http://127.0.0.1:3000`; un servidor estático como Live Server o `serve` no ejecuta `api/tutor.mjs`, aunque muestre correctamente la interfaz. Después de cambiar `.env.local`, reinicia el servidor.
 
+Si aparece `EADDRINUSE`, el puerto ya tiene un servidor: la nueva instancia no llegó a iniciarse. Detén la instancia anterior en su terminal con Ctrl+C y ejecuta `npm start` una sola vez. Conserva esa terminal abierta mientras utilizas la web. Para trabajar en otro puerto desde PowerShell puedes usar `$env:PORT=3001; npm start` y abrir `http://127.0.0.1:3001`. Tras reiniciar, recarga la página o pulsa «Volver a conectar»; las variables de Vercel no sustituyen a `.env.local` en tu equipo.
+
 `npm run tutor:doctor` comprueba la presencia de la clave, la configuración local y la API del puerto configurado, sin mostrar secretos ni consumir consultas de Gemini. Distingue la preparación local de los contadores compartidos exigidos en Vercel. Que la configuración esté lista no demuestra una consulta al proveedor; esa prueba se hace con el chat o `npm run tutor:smoke`.
 
 ## Dónde modificar el comportamiento
