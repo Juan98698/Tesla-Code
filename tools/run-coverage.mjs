@@ -19,6 +19,8 @@ const result = spawnSync(
   [
     '--experimental-test-coverage',
     '--test-coverage-include=js/**/*.js',
+    '--test-coverage-include=server/**/*.mjs',
+    '--test-coverage-include=api/**/*.mjs',
     '--test-coverage-lines=90',
     '--test-coverage-branches=85',
     '--test-coverage-functions=90',
@@ -37,12 +39,12 @@ function modules(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
     entry.isDirectory()
       ? modules(join(directory, entry.name))
-      : entry.name.endsWith('.js')
+      : /\.(js|mjs)$/.test(entry.name)
         ? [join(directory, entry.name)]
         : [],
   );
 }
-const expected = modules('js'),
+const expected = ['js', 'server', 'api'].flatMap(modules),
   errors = checkCoverage(readFileSync('coverage/lcov.info', 'utf8'), expected, root);
 if (errors.length) {
   console.error(errors.join('\n'));

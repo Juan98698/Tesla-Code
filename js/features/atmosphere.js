@@ -1,5 +1,6 @@
 import { assetUrl } from '../core/assets.js';
 import { escapeHtml as e } from '../core/html.js';
+import { mountTeslaWorld } from './tesla-world.js';
 
 const sigils = [
   ['js', 'JS', '<rect x="8" y="8" width="48" height="48" rx="8"/><text x="32" y="41">JS</text>'],
@@ -54,6 +55,7 @@ export function mountAtmosphere(doc) {
   const description = dialog.querySelector('#intro-description');
   if ([video, replay, skip, pause, sound, progress, description].some((element) => !element))
     return () => {};
+  const disposeWorld = mountTeslaWorld(doc);
   const introDescription = description.textContent;
   const source = video.canPlayType('video/mp4') ? video.dataset.mp4 : null;
   replay.disabled = !source;
@@ -235,6 +237,7 @@ export function mountAtmosphere(doc) {
   if (autoEntry && !seen && !doc.hidden) start();
   return () => {
     disposed = true;
+    disposeWorld();
     close();
     observer.disconnect();
     reduced.removeEventListener?.('change', preferences);

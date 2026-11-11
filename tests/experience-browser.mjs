@@ -42,11 +42,11 @@ await withBrowser(4321, async (browser, origin) => {
       window.portraitContexts = 0;
       const get = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (...args) {
-        if (this.matches('[data-tesla-surface]') && args[0] === 'webgl') window.portraitContexts++;
+        if (this.matches('[data-world-surface]') && args[0] === 'webgl') window.portraitContexts++;
         return get.apply(this, args);
       };
-      const draw = WebGLRenderingContext.prototype.drawElements;
-      WebGLRenderingContext.prototype.drawElements = function (...args) {
+      const draw = WebGLRenderingContext.prototype.drawArrays;
+      WebGLRenderingContext.prototype.drawArrays = function (...args) {
         window.portraitDraws++;
         return draw.apply(this, args);
       };
@@ -86,21 +86,8 @@ await withBrowser(4321, async (browser, origin) => {
         document.querySelector('[data-depth-scene]').dataset.sceneActive === String(active),
       !touch && !reduced,
     );
-    assert.equal(await page.locator('.tesla-head').count(), 1);
-    await page.getByRole('button', { name: 'Activar holograma', exact: true }).click();
-    assert.equal(await page.locator('[data-tesla-image]').count(), 1);
-    await page.locator('[data-tesla-image]').evaluate((image) => image.decode());
-    assert.equal(
-      await page.locator('[data-tesla-image]').evaluate((image) => image.naturalWidth),
-      512,
-    );
-    const gpu = await page.evaluate(() => {
-      const probe = document.createElement('canvas').getContext('webgl');
-      const available = Boolean(probe);
-      probe?.getExtension('WEBGL_lose_context')?.loseContext();
-      return available;
-    });
-    if (!touch && !reduced && gpu) await page.locator('[data-renderer="webgl"]').waitFor();
+    assert.equal(await page.locator('[data-tesla-hologram]').count(), 0);
+    await page.locator('.tesla-world-image').evaluate((image) => image.decode());
     assert.equal(await page.locator('.core-cube').count(), 0);
     await waitForFiniteAnimations(page);
     const geometry = await page.locator('.orbit-chip').evaluateAll((buttons) =>
@@ -129,126 +116,127 @@ await withBrowser(4321, async (browser, origin) => {
       false,
       `${width}: no horizontal overflow`,
     );
+    if (touch || reduced) {
+      await page.mouse.move(width - 10, 150);
+      assert.equal(await page.locator('[data-world-surface]').evaluate((el) => el.hidden), true);
+      assert.equal(await page.evaluate(() => window.portraitContexts), 0);
+    }
     if (width === 1440) {
-      const look = async (x, y, sign) => {
-        await page.mouse.move(x, y);
-        await page.waitForFunction(
-          (sign) =>
-            Math.sign(
-              parseFloat(
-                document.querySelector('[data-depth-scene]').style.getPropertyValue('--gaze-x'),
-              ),
-            ) === sign,
-          sign,
+      const settle = () =>
+        page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              let previous = -1,
+                quiet = 0;
+              const check = () => {
+                quiet = previous === window.portraitDraws ? quiet + 1 : 0;
+                previous = window.portraitDraws;
+                if (quiet >= 4) resolve();
+                else requestAnimationFrame(check);
+              };
+              requestAnimationFrame(check);
+            }),
         );
-        await waitForFiniteAnimations(page);
-        return page.locator('.tesla-head').screenshot({ animations: 'disabled' });
-      };
-      const left = await look(260, 180, -1),
-        right = await look(1380, 450, 1);
-      assert.equal(
-        left.equals(right),
-        false,
-        'The rendered portrait changes when looking left/right',
+      await page.mouse.move(30, 180);
+      await page.locator('[data-atmosphere][data-renderer="webgl"]').waitFor();
+      await settle();
+      const isolate = await page.addStyleTag({
+        content:
+          'body > :not([data-atmosphere]) { visibility: hidden !important; } .tesla-world::after, .syntax-field { display: none !important; }',
+      });
+      const left = await page.locator('[data-world-surface]').screenshot();
+      await page.mouse.move(1420, 600);
+      await settle();
+      const right = await page.locator('[data-world-surface]').screenshot();
+      await isolate.evaluate((node) => node.remove());
+      assert.equal(left.equals(right), false, 'The actual wallpaper follows the pointer');
+      const pixels = await page.evaluate(
+        async (frames) => {
+          const images = await Promise.all(
+            frames.map(
+              (src) =>
+                new Promise((resolve) => {
+                  const img = new Image();
+                  img.onload = () => resolve(img);
+                  img.src = 'data:image/png;base64,' + src;
+                }),
+            ),
+          );
+          const data = images.map((img) => {
+            const surface = document.createElement('canvas');
+            surface.width = img.width;
+            surface.height = img.height;
+            const ctx = surface.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            return ctx.getImageData(0, 0, img.width, img.height).data;
+          });
+          let laboratory = 0,
+            changed = 0;
+          for (let y = 0; y < images[0].height; y++)
+            for (let x = 0; x < images[0].width; x++) {
+              const i = (y * images[0].width + x) * 4;
+              if (
+                data[0][i] !== data[1][i] ||
+                data[0][i + 1] !== data[1][i + 1] ||
+                data[0][i + 2] !== data[1][i + 2]
+              ) {
+                changed++;
+                if (x < images[0].width * 0.4) laboratory++;
+              }
+            }
+          return { laboratory, changed };
+        },
+        [left.toString('base64'), right.toString('base64')],
       );
-      if (gpu) {
-        assert.ok(await page.evaluate(() => window.portraitDraws > 0));
-        const draws = await page.evaluate(() => window.portraitDraws);
-        await page.evaluate(
-          () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
-        );
-        assert.equal(
-          await page.evaluate(() => window.portraitDraws),
-          draws,
-          'No continuous rendering when the cursor rests',
-        );
-        await page.evaluate(() => {
-          window.restorePortrait = document
-            .querySelector('[data-tesla-surface]')
-            .getContext('webgl')
-            .getExtension('WEBGL_lose_context');
-          window.restorePortrait.loseContext();
-        });
-        await page.waitForFunction(
-          () => !document.querySelector('[data-tesla-hologram]').dataset.renderer,
-        );
-        assert.equal(await page.locator('.tesla-reference').isVisible(), true);
-        await page.evaluate(() => window.restorePortrait.restoreContext());
-        await page.locator('[data-renderer="webgl"]').waitFor();
-      }
+      assert.ok(pixels.changed > 100, 'The photographed face actually moves');
+      assert.equal(pixels.laboratory, 0, 'The laboratory stays still without seams');
+      assert.ok(await page.evaluate(() => window.portraitDraws > 0));
+      const draws = await page.evaluate(() => window.portraitDraws);
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+      );
+      assert.equal(
+        await page.evaluate(() => window.portraitDraws),
+        draws,
+        'No render loop at rest',
+      );
       const positions = await page.locator('.orbit-chip').evaluateAll((buttons) =>
         buttons.map((button) => {
           const { x, y } = button.getBoundingClientRect();
           return { x, y };
         }),
       );
-      positions.forEach((position, i) =>
+      positions.forEach((p, i) =>
         assert.deepEqual(
-          position,
+          p,
           { x: geometry[i].x, y: geometry[i].y },
-          'Looking around never moves route controls',
+          'Gaze never moves route buttons',
         ),
       );
-      await page.evaluate(() => document.dispatchEvent(new Event('pointerleave')));
+      await page.evaluate(() => {
+        window.restoreWorld = document
+          .querySelector('[data-world-surface]')
+          .getContext('webgl')
+          .getExtension('WEBGL_lose_context');
+        window.restoreWorld.loseContext();
+      });
       await page.waitForFunction(
-        () =>
-          document.querySelector('[data-depth-scene]').style.getPropertyValue('--gaze-x') === '',
+        () => !document.querySelector('[data-atmosphere]').dataset.renderer,
       );
-      await page.locator('.studio-discover').scrollIntoViewIfNeeded();
-      await page.waitForFunction(
-        () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'false',
-      );
-      assert.equal(
-        await page
-          .locator('[data-depth-scene]')
-          .evaluate((scene) => scene.style.getPropertyValue('--gaze-x')),
-        '',
-      );
-      await page.evaluate(() => scrollTo(0, 0));
-      await page.waitForFunction(
-        () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'true',
-      );
+      assert.equal(await page.locator('.tesla-world-image').isVisible(), true);
+      await page.evaluate(() => window.restoreWorld.restoreContext());
+      await page.locator('[data-atmosphere][data-renderer="webgl"]').waitFor();
+      await settle();
       await page.locator('#motion-toggle').click();
-      assert.equal(await page.locator('.tesla-reference').isVisible(), true);
-      const pausedDraws = await page.evaluate(() => window.portraitDraws);
-      await page.evaluate(
-        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
-      );
-      assert.equal(await page.evaluate(() => window.portraitDraws), pausedDraws);
-      assert.equal(
-        await page
-          .locator('[data-depth-scene]')
-          .evaluate((scene) => scene.style.getPropertyValue('--gaze-x')),
-        '',
-      );
-      await page.waitForFunction(
-        () => document.querySelector('[data-depth-scene]').dataset.sceneActive === 'false',
-      );
-      await page.waitForFunction(() =>
-        document.querySelector('.brand img').src.includes('teslacode-still.webp'),
-      );
+      await page.waitForFunction(() => document.querySelector('[data-world-surface]').hidden);
+      const paused = await page.evaluate(() => window.portraitDraws);
+      await page.mouse.move(200, 500);
+      await settle();
+      assert.equal(await page.evaluate(() => window.portraitDraws), paused);
       await page.locator('#motion-toggle').click();
-    }
-    if (touch || reduced) {
-      await page.mouse.move(width - 10, 150);
-      await page.evaluate(() => new Promise((done) => requestAnimationFrame(done)));
-      assert.equal(
-        await page
-          .locator('[data-depth-scene]')
-          .evaluate((scene) => scene.style.getPropertyValue('--gaze-x')),
-        '',
-      );
-      assert.equal(
-        await page
-          .locator('.tesla-hologram')
-          .evaluate((element) => getComputedStyle(element).animationName),
-        'none',
-      );
-      assert.equal(
-        await page.evaluate(() => window.portraitContexts),
-        0,
-        'Static devices allocate no portrait WebGL context',
-      );
+      await page.locator('[data-atmosphere][data-renderer="webgl"]').waitFor();
+      await settle();
+      await page.screenshot({ path: 'coverage/ui-review/verified/tesla-wallpaper-desktop.png' });
     }
     for (const route of routes) {
       await page.getByRole('button', { name: `Elegir ruta ${route.name}`, exact: true }).click();
@@ -438,9 +426,9 @@ await withBrowser(4321, async (browser, origin) => {
     const page = await fallbackContext.newPage();
     await page.goto(origin);
     await page.locator('.hero').waitFor();
-    await page.getByRole('button', { name: 'Activar holograma', exact: true }).click();
-    assert.equal(await page.locator('.tesla-reference').isVisible(), true);
-    await page.locator('.tesla-reference').evaluate((image) => image.decode());
+    await page.mouse.move(300, 200);
+    assert.equal(await page.locator('.tesla-world-image').isVisible(), true);
+    await page.locator('.tesla-world-image').evaluate((image) => image.decode());
     assert.equal(
       await page.evaluate(() => Boolean(document.createElement('canvas').getContext('webgl'))),
       false,

@@ -29,7 +29,8 @@ export function mountDepthScene(root, effects = {}) {
       !doc.hidden &&
       !reduced?.matches &&
       Boolean(pointer?.matches) &&
-      doc.documentElement.dataset.motion !== 'off';
+      doc.documentElement.dataset.motion !== 'off' &&
+      doc.documentElement.dataset.tutorOpen !== 'true';
     scene.dataset.sceneActive = String(active);
     effects?.onActive?.(active);
     if (!active) reset();
@@ -62,7 +63,10 @@ export function mountDepthScene(root, effects = {}) {
     : null;
   intersection?.observe(scene);
   const motion = new view.MutationObserver(sync);
-  motion.observe(doc.documentElement, { attributes: true, attributeFilter: ['data-motion'] });
+  motion.observe(doc.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-motion', 'data-tutor-open'],
+  });
   pointerTarget.addEventListener('pointermove', move, { passive: true });
   pointerTarget.addEventListener('pointerleave', reset);
   doc.addEventListener('visibilitychange', sync);

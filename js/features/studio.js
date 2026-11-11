@@ -1,6 +1,5 @@
 import { escapeHtml as e } from '../core/html.js';
 import { mountDepthScene } from './depth-scene.js';
-import { teslaHologram, mountTeslaHologram } from './tesla-hologram.js';
 import { accessState, isPublished, lessonKey } from '../domain/curriculum.js';
 import { playgroundSettings, runPlayground } from '../domain/playground.js';
 const symbols = {
@@ -111,11 +110,10 @@ export function studioHome(routes, state, next, href) {
     </div>
     <div class="hero-art knowledge-scene" data-depth-scene data-gaze-tracking role="group" aria-label="Elige tu ruta junto a Nikola Tesla">
       <div class="scene-coordinate" aria-hidden="true">IDEAS → HABILIDADES → PROYECTOS</div>
-      <div class="depth-decoration" aria-hidden="true"><div class="orbit-floor"></div><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div>${teslaHologram(true)}<span class="scene-spark spark-one"></span><span class="scene-spark spark-two"></span><span class="scene-spark spark-three"></span></div>
+      <div class="depth-decoration" aria-hidden="true"><div class="orbit-floor"></div><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div><span class="scene-spark spark-one"></span><span class="scene-spark spark-two"></span><span class="scene-spark spark-three"></span></div>
       <div class="orbit-routes">${routes.map((r, i) => `<button class="orbit-chip ${r.id === route.id ? 'selected' : ''}" type="button" data-orbit-route="${r.id}" style="--orbit:${i}" aria-label="Elegir ruta ${e(r.name)}" aria-pressed="${r.id === route.id}"><span aria-hidden="true">${e(symbols[r.id])}</span><strong>${e(shortNames[r.id] ?? r.name)}</strong><i aria-hidden="true"></i></button>`).join('')}</div>
       <div class="scene-caption"><span class="scene-caption-mark" aria-hidden="true">↗</span><div><strong>Nikola Tesla · Todo empieza con curiosidad.</strong><span>Elige una habilidad. Conecta tu futuro.</span></div></div>
-      <button class="motion-control" id="motion-toggle" type="button" aria-label="Pausar efecto holográfico" aria-pressed="false">Pausar efecto</button>
-      <button class="hologram-toggle" type="button" aria-pressed="false">Activar holograma</button>
+      <button class="motion-control" id="motion-toggle" type="button" aria-label="Pausar animaciones" aria-pressed="false">Pausar animaciones</button>
     </div>
   </header>
   <div class="workspace-heading"><div><span class="section-index">01 / TU SIGUIENTE NIVEL</span><h2>Una idea se convierte en habilidad.</h2></div><span class="workspace-caption">Un paso claro. Una prueba real.</span></div><div class="studio-workspace"><section class="studio-panel pathway-panel" aria-labelledby="studio-route-heading"><div class="studio-panel-heading"><div><span class="studio-heading-icon" aria-hidden="true">${e(symbols[route.id])}</span><h2 id="studio-route-heading">Tu ruta: ${e(route.name)}</h2></div><span class="entry-badge">Entrada libre</span></div><div class="studio-route-controls"><label for="studio-route-select">¿Qué quieres aprender?</label><select id="studio-route-select">${routes.map((r) => `<option value="${r.id}" ${r.id === route.id ? 'selected' : ''}>${e(r.name)}</option>`).join('')}</select><a class="text-link" href="#/ruta/${route.id}">Ver mapa completo →</a></div><div class="studio-map-caption"><span>HITOS DE TU RECORRIDO</span><span>${route.lessons.filter((l) => completed.has(lessonKey(route.id, l.id))).length} / ${route.lessons.filter(isPublished).length} completadas</span></div><div class="studio-map"><svg class="studio-connections" viewBox="0 0 600 220" preserveAspectRatio="none" aria-hidden="true"><path d="M100 48H500V100Q500 112 486 112H114Q100 112 100 126V172H500"/></svg>${milestones
@@ -141,40 +139,7 @@ export function studioHome(routes, state, next, href) {
     .join('')}</div></section></div>`;
 }
 export function mountStudio(root, routes, onRoute) {
-  let portrait,
-    active = false,
-    gaze = [0, 0];
-  const scene = root.querySelector('[data-depth-scene]');
-  const hologram = root.querySelector('[data-tesla-hologram]');
-  const toggle = root.querySelector('.hologram-toggle');
-  const documentRoot = root.ownerDocument.documentElement;
-  const setHologram = (enabled) => {
-    hologram.hidden = !enabled;
-    scene.dataset.hologram = enabled ? 'on' : 'off';
-    documentRoot.dataset.hologramView = enabled ? 'on' : 'off';
-    toggle.setAttribute('aria-pressed', String(enabled));
-    toggle.textContent = enabled ? 'Ver fondo de Tesla' : 'Activar holograma';
-    if (enabled) {
-      portrait = mountTeslaHologram(root);
-      portrait.onActive(active);
-      portrait.onPointer(...gaze);
-    } else {
-      portrait?.dispose();
-      portrait = null;
-    }
-  };
-  setHologram(documentRoot.dataset.hologramView === 'on');
-  toggle.onclick = () => setHologram(hologram.hidden);
-  const disposeDepth = mountDepthScene(root, {
-    onActive(value) {
-      active = value;
-      portrait?.onActive(value);
-    },
-    onPointer(x, y) {
-      gaze = [x, y];
-      portrait?.onPointer(x, y);
-    },
-  });
+  const disposeDepth = mountDepthScene(root);
   const chooseRoute = (id, selector) => {
     const view = root.ownerDocument.defaultView;
     const top = view.scrollY;
@@ -250,7 +215,5 @@ export function mountStudio(root, routes, onRoute) {
   draw();
   return () => {
     disposeDepth();
-    portrait?.dispose();
-    toggle.onclick = null;
   };
 }

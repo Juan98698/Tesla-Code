@@ -2,6 +2,7 @@ import { mountStudio } from './features/studio.js';
 import { mountBrandMotion } from './features/brand-motion.js';
 import { mountDepthScene } from './features/depth-scene.js';
 import { mountAtmosphere } from './features/atmosphere.js';
+import { mountTutorLauncher } from './features/tutor-launcher.js';
 import { $ } from './core/dom.js';
 import { escapeHtml as e } from './core/html.js';
 import { progressRepository, PROGRESS_KEY, withProgressLock } from './core/storage.js';
@@ -417,14 +418,17 @@ function bindShell() {
   bindMotionToggle($('brand-motion-toggle'));
   let disposeBrand = mountBrandMotion(document);
   let disposeAtmosphere = mountAtmosphere(document);
+  let disposeTutor = mountTutorLauncher(document);
   window.addEventListener('pagehide', () => {
     disposeBrand();
     disposeAtmosphere();
+    disposeTutor();
   });
   window.addEventListener('pageshow', (event) => {
     if (event.persisted) {
       disposeBrand = mountBrandMotion(document);
       disposeAtmosphere = mountAtmosphere(document);
+      disposeTutor = mountTutorLauncher(document);
     }
   });
   function setTheme(value) {

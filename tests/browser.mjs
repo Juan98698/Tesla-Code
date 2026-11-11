@@ -20,6 +20,14 @@ await withBrowser(4317, async (browser, origin) => {
   const page = await context.newPage(),
     errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  context.on('requestfailed', (request) => {
+    if (request.url().includes('/pyodide/'))
+      console.error(
+        'Runtime Python:',
+        new URL(request.url()).pathname,
+        request.failure()?.errorText,
+      );
+  });
   page.on('response', (response) => {
     if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
   });

@@ -1,6 +1,6 @@
 # TeslaCode
 
-Academia interactiva de programación en español. Combina rutas visuales, lecciones por etapas (aprender, practicar y comprobar), simuladores y proyectos. El sitio funciona como archivos estáticos con módulos ES: no necesita backend, cuenta, claves de API ni compilación.
+Academia interactiva de programación en español. Combina rutas visuales, lecciones por etapas (aprender, practicar y comprobar), simuladores y proyectos. El aprendizaje funciona con archivos estáticos y módulos ES, sin cuentas ni claves de API. El tutor de IA opcional utiliza una función de servidor en Vercel para conectar con Gemini.
 
 ## Desarrollo
 
@@ -11,7 +11,9 @@ npm ci
 npm start
 ```
 
-El servidor escucha en el puerto 3000. Abre el sitio mediante HTTP, no mediante `file://`. Las dependencias de npm sirven para desarrollo y pruebas. Los ejercicios de Python descargan bajo demanda una distribución fijada de Pyodide desde jsDelivr; el inicio y la lectura de lecciones no descargan ese motor.
+El servidor escucha en el puerto 3000. Abre el sitio mediante HTTP, no mediante `file://`. `npm start` genera `dist/` y sirve únicamente ese paquete público; `.env.local`, el servidor, las pruebas y las skills quedan fuera. Al editar el código, reconstruye el sitio o reinicia el servidor. Si sigue abierto el servidor anterior, detenlo primero con Ctrl+C. Las dependencias de npm sirven para desarrollo y pruebas. Los ejercicios de Python descargan bajo demanda una distribución fijada de Pyodide desde jsDelivr; el inicio y la lectura de lecciones no descargan ese motor.
+
+Para activar **Tesla Tutor**, configura `GEMINI_API_KEY` en `.env.local` o como secreto de Vercel. El chat se carga al abrirlo y no lee ni envía automáticamente el código del editor. En producción necesita contadores compartidos de Upstash Redis para limitar el consumo entre instancias. Consulta la [guía de configuración y alcance](docs/tutor-gemini.md). Sin configuración, el aprendizaje continúa y el panel informa que la IA no está conectada.
 
 ```sh
 npm run check        # Contenido, dependencias curriculares y pruebas del dominio
@@ -26,6 +28,8 @@ npm run test:console # Consola, entradas, errores y ejemplos en escritorio y mó
 npm run test:javascript # Primer módulo JavaScript: ocho lecciones desde cero y motor real aislado
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
+npm run test:tutor   # Tutor contra HTTP real con proveedor simulado, ambos temas y móvil
+npm run tutor:smoke  # Una consulta real a Gemini con la clave local; consume cuota
 npm run test:all     # Todos los controles anteriores, ejemplos y recorridos
 npm run format      # Formato consistente
 npm run test:examples # Ejemplos Python y Git (requiere Python y Bash)
@@ -71,7 +75,7 @@ Se puede guardar una lección, exportar el progreso en JSON e importar una copia
 
 ## Interfaz y acompañamiento
 
-Un laboratorio eléctrico de Nikola Tesla acompaña todas las vistas con paneles de cristal, profundidad y símbolos de programación flotantes. El texto y las consolas mantienen fondos suficientes para leer en ambos temas. Las siete rutas siguen siendo botones accesibles. «Activar holograma» carga el retrato interactivo solo cuando se solicita; responde al puntero y libera recursos al desactivarlo. En táctil, movimiento reducido o fallo de WebGL conserva una imagen estática.
+Un laboratorio eléctrico de Nikola Tesla acompaña todas las vistas con paneles de cristal, profundidad y símbolos de programación flotantes. El texto y las consolas mantienen fondos suficientes para leer en ambos temas. Las siete rutas siguen siendo botones accesibles. La cabeza y los ojos del Tesla del propio fondo siguen suavemente el cursor mediante animación fotográfica 2.5D. El renderizador se carga al primer movimiento de ratón compatible y se detiene en reposo; en táctil, movimiento reducido, ahorro de datos o fallo de WebGL conserva el fondo estático. El retrato frontal aportado por el propietario identifica al tutor.
 
 La primera entrada al inicio muestra una introducción de 10 segundos, sin sonido hasta activarlo, con pausa y acceso directo al sitio. Termina con un fundido al fondo global. «Intro» permite repetirla. Se reproduce automáticamente una vez por sesión; no descarga video al entrar directamente a una lección, con ahorro de datos, movimiento reducido o animaciones pausadas. El MP4 de entrega ocupa 10,28 MB y conserva los 240 fotogramas y el audio original. Se reprocesó de 720p a 1920×1080 con nitidez moderada; no equivale a una grabación Full HD nativa. Llena la pantalla sin franjas ni deformación; el encuadre recorta el entorno según el formato y acompaña a Tesla en móvil.
 
@@ -104,6 +108,6 @@ Las publicaciones nuevas necesitan fuentes y al menos tres prácticas; `content/
 
 ## Publicación
 
-Se puede servir en GitHub Pages desde la raíz de `main`. La navegación por fragmentos permite entrar directamente a una ruta o lección sin configurar redirecciones del servidor. Los recursos usan rutas relativas y funcionan bajo un subdirectorio de proyecto. La publicación no se ejecuta desde las herramientas de desarrollo.
+Vercel utiliza `vercel.json`, construye `dist/` y ejecuta `api/tutor.mjs` como función de servidor. Las claves se configuran como secretos del proyecto. También se puede publicar el contenido de `dist/` en GitHub Pages; para el tutor, configura la URL de la función de Vercel en `content/tutor-config.json` y su lista de orígenes permitidos. La navegación por fragmentos permite entrar directamente a una ruta o lección sin redirecciones del servidor. Los recursos estáticos funcionan bajo un subdirectorio. `npm run build` prepara el paquete; no lo publica.
 
 El diseño y los textos nuevos son originales. Se tomaron como referencias de producto las rutas de academias y los mapas interactivos; no se incorporaron materiales de Platzi ni de roadmap.sh. Para LCM se enlaza la implementación y el artículo originales de Meta en la lección correspondiente.
