@@ -278,27 +278,21 @@ await withBrowser(4321, async (browser, origin) => {
       await page.screenshot({ path: 'coverage/ui-review/verified/tesla-hologram-desktop.png' });
     }
     for (const route of routes) {
-      await page.getByRole('button', { name: `Elegir ruta ${route.name}`, exact: true }).click();
-      await page.locator(`[data-studio-route="${route.id}"]`).waitFor();
-      assert.equal(await page.evaluate(() => document.activeElement.dataset.orbitRoute), route.id);
+      await page.getByRole('link', { name: `Abrir ruta ${route.name}`, exact: true }).click();
+      await page.waitForURL(`**/#/ruta/${route.id}`);
+      await page.locator('.route-header h1').waitFor();
+      assert.equal(await page.locator('.route-header h1').innerText(), route.name);
+      await page.goBack();
+      await page.locator('.knowledge-scene').waitFor();
     }
     const keyboardRoute = routes.at(-1);
-    await page
-      .getByRole('button', { name: `Elegir ruta ${keyboardRoute.name}`, exact: true })
-      .focus();
+    await page.getByRole('link', { name: `Abrir ruta ${keyboardRoute.name}`, exact: true }).focus();
     await page.keyboard.press('Enter');
-    await page.locator(`[data-studio-route="${keyboardRoute.id}"]`).waitFor();
-    assert.equal(
-      await page.evaluate(() => document.activeElement.dataset.orbitRoute),
-      keyboardRoute.id,
-    );
-    await page.getByRole('button', { name: `Elegir ruta ${routes[0].name}`, exact: true }).focus();
-    await page.keyboard.press('Space');
-    await page.locator(`[data-studio-route="${routes[0].id}"]`).waitFor();
-    assert.equal(
-      await page.evaluate(() => document.activeElement.dataset.orbitRoute),
-      routes[0].id,
-    );
+    await page.waitForURL(`**/#/ruta/${keyboardRoute.id}`);
+    await page.locator('.route-header h1').waitFor();
+    assert.equal(await page.locator('.route-header h1').innerText(), keyboardRoute.name);
+    await page.goBack();
+    await page.locator('.knowledge-scene').waitFor();
     const state = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('teslacode:progress:v2')),
     );
@@ -309,6 +303,22 @@ await withBrowser(4321, async (browser, origin) => {
         document.documentElement.dataset.theme = theme;
       }, theme);
       await audit(page, `${width}: ${theme}`);
+      const chips = await page.locator('.orbit-chip').evaluateAll((links) =>
+        links.map((link) => ({
+          border: getComputedStyle(link).borderTopColor,
+          background: getComputedStyle(link).backgroundColor,
+        })),
+      );
+      assert.equal(
+        new Set(chips.map((chip) => chip.border)).size,
+        routes.length,
+        'Cada ruta tiene un borde distintivo',
+      );
+      assert.equal(
+        new Set(chips.map((chip) => chip.background)).size,
+        1,
+        'Las rutas comparten el fondo de cristal',
+      );
       await page.evaluate(() => scrollTo(0, 0));
       if ([1440, 390].includes(width)) {
         await page.screenshot({
@@ -368,7 +378,7 @@ await withBrowser(4321, async (browser, origin) => {
     assert.deepEqual(errors, []);
     await context.close();
     console.log(
-      `PASS experiencia ${width}px: selección por la escena, foco, movimiento, teclado/táctil, scroll, temas y accesibilidad.`,
+      `PASS experiencia ${width}px: siete rutas desde la escena, historial, movimiento, teclado/táctil, scroll, temas y accesibilidad.`,
     );
   }
   for (const [saveData, hash] of [
@@ -472,9 +482,13 @@ await withBrowser(4321, async (browser, origin) => {
       await page.evaluate(() => Boolean(document.createElement('canvas').getContext('webgl'))),
       false,
     );
-    await page.getByRole('button', { name: 'Elegir ruta Python', exact: true }).click();
-    await page.locator('[data-studio-route="python"]').waitFor();
-    await page.getByRole('link', { name: /Empieza tu primera lección/ }).click();
+    await page.getByRole('link', { name: 'Abrir ruta Python', exact: true }).click();
+    await page.waitForURL('**/#/ruta/python');
+    await page.locator('.map-node.ready').first().click();
+    await page
+      .locator('#node-inspector')
+      .getByRole('link', { name: /Empezar la lección/ })
+      .click();
     await page.locator('#lesson').waitFor();
     console.log('PASS: escena y navegación funcionales con WebGL deshabilitado.');
   } finally {

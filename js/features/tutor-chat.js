@@ -109,20 +109,21 @@ export function mountTutorChat(
   dialog.id = 'tutor-dialog';
   dialog.setAttribute('aria-labelledby', 'tutor-title');
   dialog.setAttribute('aria-describedby', 'tutor-disclaimer');
-  dialog.innerHTML = `<header class="tutor-heading"><div class="tutor-symbol" aria-hidden="true"><img src="${assetUrl('assets/hologram/nikola-reference.webp')}" width="512" height="560" alt="" decoding="async"></div><div><span class="tutor-eyebrow">PIENSA · PREGUNTA · DESCUBRE</span><h2 id="tutor-title">Tesla Tutor <span>IA</span></h2></div><button class="tutor-close" type="button" aria-label="Cerrar tutor">×</button></header>
-    <div class="tutor-context"><span class="tutor-context-dot" aria-hidden="true"></span><span data-tutor-context></span></div>
-    <div class="tutor-scroll"><section class="tutor-welcome"><span class="tutor-eyebrow">CADA PREGUNTA ABRE UN CAMINO</span><h3>Entiéndelo.<br><em>Hazlo tuyo.</em></h3><p>Empezamos por lo que ya sabes. Una idea, un ejemplo y un paso a la vez.</p></section>
-    <div class="tutor-modes" role="group" aria-label="Cómo quieres aprender">${Object.entries(modes)
+  dialog.innerHTML = `<header class="tutor-heading"><div class="tutor-symbol" aria-hidden="true"><img src="${assetUrl('assets/hologram/nikola-reference.webp')}" width="512" height="560" alt="" decoding="async"></div><div><h2 id="tutor-title">Tesla Tutor <span>IA</span></h2><p class="tutor-context" data-tutor-context></p></div><button class="tutor-close" type="button" aria-label="Cerrar tutor">×</button></header>
+    <div class="tutor-scroll"><section class="tutor-welcome"><h3>¿Qué quieres entender?</h3></section>
+    <details class="tutor-prompts" open><summary>Ayudas para preguntar</summary><div class="tutor-modes" role="group" aria-label="Cómo quieres aprender">${Object.entries(
+      modes,
+    )
       .map(
         ([id, [label]]) =>
           `<button type="button" data-tutor-mode="${id}" aria-pressed="${id === 'explain'}">${label}</button>`,
       )
-      .join('')}</div>
+      .join('')}</div></details>
     <div class="tutor-messages" role="log" aria-label="Conversación con Tesla Tutor" aria-live="off"></div></div>
-    <p class="tutor-status" role="status" aria-live="polite"></p><button class="tutor-retry" type="button" hidden>Volver a intentar</button>
+    <p class="tutor-status sr-only" role="status" aria-live="polite"></p><button class="tutor-retry" type="button" hidden>Volver a intentar</button>
     <form class="tutor-form"><details class="tutor-code"><summary>Compartir código o un error</summary><p>Revisa el fragmento antes de enviarlo. Comparte solo lo necesario, sin claves ni datos personales.</p><button type="button" data-tutor-editor hidden>Tomar código del editor</button><label for="tutor-code">Fragmento que quieres compartir</label><textarea id="tutor-code" rows="4" maxlength="4000" spellcheck="false" placeholder="Pega aquí tu código o el mensaje de error"></textarea></details>
-    <label for="tutor-question">Tu pregunta</label><div class="tutor-compose"><textarea id="tutor-question" rows="1" maxlength="2000" required placeholder="¿Qué te gustaría entender?"></textarea><div class="tutor-submit"><button type="button" class="tutor-stop" hidden>Detener respuesta</button><button type="submit" class="tutor-send" disabled>Enviar <span aria-hidden="true">↗</span></button></div></div><div class="tutor-form-actions"><button type="button" class="tutor-clear">Borrar conversación</button><p class="tutor-keyboard">Enter para enviar · Mayús + Enter para una nueva línea</p></div></form>
-    <footer class="tutor-footer"><p id="tutor-disclaimer">Asistente de IA: puede equivocarse. Contrasta con los ejemplos de la lección.</p><p>Se envían a Gemini tu pregunta, el fragmento que compartas y el contexto docente. El historial de esta página se borra al recargar.</p></footer>`;
+    <label class="sr-only" for="tutor-question">Tu pregunta</label><div class="tutor-compose"><textarea id="tutor-question" rows="1" maxlength="2000" required placeholder="¿Qué te gustaría entender?"></textarea><div class="tutor-submit"><button type="button" class="tutor-stop" hidden>Detener respuesta</button><button type="submit" class="tutor-send" disabled>Enviar <span aria-hidden="true">↗</span></button></div></div></form>
+    <footer class="tutor-footer"><button type="button" class="tutor-clear">Borrar conversación</button><details class="tutor-info"><summary>Privacidad y ayuda</summary><p id="tutor-disclaimer">Asistente de IA: puede equivocarse. Contrasta con los ejemplos de la lección.</p><p>Se envían a Gemini tu pregunta, el fragmento que compartas y el contexto docente. El historial de esta página se borra al recargar.</p><p>Enter para enviar · Mayús + Enter para una nueva línea.</p></details></footer>`;
   doc.body.append(dialog);
   launcher?.setAttribute('aria-controls', 'tutor-dialog');
   const $ = (selector) => dialog.querySelector(selector),
@@ -134,6 +135,10 @@ export function mountTutorChat(
     retry = $('.tutor-retry'),
     messages = $('.tutor-messages'),
     scroll = $('.tutor-scroll');
+  const setStatus = (message, visible = false) => {
+    status.textContent = message;
+    status.classList.toggle('sr-only', !visible);
+  };
   const conversations = new Map();
   let current,
     mode = 'explain',
@@ -215,7 +220,9 @@ export function mountTutorChat(
     messages.replaceChildren();
     current.messages.forEach(bubble);
     $('.tutor-welcome').hidden = current.messages.length > 0;
+    $('.tutor-prompts').open = current.messages.length === 0;
     $('[data-tutor-context]').textContent = current.context.title;
+    $('[data-tutor-context]').title = current.context.title;
     question.value = current.draft;
     code.value = current.code;
     $('[data-tutor-editor]').hidden = !getEditor();
@@ -227,7 +234,7 @@ export function mountTutorChat(
     checking = true;
     ready = false;
     busy(false);
-    status.textContent = 'Comprobando la conexión del tutor…';
+    setStatus('Comprobando la conexión del tutor…', true);
     checkController = new AbortController();
     const controller = checkController,
       timer = setTimeout(() => controller.abort(), 6000);
@@ -236,13 +243,18 @@ export function mountTutorChat(
       const available = await health(address, { signal: controller.signal });
       if (disposed || controller.signal.aborted) return;
       ready = available;
-      status.textContent = ready
-        ? 'Listo para explorar tu pregunta.'
-        : 'El tutor de IA todavía no está conectado. Puedes continuar con las lecciones.';
+      setStatus(
+        ready
+          ? 'Listo para explorar tu pregunta.'
+          : 'El tutor de IA todavía no está conectado. Puedes continuar con las lecciones.',
+        !ready,
+      );
     } catch {
       if (!disposed)
-        status.textContent =
-          'No se pudo conectar con el tutor. Puedes reintentar o continuar con la lección.';
+        setStatus(
+          'No se pudo conectar con el tutor. Puedes reintentar o continuar con la lección.',
+          true,
+        );
     } finally {
       clearTimeout(timer);
       checking = false;
@@ -272,10 +284,11 @@ export function mountTutorChat(
     state.last = { payload, answer };
     state.draft = '';
     question.value = '';
+    $('.tutor-code').open = false;
     render();
     const node = messages.lastElementChild.querySelector('.tutor-message-body');
     node.textContent = 'Preparando una explicación…';
-    status.textContent = 'Tesla Tutor está preparando una respuesta…';
+    setStatus('Tesla Tutor está preparando una respuesta…');
     let complete = false;
     try {
       for await (const event of ask(address, payload, { signal: controller.signal })) {
@@ -300,18 +313,21 @@ export function mountTutorChat(
         ]);
         state.pairs = state.pairs.slice(-3);
         state.last = null;
-        status.textContent = 'Respuesta lista. Puedes leerla o seguir preguntando.';
+        setStatus('Respuesta lista. Puedes leerla o seguir preguntando.');
       } else {
         answer.incomplete = true;
-        status.textContent = 'Consulta detenida. Puedes volver a intentarlo.';
+        setStatus('Consulta detenida. Puedes volver a intentarlo.', true);
       }
     } catch (error) {
       answer.incomplete = true;
-      status.textContent = controller.signal.aborted
-        ? controller.signal.reason?.name === 'TimeoutError'
-          ? 'El tutor tardó demasiado. Puedes volver a intentarlo.'
-          : 'Consulta detenida. Puedes volver a intentarlo.'
-        : error.message || 'No se pudo completar la respuesta. Intenta nuevamente.';
+      setStatus(
+        controller.signal.aborted
+          ? controller.signal.reason?.name === 'TimeoutError'
+            ? 'El tutor tardó demasiado. Puedes volver a intentarlo.'
+            : 'Consulta detenida. Puedes volver a intentarlo.'
+          : error.message || 'No se pudo completar la respuesta. Intenta nuevamente.',
+        true,
+      );
     } finally {
       clearTimeout(timer);
       if (active === controller) active = null;
@@ -348,7 +364,7 @@ export function mountTutorChat(
     else dialog.setAttribute('open', '');
     question.focus({ preventScroll: true });
     if (!ready) check();
-    else status.textContent = 'Listo para explorar tu pregunta.';
+    else setStatus('Listo para explorar tu pregunta.');
   }
   $('.tutor-close').onclick = close;
   dialog.oncancel = (event) => {
@@ -373,7 +389,7 @@ export function mountTutorChat(
     if (!editor) return;
     code.value = editor.value.slice(0, 4000);
     current.code = code.value;
-    status.textContent = 'Fragmento preparado. Revísalo antes de enviarlo junto a tu pregunta.';
+    setStatus('Fragmento preparado. Revísalo antes de enviarlo junto a tu pregunta.', true);
   };
   question.oninput = () => {
     current.draft = question.value;
@@ -413,7 +429,7 @@ export function mountTutorChat(
     current.draft = '';
     current.code = '';
     render();
-    status.textContent = 'Conversación borrada de esta página.';
+    setStatus('Conversación borrada de esta página.');
     question.focus();
   };
   const navigate = () => {

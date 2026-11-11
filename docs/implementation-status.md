@@ -256,6 +256,14 @@ La medición comparativa usa tres contextos nuevos por edición y tamaño (1440/
 
 11 de noviembre de 2026. A petición del propietario, se retira la animación del Tesla del fondo y su encuadre ligado a la portada. La fotografía global recupera su presentación fija original. El retrato frontal existente vuelve como holograma independiente y visible por defecto, con las siete rutas alrededor. Solo los iris siguen el ratón; el resto del rostro permanece fiel a la referencia. Se retiran el renderizador global y sus capas auxiliares. El LAB y el tutor conservan las mejoras de la entrega anterior. La alternativa estática, pausa, movimiento reducido, ahorro de datos, contexto perdido y limpieza de recursos se mantienen.
 
+## Lectura opcional de la teoría
+
+11 de noviembre de 2026. Se incorpora lectura opcional de teoría mediante Web Speech API en la etapa Aprender de las rutas. Un botón de altavoz inicia la lectura; permite pausar, continuar desde el fragmento actual, detener, elegir voz española y cambiar velocidad. Los bloques activos se resaltan sin desplazar el foco. El módulo se carga al entrar en Aprender y no utiliza servicios de IA del proyecto. Las consolas y el código editable se excluyen; cambiar de etapa/lección cancela el audio y ocultar la página lo pausa. La ausencia de API/voces se informa sin impedir el aprendizaje. Escuchar no completa actividades ni modifica XP.
+
+## Rutas y lectura del tutor
+
+11 de noviembre de 2026. Los siete enlaces del holograma abren directamente el mapa de su ruta. Cada uno utiliza un borde de color propio sobre el mismo fondo de cristal; Fundamentos deja de tener un relleno seleccionado permanente. El tutor integra el contexto en una cabecera compacta, retira lemas y etiquetas redundantes y despliega privacidad/ayuda a petición. Los estados normales se anuncian sin reservar una franja visible; los errores conservan texto y reintento. Las ayudas se pliegan al conversar y el fragmento de código al enviar, manteniendo sus controles disponibles. El texto de las respuestas conserva su tamaño. En la comparación local a 1440×900, la altura de conversación pasa de 471,5 a 633,4 px; a 390×844, de 463,9 a 614,4 px. Se comprueban también 320×568 y 844×390. Son medidas de geometría del navegador, con proveedor simulado, no pruebas en dispositivos físicos.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |

@@ -66,7 +66,7 @@ test('milestone previews preserve real lesson identities, current progress and r
   assert.equal(studioMilestones({ id: 'demo', lessons: [{ id: 'a', kind: 'core' }] }).length, 1);
 });
 
-test('the depth scene selects real routes with keyboard focus and without granting learning credit', (t) => {
+test('the depth scene links directly to every route without granting learning credit', (t) => {
   installDOM(t);
   const root = document.getElementById('root'),
     state = emptyProgress(),
@@ -77,10 +77,13 @@ test('the depth scene selects real routes with keyboard focus and without granti
   assert.equal(root.querySelectorAll('[data-orbit-route]').length, routes.length);
   assert.equal(root.querySelector('.depth-decoration').getAttribute('aria-hidden'), 'true');
   const dispose = mountStudio(root, routes, (id) => selected.push(id));
-  const button = root.querySelector('[data-orbit-route="python"]');
-  button.click();
-  assert.deepEqual(selected, ['python']);
-  assert.equal(document.activeElement, button);
+  for (const route of routes) {
+    const link = root.querySelector(`a[data-orbit-route="${route.id}"]`);
+    assert.equal(link.getAttribute('href'), `#/ruta/${route.id}`);
+    assert.equal(link.getAttribute('aria-label'), `Abrir ruta ${route.name}`);
+    assert.equal(link.hasAttribute('aria-pressed'), false);
+  }
+  assert.deepEqual(selected, []);
   assert.equal(state.xp, 0);
   assert.deepEqual(state.completed, []);
   dispose();

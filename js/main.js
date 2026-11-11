@@ -306,8 +306,23 @@ async function render() {
             }
           };
         });
-        if (tab === 'aprender')
-          disposeView = mountCodeExamples($('lesson'), data, { context: key });
+        if (tab === 'aprender') {
+          const disposeExamples = mountCodeExamples($('lesson'), data, { context: key });
+          disposeView = disposeExamples;
+          try {
+            const { mountLessonAudio } = await import('./features/lesson-audio.js');
+            if (version !== renderVersion) return;
+            const disposeAudio = mountLessonAudio(root);
+            disposeView = () => {
+              disposeAudio();
+              disposeExamples();
+            };
+          } catch {
+            if (version !== renderVersion) return;
+            $('lesson-audio').textContent =
+              'No pudimos cargar la lectura en voz alta. Puedes seguir leyendo la teoría.';
+          }
+        }
         if (tab === 'aprender' && data.widget) {
           const widget = await widgets[data.widget]();
           if (version !== renderVersion) return;
@@ -392,6 +407,8 @@ async function render() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   } catch (error) {
     if (version !== renderVersion) return;
+    disposeView();
+    disposeView = () => {};
     root.innerHTML = `<div class="empty-state" role="alert"><h1>No pudimos abrir este paso.</h1><p>${e(error.message)}</p><button class="btn" id="retry">Volver a intentar</button> <a class="btn ghost" href="#/rutas">Ir a las rutas</a></div>`;
     $('retry').onclick = render;
   }

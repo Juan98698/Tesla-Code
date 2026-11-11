@@ -112,7 +112,7 @@ export function studioHome(routes, state, next, href) {
     <div class="hero-art knowledge-scene" data-depth-scene data-gaze-tracking role="group" aria-label="Elige tu ruta junto a Nikola Tesla">
       <div class="scene-coordinate" aria-hidden="true">IDEAS → HABILIDADES → PROYECTOS</div>
       <div class="depth-decoration" aria-hidden="true"><div class="orbit-floor"></div><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div>${teslaHologram()}<span class="scene-spark spark-one"></span><span class="scene-spark spark-two"></span><span class="scene-spark spark-three"></span></div>
-      <div class="orbit-routes">${routes.map((r, i) => `<button class="orbit-chip ${r.id === route.id ? 'selected' : ''}" type="button" data-orbit-route="${r.id}" style="--orbit:${i}" aria-label="Elegir ruta ${e(r.name)}" aria-pressed="${r.id === route.id}"><span aria-hidden="true">${e(symbols[r.id])}</span><strong>${e(shortNames[r.id] ?? r.name)}</strong><i aria-hidden="true"></i></button>`).join('')}</div>
+      <div class="orbit-routes">${routes.map((r, i) => `<a class="orbit-chip" href="#/ruta/${r.id}" data-orbit-route="${r.id}" style="--orbit:${i}" aria-label="Abrir ruta ${e(r.name)}"><span aria-hidden="true">${e(symbols[r.id])}</span><strong>${e(shortNames[r.id] ?? r.name)}</strong><i aria-hidden="true"></i></a>`).join('')}</div>
       <div class="scene-caption"><span class="scene-caption-mark" aria-hidden="true">↗</span><div><strong>Nikola Tesla · Todo empieza con curiosidad.</strong><span>Elige una habilidad. Conecta tu futuro.</span></div></div>
       <button class="motion-control" id="motion-toggle" type="button" aria-label="Pausar animaciones" aria-pressed="false">Pausar animaciones</button>
     </div>
@@ -155,12 +155,6 @@ export function mountStudio(root, routes, onRoute) {
     view.scrollTo({ top: destination, behavior: 'instant' });
     control?.focus({ preventScroll: true });
   };
-  root.querySelectorAll('[data-orbit-route]').forEach((button) => {
-    button.onclick = () => {
-      const id = button.dataset.orbitRoute;
-      chooseRoute(id, `[data-orbit-route="${id}"]`);
-    };
-  });
   const id = root.querySelector('[data-studio-route]').dataset.studioRoute;
   const control = root.querySelector('#studio-value');
   let result = runPlayground(id, control.value),

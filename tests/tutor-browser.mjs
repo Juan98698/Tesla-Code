@@ -81,6 +81,17 @@ await withTutorBrowser(async ({ browser, origin, calls, env, stats }) => {
     assert.equal(await dialog.locator('.tutor-messages img,script').count(), 0);
     assert.equal(await page.evaluate(() => window.tutorXss), undefined);
     assert.ok(await dialog.locator('pre code').first().isVisible());
+    assert.equal(await dialog.locator('.tutor-prompts').getAttribute('open'), null);
+    const reading = await dialog.locator('.tutor-scroll').boundingBox();
+    const frame = await dialog.boundingBox();
+    assert.ok(
+      reading.height / frame.height >= 0.65,
+      'La conversación ocupa al menos el 65 % del tutor',
+    );
+    await dialog.locator('.tutor-info summary').click();
+    assert.equal(await dialog.locator('#tutor-disclaimer').isVisible(), true);
+    await audit(page, `privacy/${viewport.width}`);
+    await dialog.locator('.tutor-info summary').click();
     for (const theme of ['dark', 'light']) {
       await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme);
       await audit(page, `conversation/${viewport.width}/${theme}`);
@@ -103,6 +114,11 @@ await withTutorBrowser(async ({ browser, origin, calls, env, stats }) => {
       .fill(`Quiero reintentar ${viewport.width}`);
     await dialog.getByRole('button', { name: /Enviar/ }).click();
     await dialog.getByRole('button', { name: 'Volver a intentar', exact: true }).waitFor();
+    const notice = await dialog.locator('.tutor-status').boundingBox();
+    assert.ok(
+      notice.height >= 20 && notice.width >= 200,
+      'El error sigue visible junto al reintento',
+    );
     await dialog.getByRole('button', { name: 'Volver a intentar', exact: true }).click();
     await page.waitForFunction(() =>
       document.querySelector('.tutor-status').textContent.startsWith('Respuesta lista'),
