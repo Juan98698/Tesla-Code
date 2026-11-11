@@ -16,12 +16,6 @@ Procesamiento realizado fuera de la aplicación con Chrome, canvas y FFmpeg/Medi
 
 La reproducción real de la entrega se verificó hasta el evento `ended`: 240 fotogramas, sin fotogramas descartados en esa comprobación local. Las pruebas de navegador vuelven a comprobar dimensiones, encuadre, duración y transición en escritorio y móvil emulado. Esto no mide una conexión móvil real.
 
-## Fondo auxiliar para el giro de la cabeza
+## Encuadre restaurado
 
-`tesla-cleanplate-8946b68e5b.webp` (1024×576; 86.616 bytes) contiene el laboratorio sin la persona. Se generó con la herramienta integrada **imagegen**, usando `tesla-world-fee05fe4b1.webp` como referencia; no se utilizó CLI. El PNG generado se conservó en `C:/Users/Juan manuel/.codex/generated_images/01a1c193-8874-78a1-9db5-2f538ab9226a/exec-8888ae8f-cb50-4f8d-9e6b-3513d7232a27.png`. La entrega WebP se redujo y codificó con canvas de Chrome. No se sustituyeron el fondo original ni los rasgos de Tesla: el rostro animado conserva los píxeles de la fotografía aportada.
-
-`tesla-head-mask.svg` (512×288; 554 bytes) delimita cabeza y cuello mediante una silueta vectorial. Ambos recursos se solicitan únicamente al activar el seguimiento con ratón; permiten ocultar la posición anterior de la cabeza sin arrastrar el laboratorio. La animación gira una malla de relieve con ángulos moderados, sin estirar las coordenadas de la fotografía. No es un modelo completo para vistas de perfil o giros de 360°.
-
-Prompt final de imagegen:
-
-> Use case: precise-object-edit. Asset type: clean background plate for animating an existing photographic bust. Edit the supplied wide blue Nikola Tesla laboratory illustration. Remove Nikola Tesla entirely (head, hair, neck, suit, arms), revealing only the continuing dark navy electrical laboratory and blue atmospheric sky behind him. Preserve the original camera, landscape framing and aspect ratio, towers, Tesla coils, technical blueprints, cyan electrical arcs, blue lighting and overall layout. No person, no face, no head, no text. The area formerly occupied by his head must become seamless dark blue stormy laboratory sky. Keep all pre-existing laboratory elements outside the figure as faithful as possible, without adding new focal objects. This is a background plate, not a redesign; the original face will be composited separately in the application.
+El 11 de noviembre de 2026 se retiraron la base auxiliar generada y la máscara de cabeza de la descarga del sitio. El fondo vuelve a ser la fotografía fija original; el holograma utiliza `assets/hologram/nikola-reference.webp`, derivado del retrato aportado por el propietario. Los archivos originales del usuario se conservan. La procedencia y el prompt de la base descartada permanecen en el historial del commit `efa0c2e`; no se utiliza para mostrar ni animar el retrato actual.

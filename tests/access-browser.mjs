@@ -46,7 +46,7 @@ await withBrowser(4320, async (browser, origin) => {
     assert.equal(await page.locator('.hero').count(), 1);
     assert.equal(await page.locator('.hero-art').isVisible(), true);
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
-    assert.equal(await page.locator('[data-world-surface]').evaluate((el) => el.hidden), true);
+    assert.equal(await page.locator('[data-tesla-surface]').evaluate((el) => el.hidden), true);
     assert.ok(
       await page.locator('.brand img').evaluate((el) => el.complete && el.naturalWidth > 0),
     );
@@ -67,7 +67,7 @@ await withBrowser(4320, async (browser, origin) => {
     await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
     await page.screenshot({ path: screenshotPath(`teslacode-final-${width}.png`), fullPage: true });
     await page.locator('#motion-toggle').click(); // Optional opt-in cannot override reduced motion.
-    assert.equal(await page.locator('[data-world-surface]').evaluate((el) => el.hidden), true);
+    assert.equal(await page.locator('[data-tesla-surface]').evaluate((el) => el.hidden), true);
     await page.locator('#motion-toggle').click();
     await page.reload();
     await page.locator('#motion-toggle').waitFor();

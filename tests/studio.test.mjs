@@ -72,7 +72,7 @@ test('the depth scene selects real routes with keyboard focus and without granti
     state = emptyProgress(),
     selected = [];
   root.innerHTML = homePage(routes, state);
-  assert.equal(root.querySelector('[data-tesla-hologram]'), null);
+  assert.ok(root.querySelector('[data-tesla-hologram]'));
   assert.equal(root.querySelector('.core-cube'), null);
   assert.equal(root.querySelectorAll('[data-orbit-route]').length, routes.length);
   assert.equal(root.querySelector('.depth-decoration').getAttribute('aria-hidden'), 'true');

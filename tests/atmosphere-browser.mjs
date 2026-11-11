@@ -101,10 +101,10 @@ await withBrowser(4337, async (browser, origin) => {
       await page.evaluate(() => JSON.parse(localStorage.getItem('teslacode:progress:v2')).xp),
       0,
     );
-    assert.equal(await page.locator('[data-tesla-hologram]').count(), 0);
+    assert.equal(await page.locator('[data-tesla-hologram]').count(), 1);
     assert.ok(
-      !requests.some((url) => url.includes('nikola-reference')),
-      'El retrato 3D no se descarga hasta solicitarlo',
+      requests.some((url) => url.includes('nikola-reference')),
+      'El retrato de referencia se muestra en la portada',
     );
     await page.locator('.tesla-world-image').evaluate((img) => img.decode());
     assert.equal(await page.locator('.syntax-sigil').count(), 11);
@@ -136,7 +136,7 @@ await withBrowser(4337, async (browser, origin) => {
     await page.goto(origin + '/#/inicio');
     await page.locator('.hero').waitFor();
     assert.equal(await page.locator('.hologram-toggle').count(), 0);
-    assert.equal(await page.locator('[data-world-surface]').count(), 1);
+    assert.equal(await page.locator('[data-world-surface]').count(), 0);
     await page.getByRole('button', { name: 'Ver introducción de TeslaCode', exact: true }).click();
     await dialog.waitFor();
     await page.keyboard.press('Escape');
@@ -147,7 +147,7 @@ await withBrowser(4337, async (browser, origin) => {
     assert.deepEqual(errors, []);
     await context.close();
     console.log(
-      `PASS atmósfera ${width}px: video real, transición natural, pausa/sonido/omitir, sesión, Tesla integrado en el fondo, cinco vistas, ambos temas y WCAG.`,
+      `PASS atmósfera ${width}px: video real, transición natural, pausa/sonido/omitir, sesión, fondo fijo y holograma independiente, cinco vistas, ambos temas y WCAG.`,
     );
   }
   for (const setting of ['reduced', 'saveData', 'deepLink']) {

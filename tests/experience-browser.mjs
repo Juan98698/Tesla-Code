@@ -52,11 +52,11 @@ await withBrowser(4321, async (browser, origin) => {
       }).observe({ type: 'layout-shift', buffered: true });
       const get = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (...args) {
-        if (this.matches('[data-world-surface]') && args[0] === 'webgl') window.portraitContexts++;
+        if (this.matches('[data-tesla-surface]') && args[0] === 'webgl') window.portraitContexts++;
         return get.apply(this, args);
       };
-      const draw = WebGLRenderingContext.prototype.drawArrays;
-      WebGLRenderingContext.prototype.drawArrays = function (...args) {
+      const draw = WebGLRenderingContext.prototype.drawElements;
+      WebGLRenderingContext.prototype.drawElements = function (...args) {
         window.portraitDraws++;
         return draw.apply(this, args);
       };
@@ -96,7 +96,7 @@ await withBrowser(4321, async (browser, origin) => {
         document.querySelector('[data-depth-scene]').dataset.sceneActive === String(active),
       !touch && !reduced,
     );
-    assert.equal(await page.locator('[data-tesla-hologram]').count(), 0);
+    assert.equal(await page.locator('[data-tesla-hologram]').count(), 1);
     await page.locator('.tesla-world-image').evaluate((image) => image.decode());
     assert.equal(await page.locator('.core-cube').count(), 0);
     await waitForFiniteAnimations(page);
@@ -133,7 +133,7 @@ await withBrowser(4321, async (browser, origin) => {
     );
     if (touch || reduced) {
       await page.mouse.move(width - 10, 150);
-      assert.equal(await page.locator('[data-world-surface]').evaluate((el) => el.hidden), true);
+      assert.equal(await page.locator('[data-tesla-surface]').evaluate((el) => el.hidden), true);
       assert.equal(await page.evaluate(() => window.portraitContexts), 0);
     }
     if (width === 1440) {
@@ -153,18 +153,18 @@ await withBrowser(4321, async (browser, origin) => {
             }),
         );
       await page.mouse.move(30, 180);
-      await page.locator('[data-atmosphere][data-renderer="webgl"]').waitFor();
+      await page.locator('[data-tesla-hologram][data-renderer="webgl"]').waitFor();
       await settle();
-      const isolate = await page.addStyleTag({
-        content:
-          'body > :not([data-atmosphere]) { visibility: hidden !important; } .tesla-world::after, .syntax-field { display: none !important; }',
-      });
-      const left = await page.locator('[data-world-surface]').screenshot();
+      // Freeze decorative floating only for the two iris pixel comparisons.
+      const left = await page
+        .locator('[data-tesla-surface]')
+        .screenshot({ animations: 'disabled' });
       await page.mouse.move(1420, 600);
       await settle();
-      const right = await page.locator('[data-world-surface]').screenshot();
-      await isolate.evaluate((node) => node.remove());
-      assert.equal(left.equals(right), false, 'The actual wallpaper follows the pointer');
+      const right = await page
+        .locator('[data-tesla-surface]')
+        .screenshot({ animations: 'disabled' });
+      assert.equal(left.equals(right), false, 'The reference portrait eyes follow the cursor');
       const pixels = await page.evaluate(
         async (frames) => {
           const images = await Promise.all(
@@ -196,23 +196,36 @@ await withBrowser(4321, async (browser, origin) => {
                 data[0][i + 2] !== data[1][i + 2]
               ) {
                 changed++;
-                if (x < images[0].width * 0.4) laboratory++;
+                const u = x / images[0].width,
+                  v = y / images[0].height;
+                const eye =
+                  v > 0.37 && v < 0.47 && ((u > 0.35 && u < 0.49) || (u > 0.55 && u < 0.7));
+                if (!eye) laboratory++;
               }
             }
           return { laboratory, changed };
         },
         [left.toString('base64'), right.toString('base64')],
       );
-      assert.ok(pixels.changed > 100, 'The photographed face actually moves');
-      assert.equal(pixels.laboratory, 0, 'The laboratory stays still without seams');
+      assert.ok(pixels.changed > 100, 'Both eye regions visibly change');
+      assert.equal(pixels.laboratory, 0, 'The portrait stays unchanged outside the eyes');
       const irises = await irisMotion(page);
+      assert.equal(
+        irises.escapedPixels,
+        0,
+        'The photographed lids stay intact throughout a 25-position gaze sweep',
+      );
+      assert.ok(
+        irises.whiteLuminance.every((value) => value > 0.24),
+        'A continuous lit eyeball replaces the old iris instead of a black hole',
+      );
       for (let eye = 0; eye < 2; eye++) {
         assert.ok(
-          irises.left[eye] * irises.scale < -6 && irises.right[eye] * irises.scale > 6,
+          irises.left[eye] * irises.scale < -2.5 && irises.right[eye] * irises.scale > 2.5,
           'Both pupils visibly follow horizontal cursor targets at the displayed face size',
         );
         assert.ok(
-          irises.up[eye] * irises.scale < -4 && irises.down[eye] * irises.scale > 4,
+          irises.up[eye] * irises.scale < -1.1 && irises.down[eye] * irises.scale > 1.1,
           'Both pupils visibly follow vertical cursor targets at the displayed face size',
         );
       }
@@ -241,28 +254,28 @@ await withBrowser(4321, async (browser, origin) => {
       );
       await page.evaluate(() => {
         window.restoreWorld = document
-          .querySelector('[data-world-surface]')
+          .querySelector('[data-tesla-surface]')
           .getContext('webgl')
           .getExtension('WEBGL_lose_context');
         window.restoreWorld.loseContext();
       });
       await page.waitForFunction(
-        () => !document.querySelector('[data-atmosphere]').dataset.renderer,
+        () => !document.querySelector('[data-tesla-hologram]').dataset.renderer,
       );
-      assert.equal(await page.locator('.tesla-world-image').isVisible(), true);
+      assert.equal(await page.locator('.tesla-reference').isVisible(), true);
       await page.evaluate(() => window.restoreWorld.restoreContext());
-      await page.locator('[data-atmosphere][data-renderer="webgl"]').waitFor();
+      await page.locator('[data-tesla-hologram][data-renderer="webgl"]').waitFor();
       await settle();
       await page.locator('#motion-toggle').click();
-      await page.waitForFunction(() => document.querySelector('[data-world-surface]').hidden);
+      await page.waitForFunction(() => document.querySelector('[data-tesla-surface]').hidden);
       const paused = await page.evaluate(() => window.portraitDraws);
       await page.mouse.move(200, 500);
       await settle();
       assert.equal(await page.evaluate(() => window.portraitDraws), paused);
       await page.locator('#motion-toggle').click();
-      await page.locator('[data-atmosphere][data-renderer="webgl"]').waitFor();
+      await page.locator('[data-tesla-hologram][data-renderer="webgl"]').waitFor();
       await settle();
-      await page.screenshot({ path: 'coverage/ui-review/verified/tesla-wallpaper-desktop.png' });
+      await page.screenshot({ path: 'coverage/ui-review/verified/tesla-hologram-desktop.png' });
     }
     for (const route of routes) {
       await page.getByRole('button', { name: `Elegir ruta ${route.name}`, exact: true }).click();
@@ -453,7 +466,7 @@ await withBrowser(4321, async (browser, origin) => {
     await page.goto(origin);
     await page.locator('.hero').waitFor();
     await page.mouse.move(300, 200);
-    assert.equal(await page.locator('.tesla-world-image').isVisible(), true);
+    assert.equal(await page.locator('.tesla-reference').isVisible(), true);
     await page.locator('.tesla-world-image').evaluate((image) => image.decode());
     assert.equal(
       await page.evaluate(() => Boolean(document.createElement('canvas').getContext('webgl'))),

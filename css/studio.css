@@ -2052,7 +2052,89 @@ body[data-view='leccion'] .route-label {
   }
 }
 
-/* Keep route actions outside the photographed head, including its motion range. */
+/* Independent reference portrait with native route controls around it. */
+.tesla-hologram {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: clamp(200px, 48%, 280px);
+  aspect-ratio: 512 / 560;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0 16px #22baff38);
+}
+.tesla-head {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  animation: tesla-hover 5.8s ease-in-out infinite;
+}
+@keyframes tesla-hover {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+[data-depth-scene]:not([data-scene-active='true']) .tesla-head,
+:root[data-world-motion='off'] .tesla-head {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tesla-head {
+    animation: none;
+  }
+}
+.tesla-reference,
+.tesla-surface {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.tesla-surface {
+  position: absolute;
+  inset: 0;
+}
+.tesla-surface[hidden] {
+  display: none;
+}
+.tesla-hologram[data-renderer='webgl'] .tesla-reference {
+  visibility: hidden;
+}
+.tesla-beam {
+  position: absolute;
+  inset: 20px 5% -16px;
+  background: linear-gradient(0deg, #58ddff1c, transparent 70%);
+  clip-path: polygon(10% 0, 90% 0, 70% 100%, 30% 100%);
+}
+.tesla-projector {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  width: 58%;
+  height: 22px;
+  transform: translateX(-50%);
+  border: 1px solid #72d8e587;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #6bdeff40, #102c3d 57%, #081623 72%);
+  box-shadow:
+    0 5px 0 #07131d,
+    0 8px 18px #45d5ff16;
+}
+.tesla-projector i {
+  position: absolute;
+  inset: 4px 14%;
+  border: 1px solid #7fe7f099;
+  border-radius: 50%;
+}
+.tesla-projector i + i {
+  inset: 7px 28%;
+}
+.knowledge-scene .depth-decoration {
+  inset: 60px 3% 75px;
+}
 .knowledge-scene.hero-art {
   height: 540px;
 }
@@ -2126,6 +2208,13 @@ body[data-view='leccion'] .route-label {
   }
 }
 @media (max-width: 600px) {
+  .knowledge-scene .depth-decoration {
+    inset: 46px 3% 75px;
+  }
+  .tesla-hologram {
+    width: 224px;
+    max-width: 76%;
+  }
   .knowledge-scene.hero-art {
     height: 630px;
     max-width: 500px;

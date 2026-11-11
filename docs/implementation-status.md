@@ -252,6 +252,10 @@ La comprobación GPU localiza ambos iris en cuatro direcciones mediante píxeles
 
 La medición comparativa usa tres contextos nuevos por edición y tamaño (1440/390 px), HTTP local sin compresión, intro vista, sin cargas de navegador paralelas ni limitación de CPU/red. La transferencia inicial, sin HTML, pasa de 1.493.005 a unos 1.505.422 bytes; mantiene 57 peticiones y no solicita el chat ni la API. La base auxiliar de 86.616 bytes y su máscara se cargan solo con el primer movimiento de ratón compatible. CLS es 0 en las doce muestras finales. LCP mediano de escritorio: 1052 → 1056 ms; móvil: 928 → 832 ms, con variación importante entre muestras. No se atribuye una mejora de velocidad a estos datos ni se mide INP de campo. Comando y datos locales: `node coverage/polish-measure.mjs`, `coverage/polish-performance.json`.
 
+## Restauración del holograma de referencia
+
+11 de noviembre de 2026. A petición del propietario, se retira la animación del Tesla del fondo y su encuadre ligado a la portada. La fotografía global recupera su presentación fija original. El retrato frontal existente vuelve como holograma independiente y visible por defecto, con las siete rutas alrededor. Solo los iris siguen el ratón; el resto del rostro permanece fiel a la referencia. Se retiran el renderizador global y sus capas auxiliares. El LAB y el tutor conservan las mejoras de la entrega anterior. La alternativa estática, pausa, movimiento reducido, ahorro de datos, contexto perdido y limpieza de recursos se mantienen.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |
