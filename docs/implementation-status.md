@@ -242,6 +242,16 @@ Pasan 198 pruebas unitarias, cobertura de 50 módulos (99,28 % de líneas, 96,04
 
 Frente a la entrega del tutor anterior a esta animación, la carga inicial pasa de 1.500.363 a 1.493.005 bytes, sin HTML, y de 58 a 57 peticiones. Son tres contextos nuevos por tamaño/edición, en el mismo servidor HTTP local sin compresión, sin otras pruebas de navegador simultáneas y con intro ya vista. CLS es 0; la variación de LCP no demuestra una mejora para usuarios reales. No se midió INP de campo. Los datos están en `coverage/tesla-world-performance.json`.
 
+## Giro del rostro, tutor ampliado y LAB explicado
+
+10 de noviembre de 2026. La deformación UV de la entrega anterior se sustituye por una malla de relieve con rotación rígida y una base auxiliar sin figura. La cabeza conserva la fotografía y sus proporciones; los iris se componen y desplazan por separado dentro de los párpados. El giro es moderado y no ofrece perfiles ni vistas de 360°. La portada encuadra la cabeza completa y distribuye las siete rutas a sus lados o debajo en móvil. El encuadre usa transformaciones de composición y los símbolos conservan coordenadas de viewport, evitando saltos al aparecer el contenido. Recursos y prompt de la base generada con imagegen quedan en `assets/atmosphere/README.md`.
+
+El tutor pasa de 480 a 680 px de ancho máximo, amplía el retrato de 62 a 112 px en escritorio y reserva más altura para leer al compactar el formulario. En 390×844 el área de respuesta mide aproximadamente 464 px de alto. Cada LAB explica su objetivo, propone una prueba concreta, interpreta el resultado y sugiere qué observar. El ejemplo de IA permite leer sus dos documentos y explica los límites de una coincidencia de palabras. Probar selecciona el resultado; no concede progreso ni XP.
+
+La comprobación GPU localiza ambos iris en cuatro direcciones mediante píxeles renderizados. Se verificaron encuadre, ausencia de solapamientos con rutas y contraste en 320, 390, 768, 1024, 1366 y 1440 px, además de pérdida/restauración de contexto, pausa y navegación por teclado. Los recorridos de experiencia, tutor, atmósfera y acceso pasan en escritorio y móvil emulado. No equivalen a una prueba con móvil físico ni a un modelo anatómico completo.
+
+La medición comparativa usa tres contextos nuevos por edición y tamaño (1440/390 px), HTTP local sin compresión, intro vista, sin cargas de navegador paralelas ni limitación de CPU/red. La transferencia inicial, sin HTML, pasa de 1.493.005 a unos 1.505.422 bytes; mantiene 57 peticiones y no solicita el chat ni la API. La base auxiliar de 86.616 bytes y su máscara se cargan solo con el primer movimiento de ratón compatible. CLS es 0 en las doce muestras finales. LCP mediano de escritorio: 1052 → 1056 ms; móvil: 928 → 832 ms, con variación importante entre muestras. No se atribuye una mejora de velocidad a estos datos ni se mide INP de campo. Comando y datos locales: `node coverage/polish-measure.mjs`, `coverage/polish-performance.json`.
+
 ## Estado del plan completo
 
 | Fase                           | Estado                    | Pendiente concreto                                                                                                                                                                                                                      |

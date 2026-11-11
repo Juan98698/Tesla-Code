@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { withBrowser, waitForFiniteAnimations } from './support/browser.mjs';
 import { browserExecutable } from './support/runtime.mjs';
+import { irisMotion } from './support/tesla-pixels.mjs';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const routes = read('content/curriculum/index.json').routes.map((id) =>
@@ -40,6 +41,15 @@ await withBrowser(4321, async (browser, origin) => {
     await page.addInitScript(() => {
       window.portraitDraws = 0;
       window.portraitContexts = 0;
+      window.backdropShifts = [];
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries())
+          if (
+            !entry.hadRecentInput &&
+            entry.sources?.some((source) => source.node?.closest?.('[data-atmosphere]'))
+          )
+            window.backdropShifts.push(entry.value);
+      }).observe({ type: 'layout-shift', buffered: true });
       const get = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (...args) {
         if (this.matches('[data-world-surface]') && args[0] === 'webgl') window.portraitContexts++;
@@ -90,6 +100,11 @@ await withBrowser(4321, async (browser, origin) => {
     await page.locator('.tesla-world-image').evaluate((image) => image.decode());
     assert.equal(await page.locator('.core-cube').count(), 0);
     await waitForFiniteAnimations(page);
+    assert.deepEqual(
+      await page.evaluate(() => window.backdropShifts),
+      [],
+      'Framing the photograph and floating symbols must not shift the painted backdrop',
+    );
     const geometry = await page.locator('.orbit-chip').evaluateAll((buttons) =>
       buttons.map((button) => {
         const box = button.getBoundingClientRect();
@@ -190,6 +205,17 @@ await withBrowser(4321, async (browser, origin) => {
       );
       assert.ok(pixels.changed > 100, 'The photographed face actually moves');
       assert.equal(pixels.laboratory, 0, 'The laboratory stays still without seams');
+      const irises = await irisMotion(page);
+      for (let eye = 0; eye < 2; eye++) {
+        assert.ok(
+          irises.left[eye] * irises.scale < -6 && irises.right[eye] * irises.scale > 6,
+          'Both pupils visibly follow horizontal cursor targets at the displayed face size',
+        );
+        assert.ok(
+          irises.up[eye] * irises.scale < -4 && irises.down[eye] * irises.scale > 4,
+          'Both pupils visibly follow vertical cursor targets at the displayed face size',
+        );
+      }
       assert.ok(await page.evaluate(() => window.portraitDraws > 0));
       const draws = await page.evaluate(() => window.portraitDraws);
       await page.evaluate(

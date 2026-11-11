@@ -107,9 +107,15 @@ test('workbench tabs, experiments and route selection never manufacture course p
       tabs[0].dispatchEvent(new dom.window.KeyboardEvent('keydown', { key, bubbles: true }));
     root.querySelector('[data-preview-tab=result]').click();
     const control = root.querySelector('#studio-value');
+    root.querySelector('[data-preview-tab=request]').click();
     if (route.id === 'frontend') control.value = '<img src=x onerror=alert(1)>';
     submit(root.querySelector('#studio-form'));
     assert.equal(root.querySelector('#studio-error').hidden, true);
+    assert.equal(
+      root.querySelector('[data-preview-tab=result]').getAttribute('aria-selected'),
+      'true',
+    );
+    assert.ok(root.querySelector('#studio-explanation').textContent.length > 40);
     if (route.id === 'frontend') {
       assert.equal(root.querySelector('#studio-dom-preview img'), null);
       assert.equal(root.querySelector('#studio-dom-preview').textContent, control.value);

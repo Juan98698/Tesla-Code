@@ -121,7 +121,7 @@ export function mountTutorChat(
     <div class="tutor-messages" role="log" aria-label="Conversación con Tesla Tutor" aria-live="off"></div></div>
     <p class="tutor-status" role="status" aria-live="polite"></p><button class="tutor-retry" type="button" hidden>Volver a intentar</button>
     <form class="tutor-form"><details class="tutor-code"><summary>Compartir código o un error</summary><p>Revisa el fragmento antes de enviarlo. Comparte solo lo necesario, sin claves ni datos personales.</p><button type="button" data-tutor-editor hidden>Tomar código del editor</button><label for="tutor-code">Fragmento que quieres compartir</label><textarea id="tutor-code" rows="4" maxlength="4000" spellcheck="false" placeholder="Pega aquí tu código o el mensaje de error"></textarea></details>
-    <label for="tutor-question">Tu pregunta</label><textarea id="tutor-question" rows="2" maxlength="2000" required placeholder="¿Qué te gustaría entender?"></textarea><div class="tutor-form-actions"><button type="button" class="tutor-clear">Borrar conversación</button><span></span><button type="button" class="tutor-stop" hidden>Detener respuesta</button><button type="submit" class="tutor-send" disabled>Enviar <span aria-hidden="true">↗</span></button></div><p class="tutor-keyboard">Enter para enviar · Mayús + Enter para una nueva línea</p></form>
+    <label for="tutor-question">Tu pregunta</label><div class="tutor-compose"><textarea id="tutor-question" rows="1" maxlength="2000" required placeholder="¿Qué te gustaría entender?"></textarea><div class="tutor-submit"><button type="button" class="tutor-stop" hidden>Detener respuesta</button><button type="submit" class="tutor-send" disabled>Enviar <span aria-hidden="true">↗</span></button></div></div><div class="tutor-form-actions"><button type="button" class="tutor-clear">Borrar conversación</button><p class="tutor-keyboard">Enter para enviar · Mayús + Enter para una nueva línea</p></div></form>
     <footer class="tutor-footer"><p id="tutor-disclaimer">Asistente de IA: puede equivocarse. Contrasta con los ejemplos de la lección.</p><p>Se envían a Gemini tu pregunta, el fragmento que compartas y el contexto docente. El historial de esta página se borra al recargar.</p></footer>`;
   doc.body.append(dialog);
   launcher?.setAttribute('aria-controls', 'tutor-dialog');
@@ -161,6 +161,7 @@ export function mountTutorChat(
   }
   function busy(value) {
     send.disabled = value || !ready;
+    send.hidden = value;
     stop.hidden = !value;
     $('.tutor-clear').disabled = value;
     retry.hidden = true;
