@@ -16,3 +16,13 @@ El 9 de noviembre de 2026 el usuario aportó `TeslaGifCode.webp`: 800 × 450 px,
 - `brand/teslacode-still.webp`: 3998 B. Es el favicon y la alternativa para pausa, logo fuera de pantalla, pestaña oculta, movimiento reducido, ahorro de datos o fallo de la animación.
 
 El logo visible solicita la animación en todas las secciones, incluidas las rutas, el laboratorio, el progreso y las lecciones. El logo oculto por el diseño responsive conserva la imagen estática y la pestaña oculta detiene el giro. Se mantiene un único montaje en la navegación para continuar al cambiar de vista y reutilizar el archivo cacheado. Hay un botón de pausa permanente en la cabecera. La marca mide 96 px en la barra lateral, 56 px en la barra compacta y 48–56 px en móvil/tableta, usando los mismos archivos optimizados. El fondo negro azulado y el borde cian se mantienen también en el tema claro. El original aportado permanece en su ubicación del usuario y no forma parte de la descarga del sitio.
+
+## Analizador de JavaScript
+
+`vendor/acorn/acorn.mjs` es una copia sin modificar de `dist/acorn.mjs` de
+[Acorn 8.15.0](https://github.com/acornjs/acorn), fijado en `package-lock.json`.
+Su licencia MIT se conserva en `vendor/acorn/LICENSE`. Las pruebas comparan ambos
+archivos con la dependencia instalada. Se carga bajo demanda al comprobar contratos
+que exigen declaraciones o formas sintácticas; permite localizar inicializadores
+sin ejecutar el código del estudiante en la página principal. La ejecución sigue
+ocurriendo en Workers aislados. No añade herramientas que el principiante deba instalar.

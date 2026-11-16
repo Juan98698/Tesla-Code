@@ -73,3 +73,9 @@ La entrega de video prioriza calidad y cobertura completa de la pantalla: 1920×
 El usuario exige aplicar a toda Fundamentos la progresión entender → implementar → reescribir y comprobar → integrar y depurar, desde cero y sin conocimientos previos supuestos. Cada reto produce una entrega que se usa después; las explicaciones, ejemplos, prácticas y evaluación deben corresponder a las capacidades ya introducidas. El acuerdo y las condiciones de cierre se conservan en [fundamentos-learning-model.md](fundamentos-learning-model.md). `AGENTS.md` dirige a futuras sesiones a ese documento y recuerda usar las seis skills de desarrollo cuando sean pertinentes.
 
 Primera migración implementada: ocho lecciones del módulo inicial construyen Mi plan de práctica, con cuatro etapas, recuperación del código real aprobado, bitácora, descarga de entregas y respaldo/importación de ese trabajo. Los diez temas publicados posteriores requieren todavía migración; los doce bloques futuros siguen en preparación. La revisión independiente y el piloto no se dan por realizados.
+
+Corrección del primer lote: las ocho lecciones conservan un contrato de reporte
+acumulativo y justifican sus cambios; las reescrituras comparan la entrega real
+anterior con los mismos casos. Cada integración reproduce una incidencia antes
+de registrar diagnóstico y comprobar la versión protegida. Se requieren respuestas
+estructuradas y explicación entregada, cuya revisión humana continúa pendiente.

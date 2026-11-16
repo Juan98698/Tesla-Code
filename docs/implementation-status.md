@@ -291,3 +291,46 @@ Los puentes existentes se reutilizan como repasos. Las nuevas lecciones de Pytho
 Se añaden controles de publicación para el orden y las referencias de las etapas. También se amplían los casos de comparación, suma y máximo que admitían errores habituales, y las predicciones numéricas aceptan representaciones equivalentes.
 
 Pendiente: migrar los otros diez temas publicados, desarrollar los doce bloques avanzados con el modelo acordado, revisión independiente, piloto con principiantes y comprobación longitudinal de retención. No se declara completada toda la ruta por este primer lote.
+
+## Corrección del encadenamiento en las ocho lecciones iniciales
+
+16 de noviembre de 2026. El primer módulo conserva el reporte completo entre
+incrementos y declara el motivo de cada cambio. Meta y recordatorio permanecen
+en las lecciones posteriores; los 30 minutos confirmados se usan al calcular 150,
+con 20 como referencia histórica. La tarjeta final conserva las capacidades
+anteriores y compara el plan base con uno ampliado.
+
+Las 32 etapas mantienen sus IDs. Entender exige decisiones y explicación entregada;
+las 24 etapas de código incorporan predicciones o trazas estructuradas distintas.
+Las ocho reescrituras comparan ejecuciones de la versión real anterior del estudiante
+con los mismos casos. Las ocho integraciones requieren ejecutar una incidencia
+independiente del borrador, identificar su causa y comprobar la versión corregida
+o protegida. La bitácora pide síntoma, entrada, hipótesis, prueba, causa y corrección.
+
+Las pruebas contrastan declaraciones/tipos y variantes de configuración cuando
+la habilidad lo exige; no basta imprimir un resultado fijo. Acorn 8.15.0, con su
+licencia MIT, analiza declaraciones y localiza inicializadores sin evaluar código
+en la página anfitriona. Su copia pública se comprueba contra la dependencia fijada.
+El editor, el ejecutor y la evaluación conservan sus responsabilidades separadas.
+Se evita aprobar una versión editada mientras se ejecutaba otra o recuperar código
+anterior durante un evento de escritura.
+
+Las explicaciones se exigen como entrega, pendiente de revisión humana, sin
+clasificación por palabras clave. Los registros guardan respuestas, código probado,
+reproducción y comparación; sobreviven a respaldo e importación. Una evaluación
+nueva necesita esas evidencias además del quiz y las prácticas. Se preservan
+completados históricos y XP; los intentos fallidos no reemplazan entregas aprobadas.
+
+El alcance continúa siendo ocho lecciones migradas: diez publicaciones posteriores
+requieren migración y doce bloques futuros siguen en preparación. La revisión
+independiente y el piloto con principiantes siguen pendientes. La verificación
+local automatizada comprueba contratos y funcionamiento, no acredita comprensión
+humana ni ausencia absoluta de vacíos pedagógicos.
+
+Verificación local: 236 pruebas unitarias aprobadas, 55 módulos con cobertura
+por archivo y 98,91 % de líneas globales. Pasan las soluciones y variantes de los
+contratos, los contraejemplos, el respaldo de evidencias y la conservación de XP.
+El recorrido JavaScript comprueba las 18 publicaciones en 1440 y 390 px; audio
+comprueba también la alternativa de 320 px. Las auditorías automáticas de los
+paneles de evidencia cubren ambos temas en escritorio y móvil. Formato, contenido,
+recursos versionados y generación del contexto docente se verifican por separado.

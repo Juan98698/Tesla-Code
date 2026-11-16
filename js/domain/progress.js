@@ -1,3 +1,4 @@
+import { projectAssessmentReady } from './project-assessment.js';
 import { XP, updateStreak } from './gamification.js';
 export function recordAttempt(state, key, results, now = new Date()) {
   const score = Math.round((results.filter((r) => r.correct).length / results.length) * 100);
@@ -20,7 +21,11 @@ export function completeIfReady(state, key, data) {
   if (state.completed.includes(key)) return true;
   if (
     (state.lessons[key]?.best ?? 0) < 80 ||
-    !data.activities.every((a) => state.practices.includes(`${key}/${a.id}`))
+    !data.activities.every(
+      (a) =>
+        state.practices.includes(`${key}/${a.id}`) &&
+        projectAssessmentReady(a, state.projectArtifacts?.[`${key}/${a.id}`]),
+    )
   )
     return false;
   state.completed.push(key);

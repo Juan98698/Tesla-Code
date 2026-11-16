@@ -10,13 +10,23 @@ import { recordAttempt, completeIfReady } from '../js/domain/progress.js';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const lesson = (id, route = 'fundamentos') => read(`content/lessons/${route}/${id}.json`);
 const passes = (code, activity) =>
-  activity.cases.every((c) => runJavaScript(code, c, false, activity.entrypoint).result.passed);
+  activity.cases.every(
+    (c) =>
+      runJavaScript(code, c, false, activity.entrypoint, activity.bindings, activity.syntax).result
+        .passed,
+  );
 
 test('numeric addition rejects the former conversion shortcut and accepts equivalent conversion', () => {
   const activity = lesson('js-entradas-y-conversion').activities.find((a) => a.id.endsWith('-a2'));
-  assert.equal(passes(activity.solution.replace('Number(texto)', 'texto'), activity), false);
+  assert.equal(
+    passes(activity.solution.replace('Number(textoMinutos)', 'textoMinutos'), activity),
+    false,
+  );
   assert.equal(passes(activity.solution, activity), true);
-  assert.equal(passes(activity.solution.replace('minutos + 5', '5 + minutos'), activity), true);
+  assert.equal(
+    passes(activity.solution.replace('minutos * dias', 'dias * minutos'), activity),
+    true,
+  );
 });
 
 test('transfer cases reject plausible mistakes about boundaries, state, empty data and contracts', () => {
@@ -101,7 +111,11 @@ test('new learners must analyze reuse while historic completions keep their acce
     .map((a) => `${key}/${a.id}`);
   assert.equal(completeIfReady(state, key, data), false);
   state.practices.push(`${key}/analizar-reutilizacion`);
-  assert.equal(completeIfReady(state, key, data), true);
+  assert.equal(
+    completeIfReady(state, key, data),
+    false,
+    'Practice flags alone cannot replace evidence',
+  );
   const historical = { ...emptyProgress(), completed: [key], xp: 90 };
   assert.equal(completeIfReady(historical, key, data), true);
   assert.equal(historical.xp, 90);

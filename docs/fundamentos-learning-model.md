@@ -71,3 +71,34 @@ con revisión y entrega de módulos completos, sin simular contenido avanzado.
 - Se verifican progreso antiguo, teclado, móvil, borradores y respaldo.
 - Revisión docente independiente y piloto con principiantes siguen pendientes
   hasta que se realicen. Las pruebas automáticas no sustituyen esa evidencia.
+
+## Contrato de evidencias en las ocho lecciones iniciales
+
+Las cuatro etapas requieren entregar una explicación. Las tres de código exigen
+además una predicción estructurada; integración añade un diagnóstico y la ejecución
+de una incidencia defectuosa independiente del borrador recuperado. Se conservan
+salida/error observado, respuestas, código comprobado y resultados de comparación.
+La bitácora pide predicción, traza y justificación; en depuración pide síntoma,
+entrada, hipótesis, prueba, causa y corrección. Entregar escritura libre no implica
+que su razonamiento haya recibido aprobación humana: queda pendiente de revisión.
+
+Cada incremento declara las capacidades conservadas y el motivo de su cambio.
+El reporte mantiene saludo, título y estado; luego añade sesión/duración/días,
+meta/recordatorio, referencia de duración, total, nombre y comparación ampliada.
+La confirmación de 30 minutos en `let` continúa como dato actual al calcular 150
+minutos; 20 se mantiene como referencia histórica. Ninguna reescritura cambia ese
+contrato por accidente.
+
+La reescritura ejecuta la versión anterior real del estudiante y compara las
+salidas completas para los mismos casos comunes. Las variantes nuevas se verifican
+por separado: la versión anterior no recibe requisitos aún no introducidos.
+Comentarios, declaraciones y tipos se contrastan cuando forman parte de la
+habilidad anunciada. Las variantes de configuración cambian solo inicializadores
+analizados sintácticamente, dentro del ejecutor aislado; no se ejecuta código del
+estudiante en la página anfitriona. No se califican explicaciones por palabras clave.
+
+Una evaluación nueva no se completa únicamente con quiz y marcas históricas de
+práctica: necesita la evidencia de cada etapa. Se conservan las lecciones ya
+completadas, sus IDs y XP. Los borradores fallidos no reemplazan entregas aprobadas.
+Cambiar la explicación obliga a registrarla de nuevo; editar código exige comprobar
+esa nueva versión. El respaldo incluye los registros de evidencia.

@@ -53,7 +53,7 @@ export function mountCaseStudy(section, activity, isSolved, onSolve, onEvidence 
     report.hidden = !result.passed;
     section.querySelector('[data-case-report]').textContent = caseStudyReport(activity, responses);
     if (result.passed) {
-      onEvidence();
+      if (onEvidence() === false) return;
       section.querySelector('.badge').textContent = '✓ Resuelta';
       section.querySelector('.badge').classList.add('live');
       if (!recorded) {

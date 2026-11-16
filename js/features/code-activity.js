@@ -66,6 +66,7 @@ export function mountCodeActivity(
       setItem: (key, value) => globalThis.localStorage.setItem(key, value),
     },
     artifactFor = () => undefined,
+    assessment,
   } = {},
 ) {
   const editor = section.querySelector('textarea');
@@ -122,14 +123,14 @@ export function mountCodeActivity(
       const source = artifactFor(activity.learningStep.from);
       if (!source?.verifiedAt || !source.code) return;
       editor.value = source.code;
-      editor.oninput();
+      editor.dispatchEvent(new section.ownerDocument.defaultView.Event('input'));
       editor.focus();
     };
   stop.onclick = () => runner.cancel();
   section.querySelector('[data-reset]').onclick = () => {
     runner.cancel();
     editor.value = activity.starter;
-    editor.oninput();
+    editor.dispatchEvent(new section.ownerDocument.defaultView.Event('input'));
     editor.focus();
   };
   clear.onclick = () => {
@@ -139,7 +140,8 @@ export function mountCodeActivity(
     status.textContent = 'Consola limpia.';
   };
   const execute = async (mode) => {
-    if (run.disabled) return;
+    if (run.disabled || (mode === 'check' && assessment && !assessment.beforeCheck())) return;
+    const submittedCode = editor.value;
     run.disabled = true;
     if (check) check.disabled = true;
     clear.disabled = true;
@@ -165,7 +167,13 @@ export function mountCodeActivity(
                 },
               ],
             }
-          : { code: editor.value, cases: activity.cases, entrypoint: activity.entrypoint };
+          : {
+              code: submittedCode,
+              cases: activity.cases,
+              entrypoint: activity.entrypoint,
+              bindings: activity.bindings,
+              syntax: activity.syntax,
+            };
       const result = await runner.run(
         job,
         (phase) => {
@@ -223,7 +231,14 @@ export function mountCodeActivity(
             )}</pre></li>`,
         )
         .join('')}</ul>`;
-      if (correct) {
+      if (correct && editor.value !== submittedCode) {
+        feedback.textContent =
+          'El código cambió durante la prueba. Comprueba esta versión de nuevo.';
+        return;
+      }
+      if (correct && assessment) {
+        await assessment.checked(submittedCode, result);
+      } else if (correct) {
         section.querySelector('.badge').textContent = '✓ Resuelta';
         section.querySelector('.badge').classList.add('live');
         onSolve(activity.id);

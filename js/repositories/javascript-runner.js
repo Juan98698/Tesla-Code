@@ -8,6 +8,7 @@ export function javascriptWorker() {
     let stdout = '',
       position = 0,
       emitted = -Infinity;
+    const consoleArguments = [];
     const send = self.postMessage.bind(self);
     const display = (value) => {
       if (typeof value !== 'object' || value === null) return String(value);
@@ -18,6 +19,7 @@ export function javascriptWorker() {
       }
     };
     const print = (...values) => {
+      if (item.consoleArguments) consoleArguments.push(values);
       const line = values.map(display).join(' ') + '\n';
       if (stdout.length + line.length > 6000) throw Error('La salida supera 6000 caracteres.');
       stdout += line;
@@ -54,6 +56,7 @@ export function javascriptWorker() {
         keys.every((key) => Object.hasOwn(actual, key) && same(actual[key], expected[key]))
       );
     };
+    let boundMatch = true;
     let returned,
       unchanged = true;
     const probe = '__teslacode_call_' + Math.random().toString(36).slice(2);
@@ -81,6 +84,29 @@ export function javascriptWorker() {
         ' === "function" ? ' +
         entrypoint +
         ' : undefined);';
+    }
+    if (!callable && !exploratory && item.expectedBindings) {
+      const names = Object.keys(item.expectedBindings);
+      if (names.some((name) => !/^[a-zA-Z_$][\w$]*$/.test(name))) throw Error('Dato inválido.');
+      self[probe] = (values) => {
+        boundMatch = same(values, item.expectedBindings);
+      };
+      suffix =
+        '\n;self[' +
+        JSON.stringify(probe) +
+        ']({' +
+        names
+          .map(
+            (name) =>
+              JSON.stringify(name) +
+              ': (typeof ' +
+              name +
+              ' === "undefined" ? undefined : ' +
+              name +
+              ')',
+          )
+          .join(',') +
+        '});';
     }
     const url = URL.createObjectURL(
       new Blob([code + suffix + '\n//# sourceURL=teslacode-ejercicio.js'], {
@@ -116,11 +142,18 @@ export function javascriptWorker() {
       ? format(item.expected)
       : (item.stdout ?? '').replaceAll('\r\n', '\n');
     const actual = callable ? format(returned) : stdout;
+    const argumentsMatch =
+      !item.consoleArguments ||
+      Object.entries(item.consoleArguments).every(([label, value]) =>
+        consoleArguments.some(
+          (args) => args.length === 2 && args[0] === label && same(args[1], value),
+        ),
+      );
     const passed =
       !failure &&
       (callable
         ? same(returned, item.expected) && unchanged && stdout === (item.stdout ?? '')
-        : stdout === expected);
+        : stdout === expected && boundMatch && argumentsMatch);
     send({
       type: 'result',
       result: {
@@ -129,6 +162,15 @@ export function javascriptWorker() {
         actual,
         expected,
         passed: exploratory ? null : passed,
+        ...(!boundMatch
+          ? { error: 'Los datos declarados no tienen los valores o tipos del contrato.' }
+          : {}),
+        ...(!argumentsMatch
+          ? {
+              error:
+                'Presenta los rótulos y sus cantidades como valores separados, según el contrato.',
+            }
+          : {}),
         ...(callable && !unchanged
           ? { error: 'La función modificó los argumentos; debe conservarlos.' }
           : callable && stdout !== (item.stdout ?? '')
@@ -176,7 +218,12 @@ export function javascriptFrameBootstrap(channel, source) {
         if (current === worker)
           send({ type: 'error', message: event.message || 'No se pudo ejecutar JavaScript.' });
       };
-      worker.postMessage({ code, item, entrypoint, exploratory: mode === 'run' });
+      worker.postMessage({
+        code: item.source ?? code,
+        item,
+        entrypoint,
+        exploratory: mode === 'run',
+      });
     };
     send({ type: 'running' });
     next();
@@ -212,12 +259,17 @@ export function createJavaScriptRunner({
   loadTimeout = 10000,
 } = {}) {
   let active;
-  const cancel = () => active?.(Error('Ejecución detenida.'));
+  let revision = 0;
+  const cancel = () => {
+    revision++;
+    active?.(Error('Ejecución detenida.'));
+  };
   return {
     cancel,
     dispose: cancel,
-    run(job, onStatus = () => {}, onOutput = () => {}) {
+    async run(job, onStatus = () => {}, onOutput = () => {}) {
       cancel();
+      const runRevision = revision;
       if (
         typeof job.code !== 'string' ||
         !job.code.trim() ||
@@ -230,6 +282,11 @@ export function createJavaScriptRunner({
         job.cases.length > JAVASCRIPT_LIMITS.cases
       )
         return Promise.reject(Error('El ejercicio no tiene casos válidos.'));
+      if ((job.bindings || job.syntax) && job.mode !== 'run') {
+        const { prepareBindingCases } = await import('../domain/javascript-contract.js');
+        if (revision !== runRevision) throw Error('Ejecución detenida.');
+        job = { ...job, cases: prepareBindingCases(job.code, job.cases, job.bindings, job.syntax) };
+      }
       return new Promise((resolve, reject) => {
         const channel = 'teslacode-js-' + crypto.randomUUID(),
           frame = document.createElement('iframe');

@@ -113,9 +113,18 @@ function updateCompletion(route, meta, data) {
   const key = lessonKey(route.id, meta.id),
     wasComplete = state.completed.includes(key);
   const complete = completeIfReady(state, key, data);
-  if (complete && !wasComplete) toast('¡Una nueva habilidad! Lección completada · +50 XP');
+  if (complete && !wasComplete)
+    toast(
+      data.learningProject?.version === 2
+        ? 'Entrega técnica y comprobaciones completadas · +50 XP. Explicación pendiente de revisión.'
+        : '¡Una nueva habilidad! Lección completada · +50 XP',
+    );
   if ($('lesson-status')) {
-    $('lesson-status').textContent = complete ? '✓ Completada' : 'Aprende · Practica · Comprueba';
+    $('lesson-status').textContent = complete
+      ? data.learningProject?.version === 2
+        ? '✓ Entrega técnica completada · explicación pendiente de revisión'
+        : '✓ Completada'
+      : 'Aprende · Practica · Comprueba';
     $('lesson-status').classList.toggle('live', complete);
   }
   const saved = save();
@@ -375,7 +384,9 @@ async function render() {
               const result = {
                 text: complete
                   ? next
-                    ? 'Práctica y comprobación completas. Puedes avanzar o volver a explorar.'
+                    ? data.learningProject?.version === 2
+                      ? 'Entrega técnica y comprobaciones completas. Tu explicación está pendiente de revisión. Puedes avanzar o revisar tus pruebas.'
+                      : 'Práctica y comprobación completas. Puedes avanzar o volver a explorar.'
                     : route.lessons.every(isPublished)
                       ? `¡Completaste la ruta ${route.name}! Revisa tus logros y elige un nuevo camino.`
                       : 'Completaste las lecciones disponibles de esta ruta. Los demás temas siguen en preparación.'

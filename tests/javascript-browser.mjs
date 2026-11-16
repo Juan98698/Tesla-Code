@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { withBrowser, answerQuiz, waitForFiniteAnimations } from './support/browser.mjs';
 import { indexRoute } from '../js/domain/curriculum.js';
-import { solveActivity } from './support/python.mjs';
+import { solveActivity, prepareProjectEvidence } from './support/python.mjs';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const route = indexRoute(read('content/curriculum/fundamentos.json'));
 const module = route.lessons.filter((meta) => meta.status === 'published');
@@ -77,6 +77,7 @@ await withBrowser(4323, async (browser, origin) => {
         );
         await solveActivity(page, data.activities[0]);
         await first.locator('.code-editor').fill('console.log("incorrecto");');
+        await prepareProjectEvidence(page, data.activities[1]);
         await first.locator('[data-check]').click();
         await first.locator('.practice-feedback.bad').waitFor();
         await first.locator('.code-editor').fill('console.log("un borrador");');
@@ -158,6 +159,7 @@ await withBrowser(4323, async (browser, origin) => {
             .inputValue(),
           note,
         );
+        await solveActivity(page, { ...lastActivity, solution: lastActivity.solution + '\n' });
         await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
         const violations = await page.evaluate(async () =>
           (

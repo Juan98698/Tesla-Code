@@ -1,5 +1,6 @@
 import vm from 'node:vm';
 import { javascriptWorker } from '../../js/repositories/javascript-runner.js';
+import { prepareBindingCases } from '../../js/domain/javascript-contract.js';
 
 // Runs trusted repository examples with the same worker evaluator, using V8's
 // classic-script semantics. Browser tests separately exercise actual Worker/CSP.
@@ -8,7 +9,13 @@ export function runJavaScript(
   item = { name: 'programa', stdout: '' },
   exploratory = false,
   entrypoint,
+  bindings,
+  syntax,
 ) {
+  if ((bindings || syntax) && !exploratory) {
+    item = prepareBindingCases(code, [item], bindings, syntax)[0];
+    code = item.source;
+  }
   const messages = [],
     blobs = new Map();
   let context,

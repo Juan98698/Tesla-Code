@@ -123,7 +123,7 @@ test('steps unlock in order, carry the actual approved draft and keep failed att
     jobs = 0;
   const dispose = mountActivities(
     root,
-    data.activities,
+    data.activities.map(({ assessment, ...a }) => a),
     () => false,
     (id) => {
       solved.push(id);

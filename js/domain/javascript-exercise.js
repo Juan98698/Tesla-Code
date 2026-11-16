@@ -19,6 +19,32 @@ export function javascriptExerciseErrors(exercise) {
     exercise.solution.length > JAVASCRIPT_LIMITS.source
   )
     errors.push('Falta una solución JavaScript comprobable.');
+  const simpleMap = (value) =>
+    value &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.keys(value).every((key) => /^[a-zA-Z_$][\w$]*$/.test(key));
+  if (
+    exercise.bindings !== undefined &&
+    (!simpleMap(exercise.bindings) ||
+      Object.values(exercise.bindings).some((v) => !['const', 'let'].includes(v)) ||
+      exercise.entrypoint !== undefined)
+  )
+    errors.push(
+      'Las declaraciones deben identificar nombres simples y const o let en un programa sin función de entrada.',
+    );
+  if (
+    exercise.syntax !== undefined &&
+    (!exercise.syntax ||
+      typeof exercise.syntax !== 'object' ||
+      Array.isArray(exercise.syntax) ||
+      !Object.keys(exercise.syntax).length ||
+      Object.keys(exercise.syntax).some((k) => !['comment', 'singleQuotes'].includes(k)) ||
+      Object.values(exercise.syntax).some((v) => v !== true))
+  )
+    errors.push(
+      'Las comprobaciones de sintaxis deben declarar comentarios o comillas simples explícitamente.',
+    );
   const callable = exercise.entrypoint !== undefined;
   if (
     callable &&
@@ -48,6 +74,24 @@ export function javascriptExerciseErrors(exercise) {
           !jsonValue(item.expected))
       )
         errors.push('Cada caso de función necesita argumentos y un resultado JSON finito.');
+      for (const field of ['overrides', 'expectedBindings'])
+        if (
+          item?.[field] !== undefined &&
+          (callable ||
+            !simpleMap(item[field]) ||
+            !jsonValue(item[field]) ||
+            Object.keys(item[field]).some((key) => !Object.hasOwn(exercise.bindings ?? {}, key)))
+        )
+          errors.push('Las variantes y valores observados necesitan declaraciones identificadas.');
+      if (
+        item?.consoleArguments !== undefined &&
+        (callable ||
+          !item.consoleArguments ||
+          typeof item.consoleArguments !== 'object' ||
+          Array.isArray(item.consoleArguments) ||
+          !jsonValue(item.consoleArguments))
+      )
+        errors.push('Los argumentos de presentación deben tener valores JSON.');
       if (item?.preserveArgs !== undefined && (!callable || typeof item.preserveArgs !== 'boolean'))
         errors.push('Conservar argumentos es una opción booleana de los casos de función.');
       if (

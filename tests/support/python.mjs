@@ -41,6 +41,31 @@ export async function installPythonRuntime(context, origin) {
     }
   });
 }
+export async function prepareProjectEvidence(page, activity) {
+  if (!activity.assessment) return;
+  const section = page.locator('#activities [data-activity="' + activity.id + '"]');
+  await section
+    .locator('[data-project-journal]')
+    .fill(
+      'Predicción y traza contrastadas con los casos del contrato. La explicación entregada en esta prueba automática requiere revisión humana.',
+    );
+  if (activity.assessment.debug) {
+    await section.locator('[data-reproduce]').click();
+    await page.waitForFunction(
+      (id) =>
+        document
+          .querySelector(`[data-activity="${id}"] [data-assessment-status]`)
+          .textContent.startsWith('Incidencia ejecutada'),
+      activity.id,
+    );
+  }
+  for (const q of activity.assessment.questions) {
+    if (q.type === 'choice')
+      await section.locator(`[data-response="${q.id}"][value="${q.answer}"]`).check();
+    else await section.locator(`[data-response="${q.id}"]`).fill(q.answers[0]);
+  }
+  await section.locator('[data-reasoning-form] button[type=submit]').click();
+}
 export async function solveActivity(page, activity) {
   const section = page.locator('#activities [data-activity="' + activity.id + '"]');
   if (['python', 'javascript'].includes(activity.type))
@@ -51,7 +76,8 @@ export async function solveActivity(page, activity) {
         .locator(`[data-decision="${decision.id}"] input[value="${decision.answer}"]`)
         .check();
   } else await section.locator('input').fill(activity.answers[0]);
-  await section.locator('button[type=submit]').click();
+  await prepareProjectEvidence(page, activity);
+  await section.locator('form').first().locator('button[type=submit]').click();
   try {
     await section.locator('.badge.live').waitFor({ timeout: 60000 });
   } catch (error) {

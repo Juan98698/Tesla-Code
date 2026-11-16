@@ -1,3 +1,4 @@
+import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 import { createHash } from 'node:crypto';
 
 // Hash semántico: el formato del JSON no obliga a repetir una revisión.
@@ -104,6 +105,14 @@ export function learningProjectErrors(
     !project.increment.trim()
   )
     errors.push('El proyecto necesita identidad e incremento explícitos.');
+  if (
+    project.version === 2 &&
+    (!project.changeReason?.trim() ||
+      !Array.isArray(project.capabilities) ||
+      !project.capabilities.length ||
+      new Set(project.capabilities).size !== project.capabilities.length)
+  )
+    errors.push('El proyecto debe declarar capacidades conservadas y justificar el cambio.');
   if (activities.length !== phases.length)
     errors.push('El proyecto necesita cuatro etapas completas.');
   activities.forEach((a, i) => {
@@ -128,6 +137,60 @@ export function learningProjectErrors(
       errors.push(
         'La comprensión necesita análisis y los incrementos necesitan código ejecutable.',
       );
+    if (project.version === 2) {
+      const proof = a.assessment;
+      if (!proof || !Array.isArray(proof.questions))
+        errors.push('Cada etapa necesita un contrato de evidencias.');
+      else {
+        if (i > 0 && !proof.questions.length)
+          errors.push('Falta una predicción o traza comprobable.');
+        const qids = new Set();
+        for (const q of proof.questions) {
+          if (
+            !/^[a-z0-9-]+$/.test(q.id ?? '') ||
+            qids.has(q.id) ||
+            !q.prompt?.trim() ||
+            !q.explanation?.trim() ||
+            !['choice', 'text'].includes(q.type)
+          )
+            errors.push('Evidencia estructurada inválida.');
+          qids.add(q.id);
+          if (
+            q.type === 'choice' &&
+            (!Array.isArray(q.options) ||
+              q.options.length < 2 ||
+              !Number.isInteger(q.answer) ||
+              !q.options[q.answer])
+          )
+            errors.push('Decisión de evidencia sin respuesta válida.');
+          if (
+            q.type === 'text' &&
+            (!Array.isArray(q.answers) ||
+              !q.answers.length ||
+              q.answers.some((v) => typeof v !== 'string' || !v.trim()))
+          )
+            errors.push('Predicción sin respuestas comprobables.');
+        }
+        if (Boolean(proof.rewrite) !== (i === 2))
+          errors.push('Solo la reescritura debe comparar con el incremento anterior.');
+        if (i === 3) {
+          if (!proof.debug?.id || !proof.debug.context?.trim())
+            errors.push('Falta la incidencia reproducible.');
+          else
+            errors.push(
+              ...javascriptExerciseErrors({
+                starter: '',
+                solution: proof.debug.code,
+                cases: proof.debug.cases,
+              }),
+            );
+        }
+      }
+      if (i > 0 && Array.isArray(project.capabilities))
+        for (const c of a.cases ?? [])
+          if (project.capabilities.some((label) => !c.stdout.includes(label)))
+            errors.push('Un caso perdió una capacidad del reporte acumulado.');
+    }
     previousSources.add(`${key}/${a.id}`);
   });
   return errors;

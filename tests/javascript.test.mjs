@@ -57,7 +57,14 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       assert.deepEqual(javascriptExerciseErrors(activity), [], activity.id);
       for (const item of activity.cases) {
         assert.equal(
-          runJavaScript(activity.solution, item, false, activity.entrypoint).result.passed,
+          runJavaScript(
+            activity.solution,
+            item,
+            false,
+            activity.entrypoint,
+            activity.bindings,
+            activity.syntax,
+          ).result.passed,
           true,
           activity.id + '/' + item.name,
         );
@@ -72,6 +79,8 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
             item,
             false,
             activity.entrypoint,
+            activity.bindings,
+            activity.syntax,
           ).result.passed,
           true,
         );
@@ -82,7 +91,7 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
   }
   assert.equal(examples, 25);
   assert.equal(activities, 57);
-  assert.equal(cases, 164);
+  assert.equal(cases, 176);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {
