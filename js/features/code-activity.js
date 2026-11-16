@@ -233,6 +233,9 @@ export function mountCodeActivity(
 export function mountCodeExamples(root, data, options = {}) {
   const cleanups = [];
   const blocks = [...root.querySelectorAll('pre[data-language]')];
+  // Static code and reference output can overflow on narrow screens too.
+  // Keep them reachable by keyboard, even without an executable example.
+  for (const block of blocks) block.tabIndex = 0;
   for (const example of data.examples ?? []) {
     const block = blocks.find(
       (node) =>

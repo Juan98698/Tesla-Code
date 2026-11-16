@@ -81,6 +81,21 @@ test('exploring shows stdout, keeps custom inputs separate and never completes a
   dispose();
 });
 
+test('static lesson blocks remain keyboard reachable without an executable console', (t) => {
+  installDOM(t);
+  const root = document.getElementById('root');
+  root.innerHTML =
+    '<pre data-language="javascript">console.log("Hola");</pre><pre data-language="pseudocode">MOSTRAR Hola</pre><pre data-language="text">Hola</pre>';
+  const dispose = mountCodeExamples(root, {});
+  for (const block of root.querySelectorAll('pre')) {
+    assert.equal(block.tabIndex, 0);
+    block.focus();
+    assert.equal(document.activeElement, block);
+  }
+  assert.equal(root.querySelector('.code-example'), null);
+  dispose();
+});
+
 test('every declared browser example gets an independent console; local examples explain the boundary', async (t) => {
   installDOM(t);
   const root = document.getElementById('root');

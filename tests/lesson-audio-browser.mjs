@@ -140,6 +140,21 @@ await withTutorBrowser(async ({ browser, origin, calls }) => {
     await noApi.getByRole('button', { name: 'Escuchar teoría', exact: true }).isDisabled(),
     true,
   );
+  const codeBlocks = noApi.locator('#lesson pre[data-language="javascript"]');
+  const overflowingIndex = await codeBlocks.evaluateAll((blocks) =>
+    blocks.findIndex((block) => block.scrollWidth > block.clientWidth),
+  );
+  assert.ok(
+    overflowingIndex >= 0,
+    'The narrow viewport exercises a genuinely scrollable code block',
+  );
+  const overflowing = codeBlocks.nth(overflowingIndex);
+  await overflowing.focus();
+  await noApi.keyboard.press('ArrowRight');
+  await noApi.waitForFunction(() => {
+    const block = document.activeElement;
+    return block?.matches('#lesson pre[data-language="javascript"]') && block.scrollLeft > 0;
+  });
   await audit(noApi, 'unsupported reader 320');
   await fallback.close();
   const late = await learningContext(browser, {
