@@ -13,10 +13,10 @@ const passes = (code, activity) =>
   activity.cases.every((c) => runJavaScript(code, c, false, activity.entrypoint).result.passed);
 
 test('numeric addition rejects the former conversion shortcut and accepts equivalent conversion', () => {
-  const activity = lesson('js-proyecto-tarjeta').activities[1];
-  assert.equal(passes(activity.starter, activity), false);
-  assert.equal(passes('console.log(prompt("Minutos") + 5);', activity), false);
-  assert.equal(passes('console.log(5 + Number(prompt("Minutos")));', activity), true);
+  const activity = lesson('js-entradas-y-conversion').activities.find((a) => a.id.endsWith('-a2'));
+  assert.equal(passes(activity.solution.replace('Number(texto)', 'texto'), activity), false);
+  assert.equal(passes(activity.solution, activity), true);
+  assert.equal(passes(activity.solution.replace('minutos + 5', '5 + minutos'), activity), true);
 });
 
 test('transfer cases reject plausible mistakes about boundaries, state, empty data and contracts', () => {

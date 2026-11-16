@@ -1,5 +1,6 @@
 import { normalizeProgress } from './progress-state.js';
 import { XP } from './gamification.js';
+import { validProjectArtifact, mergeProjectArtifacts } from './learning-project.js';
 
 export const MAX_BACKUP_BYTES = 2 * 1024 * 1024;
 const object = (value) => value && typeof value === 'object' && !Array.isArray(value);
@@ -99,6 +100,14 @@ export function parseBackup(text) {
       }
     }
   }
+  if (
+    raw.projectArtifacts !== undefined &&
+    (!object(raw.projectArtifacts) ||
+      Object.entries(raw.projectArtifacts).some(
+        ([key, value]) => !validProjectArtifact(key, value),
+      ))
+  )
+    throw Error('Las entregas del proyecto no son válidas.');
   return normalizeProgress(raw);
 }
 
@@ -106,6 +115,7 @@ export function mergeProgress(current, imported) {
   const a = normalizeProgress(current),
     b = normalizeProgress(imported);
   const result = structuredClone(a);
+  result.projectArtifacts = mergeProjectArtifacts(a.projectArtifacts, b.projectArtifacts);
   for (const key of ['completed', 'practices', 'rewards', 'bookmarks'])
     result[key] = unique(a[key], b[key]);
   // Conserva XP antiguo sin desglose, sin sumarlo dos veces al importar otra copia.

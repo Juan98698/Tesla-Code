@@ -79,6 +79,59 @@ export function publicationDepthErrors(data) {
     );
   return errors;
 }
+
+export function learningProjectErrors(
+  data,
+  key,
+  previousSources = new Set(),
+  previousLesson = null,
+) {
+  if (!data.learningProject) return [];
+  const errors = [],
+    phases = ['entender', 'implementar', 'reescribir', 'integrar'];
+  const activities = data.activities ?? [],
+    project = data.learningProject;
+  if (
+    previousLesson ? !project.previous?.startsWith(`${previousLesson}/`) : project.previous !== null
+  )
+    errors.push('El proyecto debe recuperar la entrega de la lección anterior.');
+  if (
+    typeof project.id !== 'string' ||
+    !/^[a-z0-9-]+$/.test(project.id) ||
+    typeof project.name !== 'string' ||
+    !project.name.trim() ||
+    typeof project.increment !== 'string' ||
+    !project.increment.trim()
+  )
+    errors.push('El proyecto necesita identidad e incremento explícitos.');
+  if (activities.length !== phases.length)
+    errors.push('El proyecto necesita cuatro etapas completas.');
+  activities.forEach((a, i) => {
+    const step = a.learningStep;
+    if (!step || step.phase !== phases[i] || step.project !== project.id) {
+      errors.push('La etapa no sigue el ciclo de aprendizaje del proyecto.');
+      return;
+    }
+    if (
+      !['label', 'input', 'output', 'reflection'].every(
+        (field) => typeof step[field] === 'string' && step[field].trim(),
+      )
+    )
+      errors.push('Faltan entrada, entrega o reflexión de la etapa.');
+    const requirements = i === 0 ? [] : [activities[i - 1].id];
+    if (JSON.stringify(step.requires) !== JSON.stringify(requirements))
+      errors.push('Cada etapa debe exigir la anterior, sin saltos.');
+    const source = i < 2 ? project.previous : `${key}/${activities[i - 1].id}`;
+    if (step.from !== source || (source !== null && !previousSources.has(source)))
+      errors.push('La entrega anterior no existe o no precede a esta etapa.');
+    if ((i === 0 && a.type !== 'case-study') || (i > 0 && a.type !== 'javascript'))
+      errors.push(
+        'La comprensión necesita análisis y los incrementos necesitan código ejecutable.',
+      );
+    previousSources.add(`${key}/${a.id}`);
+  });
+  return errors;
+}
 export function coverageErrors(meta, data) {
   const errors = [],
     text = explanationText(data.html ?? '');

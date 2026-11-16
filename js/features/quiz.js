@@ -57,6 +57,7 @@ export function mountQuiz({ box, questions, onFinish }) {
       const input = document.createElement('input');
       input.required = true;
       input.autocomplete = 'off';
+      if (q.responseFormat === 'number') input.inputMode = 'decimal';
       label.append(input);
       const submit = button('Comprobar', 'btn', () => {});
       submit.type = 'submit';

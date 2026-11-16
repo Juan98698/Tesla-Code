@@ -21,10 +21,10 @@ export function caseStudyMarkup(activity) {
       .join(
         '',
       )}<div class="btns"><button class="btn small" type="submit">Comprobar mi análisis</button><button class="btn ghost small" type="button" data-hint>Necesito una pista</button></div></form>
-    <details class="case-report" hidden><summary>Ver mi informe razonado</summary><pre data-case-report></pre></details>`;
+    <details class="case-report" hidden><summary>${activity.learningStep ? 'Ver decisiones y explicación' : 'Ver mi informe razonado'}</summary><pre data-case-report tabindex="0"></pre></details>`;
 }
 
-export function mountCaseStudy(section, activity, isSolved, onSolve) {
+export function mountCaseStudy(section, activity, isSolved, onSolve, onEvidence = () => {}) {
   let recorded = isSolved(activity.id);
   section.querySelector('form').onsubmit = (event) => {
     event.preventDefault();
@@ -53,6 +53,7 @@ export function mountCaseStudy(section, activity, isSolved, onSolve) {
     report.hidden = !result.passed;
     section.querySelector('[data-case-report]').textContent = caseStudyReport(activity, responses);
     if (result.passed) {
+      onEvidence();
       section.querySelector('.badge').textContent = '✓ Resuelta';
       section.querySelector('.badge').classList.add('live');
       if (!recorded) {

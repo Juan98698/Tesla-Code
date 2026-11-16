@@ -283,3 +283,11 @@ La medición comparativa usa tres contextos nuevos por edición y tamaño (1440/
 4. Contrastar el módulo inicial con una persona docente y participantes de los perfiles previstos. Incorporar sus hallazgos antes de replicar el patrón sin cambios a todas las rutas.
 
 Los puentes existentes se reutilizan como repasos. Las nuevas lecciones de Python responden a objetivos propios y no se acreditan automáticamente por coincidencia de títulos. El contenido no redactado permanece visible como planificación.
+
+## Inicio del proyecto encadenado en Fundamentos
+
+16 de noviembre de 2026. Se registra la dirección completa en `AGENTS.md` y `fundamentos-learning-model.md`. Las ocho lecciones iniciales construyen Mi plan de práctica con 32 etapas: análisis, implementación, reescritura y entrega integrada por lección. Los incrementos recuperan el código aprobado anterior, conservan borradores propios y permiten recuperar y descargar entregas. La bitácora queda incluida en el respaldo de progreso; no se califica automáticamente su contenido. Se conserva el historial anterior sin exigir nuevas etapas a una finalización ya obtenida.
+
+Se añaden controles de publicación para el orden y las referencias de las etapas. También se amplían los casos de comparación, suma y máximo que admitían errores habituales, y las predicciones numéricas aceptan representaciones equivalentes.
+
+Pendiente: migrar los otros diez temas publicados, desarrollar los doce bloques avanzados con el modelo acordado, revisión independiente, piloto con principiantes y comprobación longitudinal de retención. No se declara completada toda la ruta por este primer lote.

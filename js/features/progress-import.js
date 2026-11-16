@@ -2,14 +2,16 @@ import { MAX_BACKUP_BYTES, mergeProgress, parseBackup } from '../domain/progress
 
 const evidence = (state) =>
   JSON.stringify(
-    ['xp', 'completed', 'practices', 'rewards', 'lessons', 'bookmarks'].map((key) => state[key]),
+    ['xp', 'completed', 'practices', 'rewards', 'lessons', 'bookmarks', 'projectArtifacts'].map(
+      (key) => state[key],
+    ),
   );
 
 export function importMarkup() {
   return (
     '<section class="card progress-import"><h2>Recuperar una copia del progreso</h2>' +
     '<p>Combina tus logros sin borrar los actuales. Se guarda una copia anterior para deshacer. ' +
-    'El archivo de progreso no incluye los borradores de código.</p>' +
+    'Incluye las entregas comprobadas y la bitácora guardada; los borradores de código quedan fuera.</p>' +
     '<label for="progress-file">Copia JSON · hasta 2 MB</label>' +
     '<input id="progress-file" type="file" accept=".json,application/json">' +
     '<p id="import-preview" role="status"></p><div class="btns">' +
@@ -70,7 +72,9 @@ export function mountProgressImport(
         candidate.completed.length +
         ' lecciones completadas y ' +
         candidate.xp +
-        ' XP. Los logros actuales se conservan.';
+        ' XP. ' +
+        Object.keys(candidate.projectArtifacts).length +
+        ' entregas o apuntes del proyecto. Los logros actuales se conservan.';
       confirm.disabled = false;
     } catch (error) {
       if (alive && version === generation) message.textContent = error.message;

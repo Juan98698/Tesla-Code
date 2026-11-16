@@ -14,6 +14,7 @@ import {
   curriculumSequenceErrors,
   learningDesignErrors,
   publicationDepthErrors,
+  learningProjectErrors,
 } from './pedagogy.mjs';
 const errors = [];
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -38,6 +39,7 @@ const concepts = new Map(),
   files = new Set(),
   entryKeys = new Set();
 let published = 0;
+const projectSources = new Set();
 for (const c of registry) {
   if (concepts.has(c.id)) fail(`Concepto duplicado: ${c.id}`);
   concepts.set(c.id, c);
@@ -113,6 +115,14 @@ for (const [key, meta] of lessons) {
       fail(`${key}: concepto requerido ${cid} sin antecedente en el mapa`);
 }
 function checkQuestion(q, where, allowed) {
+  if (
+    q.responseFormat !== undefined &&
+    (q.type !== 'text' ||
+      q.responseFormat !== 'number' ||
+      !Array.isArray(q.answers) ||
+      q.answers.some((a) => !String(a).trim() || !Number.isFinite(Number(a))))
+  )
+    fail(`${where}: formato de respuesta numérica inválido`);
   if (!q.id || !q.prompt || !q.explanation || !concepts.has(q.concept))
     fail(`${where}: faltan datos o concepto válido`);
   if (q.concept && !allowed.has(concepts.get(q.concept)?.introducedBy))
@@ -155,6 +165,18 @@ for (const [key, meta] of lessons) {
   }
   const data = read(path),
     allowed = ancestors(key);
+  for (const error of learningProjectErrors(
+    data,
+    key,
+    projectSources,
+    meta.progressionRequires?.at(-1) ?? null,
+  ))
+    fail(`${path}: ${error}`);
+  if (key.startsWith('fundamentos/js-')) {
+    const model = read('content/curriculum/fundamentos.json').learningModel;
+    if (model && !(model.pendingMigration ?? []).includes(meta.id) && !data.learningProject)
+      fail(`${path}: esta publicación requiere retos encadenados del proyecto.`);
+  }
   if (!depthBacklog.has(key))
     for (const error of publicationDepthErrors(data)) fail(path + ': ' + error);
   for (const cid of meta.requiresConcepts ?? []) {

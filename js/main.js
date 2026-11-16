@@ -17,6 +17,7 @@ import {
   includeArchives,
 } from './domain/curriculum.js';
 import { recordAttempt, completeIfReady } from './domain/progress.js';
+import { recordProjectArtifact } from './domain/learning-project.js';
 import { updateStreak } from './domain/gamification.js';
 import {
   homePage,
@@ -341,10 +342,24 @@ async function render() {
               const practiceKey = `${key}/${id}`;
               if (!state.practices.includes(practiceKey)) state.practices.push(practiceKey);
               state.streak = updateStreak(state.streak);
-              updateCompletion(route, meta, data);
+              const { saved } = updateCompletion(route, meta, data);
               refresh();
+              return saved;
             },
-            { context: key },
+            {
+              context: key,
+              reviewCompleted: state.completed.includes(key),
+              artifactFor: (source) => state.projectArtifacts[source],
+              onEvidence: (id, evidence) => {
+                if (!data.learningProject) return;
+                recordProjectArtifact(state, `${key}/${id}`, data.learningProject.id, evidence);
+                return save();
+              },
+              onJournal: (id, notes) => {
+                recordProjectArtifact(state, `${key}/${id}`, data.learningProject.id, { notes });
+                return save();
+              },
+            },
           );
           refresh();
           await mountLabs(root, version);

@@ -1,9 +1,11 @@
+import { normalizeProjectArtifacts } from './learning-project.js';
 export const emptyProgress = () => ({
   version: 2,
   xp: 0,
   streak: { count: 0, lastDay: null },
   completed: [],
   lessons: {},
+  projectArtifacts: {},
   practices: [],
   rewards: [],
   bookmarks: [],
@@ -19,6 +21,7 @@ export function normalizeProgress(raw) {
       ? [...new Set(raw[key].filter((x) => typeof x === 'string'))]
       : [];
   base.xp = Number.isFinite(raw.xp) && raw.xp >= 0 ? raw.xp : 0;
+  base.projectArtifacts = normalizeProjectArtifacts(raw.projectArtifacts);
   base.lessons = Object.fromEntries(
     Object.entries(raw.lessons && typeof raw.lessons === 'object' ? raw.lessons : {})
       .filter(

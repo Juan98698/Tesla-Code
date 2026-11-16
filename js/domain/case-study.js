@@ -53,6 +53,8 @@ export function caseStudyReport(activity, responses) {
       (decision) =>
         `${decision.prompt}\n${decision.options[responses[decision.id]]}\nJustificación: ${decision.explanation}`,
     ),
-    'Alcance: caso didáctico con material preparado; no es una inferencia ejecutada por un modelo.',
+    activity.learningStep
+      ? 'Alcance: decisiones elegidas y explicaciones del material. La justificación personal se conserva en la bitácora y requiere revisión.'
+      : 'Alcance: caso didáctico con material preparado; no es una inferencia ejecutada por un modelo.',
   ].join('\n\n');
 }

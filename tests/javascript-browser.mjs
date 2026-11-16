@@ -72,7 +72,10 @@ await withBrowser(4323, async (browser, origin) => {
       await page.getByRole('tab', { name: /Practicar/ }).click();
       await page.locator('[data-activity]').first().waitFor();
       if (index === 0) {
-        const first = page.locator('[data-activity]').first();
+        const first = page.locator(
+          `[data-activity="${data.activities.find((a) => a.type === 'javascript').id}"]`,
+        );
+        await solveActivity(page, data.activities[0]);
         await first.locator('.code-editor').fill('console.log("incorrecto");');
         await first.locator('[data-check]').click();
         await first.locator('.practice-feedback.bad').waitFor();
@@ -80,11 +83,91 @@ await withBrowser(4323, async (browser, origin) => {
         await page.reload();
         await page.locator('[data-activity]').first().waitFor();
         assert.equal(
-          await page.locator('[data-activity]').first().locator('.code-editor').inputValue(),
+          await page
+            .locator(`[data-activity="${data.activities.find((a) => a.type === 'javascript').id}"]`)
+            .locator('.code-editor')
+            .inputValue(),
           'console.log("un borrador");',
         );
       }
-      for (const activity of data.activities) await solveActivity(page, activity);
+      for (let stepIndex = 0; stepIndex < data.activities.length; stepIndex++) {
+        const activity = data.activities[stepIndex];
+        const section = page.locator(`[data-activity="${activity.id}"]`);
+        if (data.learningProject && stepIndex > 1) {
+          const previousKey = `fundamentos/${meta.id}/${data.activities[stepIndex - 1].id}`;
+          const previous = await page.evaluate(
+            (key) =>
+              JSON.parse(localStorage.getItem('teslacode:progress:v2')).projectArtifacts[key].code,
+            previousKey,
+          );
+          assert.equal(
+            await section.locator('.code-editor').inputValue(),
+            previous,
+            'The next step starts from the actual approved version',
+          );
+        }
+        const submitted =
+          data.learningProject && activity.type === 'javascript'
+            ? { ...activity, solution: activity.solution + '\n' }
+            : activity;
+        await solveActivity(page, submitted);
+        if (data.learningProject) {
+          const artifactKey = `fundamentos/${meta.id}/${activity.id}`;
+          await page.waitForFunction(
+            (key) =>
+              JSON.parse(localStorage.getItem('teslacode:progress:v2')).projectArtifacts[key]
+                ?.verifiedAt,
+            artifactKey,
+          );
+          if (activity.type === 'javascript') {
+            const artifact = await page.evaluate(
+              (key) =>
+                JSON.parse(localStorage.getItem('teslacode:progress:v2')).projectArtifacts[key],
+              artifactKey,
+            );
+            assert.equal(
+              artifact.code,
+              submitted.solution,
+              'Snapshots contain submitted code, not the reference template',
+            );
+          }
+        }
+      }
+      if (index === 0) {
+        const lastActivity = data.activities.at(-1);
+        const last = page.locator(`[data-activity="${lastActivity.id}"]`);
+        const note = 'Predije tres líneas y comparé el orden con mi versión anterior.';
+        await last.locator('[data-project-journal]').fill(note);
+        const artifactKey = `fundamentos/${meta.id}/${lastActivity.id}`;
+        await page.waitForFunction(
+          ({ key, note }) =>
+            JSON.parse(localStorage.getItem('teslacode:progress:v2')).projectArtifacts[key]
+              .notes === note,
+          { key: artifactKey, note },
+        );
+        const downloaded = page.waitForEvent('download');
+        await last.locator('[data-download-artifact]').click();
+        const file = await downloaded;
+        assert.match(file.suggestedFilename(), /plan-practica.*\.js$/);
+        assert.equal(readFileSync(await file.path(), 'utf8'), lastActivity.solution + '\n');
+        await page.reload();
+        await page.locator('[data-project-journal]').first().waitFor();
+        assert.equal(
+          await page
+            .locator(`[data-activity="${lastActivity.id}"] [data-project-journal]`)
+            .inputValue(),
+          note,
+        );
+        await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
+        const violations = await page.evaluate(async () =>
+          (
+            await axe.run(document, {
+              runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
+            })
+          ).violations.map((v) => v.id),
+        );
+        assert.deepEqual(violations, [], `Project controls ${width}px`);
+      }
       await answerQuiz(page, data);
       const state = await page.evaluate(() =>
         JSON.parse(localStorage.getItem('teslacode:progress:v2')),

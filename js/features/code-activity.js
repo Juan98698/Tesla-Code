@@ -25,6 +25,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
     <button class="btn ghost small" type="button" data-stop disabled>Detener</button>
     ${practice ? '<button class="btn ghost small" type="button" data-hint>Necesito una pista</button>' : ''}
     <button class="btn ghost small" type="button" data-reset>Restaurar código inicial</button></div></form>
+    ${activity.learningStep?.from ? '<button class="btn ghost small" type="button" data-restore-source disabled>Recuperar entrega anterior</button><p>Recuperar reemplaza este borrador. Copia antes cualquier cambio que quieras conservar.</p>' : ''}
     <p class="code-save-note" role="status"></p>
     <section class="python-console" aria-labelledby="console-title-${activity.id}">
       <div class="console-heading"><h4 id="console-title-${activity.id}">Consola ${language}</h4>
@@ -64,6 +65,7 @@ export function mountCodeActivity(
       getItem: (key) => globalThis.localStorage.getItem(key),
       setItem: (key, value) => globalThis.localStorage.setItem(key, value),
     },
+    artifactFor = () => undefined,
   } = {},
 ) {
   const editor = section.querySelector('textarea');
@@ -81,12 +83,33 @@ export function mountCodeActivity(
   const js = activity.type === 'javascript';
   const runner = (runnerFactory ?? (js ? createJavaScriptRunner : createPythonRunner))();
   let alive = true;
+  let hasOwnWork = false;
+  const restoreSource = section.querySelector('[data-restore-source]');
+  const recoverSource = () => {
+    const previous = artifactFor(activity.learningStep?.from);
+    if (restoreSource) restoreSource.disabled = !(previous?.verifiedAt && previous.code);
+    if (!activity.learningStep || hasOwnWork) return;
+    const own = artifactFor(context + '/' + activity.id);
+    const source = own?.verifiedAt ? own : artifactFor(activity.learningStep.from);
+    if (source?.verifiedAt && source.code) {
+      editor.value = source.code;
+      hasOwnWork = Boolean(own?.verifiedAt);
+      saved.textContent = own?.verifiedAt
+        ? 'Recuperaste tu versión comprobada de este reto.'
+        : 'Continúas tu código aprobado del reto anterior. Adáptalo al nuevo requisito.';
+    }
+  };
   try {
     const draft = storage?.getItem(key);
-    if (draft !== null && draft !== undefined && draft.length <= PYTHON_LIMITS.source)
+    if (draft !== null && draft !== undefined && draft.length <= PYTHON_LIMITS.source) {
       editor.value = draft;
+      hasOwnWork = true;
+    }
   } catch {}
+  recoverSource();
+  section.addEventListener('project-source-ready', recoverSource);
   editor.oninput = () => {
+    hasOwnWork = true;
     try {
       storage.setItem(key, editor.value);
       saved.textContent = 'Borrador guardado en este navegador.';
@@ -94,6 +117,14 @@ export function mountCodeActivity(
       saved.textContent = 'No se pudo guardar el borrador. Copia tu código antes de salir.';
     }
   };
+  if (restoreSource)
+    restoreSource.onclick = () => {
+      const source = artifactFor(activity.learningStep.from);
+      if (!source?.verifiedAt || !source.code) return;
+      editor.value = source.code;
+      editor.oninput();
+      editor.focus();
+    };
   stop.onclick = () => runner.cancel();
   section.querySelector('[data-reset]').onclick = () => {
     runner.cancel();
@@ -187,7 +218,7 @@ export function mountCodeActivity(
       }</p><ul>${result.results
         .map(
           (item) =>
-            `<li>${item.passed ? '✓' : '✗'} ${e(item.name)}<pre>${e(
+            `<li>${item.passed ? '✓' : '✗'} ${e(item.name)}<pre tabindex="0">${e(
               item.error ?? 'Esperado: ' + item.expected + '\nObtenido: ' + item.actual,
             )}</pre></li>`,
         )
@@ -226,6 +257,7 @@ export function mountCodeActivity(
   };
   return () => {
     alive = false;
+    section.removeEventListener('project-source-ready', recoverSource);
     runner.dispose();
   };
 }
