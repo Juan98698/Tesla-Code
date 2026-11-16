@@ -9,12 +9,17 @@ import { recordAttempt, completeIfReady } from '../js/domain/progress.js';
 
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const lesson = (id, route = 'fundamentos') => read(`content/lessons/${route}/${id}.json`);
-const passes = (code, activity) =>
-  activity.cases.every(
-    (c) =>
-      runJavaScript(code, c, false, activity.entrypoint, activity.bindings, activity.syntax).result
-        .passed,
-  );
+const passes = (code, activity) => {
+  try {
+    return activity.cases.every(
+      (c) =>
+        runJavaScript(code, c, false, activity.entrypoint, activity.bindings, activity.syntax)
+          .result.passed,
+    );
+  } catch {
+    return false;
+  }
+};
 
 test('numeric addition rejects the former conversion shortcut and accepts equivalent conversion', () => {
   const activity = lesson('js-entradas-y-conversion').activities.find((a) => a.id.endsWith('-a2'));
@@ -29,50 +34,37 @@ test('numeric addition rejects the former conversion shortcut and accepts equiva
   );
 });
 
-test('transfer cases reject plausible mistakes about boundaries, state, empty data and contracts', () => {
-  const wrong = {
-    'js-tipos-y-calculos': 'console.log(Number(prompt()) + Number(prompt()));',
-    'js-comparaciones': 'console.log(prompt() !== prompt());',
-    'js-decisiones':
-      'const t = Number(prompt()); if(t <= 0) console.log("Helada"); else if(t <= 30) console.log("Normal"); else console.log("Calor");',
-    'js-validacion':
-      'const n = Number(prompt()); if(n >= 0 && n <= 6) console.log(n*8); else console.log("Reserva inválida");',
-    'js-ciclo-while':
-      'const n = Number(prompt()); for(let i=0;i<=n;i=i+1) console.log("Regar"); console.log("Fin");',
-    'js-acumular-con-for':
-      'const n = Number(prompt()); let t=0; for(let i=1;i<=n;i=i+1) if(i%2===0)t=t+i; console.log(t);',
-    'js-funciones-y-retorno': 'function area(a,b){return a+b;}',
-    'js-descomponer-y-probar': 'function recargo(d){if(d>7)return d*2;return 0;}',
-    'js-listas-y-recorridos':
-      'function contarHeladas(datos){let c=0;for(let i=0;i<datos.length;i=i+1)if(datos[i]<=0)c=c+1;return c;}',
-    'js-proyecto-mediciones':
-      'function resumir(datos,m){let total=0,c=0;for(let i=0;i<datos.length;i=i+1){total=total+datos[i];if(datos[i]>m)c=c+1;}return [total,c];}',
-  };
-  for (const [id, code] of Object.entries(wrong)) {
-    const activity = lesson(id).activities.find((a) => a.id === `${id}-a3`);
-    assert.equal(passes(activity.solution, activity), true, id);
-    assert.equal(passes(code, activity), false, id + ': plausible mistake must fail');
-    // A memorized single output cannot solve a variable-input transfer contract.
-    assert.equal(
-      passes(
-        `console.log(${JSON.stringify(activity.cases[0].stdout?.trimEnd() ?? activity.cases[0].expected)});`,
-        activity,
-      ),
-      false,
-      id + ': fixed output',
-    );
+test('transfer cases reject plausible defects in types, boundaries, state, validation and return contracts', () => {
+  const ids = [
+    'js-tipos-y-calculos',
+    'js-comparaciones',
+    'js-decisiones',
+    'js-validacion',
+    'js-ciclo-while',
+    'js-acumular-con-for',
+    'js-funciones-y-retorno',
+    'js-descomponer-y-probar',
+    'js-listas-y-recorridos',
+    'js-proyecto-mediciones',
+  ];
+  for (const id of ids) {
+    const a = lesson(id).activities.find((a) => a.id === id + '-a3');
+    assert.equal(passes(a.solution, a), true, id);
+    assert.equal(passes(a.assessment.debug.code, a), false, id + ': plausible defect');
   }
 });
 
-test('equivalent loops and different variable names still solve the new transfer contracts', () => {
-  const activity = lesson('js-acumular-con-for').activities[2];
-  assert.equal(
-    passes(
-      'let limite=Number(prompt());let visita=1;let pares=0;while(visita<=limite){if(visita%2===0){pares=pares+1;}visita=visita+1;}console.log(pares);',
-      activity,
-    ),
-    true,
+test('equivalent list loops with different local names retain the complete project contract', () => {
+  const a = lesson('js-listas-y-recorridos').activities.find(
+    (a) => a.id === 'js-listas-y-recorridos-a2',
   );
+  const start = a.solution.indexOf('function sumarSesiones('),
+    end = a.solution.indexOf('\n\nconst nombre', start);
+  const alternate =
+    a.solution.slice(0, start) +
+    'function sumarSesiones(coleccion){let suma=0;for(let indice=0;indice<coleccion.length;indice=indice+1){suma=suma+coleccion[indice];}return suma;}' +
+    a.solution.slice(end);
+  assert.equal(passes(alternate, a), true);
 });
 
 test('analysis cases require all decisions, including transfer of invariant and complexity reasoning', () => {

@@ -1,6 +1,6 @@
 import { escapeHtml as e } from '../core/html.js';
 import { grade } from '../domain/grading.js';
-import { projectAssessmentReady } from '../domain/project-assessment.js';
+import { projectAssessmentReady, executionObservation } from '../domain/project-assessment.js';
 import { createJavaScriptRunner } from '../repositories/javascript-runner.js';
 
 export function assessmentMarkup(a) {
@@ -120,16 +120,31 @@ export function mountProjectAssessment(
       busy = true;
       event.currentTarget.disabled = true;
       try {
-        const result = await runner.run({ code: rule.debug.code, cases: rule.debug.cases });
+        const result = await runner.run({
+          code: rule.debug.code,
+          cases: rule.debug.cases,
+          entrypoint: rule.debug.entrypoint,
+        });
         if (!alive) return;
         debug = {
           fixture: rule.debug.id,
           failed: result.results.some((r) => r.error || !r.passed),
           stdout: result.results.map((r) => r.stdout).join('\n'),
           error: result.results.map((r) => r.error ?? '').join('\n'),
+          observations: result.results
+            .map(
+              (r) =>
+                r.name +
+                '\nEsperado: ' +
+                r.expected +
+                '\nObtenido: ' +
+                r.actual +
+                (rule.debug.entrypoint ? '\nSalida impresa observada:\n' + r.stdout : '') +
+                (r.error ? '\n' + r.error : ''),
+            )
+            .join('\n\n'),
         };
-        section.querySelector('[data-incident-output]').textContent =
-          debug.stdout + '\n' + debug.error;
+        section.querySelector('[data-incident-output]').textContent = debug.observations;
         status.textContent =
           'Incidencia ejecutada. Contrasta lo observado con el resultado esperado y registra tu diagnóstico.';
       } catch (error) {
@@ -163,13 +178,20 @@ export function mountProjectAssessment(
           .filter((c) => !c.overrides)
           .map(({ overrides, expectedBindings, consoleArguments, ...c }) => c);
         try {
-          const baseline = await runner.run({ code: previous.code, cases });
+          const baseline = await runner.run({
+            code: previous.code,
+            cases,
+            entrypoint: a.entrypoint,
+          });
           if (!alive) return;
           rewrite = {
             source: a.learningStep.from,
+            kind: a.entrypoint ? 'return-and-stdout' : 'stdout',
             passed: baseline.results.every((r) => r.passed === true),
-            before: baseline.results.map((r) => r.stdout),
-            after: result.results.filter((_, i) => !a.cases[i].overrides).map((r) => r.stdout),
+            before: baseline.results.map((r) => executionObservation(r, Boolean(a.entrypoint))),
+            after: result.results
+              .filter((_, i) => !a.cases[i].overrides)
+              .map((r) => executionObservation(r, Boolean(a.entrypoint))),
           };
           if (!baseline.results.every((r) => r.passed === true)) {
             status.textContent =

@@ -7,6 +7,35 @@ export function prepareBindingCases(code, cases, bindings = {}, syntax = {}) {
   const tree = parse(code, { ecmaVersion: 2024, sourceType: 'script', onComment: comments });
   if (syntax.comment && !comments.some((c) => c.value.trim()))
     throw Error('Agrega un comentario real fuera de los textos, como pide el reto.');
+  const required = new Set(syntax.nodes ?? []);
+  if (syntax.typeof) required.add('typeof');
+  const findStructures = (node) => {
+    if (!node || typeof node !== 'object') return;
+    required.delete(node.type);
+    if (node.type === 'UnaryExpression' && node.operator === 'typeof') required.delete('typeof');
+    for (const value of Object.values(node))
+      if (value && typeof value === 'object')
+        Array.isArray(value) ? value.forEach(findStructures) : findStructures(value);
+  };
+  if (required.size) {
+    findStructures(tree);
+    if (required.size)
+      throw Error(
+        'Aplica las estructuras del contrato: ' +
+          [...required]
+            .map(
+              (name) =>
+                ({
+                  IfStatement: 'if',
+                  WhileStatement: 'while',
+                  ForStatement: 'for',
+                  FunctionDeclaration: 'function',
+                })[name] ?? name,
+            )
+            .join(', ') +
+          '.',
+      );
+  }
   if (syntax.singleQuotes) {
     const literals = [];
     const visit = (node) => {

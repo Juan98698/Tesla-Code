@@ -4,7 +4,8 @@ import { JAVASCRIPT_LIMITS } from '../domain/javascript-exercise.js';
 // script: top-level return/import stay syntax errors and source lines aren't shifted.
 export function javascriptWorker() {
   self.onmessage = ({ data }) => {
-    const { code, item, exploratory, entrypoint } = data;
+    const { code, item, exploratory } = data;
+    const entrypoint = item.entrypoint ?? data.entrypoint;
     let stdout = '',
       position = 0,
       emitted = -Infinity;
@@ -175,8 +176,9 @@ export function javascriptWorker() {
           ? { error: 'La función modificó los argumentos; debe conservarlos.' }
           : callable && stdout !== (item.stdout ?? '')
             ? {
-                error:
-                  'La salida impresa no cumple el contrato. Devuelve el resultado de la función.',
+                error: item.stdout
+                  ? 'El reporte impreso no coincide con la salida completa esperada. Comprueba también los valores devueltos.'
+                  : 'La salida impresa no cumple el contrato. Devuelve el resultado de la función.',
               }
             : {}),
         ...failure,

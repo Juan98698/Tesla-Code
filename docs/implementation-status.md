@@ -334,3 +334,49 @@ El recorrido JavaScript comprueba las 18 publicaciones en 1440 y 390 px; audio
 comprueba también la alternativa de 320 px. Las auditorías automáticas de los
 paneles de evidencia cubren ambos temas en escritorio y móvil. Formato, contenido,
 recursos versionados y generación del contexto docente se verifican por separado.
+
+## Migración de las diez publicaciones posteriores
+
+16 de noviembre de 2026. Se completa la migración de las **18 lecciones
+publicadas** de Fundamentos JavaScript al proyecto Mi plan de práctica. Los diez
+incrementos posteriores añaden tipos y unidades, comparaciones, recomendaciones,
+validación, calendario con while, acumulación con for, funciones, descomposición,
+listas de sesiones y resumen final. La ruta declara cero publicaciones pendientes
+de migración; los doce bloques futuros mantienen su estado de preparación.
+
+Las 72 etapas del proyecto siguen entender → implementar → reescribir y comprobar
+→ integrar y depurar. Se preservan los IDs anteriores, incluida analizar-contrato,
+y tres repasos posteriores obligatorios con situaciones diferentes. Las cuatro
+etapas requieren evidencia; los repasos se habilitan después de integrar. Las
+lecciones ya completadas y su XP conservan su tratamiento histórico.
+
+Cada ampliación mantiene capacidades previas dentro del dominio válido y justifica
+los cambios de entrada. Validar permite rechazar datos sin presentar cálculos
+parciales; no confunde ausencia con cero. El calendario admite cero días. Los
+cálculos admiten hasta 125 minutos en la proyección ampliada, manteniendo 120 como
+límite de la entrada base. Las listas distinguen sesiones programadas y realizadas,
+admiten la vacía y verifican posiciones, repetidos, límites y conservación.
+
+Las funciones se prueban con argumentos independientes de las entradas del
+reporte. Los casos pueden comprobar distintos puntos de entrada para conservar
+contratos anteriores. La comparación de reescrituras conserva tanto impresión
+como retorno tipado; imprimir un resultado no sustituye devolverlo. Las incidencias
+muestran resultados esperados, observados y salida impresa; cada copia defectuosa
+se ejecuta y falla antes de aceptar la investigación. Las estructuras exigidas se
+comprueban mediante análisis sintáctico, sin buscar palabras en comentarios.
+
+Se revisaron prerrequisitos teóricos y el código de las soluciones contra las
+construcciones ya enseñadas. El cuestionario conserva sus preguntas e IDs y la
+bitácora pide predicción, traza, hipótesis, prueba, causa y corrección. Las preguntas
+estructuradas contrastan también estado parcial y parada de recorridos. La calidad
+de las explicaciones continúa pendiente de revisión humana; no se califica por
+palabras clave ni se atribuye comprensión por superar pruebas automáticas.
+
+Verificación: 246 pruebas unitarias y los 55 módulos bajo comprobación de cobertura;
+477 casos declarados para las actividades JavaScript, con soluciones y
+contraejemplos ejecutados. El recorrido de las 18 publicaciones pasa en 1440 y
+390 px. El recorrido general renderiza 124 lecciones y resuelve 264 actividades.
+Audio y alternativas de lectura pasan; los paneles del proyecto final se verifican
+en 1440, 390 y 320 px, con ambos temas y auditorías automáticas WCAG. El contexto
+docente se regenera, excluyendo evaluaciones. Revisión docente independiente y
+piloto con principiantes permanecen pendientes.

@@ -41,11 +41,12 @@ versión no concede XP ni completa el nuevo contrato.
 
 ## Implementación incremental
 
-El primer lote migra las ocho lecciones del módulo inicial al mismo proyecto y
-al ciclo de cuatro pasos. Los otros diez temas publicados conservan su material
-y requieren migración editorial; no basta añadirles etiquetas. Los doce bloques
-posteriores continúan en preparación. El objetivo es aplicar el modelo a todos,
-con revisión y entrega de módulos completos, sin simular contenido avanzado.
+Las dieciocho lecciones publicadas construyen el mismo proyecto con las cuatro
+etapas. El segundo lote migra los diez temas posteriores: tipos, comparaciones,
+decisiones, validación, while, for, funciones, descomposición, listas y análisis de
+sesiones. Conserva los tres repasos posteriores y sus IDs como transferencias
+obligatorias después de integrar. Los doce bloques posteriores continúan en
+preparación; la migración de lo publicado no significa que estén desarrollados.
 
 | Siguiente tramo                | Conocimientos que debe preparar                                                     | Incremento del proyecto             |
 | ------------------------------ | ----------------------------------------------------------------------------------- | ----------------------------------- |
@@ -72,7 +73,7 @@ con revisión y entrega de módulos completos, sin simular contenido avanzado.
 - Revisión docente independiente y piloto con principiantes siguen pendientes
   hasta que se realicen. Las pruebas automáticas no sustituyen esa evidencia.
 
-## Contrato de evidencias en las ocho lecciones iniciales
+## Contrato de evidencias de las dieciocho publicaciones
 
 Las cuatro etapas requieren entregar una explicación. Las tres de código exigen
 además una predicción estructurada; integración añade un diagnóstico y la ejecución
@@ -102,3 +103,29 @@ práctica: necesita la evidencia de cada etapa. Se conservan las lecciones ya
 completadas, sus IDs y XP. Los borradores fallidos no reemplazan entregas aprobadas.
 Cambiar la explicación obliga a registrarla de nuevo; editar código exige comprobar
 esa nueva versión. El respaldo incluye los registros de evidencia.
+
+## Continuidad posterior a la tarjeta inicial
+
+Los tipos y comparaciones amplían el reporte sin cambiarlo por accidente. La
+clasificación respeta los umbrales inclusivos de 30 y 60. La validación separa
+los datos válidos de un rechazo explícito: las entradas inválidas no producen
+reportes parciales; cero sigue siendo válido. Después se reciben días entre 0 y
+7 y se enumeran las sesiones, conservando los cinco días originales como caso.
+
+Los ciclos acumulan minutos programados y cuentan días pares. La introducción
+de funciones mantiene el programa completo, pero también prueba retornos con
+argumentos distintos de los leídos por el reporte. Las reescrituras comparan
+ambas observaciones: igualdad de impresión no sustituye igualdad de retorno.
+calcularTotal admite hasta 125 minutos por día para proyectar cinco adicionales
+a una base válida máxima de 120; esa ampliación no cambia la validación de entrada.
+
+Las listas se construyen con la cantidad anunciada y entradas de cada sesión,
+antes de presentar resultados. Las funciones reciben listas independientes y
+deben conservarlas. La entrega final reúne suma, conteo inclusivo y máximo,
+define la vacía y comprueba extremos, repetidos y máximos en ambas puntas. El
+máximo también se contrasta con negativos en su contrato independiente; los
+minutos reales introducidos siguen siendo no negativos.
+
+Los cuestionarios y tres transferencias posteriores mantienen sus identificadores
+y problemas distintos. Se conservan logros previos. La revisión docente
+independiente y el piloto con principiantes continúan pendientes.

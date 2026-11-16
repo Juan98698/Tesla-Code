@@ -79,3 +79,10 @@ acumulativo y justifican sus cambios; las reescrituras comparan la entrega real
 anterior con los mismos casos. Cada integración reproduce una incidencia antes
 de registrar diagnóstico y comprobar la versión protegida. Se requieren respuestas
 estructuradas y explicación entregada, cuya revisión humana continúa pendiente.
+
+Migración posterior, 16 de noviembre de 2026: las diez lecciones siguientes ya
+construyen el mismo plan y completan la migración de las 18 publicaciones. Se
+conservan los tres repasos posteriores y todos los IDs previos. El contrato
+distingue rechazo de datos inválidos, conservación del reporte, retornos de
+funciones y lectura de listas sin mutar argumentos. Las doce ampliaciones futuras
+y la revisión con principiantes siguen pendientes.

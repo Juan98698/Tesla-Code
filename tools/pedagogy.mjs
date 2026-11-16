@@ -113,9 +113,18 @@ export function learningProjectErrors(
       new Set(project.capabilities).size !== project.capabilities.length)
   )
     errors.push('El proyecto debe declarar capacidades conservadas y justificar el cambio.');
-  if (activities.length !== phases.length)
+  if (activities.length !== phases.length + (project.followUpIds?.length ?? 0))
     errors.push('El proyecto necesita cuatro etapas completas.');
   activities.forEach((a, i) => {
+    if (i >= 4) {
+      if (
+        project.followUpIds?.[i - 4] !== a.id ||
+        a.learningStep ||
+        JSON.stringify(a.followUp?.requires) !== JSON.stringify([activities[3].id])
+      )
+        errors.push('La comprobación posterior debe conservar su ID y exigir la integración.');
+      return;
+    }
     const step = a.learningStep;
     if (!step || step.phase !== phases[i] || step.project !== project.id) {
       errors.push('La etapa no sigue el ciclo de aprendizaje del proyecto.');
@@ -182,13 +191,19 @@ export function learningProjectErrors(
                 starter: '',
                 solution: proof.debug.code,
                 cases: proof.debug.cases,
+                entrypoint: proof.debug.entrypoint,
               }),
             );
         }
       }
       if (i > 0 && Array.isArray(project.capabilities))
         for (const c of a.cases ?? [])
-          if (project.capabilities.some((label) => !c.stdout.includes(label)))
+          if (c.rejected === true) {
+            if (project.rejection !== 'Entrada inválida\n' || c.stdout !== project.rejection)
+              errors.push(
+                'El rechazo debe respetar la política explícita del proyecto, sin cálculos parciales.',
+              );
+          } else if (project.capabilities.some((label) => !(c.stdout ?? '').includes(label)))
             errors.push('Un caso perdió una capacidad del reporte acumulado.');
     }
     previousSources.add(`${key}/${a.id}`);

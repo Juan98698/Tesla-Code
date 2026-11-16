@@ -35,6 +35,8 @@ function validAssessment(proof) {
       (object(proof.rewrite) &&
         typeof proof.rewrite.source === 'string' &&
         typeof proof.rewrite.passed === 'boolean' &&
+        (proof.rewrite.kind === undefined ||
+          ['stdout', 'return-and-stdout'].includes(proof.rewrite.kind)) &&
         [proof.rewrite.before, proof.rewrite.after].every(
           (v) =>
             Array.isArray(v) &&

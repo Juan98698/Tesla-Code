@@ -39,11 +39,24 @@ export function javascriptExerciseErrors(exercise) {
       typeof exercise.syntax !== 'object' ||
       Array.isArray(exercise.syntax) ||
       !Object.keys(exercise.syntax).length ||
-      Object.keys(exercise.syntax).some((k) => !['comment', 'singleQuotes'].includes(k)) ||
-      Object.values(exercise.syntax).some((v) => v !== true))
+      Object.keys(exercise.syntax).some(
+        (k) => !['comment', 'singleQuotes', 'nodes', 'typeof'].includes(k),
+      ) ||
+      Object.entries(exercise.syntax).some(([key, value]) =>
+        key === 'nodes'
+          ? !Array.isArray(value) ||
+            !value.length ||
+            value.some(
+              (v) =>
+                !['IfStatement', 'WhileStatement', 'ForStatement', 'FunctionDeclaration'].includes(
+                  v,
+                ),
+            )
+          : value !== true,
+      ))
   )
     errors.push(
-      'Las comprobaciones de sintaxis deben declarar comentarios o comillas simples explícitamente.',
+      'Las comprobaciones de sintaxis deben declarar comentarios, comillas simples o estructuras admitidas explícitamente.',
     );
   const callable = exercise.entrypoint !== undefined;
   if (
@@ -92,6 +105,17 @@ export function javascriptExerciseErrors(exercise) {
           !jsonValue(item.consoleArguments))
       )
         errors.push('Los argumentos de presentación deben tener valores JSON.');
+      if (
+        item?.entrypoint !== undefined &&
+        (!callable ||
+          typeof item.entrypoint !== 'string' ||
+          !/^[a-zA-Z_$][\w$]*$/.test(item.entrypoint))
+      )
+        errors.push(
+          'El caso necesita un nombre simple de función dentro de un contrato de funciones.',
+        );
+      if (item?.rejected !== undefined && typeof item.rejected !== 'boolean')
+        errors.push('El rechazo de una entrada debe declararse como booleano.');
       if (item?.preserveArgs !== undefined && (!callable || typeof item.preserveArgs !== 'boolean'))
         errors.push('Conservar argumentos es una opción booleana de los casos de función.');
       if (

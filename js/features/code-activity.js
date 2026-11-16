@@ -41,7 +41,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
               (c) =>
                 `<li><strong>${e(c.name)}</strong>: ${
                   activity.entrypoint
-                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}`
+                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
                     : `entradas ${e(JSON.stringify(c.globals ?? c.stdin ?? []))}; salida ${e(JSON.stringify(c.stdout))}`
                 }</li>`,
             )

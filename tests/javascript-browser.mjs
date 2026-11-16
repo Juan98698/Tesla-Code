@@ -94,7 +94,7 @@ await withBrowser(4323, async (browser, origin) => {
       for (let stepIndex = 0; stepIndex < data.activities.length; stepIndex++) {
         const activity = data.activities[stepIndex];
         const section = page.locator(`[data-activity="${activity.id}"]`);
-        if (data.learningProject && stepIndex > 1) {
+        if (activity.learningStep && stepIndex > 1) {
           const previousKey = `fundamentos/${meta.id}/${data.activities[stepIndex - 1].id}`;
           const previous = await page.evaluate(
             (key) =>
@@ -112,7 +112,7 @@ await withBrowser(4323, async (browser, origin) => {
             ? { ...activity, solution: activity.solution + '\n' }
             : activity;
         await solveActivity(page, submitted);
-        if (data.learningProject) {
+        if (activity.learningStep) {
           const artifactKey = `fundamentos/${meta.id}/${activity.id}`;
           await page.waitForFunction(
             (key) =>

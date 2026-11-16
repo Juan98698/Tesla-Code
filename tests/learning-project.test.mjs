@@ -195,26 +195,14 @@ test('steps unlock in order, carry the actual approved draft and keep failed att
   dispose();
 });
 
-test('reviewed counterexamples no longer pass incomplete comparison, sum or maximum tests', async () => {
+test('reviewed defects cannot pass by preserving only the report and omitting a final element or return', async () => {
   const { runJavaScript } = await import('./support/javascript.mjs');
-  const examples = [
-    ['js-comparaciones', 2, 'console.log(Number(prompt()) < Number(prompt()));'],
-    [
-      'js-listas-y-recorridos',
-      1,
-      'function sumar(datos){if(datos.length===0)return 0;return datos[0]+datos[1];}',
-    ],
-    [
-      'js-proyecto-mediciones',
-      1,
-      'function maximo(datos){if(datos.length===0)return "Sin datos";let mayor=datos[0];for(let i=1;i<datos.length-1;i=i+1)if(datos[i]>mayor)mayor=datos[i];return mayor;}',
-    ],
-  ];
-  for (const [id, index, wrong] of examples) {
-    const a = read(id).activities[index];
-    assert.equal(
-      a.cases.every((c) => runJavaScript(wrong, c, false, a.entrypoint).result.passed),
-      false,
+  for (const id of ['js-comparaciones', 'js-listas-y-recorridos', 'js-proyecto-mediciones']) {
+    const a = read(id).activities.find((a) => a.id === id + '-a3');
+    assert.ok(
+      a.cases.some(
+        (c) => !runJavaScript(a.assessment.debug.code, c, false, a.entrypoint).result.passed,
+      ),
       id,
     );
   }

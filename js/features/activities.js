@@ -25,8 +25,8 @@ export function mountActivities(root, activities, isSolved, onSolve, options = {
   const context = options.context ?? 'practice';
   const ready = (a) =>
     options.reviewCompleted ||
-    !a.learningStep ||
-    (a.learningStep.requires ?? []).every((id) => solved.has(id));
+    !(a.learningStep || a.followUp) ||
+    ((a.learningStep ?? a.followUp).requires ?? []).every((id) => solved.has(id));
   const capture = (a, submitted = {}) => {
     if (!a.learningStep || !ready(a)) return;
     const section = root.querySelector(`[data-activity="${a.id}"]`);
@@ -42,6 +42,13 @@ export function mountActivities(root, activities, isSolved, onSolve, options = {
     section.querySelector('[data-download-artifact]').disabled = false;
   };
   const refreshSteps = (recover = true) => {
+    for (const a of activities.filter((a) => a.followUp)) {
+      const section = root.querySelector(`[data-activity="${a.id}"]`);
+      section.querySelector('[data-follow-up-controls]').disabled = !ready(a);
+      section.querySelector('[data-follow-up-status]').textContent = ready(a)
+        ? a.followUp.reason
+        : 'Completa la integración del proyecto antes de resolver esta transferencia.';
+    }
     for (const a of activities.filter((a) => a.learningStep)) {
       const section = root.querySelector(`[data-activity="${a.id}"]`);
       section.querySelector('[data-step-controls]').disabled = !ready(a);
@@ -87,7 +94,7 @@ export function mountActivities(root, activities, isSolved, onSolve, options = {
   root.innerHTML = activities
     .map(
       (a) =>
-        `<section class="card practice-card" data-activity="${a.id}">${a.learningStep ? `<p class="eyebrow">${e(a.learningStep.label)}</p><p>${e(a.learningStep.input)}</p><p><strong>Entregas:</strong> ${e(a.learningStep.output)}</p><p data-step-status role="status"></p><details data-project-source hidden><summary>Consultar la entrega anterior</summary><pre tabindex="0"></pre></details><fieldset class="journey-controls" data-step-controls><legend>${e(a.learningStep.label)}</legend>` : ''}<span class="badge ${solved.has(a.id) ? 'live' : ''}">${solved.has(a.id) ? '✓ Resuelta' : 'TU TURNO'}</span><h3 style="margin-top:16px">${e(a.prompt)}</h3>${a.type === 'case-study' ? caseStudyMarkup(a) : ['python', 'javascript'].includes(a.type) ? codeActivityMarkup(a) : `<form><label for="answer-${a.id}">Tu respuesta</label><input id="answer-${a.id}" autocomplete="off" required maxlength="200"><div class="btns" style="margin-top:12px"><button class="btn small" type="submit">Comprobar respuesta</button><button class="btn ghost small" type="button" data-hint>Necesito una pista</button></div></form>`}<p class="hint" aria-live="polite" hidden>${e(a.hint)}</p><div class="practice-feedback" role="status" hidden></div>${a.learningStep ? `</fieldset><label for="journal-${a.id}">Bitácora del reto</label><p id="journal-help-${a.id}">${e(a.learningStep.reflection)} Tu explicación se guarda para revisión; no recibe una calificación automática.</p><textarea id="journal-${a.id}" data-project-journal rows="3" maxlength="2000" aria-describedby="journal-help-${a.id}"></textarea>${a.assessment ? `<fieldset data-assessment-controls class="journey-controls"><legend>Evidencias requeridas</legend>${assessmentMarkup(a)}</fieldset>` : ''}<p data-journal-status role="status"></p><button class="btn ghost small" type="button" data-download-artifact disabled>Descargar mi entrega</button><p data-artifact-status role="status"></p>` : ''}</section>`,
+        `<section class="card practice-card" data-activity="${a.id}">${a.followUp ? '<p data-follow-up-status role="status"></p><fieldset class="journey-controls" data-follow-up-controls><legend>Comprobación posterior · otra situación</legend>' : ''}${a.learningStep ? `<p class="eyebrow">${e(a.learningStep.label)}</p><p>${e(a.learningStep.input)}</p><p><strong>Entregas:</strong> ${e(a.learningStep.output)}</p><p data-step-status role="status"></p><details data-project-source hidden><summary>Consultar la entrega anterior</summary><pre tabindex="0"></pre></details><fieldset class="journey-controls" data-step-controls><legend>${e(a.learningStep.label)}</legend>` : ''}<span class="badge ${solved.has(a.id) ? 'live' : ''}">${solved.has(a.id) ? '✓ Resuelta' : 'TU TURNO'}</span><h3 style="margin-top:16px">${e(a.prompt)}</h3>${a.type === 'case-study' ? caseStudyMarkup(a) : ['python', 'javascript'].includes(a.type) ? codeActivityMarkup(a) : `<form><label for="answer-${a.id}">Tu respuesta</label><input id="answer-${a.id}" autocomplete="off" required maxlength="200"><div class="btns" style="margin-top:12px"><button class="btn small" type="submit">Comprobar respuesta</button><button class="btn ghost small" type="button" data-hint>Necesito una pista</button></div></form>`}<p class="hint" aria-live="polite" hidden>${e(a.hint)}</p><div class="practice-feedback" role="status" hidden></div>${a.followUp ? '</fieldset>' : ''}${a.learningStep ? `</fieldset><label for="journal-${a.id}">Bitácora del reto</label><p id="journal-help-${a.id}">${e(a.learningStep.reflection)} Tu explicación se guarda para revisión; no recibe una calificación automática.</p><textarea id="journal-${a.id}" data-project-journal rows="3" maxlength="2000" aria-describedby="journal-help-${a.id}"></textarea>${a.assessment ? `<fieldset data-assessment-controls class="journey-controls"><legend>Evidencias requeridas</legend>${assessmentMarkup(a)}</fieldset>` : ''}<p data-journal-status role="status"></p><button class="btn ghost small" type="button" data-download-artifact disabled>Descargar mi entrega</button><p data-artifact-status role="status"></p>` : ''}</section>`,
     )
     .join('');
   activities.forEach((a) => {

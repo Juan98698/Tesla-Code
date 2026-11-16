@@ -1,3 +1,5 @@
+import { verifiedWork } from './support/project-proof.mjs';
+import { recordProjectArtifact } from '../js/domain/learning-project.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -93,6 +95,13 @@ test('retrospective questions and cumulative tasks appear later and are required
       key,
       data.quiz.map((q) => ({ id: q.id, concept: q.concept, correct: true })),
     );
+    for (const a of data.activities.filter((a) => a.learningStep))
+      recordProjectArtifact(
+        state,
+        key + '/' + a.id,
+        'plan-practica',
+        verifiedWork(a, data.activities[1].solution),
+      );
     state.practices = data.activities
       .filter((a) => a.id !== activity.id)
       .map((a) => `${key}/${a.id}`);

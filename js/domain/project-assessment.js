@@ -1,5 +1,9 @@
 import { grade } from './grading.js';
 
+export function executionObservation(result, callable = false) {
+  return callable ? JSON.stringify([result.stdout, result.actual]) : result.stdout;
+}
+
 export function projectAssessmentReady(activity, record) {
   if (!activity.assessment) return true;
   const proof = record?.assessment,
@@ -29,6 +33,7 @@ export function projectAssessmentReady(activity, record) {
     const count = activity.cases.filter((c) => !c.overrides).length;
     if (
       comparison?.passed !== true ||
+      (activity.entrypoint !== undefined && comparison.kind !== 'return-and-stdout') ||
       !Array.isArray(comparison?.before) ||
       !Array.isArray(comparison?.after) ||
       comparison?.source !== activity.learningStep.from ||
