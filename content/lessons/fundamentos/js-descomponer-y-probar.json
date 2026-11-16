@@ -1,0 +1,305 @@
+{
+  "id": "js-descomponer-y-probar",
+  "outcome": "Separar reglas y probar funciones: construir y explicar una solución que funcione con distintos datos y casos límite.",
+  "requiresConcepts": [
+    "js-console-log",
+    "js-valores-literales",
+    "js-secuencia",
+    "js-const-inicial",
+    "js-nombres",
+    "js-entradas-prompt",
+    "js-conversion-number",
+    "js-funciones-y-retorno-concepto",
+    "js-decisiones-concepto",
+    "js-comparaciones-concepto",
+    "js-tipos-y-calculos-concepto",
+    "js-suma-producto"
+  ],
+  "html": "<p>Descomponer un programa consiste en separar responsabilidades con contratos claros; una función que recibe datos y devuelve un resultado puede probarse sin pedir entradas ni imprimir.</p>\n<h3>Una responsabilidad por parte</h3><p>Mantén prompt y console.log en la parte de interacción. La función de cálculo recibe valores ya preparados y devuelve el resultado. Esto permite llamar a la misma regla con cero, con un borde y con otros valores sin cambiar su código ni depender de datos globales.</p>\n<h3>Retornos según el contrato</h3><p>Una función puede usar if y devolver distintos resultados en cada rama. En function costo(unidades) { if (unidades === 0) { return 0; } return unidades * 4 + 2; }, el cero no paga envío; otras cantidades pagan cuatro por unidad y dos de envío. Tras el primer return no se ejecuta lo que viene después en esa llamada.</p>\n<h3>Prueba una regla, no el ejemplo</h3><p>Anota entrada y salida esperada antes de ejecutar. Prueba cero para distinguir un cargo fijo aplicado por error, uno para la primera compra y varias unidades para detectar una respuesta fija. Cambiar una constante para que coincida un caso no arregla una regla equivocada.</p>\n<h3>Proyecto pequeño</h3><p>Los retos de este bloque no exigen una librería de pruebas ni módulos. Tu función y las llamadas viven en el mismo programa síncrono. Los casos automáticos comprueban comportamiento; revisar la separación de responsabilidades requiere además leer y explicar el diseño. Una solución equivalente que calcula el mismo contrato sigue siendo válida.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Una tienda cobra cuatro fichas por unidad y dos de envío, excepto si no hay compra.</p><p>Aíslas la regla y devuelves cero antes del cálculo general cuando no hay unidades.</p><p>Las llamadas con cero y tres devuelven 0 y 14, sin pedir datos dentro de la función.</p><p>Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo.</p></section>\n<h3>Predice y prueba</h3><pre data-language=\"javascript\">function costo(unidades) {\n  if (unidades === 0) { return 0; }\n  return unidades * 4 + 2;\n}\nconsole.log(costo(0));\nconsole.log(costo(3));</pre><p>Salida esperada:</p><pre data-language=\"text\">0\n14</pre>\n<div class=\"callout\"><strong>Antes de avanzar</strong><p>Predice un caso diferente del ejemplo y explica tu elección. Resuelve comprensión, reparación y reto nuevo; después completa la comprobación. Pasar los casos demuestra esos resultados, no una única forma de escribir el código.</p></div>",
+  "examples": [
+    {
+      "id": "js-descomponer-y-probar-e1",
+      "language": "javascript",
+      "code": "function costo(unidades) {\n  if (unidades === 0) { return 0; }\n  return unidades * 4 + 2;\n}\nconsole.log(costo(0));\nconsole.log(costo(3));",
+      "stdin": [],
+      "stdout": "0\n14\n"
+    }
+  ],
+  "quiz": [
+    {
+      "type": "choice",
+      "prompt": "¿Qué facilita probar una función de cálculo?",
+      "options": [
+        "Pedir datos con prompt dentro de cada operación",
+        "Leer una variable global que cambia",
+        "Recibir parámetros y devolver resultados"
+      ],
+      "answer": 2,
+      "explanation": "El contrato explicita entradas y salida.",
+      "id": "js-descomponer-y-probar-q1",
+      "concept": "js-descomponer-y-probar-concepto"
+    },
+    {
+      "type": "choice",
+      "prompt": "¿Qué caso revela que se cobra envío sin compra?",
+      "options": [
+        "Cambiar el nombre de la variable",
+        "Cero unidades",
+        "Solo diez unidades"
+      ],
+      "answer": 1,
+      "explanation": "El cero toma una regla distinta.",
+      "id": "js-descomponer-y-probar-q2",
+      "concept": "js-descomponer-y-probar-concepto"
+    },
+    {
+      "type": "choice",
+      "prompt": "Después de return dentro de una función…",
+      "options": [
+        "La llamada termina",
+        "El cuerpo sigue hasta el final",
+        "Se vuelve a empezar"
+      ],
+      "answer": 0,
+      "explanation": "Las instrucciones posteriores de esa llamada no se ejecutan.",
+      "id": "js-descomponer-y-probar-q3",
+      "concept": "js-descomponer-y-probar-concepto"
+    },
+    {
+      "type": "choice",
+      "prompt": "Si pasan tres ejemplos, ¿se demuestra corrección para todas las entradas?",
+      "options": [
+        "Sí, siempre",
+        "Solo si los nombres son largos",
+        "No; también hay que razonar sobre la regla"
+      ],
+      "answer": 2,
+      "explanation": "Los tests son evidencia concreta, no una demostración universal.",
+      "id": "js-descomponer-y-probar-q4",
+      "concept": "js-descomponer-y-probar-concepto"
+    }
+  ],
+  "activities": [
+    {
+      "type": "javascript",
+      "prompt": "Comprensión: lee unidades de 0 a 10 y muestra el costo de la tienda: cero sin compra; en otro caso cuatro por unidad más dos de envío.",
+      "starter": "",
+      "solution": "function costo(n) { if (n === 0) { return 0; } return n * 4 + 2; }\nconsole.log(costo(Number(prompt(\"Unidades\"))));",
+      "cases": [
+        {
+          "name": "Sin compra",
+          "stdin": [
+            "0"
+          ],
+          "stdout": "0\n"
+        },
+        {
+          "name": "Una",
+          "stdin": [
+            "1"
+          ],
+          "stdout": "6\n"
+        },
+        {
+          "name": "Tres",
+          "stdin": [
+            "3"
+          ],
+          "stdout": "14\n"
+        }
+      ],
+      "hint": "Separa entradas, proceso y salida. Predice cada caso antes de ejecutarlo.",
+      "explanation": "El programa produjo los resultados esperados con todos los datos del contrato. Explica por qué tu solución también sirve para otros datos admitidos.",
+      "usesInput": true,
+      "stdin": [
+        "0"
+      ],
+      "id": "js-descomponer-y-probar-a1",
+      "concept": "js-descomponer-y-probar-concepto"
+    },
+    {
+      "type": "javascript",
+      "prompt": "Guiada: un taller tiene 10 cupos. Lee reservas de 0 a 15. Una función debe devolver los cupos libres, con mínimo cero. Repara los resultados negativos.",
+      "starter": "function libres(reservas) { return 10 - reservas; }\nconsole.log(libres(Number(prompt(\"Reservas\"))));",
+      "solution": "function libres(reservas) { if (reservas >= 10) { return 0; } return 10 - reservas; }\nconsole.log(libres(Number(prompt(\"Reservas\"))));",
+      "cases": [
+        {
+          "name": "Vacío",
+          "stdin": [
+            "0"
+          ],
+          "stdout": "10\n"
+        },
+        {
+          "name": "Llena",
+          "stdin": [
+            "10"
+          ],
+          "stdout": "0\n"
+        },
+        {
+          "name": "Exceso",
+          "stdin": [
+            "12"
+          ],
+          "stdout": "0\n"
+        },
+        {
+          "name": "Parcial",
+          "stdin": [
+            "3"
+          ],
+          "stdout": "7\n"
+        }
+      ],
+      "hint": "Separa entradas, proceso y salida. Predice cada caso antes de ejecutarlo.",
+      "explanation": "El programa produjo los resultados esperados con todos los datos del contrato. Explica por qué tu solución también sirve para otros datos admitidos.",
+      "usesInput": true,
+      "stdin": [
+        "0"
+      ],
+      "id": "js-descomponer-y-probar-a2",
+      "concept": "js-descomponer-y-probar-concepto"
+    },
+    {
+      "type": "javascript",
+      "prompt": "Proyecto: una biblioteca presta hasta 7 días sin recargo. Desde el día 8 cobra 2 fichas por cada día adicional. Lee días enteros de 0 a 30. Separa la regla en una función y muestra solo el recargo. Decide casos que detecten cobrar todos los días por error.",
+      "starter": "",
+      "solution": "function recargo(dias) { if (dias <= 7) { return 0; } return (dias - 7) * 2; }\nconsole.log(recargo(Number(prompt(\"Días\"))));",
+      "cases": [
+        {
+          "name": "Ninguno",
+          "stdin": [
+            "0"
+          ],
+          "stdout": "0\n"
+        },
+        {
+          "name": "Último gratis",
+          "stdin": [
+            "7"
+          ],
+          "stdout": "0\n"
+        },
+        {
+          "name": "Primer recargo",
+          "stdin": [
+            "8"
+          ],
+          "stdout": "2\n"
+        },
+        {
+          "name": "Diez",
+          "stdin": [
+            "10"
+          ],
+          "stdout": "6\n"
+        },
+        {
+          "name": "Largo",
+          "stdin": [
+            "30"
+          ],
+          "stdout": "46\n"
+        }
+      ],
+      "hint": "Separa entradas, proceso y salida. Predice cada caso antes de ejecutarlo.",
+      "explanation": "El programa produjo los resultados esperados con todos los datos del contrato. Explica por qué tu solución también sirve para otros datos admitidos.",
+      "usesInput": true,
+      "stdin": [
+        "0"
+      ],
+      "id": "js-descomponer-y-probar-a3",
+      "concept": "js-descomponer-y-probar-concepto"
+    },
+    {
+      "id": "analizar-contrato",
+      "type": "case-study",
+      "concept": "js-descomponer-y-probar-concepto",
+      "prompt": "Revisa un diseño antes de probarlo.",
+      "brief": "Una biblioteca quiere probar el recargo de 7 días gratis y 2 fichas por día adicional sin pedir datos durante cada prueba.",
+      "evidence": [
+        {
+          "label": "Diseño A",
+          "text": "recargo(dias) recibe días y devuelve una cantidad; el programa exterior lee e imprime."
+        },
+        {
+          "label": "Diseño B",
+          "text": "recargo() pide días con prompt, imprime un total y no devuelve un resultado."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "separacion",
+          "prompt": "¿Qué diseño permite comparar directamente recargo(8) con 2?",
+          "options": [
+            "B, porque imprimir y devolver son iguales",
+            "Ninguno puede recibir números",
+            "A, porque devuelve un resultado a quien llama"
+          ],
+          "answer": 2,
+          "explanation": "Los parámetros y el retorno permiten probar la regla sin interacción."
+        },
+        {
+          "id": "borde",
+          "prompt": "¿Qué pareja de pruebas comprueba el cambio de regla?",
+          "options": [
+            "20 devuelve 26 y 30 devuelve 46",
+            "7 devuelve 0 y 8 devuelve 2",
+            "1 devuelve 0 y 2 devuelve 0"
+          ],
+          "answer": 1,
+          "explanation": "Se comprueba el último día gratuito y el primero con recargo."
+        }
+      ],
+      "hint": "Contrasta la regla y los casos; una salida coincidente no demuestra por sí sola cómo se obtuvo.",
+      "explanation": "Elegiste una responsabilidad comprobable y casos que distinguen las dos ramas del contrato."
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: guía de JavaScript",
+      "url": "https://developer.mozilla.org/es/docs/Web/JavaScript/Guide"
+    },
+    {
+      "title": "MDN: return",
+      "url": "https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/return"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo."
+    ],
+    "workedExample": {
+      "problem": "Una tienda cobra cuatro fichas por unidad y dos de envío, excepto si no hay compra.",
+      "reasoning": "Aíslas la regla y devuelves cero antes del cálculo general cuando no hay unidades.",
+      "result": "Las llamadas con cero y tres devuelven 0 y 14, sin pedir datos dentro de la función."
+    },
+    "transferActivityIds": [
+      "js-descomponer-y-probar-a3",
+      "analizar-contrato"
+    ]
+  },
+  "coverage": {
+    "js-descomponer-y-probar-concepto": {
+      "explanationExcerpt": "Descomponer un programa consiste en separar responsabilidades con contratos claros; una función que recibe datos y devuelve un resultado puede probarse sin pedir entradas ni imprimir.",
+      "assessmentIds": [
+        "js-descomponer-y-probar-q1",
+        "js-descomponer-y-probar-q2",
+        "js-descomponer-y-probar-q3",
+        "js-descomponer-y-probar-q4"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-15",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Reglas contrastadas con MDN: scripts clásicos, consola, const/let, valores y prompt adaptado. Ejemplos y soluciones se comprueban con JavaScript real en las suites de esta entrega; no se atribuye una versión universal al motor del navegador.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  }
+}

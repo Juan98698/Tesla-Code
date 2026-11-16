@@ -1,0 +1,297 @@
+{
+  "id": "js-validacion",
+  "outcome": "Validar entradas antes de calcular: construir y explicar una solución que funcione con distintos datos y casos límite.",
+  "requiresConcepts": [
+    "js-console-log",
+    "js-valores-literales",
+    "js-secuencia",
+    "js-const-inicial",
+    "js-nombres",
+    "js-entradas-prompt",
+    "js-conversion-number",
+    "js-comparaciones-concepto",
+    "js-decisiones-concepto",
+    "js-tipos-y-calculos-concepto",
+    "js-suma-producto"
+  ],
+  "html": "<p>Validar una entrada consiste en comprobar las condiciones del contrato antes de utilizarla; convertir un texto a número no demuestra que el dato sea válido.</p>\n<h3>Vacío no significa cero</h3><p>texto.trim() produce otro texto sin espacios en los extremos. No modifica el original. texto.trim() === &quot;&quot; detecta ausencia de contenido; Number(&quot;&quot;) y Number(&quot;   &quot;) producen cero. Comprueba el texto antes de aceptar ese cero como una cantidad.</p>\n<h3>Enteros admitidos</h3><p>Number.isInteger(numero) devuelve true para un número entero finito; devuelve false para NaN, Infinity y decimales. Primero usa Number, después consulta Number.isInteger. Esa función no convierte textos. Para un contrato de minutos entre cero y ciento veinte inclusive, exige también numero &gt;= 0 y numero &lt;= 120.</p>\n<h3>Combinar preguntas</h3><p>&amp;&amp; significa que ambas condiciones deben ser verdaderas; || que basta alguna verdadera. ! niega un booleano: !true es false. Se evalúa de izquierda a derecha y se omite lo que ya no hace falta decidir. Usa paréntesis para separar grupos y evitar depender de prioridades que no recuerdas. Aquí combinaremos booleanos; no generalizamos todavía estos operadores a otros valores.</p>\n<h3>Un contrato preciso</h3><p>En estas actividades aceptamos cualquier texto no vacío que Number convierta a un entero del rango: &quot;02&quot; representa dos y &quot;2.0&quot; también. No prometemos aceptar solo dígitos. Una entrada inválida produce un mensaje y no el cálculo. Faltar líneas para prompt sigue siendo un error del entorno; no es una cancelación simulada.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Un plan recibe minutos de cero a ciento veinte, sin admitir texto vacío ni fracciones.</p><p>Se comprueba contenido, entero y rango antes de sumar cinco; cero sí pertenece al contrato.</p><p>La entrada 0 produce 5, mientras un texto vacío debe producir Entrada inválida.</p><p>Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo.</p></section>\n<h3>Predice y prueba</h3><pre data-language=\"javascript\">const texto = prompt(\"Minutos\");\nconst minutos = Number(texto);\nif (texto.trim() !== \"\" &amp;&amp; Number.isInteger(minutos) &amp;&amp; minutos &gt;= 0 &amp;&amp; minutos &lt;= 120) {\n  console.log(minutos + 5);\n} else {\n  console.log(\"Entrada inválida\");\n}</pre><p>Salida esperada:</p><pre data-language=\"text\">5</pre>\n<div class=\"callout\"><strong>Antes de avanzar</strong><p>Predice un caso diferente del ejemplo y explica tu elección. Resuelve comprensión, reparación y reto nuevo; después completa la comprobación. Pasar los casos demuestra esos resultados, no una única forma de escribir el código.</p></div>",
+  "examples": [
+    {
+      "id": "js-validacion-e1",
+      "language": "javascript",
+      "code": "const texto = prompt(\"Minutos\");\nconst minutos = Number(texto);\nif (texto.trim() !== \"\" && Number.isInteger(minutos) && minutos >= 0 && minutos <= 120) {\n  console.log(minutos + 5);\n} else {\n  console.log(\"Entrada inválida\");\n}",
+      "stdin": [
+        "0"
+      ],
+      "stdout": "5\n"
+    }
+  ],
+  "quiz": [
+    {
+      "type": "choice",
+      "prompt": "¿Por qué Number(\"\") no basta para validar minutos?",
+      "options": [
+        "Siempre lanza un error",
+        "Produce un texto",
+        "Produce cero aunque falte el dato"
+      ],
+      "answer": 2,
+      "explanation": "El vacío requiere una comprobación propia.",
+      "id": "js-validacion-q1",
+      "concept": "js-validacion-concepto"
+    },
+    {
+      "type": "choice",
+      "prompt": "¿Qué devuelve Number.isInteger(2.5)?",
+      "options": [
+        "2",
+        "false",
+        "true"
+      ],
+      "answer": 1,
+      "explanation": "La fracción no es un entero.",
+      "id": "js-validacion-q2",
+      "concept": "js-validacion-concepto"
+    },
+    {
+      "type": "choice",
+      "prompt": "Para exigir dos condiciones al mismo tiempo, usamos…",
+      "options": [
+        "&&",
+        "||",
+        "="
+      ],
+      "answer": 0,
+      "explanation": "Ambas deben cumplirse.",
+      "id": "js-validacion-q3",
+      "concept": "js-validacion-concepto"
+    },
+    {
+      "type": "choice",
+      "prompt": "Con el contrato descrito, ¿se admite \"2.0\"?",
+      "options": [
+        "No, solo se aceptan dígitos",
+        "Solo si se quitan las comillas del editor",
+        "Sí, se convierte al entero 2"
+      ],
+      "answer": 2,
+      "explanation": "El contrato valida el valor convertido, no un formato léxico estricto.",
+      "id": "js-validacion-q4",
+      "concept": "js-validacion-concepto"
+    }
+  ],
+  "activities": [
+    {
+      "type": "javascript",
+      "prompt": "Comprensión: lee texto y muestra Vacío si solo tiene espacios o está vacío; en otro caso Con dato.",
+      "starter": "",
+      "solution": "const texto = prompt(\"Dato\");\nif (texto.trim() === \"\") { console.log(\"Vacío\"); } else { console.log(\"Con dato\"); }",
+      "cases": [
+        {
+          "name": "Vacío",
+          "stdin": [
+            ""
+          ],
+          "stdout": "Vacío\n"
+        },
+        {
+          "name": "Espacios",
+          "stdin": [
+            "   "
+          ],
+          "stdout": "Vacío\n"
+        },
+        {
+          "name": "Cero",
+          "stdin": [
+            "0"
+          ],
+          "stdout": "Con dato\n"
+        }
+      ],
+      "hint": "Separa entradas, proceso y salida. Predice cada caso antes de ejecutarlo.",
+      "explanation": "El programa produjo los resultados esperados con todos los datos del contrato. Explica por qué tu solución también sirve para otros datos admitidos.",
+      "usesInput": true,
+      "stdin": [
+        ""
+      ],
+      "id": "js-validacion-a1",
+      "concept": "js-validacion-concepto"
+    },
+    {
+      "type": "javascript",
+      "prompt": "Guiada: admite enteros de 0 a 120 inclusive y texto no vacío. Muestra Válido o Inválido. Repara la aceptación del vacío y de fracciones.",
+      "starter": "const texto = prompt(\"Minutos\");\nconst n = Number(texto);\nif (n >= 0 && n <= 120) { console.log(\"Válido\"); } else { console.log(\"Inválido\"); }",
+      "solution": "const texto = prompt(\"Minutos\");\nconst n = Number(texto);\nif (texto.trim() !== \"\" && Number.isInteger(n) && n >= 0 && n <= 120) { console.log(\"Válido\"); } else { console.log(\"Inválido\"); }",
+      "cases": [
+        {
+          "name": "Cero",
+          "stdin": [
+            "0"
+          ],
+          "stdout": "Válido\n"
+        },
+        {
+          "name": "Tope",
+          "stdin": [
+            "120"
+          ],
+          "stdout": "Válido\n"
+        },
+        {
+          "name": "Exceso",
+          "stdin": [
+            "121"
+          ],
+          "stdout": "Inválido\n"
+        },
+        {
+          "name": "Fracción",
+          "stdin": [
+            "2.5"
+          ],
+          "stdout": "Inválido\n"
+        },
+        {
+          "name": "Vacío",
+          "stdin": [
+            ""
+          ],
+          "stdout": "Inválido\n"
+        },
+        {
+          "name": "Letras",
+          "stdin": [
+            "hola"
+          ],
+          "stdout": "Inválido\n"
+        },
+        {
+          "name": "Negativo",
+          "stdin": [
+            "-1"
+          ],
+          "stdout": "Inválido\n"
+        }
+      ],
+      "hint": "Separa entradas, proceso y salida. Predice cada caso antes de ejecutarlo.",
+      "explanation": "El programa produjo los resultados esperados con todos los datos del contrato. Explica por qué tu solución también sirve para otros datos admitidos.",
+      "usesInput": true,
+      "stdin": [
+        "0"
+      ],
+      "id": "js-validacion-a2",
+      "concept": "js-validacion-concepto"
+    },
+    {
+      "type": "javascript",
+      "prompt": "Reto nuevo: una reserva admite de 1 a 6 personas enteras. Lee el dato; si no es vacío y cumple ese rango, muestra el total a 8 fichas por persona. En otro caso muestra Reserva inválida.",
+      "starter": "",
+      "solution": "const texto = prompt(\"Personas\");\nconst personas = Number(texto);\nif (texto.trim() !== \"\" && Number.isInteger(personas) && personas >= 1 && personas <= 6) { console.log(personas * 8); } else { console.log(\"Reserva inválida\"); }",
+      "cases": [
+        {
+          "name": "Una",
+          "stdin": [
+            "1"
+          ],
+          "stdout": "8\n"
+        },
+        {
+          "name": "Seis",
+          "stdin": [
+            "6"
+          ],
+          "stdout": "48\n"
+        },
+        {
+          "name": "Cero",
+          "stdin": [
+            "0"
+          ],
+          "stdout": "Reserva inválida\n"
+        },
+        {
+          "name": "Siete",
+          "stdin": [
+            "7"
+          ],
+          "stdout": "Reserva inválida\n"
+        },
+        {
+          "name": "Fracción",
+          "stdin": [
+            "1.5"
+          ],
+          "stdout": "Reserva inválida\n"
+        },
+        {
+          "name": "Sin dato",
+          "stdin": [
+            "  "
+          ],
+          "stdout": "Reserva inválida\n"
+        },
+        {
+          "name": "Texto",
+          "stdin": [
+            "no"
+          ],
+          "stdout": "Reserva inválida\n"
+        }
+      ],
+      "hint": "Separa entradas, proceso y salida. Predice cada caso antes de ejecutarlo.",
+      "explanation": "El programa produjo los resultados esperados con todos los datos del contrato. Explica por qué tu solución también sirve para otros datos admitidos.",
+      "usesInput": true,
+      "stdin": [
+        "1"
+      ],
+      "id": "js-validacion-a3",
+      "concept": "js-validacion-concepto"
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: guía de JavaScript",
+      "url": "https://developer.mozilla.org/es/docs/Web/JavaScript/Guide"
+    },
+    {
+      "title": "MDN: Number.isInteger",
+      "url": "https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo."
+    ],
+    "workedExample": {
+      "problem": "Un plan recibe minutos de cero a ciento veinte, sin admitir texto vacío ni fracciones.",
+      "reasoning": "Se comprueba contenido, entero y rango antes de sumar cinco; cero sí pertenece al contrato.",
+      "result": "La entrada 0 produce 5, mientras un texto vacío debe producir Entrada inválida."
+    },
+    "transferActivityIds": [
+      "js-validacion-a3"
+    ]
+  },
+  "coverage": {
+    "js-validacion-concepto": {
+      "explanationExcerpt": "Validar una entrada consiste en comprobar las condiciones del contrato antes de utilizarla; convertir un texto a número no demuestra que el dato sea válido.",
+      "assessmentIds": [
+        "js-validacion-q1",
+        "js-validacion-q2",
+        "js-validacion-q3",
+        "js-validacion-q4"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-15",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Reglas contrastadas con MDN: scripts clásicos, consola, const/let, valores y prompt adaptado. Ejemplos y soluciones se comprueban con JavaScript real en las suites de esta entrega; no se atribuye una versión universal al motor del navegador.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  }
+}

@@ -25,7 +25,7 @@ npm run test:access  # Entradas libres, orientación, repasos y secuencia intern
 npm run test:module  # Piloto de la edición anterior: 17 lecciones, escritorio y móvil
 npm run test:python  # Primer módulo Python completo, ejecución real y recuperación del progreso
 npm run test:console # Consola, entradas, errores y ejemplos en escritorio y móvil
-npm run test:javascript # Primer módulo JavaScript: ocho lecciones desde cero y motor real aislado
+npm run test:javascript # Continuidad JavaScript: 18 lecciones, decisiones, ciclos, funciones y listas
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
 npm run test:tutor   # Tutor contra HTTP real con proveedor simulado, ambos temas y móvil
@@ -53,12 +53,12 @@ La consola JavaScript usa el motor del navegador y se inicia al ejecutar. Esta e
 ## Qué está disponible
 
 - Siete mapas: Fundamentos, Algoritmia, Python, Frontend, Backend, Bases de datos e IA.
-- **46 lecciones publicadas en los recorridos actuales**, más **68 en la edición anterior de Fundamentos**, conservadas con sus enlaces y logros. El inventario completo tiene 459 entradas, incluidas las archivadas y los bloques futuros. Los temas pendientes aparecen **en preparación**.
-- **Fundamentos con JavaScript: primer módulo completo de ocho lecciones**, 15 ejemplos ejecutables, 24 ejercicios de código y 40 preguntas. Enseña editor y consola, textos/números, secuencia, errores/comentarios, const, let, operaciones, lectura de entradas y conversión antes del proyecto de tarjeta y plan de práctica. Los otros 17 bloques permanecen en preparación; sus entradas representan bloques por desarrollar, no lecciones ya redactadas.
+- **56 lecciones publicadas en los recorridos actuales**, más **68 en la edición anterior de Fundamentos**, conservadas con sus enlaces y logros. El inventario completo tiene 464 entradas, incluidas las archivadas y los bloques futuros. Los temas pendientes aparecen **en preparación**.
+- **Fundamentos con JavaScript: primer módulo completo de ocho lecciones**, 15 ejemplos ejecutables, 24 ejercicios de código y 40 preguntas. Enseña editor y consola, textos/números, secuencia, errores/comentarios, const, let, operaciones, lectura de entradas y conversión antes del proyecto de tarjeta y plan de práctica. La continuidad añade diez lecciones en cinco bloques: tipos y comparaciones, decisiones y validación, ciclos, funciones y listas. En total hay 18 lecciones, 25 ejemplos, 54 ejercicios ejecutables, tres análisis de decisiones y 80 preguntas. Los doce bloques posteriores siguen en preparación.
 - La edición anterior conserva sus 68 lecciones desde Primeros pasos hasta Experto. Se consulta desde el mapa de Fundamentos y desde sus URLs originales. Sus finalizaciones y XP permanecen; no acreditan las nuevas prácticas JavaScript.
 - Primeros pasos (edición anterior): sus dos lecciones incluyen fuentes, ejemplos razonados, errores frecuentes y tres actividades cada una: comprensión, práctica guiada y transferencia. La revisión asistida reduce la deuda editorial a 81 lecciones; la revisión independiente sigue pendiente.
 - IA: 13 lecciones de exploración desde cero, con 52 prácticas, 39 casos de evidencia y 68 preguntas. LLM, difusión y NCM son centrales. El mapa de 96 temas añade puentes de JavaScript, Python y matemáticas, ingeniería y proyectos; 83 temas siguen en preparación. Consulta el [temario y sus límites](docs/ia-curriculum.md).
-- Algoritmia: **12 de 45 lecciones**: once del núcleo conceptual y en pseudocódigo, hasta invariantes, y un laboratorio Python opcional con código ejecutable. Cada una tiene tres prácticas. El laboratorio no bloquea el núcleo ni presupone conocer el lenguaje.
+- Algoritmia: **12 de 45 lecciones**: once del núcleo conceptual y en pseudocódigo, hasta invariantes, y un laboratorio Python opcional con código ejecutable. Cada una tiene al menos tres prácticas; cotas e invariantes añaden casos de transferencia con decisiones justificadas. El laboratorio no bloquea el núcleo ni presupone conocer el lenguaje.
 - Python: **7 de 67 lecciones**: un primer módulo desde cero hasta un presupuesto con entradas variables. Enseña cada instrucción antes de utilizarla, con predicción, reparación y construcción; incluye doce actividades de código. Los diez módulos restantes están planificados.
 - Frontend, Backend y Bases de datos tienen dos lecciones publicadas cada una. Todas las rutas tienen entrada libre; la progresión obligatoria se conserva dentro de cada una, separada de sus dependencias académicas.
 - Laboratorios de variables, ciclos, condicionales, segmentación de texto y señal/ruido; proyectos de propinas y adivinación; intérprete acotado de pseudocódigo.

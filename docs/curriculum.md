@@ -2,7 +2,7 @@
 
 ## Fundamentos como primer lenguaje
 
-El recorrido principal es Fundamentos y lógica con JavaScript. Su primer módulo publica ocho lecciones: primera ejecución, valores y secuencia, errores y comentarios, const, let, operaciones, entradas y conversión y proyecto de tarjeta. Incluye 24 prácticas de código, 15 ejemplos ejecutables y 40 preguntas. Los otros 17 bloques del plan continúan en preparación.
+El recorrido principal es Fundamentos y lógica con JavaScript. Su primer módulo publica ocho lecciones: primera ejecución, valores y secuencia, errores y comentarios, const, let, operaciones, entradas y conversión y proyecto de tarjeta. Incluye 24 prácticas de código, 15 ejemplos ejecutables y 40 preguntas. La continuidad básica añade diez lecciones en los cinco bloques siguientes: tipos/comparaciones, decisiones/validación, ciclos/acumulación, funciones/descomposición y listas/proyecto de mediciones. Hay 18 lecciones disponibles, 25 ejemplos ejecutables, 54 prácticas de código, tres análisis de decisiones y 80 preguntas. Los doce bloques posteriores siguen en preparación.
 
 Las 68 lecciones de la edición anterior conservan sus IDs, enlaces e historial en el archivo de Fundamentos. No son el itinerario JavaScript ni acreditan automáticamente sus nuevas lecciones.
 
@@ -22,7 +22,7 @@ Todas las rutas permiten empezar por su primera lección publicada. Fundamentos 
 10. Razonamiento, contraejemplos e inducción.
 11. Corrección con invariantes.
 
-Estas once lecciones están publicadas. Un duodécimo laboratorio opcional traduce el máximo a Python, explica la sintaxis desde cero y permite ejecutarlo con casos. Se habilita después de la traza y no bloquea el núcleo. El teorema maestro queda como profundización posterior a recurrencias e inducción. Los IDs anteriores se conservan, sin conceder finalizaciones artificiales.
+Estas once lecciones están publicadas. Cotas e invariantes incorporan análisis de problemas nuevos: comparar planes de revisión y justificar un conteo de positivos, con mantenimiento, contraejemplo y terminación. Un duodécimo laboratorio opcional traduce el máximo a Python, explica la sintaxis desde cero y permite ejecutarlo con casos. Se habilita después de la traza y no bloquea el núcleo. El teorema maestro queda como profundización posterior a recurrencias e inducción. Los IDs anteriores se conservan, sin conceder finalizaciones artificiales.
 
 `progressionRequires` conserva el orden de aprendizaje y `dependsOn`/`requiresConcepts` describen los conocimientos utilizados. En Algoritmia, los recorridos de grafos enlazan colas y pilas, Dijkstra enlaza prioridad y Kruskal ordenamiento. Grafos deja de exigir tries y tablas hash deja de exigir colas. La revisión semántica completa de los otros mapas heredados sigue pendiente.
 

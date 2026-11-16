@@ -130,3 +130,9 @@ La primera consola ejecuta scripts clásicos síncronos, sin DOM ni red. `prompt
 El [currículo de IA](ia-curriculum.md) conserva LLM, difusión y NCM como partes centrales. Sus 13 publicaciones tienen cuatro prácticas: comprensión, guiada, reparación y transferencia. Los casos no califican escritura libre ni ejecutan un modelo. No conviertas una suma de palabras clave en evaluación semántica. El reto utiliza material nuevo y todos sus criterios deben estar explicados previamente.
 
 El 10 de noviembre de 2026 las nueve publicaciones heredadas de IA salen de la excepción de profundidad; se conservan sus IDs y finalizaciones históricas. Las cuatro publicaciones nuevas tienen IDs propios. La revisión asistida no sustituye el piloto con principiantes.
+
+## Continuidad básica y evidencia de aprendizaje
+
+Los seis primeros bloques de Fundamentos tienen contenido disponible hasta listas y funciones. Los contratos numéricos de los nuevos ejercicios se explican en cada actividad; la validación se enseña antes de pedir rechazo de entradas inválidas. Usa casos en ambos lados de un límite, cero o lista vacía cuando se admitan, empates y negativos cuando correspondan.
+
+Comprobar salida no acredita la presencia de una declaración, una función ni una conversión específica. No impongas igualdad textual del código ni búsquedas de palabras clave para acreditarlas. Compleméntalo con análisis de decisiones sobre código o diseño, como los de const, let y separación de responsabilidades. Los retos de transferencia cambian la situación y requieren elegir una regla; las pruebas de regresión deben incluir una solución incorrecta plausible y otra equivalente correcta. Los logros históricos se conservan: las actividades nuevas se exigen a quienes aún no completaron la lección.

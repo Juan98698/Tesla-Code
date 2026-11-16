@@ -292,7 +292,15 @@ test('dimensional progress uses published lessons and real achievements without 
   state.streak.count = 2;
   const before = structuredClone(state);
   root.innerHTML = views.progressPage(routes, state, concepts);
-  assert.match(root.querySelector('.progress-dial').textContent, /0 de 46 lecciones/);
+  const published = routes.reduce(
+    (total, route) =>
+      total + route.lessons.filter((lesson) => lesson.status === 'published').length,
+    0,
+  );
+  assert.match(
+    root.querySelector('.progress-dial').textContent,
+    new RegExp(`0 de ${published} lecciones`),
+  );
   assert.match(
     root.querySelector('[aria-label="Historial de la edición anterior"]').textContent,
     /1 de 68 lecciones/,

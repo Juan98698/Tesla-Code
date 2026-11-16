@@ -30,7 +30,7 @@ export function editionNotice(route, state = { completed: [] }) {
   if (route.archivedEdition)
     return '<div class="callout"><strong>Edición anterior · pseudocódigo y ejemplos Python</strong><p>Tus enlaces, prácticas y logros anteriores se conservan aquí. La nueva edición JavaScript tiene su propio recorrido y actividades.</p><a class="text-link" href="#/ruta/fundamentos">Ir a Fundamentos con JavaScript →</a></div>';
   if (route.archive)
-    return `<div class="callout"><strong>JavaScript desde cero · primera entrega</strong><p>El primer módulo está completo. Los siguientes bloques aparecen en preparación. Tus ${completedCount(route.archive, state)} lecciones completadas de la edición anterior conservan su historial y XP; no completan las nuevas prácticas JavaScript.</p><a class="text-link" href="#/ruta/${route.id}/archivo">Consultar la edición anterior →</a></div>`;
+    return `<div class="callout"><strong>JavaScript desde cero · continuidad básica</strong><p>Hay seis bloques disponibles: primeros programas, tipos, decisiones, ciclos, funciones y listas. Los bloques posteriores aparecen en preparación. Tus ${completedCount(route.archive, state)} lecciones completadas de la edición anterior conservan su historial y XP; no completan las nuevas prácticas JavaScript.</p><a class="text-link" href="#/ruta/${route.id}/archivo">Consultar la edición anterior →</a></div>`;
   return '';
 }
 export function routeCard(route, state) {

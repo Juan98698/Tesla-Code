@@ -23,7 +23,7 @@ const source = JSON.parse(readFileSync('content/curriculum/fundamentos.json', 'u
 const route = indexRoute(source);
 
 test('new edition has an independent entry while preserving every old lesson and its progress', () => {
-  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 8);
+  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 18);
   assert.equal(route.archive.lessons.length, 68);
   const completed = new Set(route.archive.lessons.map((l) => 'fundamentos/' + l.id));
   assert.equal(nextLesson(route, completed).id, 'js-tu-primer-programa');
@@ -53,7 +53,7 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       assert.equal(result.passed, true, example.id + ': ' + JSON.stringify(result));
       examples++;
     }
-    for (const activity of data.activities) {
+    for (const activity of data.activities.filter((a) => a.type === 'javascript')) {
       assert.deepEqual(javascriptExerciseErrors(activity), [], activity.id);
       for (const item of activity.cases) {
         assert.equal(
@@ -71,9 +71,9 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       activities++;
     }
   }
-  assert.equal(examples, 15);
-  assert.equal(activities, 24);
-  assert.ok(cases > 24);
+  assert.equal(examples, 25);
+  assert.equal(activities, 54);
+  assert.equal(cases, 140);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { withBrowser, answerQuiz, waitForFiniteAnimations } from './support/browser.mjs';
 import { indexRoute } from '../js/domain/curriculum.js';
-import { solveJavaScriptActivity } from './support/javascript.mjs';
+import { solveActivity } from './support/python.mjs';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const route = indexRoute(read('content/curriculum/fundamentos.json'));
 const module = route.lessons.filter((meta) => meta.status === 'published');
@@ -84,7 +84,7 @@ await withBrowser(4323, async (browser, origin) => {
           'console.log("un borrador");',
         );
       }
-      for (const activity of data.activities) await solveJavaScriptActivity(page, activity);
+      for (const activity of data.activities) await solveActivity(page, activity);
       await answerQuiz(page, data);
       const state = await page.evaluate(() =>
         JSON.parse(localStorage.getItem('teslacode:progress:v2')),
@@ -115,7 +115,7 @@ await withBrowser(4323, async (browser, origin) => {
     assert.deepEqual(errors, []);
     await context.close();
     console.log(
-      `PASS JavaScript ${width}px: ocho lecciones desde cero, 24 ejercicios, borradores, consola, accesibilidad, progreso y archivo anterior.`,
+      `PASS JavaScript ${width}px: ${module.length} lecciones desde cero, ejercicios y análisis de decisiones, borradores, consola, accesibilidad, progreso y archivo anterior.`,
     );
   }
   const page = await browser.newPage({ reducedMotion: 'reduce' });
@@ -187,7 +187,7 @@ await withBrowser(4323, async (browser, origin) => {
     },
     { origin, examples },
   );
-  assert.equal(engine.checkedExamples.length, 15);
+  assert.equal(engine.checkedExamples.length, examples.length);
   assert.ok(
     engine.checkedExamples.every((item) => item.passed),
     JSON.stringify(engine.checkedExamples.filter((item) => !item.passed)),
