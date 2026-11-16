@@ -225,6 +225,11 @@ for (const [key, meta] of lessons) {
   for (const a of data.activities ?? []) {
     checkQuestion(a, `${path}/${a.id}`, allowed);
     if (!a.hint) fail(`${path}/${a.id}: falta pista`);
+    if (
+      a.hints !== undefined &&
+      (!Array.isArray(a.hints) || a.hints.some((hint) => typeof hint !== 'string' || !hint.trim()))
+    )
+      fail(`${path}/${a.id}: pistas adicionales inválidas`);
   }
   const knownWidgets = [
     'variables-sim',

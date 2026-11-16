@@ -11,7 +11,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
     activity.usesInput ||
     activity.stdin?.length ||
     activity.cases?.some((item) => item.stdin?.length);
-  return `<p>${js ? 'Escribe, ejecuta y observa la salida. No necesitas instalar herramientas.' : 'Ejecuta y observa la salida. Python se descarga la primera vez; necesitas conexión.'}</p>
+  return `<p>${js ? 'Escribe, ejecuta y observa la salida. No necesitas instalar herramientas.' : 'Ejecuta y observa la salida. Python se descarga la primera vez; necesitas conexión.'}</p>${js && activity.entrypoint ? `<p>Comprobar llamará a <code>${e(activity.entrypoint)}</code> con los argumentos de cada caso y comparará el valor devuelto. Ejecutar solo ejecuta tu código: para explorar, añade una llamada con console.log; retírala antes de comprobar si el contrato pide una función sin impresiones.</p>` : ''}
     <form><label for="answer-${activity.id}">Tu código ${language}</label>
     <textarea id="answer-${activity.id}" class="code-editor" rows="10" spellcheck="false" wrap="off"
       autocapitalize="off" autocomplete="off" maxlength="${PYTHON_LIMITS.source}">${e(activity.starter)}</textarea>
@@ -40,7 +40,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
               (c) =>
                 `<li><strong>${e(c.name)}</strong>: ${
                   activity.entrypoint
-                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}`
+                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}`
                     : `entradas ${e(JSON.stringify(c.globals ?? c.stdin ?? []))}; salida ${e(JSON.stringify(c.stdout))}`
                 }</li>`,
             )

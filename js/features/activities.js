@@ -7,14 +7,24 @@ export function mountActivities(root, activities, isSolved, onSolve, options = {
   root.innerHTML = activities
     .map(
       (a) =>
-        `<section class="card practice-card" data-activity="${a.id}"><span class="badge ${isSolved(a.id) ? 'live' : ''}">${isSolved(a.id) ? '✓ Resuelta' : 'TU TURNO'}</span><h3 style="margin-top:16px">${e(a.prompt)}</h3>${a.type === 'case-study' ? caseStudyMarkup(a) : ['python', 'javascript'].includes(a.type) ? codeActivityMarkup(a) : `<form><label for="answer-${a.id}">Tu respuesta</label><input id="answer-${a.id}" autocomplete="off" required maxlength="200"><div class="btns" style="margin-top:12px"><button class="btn small" type="submit">Comprobar respuesta</button><button class="btn ghost small" type="button" data-hint>Necesito una pista</button></div></form>`}<p class="hint" hidden>${e(a.hint)}</p><div class="practice-feedback" role="status" hidden></div></section>`,
+        `<section class="card practice-card" data-activity="${a.id}"><span class="badge ${isSolved(a.id) ? 'live' : ''}">${isSolved(a.id) ? '✓ Resuelta' : 'TU TURNO'}</span><h3 style="margin-top:16px">${e(a.prompt)}</h3>${a.type === 'case-study' ? caseStudyMarkup(a) : ['python', 'javascript'].includes(a.type) ? codeActivityMarkup(a) : `<form><label for="answer-${a.id}">Tu respuesta</label><input id="answer-${a.id}" autocomplete="off" required maxlength="200"><div class="btns" style="margin-top:12px"><button class="btn small" type="submit">Comprobar respuesta</button><button class="btn ghost small" type="button" data-hint>Necesito una pista</button></div></form>`}<p class="hint" aria-live="polite" hidden>${e(a.hint)}</p><div class="practice-feedback" role="status" hidden></div></section>`,
     )
     .join('');
   activities.forEach((a) => {
     const section = root.querySelector(`[data-activity="${a.id}"]`),
       feedback = section.querySelector('.practice-feedback');
-    section.querySelector('[data-hint]').onclick = () => {
-      section.querySelector('.hint').hidden = false;
+    const hints = [a.hint, ...(a.hints ?? [])];
+    let revealed = 0;
+    section.querySelector('[data-hint]').onclick = (event) => {
+      revealed = Math.min(revealed + 1, hints.length);
+      const hint = section.querySelector('.hint');
+      hint.hidden = false;
+      hint.textContent = hints
+        .slice(0, revealed)
+        .map((text, i) => `Pista ${i + 1}: ${text}`)
+        .join(' · ');
+      event.currentTarget.textContent = revealed < hints.length ? 'Otra pista' : 'Pistas mostradas';
+      event.currentTarget.disabled = revealed === hints.length;
     };
     if (a.type === 'case-study') {
       mountCaseStudy(section, a, isSolved, onSolve);

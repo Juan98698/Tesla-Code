@@ -3,7 +3,12 @@ import { javascriptWorker } from '../../js/repositories/javascript-runner.js';
 
 // Runs trusted repository examples with the same worker evaluator, using V8's
 // classic-script semantics. Browser tests separately exercise actual Worker/CSP.
-export function runJavaScript(code, item = { name: 'programa', stdout: '' }, exploratory = false) {
+export function runJavaScript(
+  code,
+  item = { name: 'programa', stdout: '' },
+  exploratory = false,
+  entrypoint,
+) {
   const messages = [],
     blobs = new Map();
   let context,
@@ -48,7 +53,7 @@ export function runJavaScript(code, item = { name: 'programa', stdout: '' }, exp
         value: sandbox[key],
       });
     javascriptWorker();
-    sandbox.onmessage({ data: { code, item, exploratory } });
+    sandbox.onmessage({ data: { code, item, exploratory, entrypoint } });
   } finally {
     for (const [key, descriptor] of previous) {
       if (descriptor) Object.defineProperty(globalThis, key, descriptor);

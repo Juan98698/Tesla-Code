@@ -141,6 +141,17 @@ await withBrowser(4323, async (browser, origin) => {
           { name: 'dos', stdout: '1\n' },
         ],
       );
+      const functionCase = { name: 'argumentos', args: [[1, 2]], expected: 3, preserveArgs: true };
+      const functionResults = [];
+      for (const code of [
+        'const sumar = (datos) => datos[0] + datos[1];',
+        'console.log(3);',
+        'function sumar(datos) { console.log(3); }',
+        'function sumar(datos) { datos[0] = 9; return 3; }',
+      ]) {
+        const result = await runner.run({ code, entrypoint: 'sumar', cases: [functionCase] });
+        functionResults.push(result.results[0].passed);
+      }
       const error = await run('console.log("antes");\nnoExiste();');
       const syntax = await run('return 1;');
       const blocked = await run(
@@ -176,6 +187,7 @@ await withBrowser(4323, async (browser, origin) => {
       return {
         checkedExamples,
         isolated,
+        functionResults,
         error,
         syntax,
         blocked,
@@ -193,6 +205,7 @@ await withBrowser(4323, async (browser, origin) => {
     JSON.stringify(engine.checkedExamples.filter((item) => !item.passed)),
   );
   assert.ok(engine.isolated.results.every((r) => r.passed));
+  assert.deepEqual(engine.functionResults, [true, false, false, false]);
   assert.match(engine.error.results[0].stdout, /antes/);
   assert.match(engine.error.results[0].traceback, /Línea 2/);
   assert.match(engine.syntax.results[0].error, /SyntaxError/);

@@ -4,7 +4,7 @@ import { JAVASCRIPT_LIMITS } from '../domain/javascript-exercise.js';
 // script: top-level return/import stay syntax errors and source lines aren't shifted.
 export function javascriptWorker() {
   self.onmessage = ({ data }) => {
-    const { code, item, exploratory } = data;
+    const { code, item, exploratory, entrypoint } = data;
     let stdout = '',
       position = 0,
       emitted = -Infinity;
@@ -40,8 +40,52 @@ export function javascriptWorker() {
         throw Error('Faltan entradas para prompt(). Escríbelas antes de ejecutar, una por línea.');
       return item.stdin[position++];
     };
+    const same = (actual, expected) => {
+      if (actual === expected) return true;
+      if (!actual || !expected || typeof actual !== 'object' || typeof expected !== 'object')
+        return false;
+      if (Array.isArray(actual) !== Array.isArray(expected)) return false;
+      if (Object.prototype.toString.call(actual) !== Object.prototype.toString.call(expected))
+        return false;
+      const keys = Object.keys(expected);
+      return (
+        Object.keys(actual).length === keys.length &&
+        (!Array.isArray(expected) || actual.length === expected.length) &&
+        keys.every((key) => Object.hasOwn(actual, key) && same(actual[key], expected[key]))
+      );
+    };
+    let returned,
+      unchanged = true;
+    const probe = '__teslacode_call_' + Math.random().toString(36).slice(2);
+    const callable = entrypoint !== undefined && !exploratory;
+    let suffix = '';
+    if (callable) {
+      if (!/^[a-zA-Z_$][\w$]*$/.test(entrypoint)) throw Error('Nombre de función inválido.');
+      self[probe] = (fn) => {
+        if (typeof fn !== 'function') throw Error('Define la función ' + entrypoint + '.');
+        const args = JSON.parse(JSON.stringify(item.args));
+        returned = fn(...args);
+        if (display(returned).length > 6000) {
+          returned = undefined;
+          throw Error('El resultado supera 6000 caracteres.');
+        }
+        unchanged = !item.preserveArgs || same(args, item.args);
+      };
+      // A separate statement in the same classic script also supports lexical
+      // declarations (const/let), without eval or accepting source text matches.
+      suffix =
+        '\n;self[' +
+        JSON.stringify(probe) +
+        '](typeof ' +
+        entrypoint +
+        ' === "function" ? ' +
+        entrypoint +
+        ' : undefined);';
+    }
     const url = URL.createObjectURL(
-      new Blob([code + '\n//# sourceURL=teslacode-ejercicio.js'], { type: 'text/javascript' }),
+      new Blob([code + suffix + '\n//# sourceURL=teslacode-ejercicio.js'], {
+        type: 'text/javascript',
+      }),
     );
     let failure;
     try {
@@ -64,17 +108,35 @@ export function javascriptWorker() {
       };
     } finally {
       URL.revokeObjectURL(url);
+      delete self[probe];
     }
     stdout = stdout.replaceAll('\r\n', '\n');
-    const expected = (item.stdout ?? '').replaceAll('\r\n', '\n');
+    const format = (value) => (typeof value === 'string' ? JSON.stringify(value) : display(value));
+    const expected = callable
+      ? format(item.expected)
+      : (item.stdout ?? '').replaceAll('\r\n', '\n');
+    const actual = callable ? format(returned) : stdout;
+    const passed =
+      !failure &&
+      (callable
+        ? same(returned, item.expected) && unchanged && stdout === (item.stdout ?? '')
+        : stdout === expected);
     send({
       type: 'result',
       result: {
         name: item.name,
         stdout,
-        actual: stdout,
+        actual,
         expected,
-        passed: exploratory ? null : !failure && stdout === expected,
+        passed: exploratory ? null : passed,
+        ...(callable && !unchanged
+          ? { error: 'La función modificó los argumentos; debe conservarlos.' }
+          : callable && stdout !== (item.stdout ?? '')
+            ? {
+                error:
+                  'La salida impresa no cumple el contrato. Devuelve el resultado de la función.',
+              }
+            : {}),
         ...failure,
       },
     });
@@ -87,7 +149,7 @@ export function javascriptFrameBootstrap(channel, source) {
   window.addEventListener('message', (event) => {
     if (event.source !== parent || event.data?.channel !== channel || started) return;
     started = true;
-    const { code, cases, mode } = event.data.job;
+    const { code, cases, mode, entrypoint } = event.data.job;
     const results = [];
     const send = (message) => parent.postMessage({ channel, ...message }, '*');
     const next = () => {
@@ -114,7 +176,7 @@ export function javascriptFrameBootstrap(channel, source) {
         if (current === worker)
           send({ type: 'error', message: event.message || 'No se pudo ejecutar JavaScript.' });
       };
-      worker.postMessage({ code, item, exploratory: mode === 'run' });
+      worker.postMessage({ code, item, entrypoint, exploratory: mode === 'run' });
     };
     send({ type: 'running' });
     next();

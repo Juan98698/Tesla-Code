@@ -57,13 +57,22 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       assert.deepEqual(javascriptExerciseErrors(activity), [], activity.id);
       for (const item of activity.cases) {
         assert.equal(
-          runJavaScript(activity.solution, item).result.passed,
+          runJavaScript(activity.solution, item, false, activity.entrypoint).result.passed,
           true,
           activity.id + '/' + item.name,
         );
-        assert.equal(runJavaScript('console.log("incorrecto");', item).result.passed, false);
         assert.equal(
-          runJavaScript('// Otra escritura correcta\n' + activity.solution, item).result.passed,
+          runJavaScript('console.log("incorrecto");', item, false, activity.entrypoint).result
+            .passed,
+          false,
+        );
+        assert.equal(
+          runJavaScript(
+            '// Otra escritura correcta\n' + activity.solution,
+            item,
+            false,
+            activity.entrypoint,
+          ).result.passed,
           true,
         );
         cases++;
@@ -72,8 +81,8 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
     }
   }
   assert.equal(examples, 25);
-  assert.equal(activities, 54);
-  assert.equal(cases, 140);
+  assert.equal(activities, 57);
+  assert.equal(cases, 157);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {
@@ -105,7 +114,7 @@ test('real script semantics preserve output on errors, reject top-level return a
   assert.ok(messages.some((m) => m.type === 'output'));
   assert.equal(blobs.size, 0);
   assert.deepEqual(
-    javascriptExerciseErrors({ starter: 5, solution: '', entrypoint: 'f', cases: [] }).length,
+    javascriptExerciseErrors({ starter: 5, solution: '', entrypoint: 'a.b', cases: [] }).length,
     4,
   );
   assert.ok(

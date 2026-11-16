@@ -10,7 +10,7 @@ import { recordAttempt, completeIfReady } from '../js/domain/progress.js';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const lesson = (id, route = 'fundamentos') => read(`content/lessons/${route}/${id}.json`);
 const passes = (code, activity) =>
-  activity.cases.every((c) => runJavaScript(code, c).result.passed);
+  activity.cases.every((c) => runJavaScript(code, c, false, activity.entrypoint).result.passed);
 
 test('numeric addition rejects the former conversion shortcut and accepts equivalent conversion', () => {
   const activity = lesson('js-proyecto-tarjeta').activities[1];
@@ -31,14 +31,12 @@ test('transfer cases reject plausible mistakes about boundaries, state, empty da
       'const n = Number(prompt()); for(let i=0;i<=n;i=i+1) console.log("Regar"); console.log("Fin");',
     'js-acumular-con-for':
       'const n = Number(prompt()); let t=0; for(let i=1;i<=n;i=i+1) if(i%2===0)t=t+i; console.log(t);',
-    'js-funciones-y-retorno':
-      'const a=Number(prompt()); const b=Number(prompt()); console.log("Área:",a+b);',
-    'js-descomponer-y-probar':
-      'const d=Number(prompt()); if(d>7)console.log(d*2); else console.log(0);',
+    'js-funciones-y-retorno': 'function area(a,b){return a+b;}',
+    'js-descomponer-y-probar': 'function recargo(d){if(d>7)return d*2;return 0;}',
     'js-listas-y-recorridos':
-      'const n=Number(prompt()); let c=0; for(let i=0;i<n;i=i+1)if(Number(prompt())<=0)c=c+1;console.log(c);',
+      'function contarHeladas(datos){let c=0;for(let i=0;i<datos.length;i=i+1)if(datos[i]<=0)c=c+1;return c;}',
     'js-proyecto-mediciones':
-      'const n=Number(prompt()); const m=Number(prompt()); let total=0,c=0;for(let i=0;i<n;i=i+1){const v=Number(prompt());total=total+v;if(v>m)c=c+1;}console.log("Total:",total);console.log("Días con meta:",c);',
+      'function resumir(datos,m){let total=0,c=0;for(let i=0;i<datos.length;i=i+1){total=total+datos[i];if(datos[i]>m)c=c+1;}return [total,c];}',
   };
   for (const [id, code] of Object.entries(wrong)) {
     const activity = lesson(id).activities.find((a) => a.id === `${id}-a3`);
@@ -46,7 +44,10 @@ test('transfer cases reject plausible mistakes about boundaries, state, empty da
     assert.equal(passes(code, activity), false, id + ': plausible mistake must fail');
     // A memorized single output cannot solve a variable-input transfer contract.
     assert.equal(
-      passes(`console.log(${JSON.stringify(activity.cases[0].stdout.trimEnd())});`, activity),
+      passes(
+        `console.log(${JSON.stringify(activity.cases[0].stdout?.trimEnd() ?? activity.cases[0].expected)});`,
+        activity,
+      ),
       false,
       id + ': fixed output',
     );
