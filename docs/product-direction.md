@@ -86,3 +86,10 @@ conservan los tres repasos posteriores y todos los IDs previos. El contrato
 distingue rechazo de datos inválidos, conservación del reporte, retornos de
 funciones y lectura de listas sin mutar argumentos. Las doce ampliaciones futuras
 y la revisión con principiantes siguen pendientes.
+
+Ajuste de granularidad: Valores, tipos y operaciones pasa de dos a cuatro
+lecciones: tipos, operaciones con unidades, comparaciones e integración. Las dos
+lecciones previas conservan sus IDs y el recorrido pasa a 20 publicaciones. La
+distribución separa las nuevas operaciones del reconocimiento de tipos y conecta
+la entrega integrada con Decisiones. Los doce bloques posteriores siguen en
+preparación; revisión independiente y piloto permanecen pendientes.

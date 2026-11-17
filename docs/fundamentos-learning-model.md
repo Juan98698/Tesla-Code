@@ -41,7 +41,7 @@ versión no concede XP ni completa el nuevo contrato.
 
 ## Implementación incremental
 
-Las dieciocho lecciones publicadas construyen el mismo proyecto con las cuatro
+Las veinte lecciones publicadas construyen el mismo proyecto con las cuatro
 etapas. El segundo lote migra los diez temas posteriores: tipos, comparaciones,
 decisiones, validación, while, for, funciones, descomposición, listas y análisis de
 sesiones. Conserva los tres repasos posteriores y sus IDs como transferencias
@@ -73,7 +73,7 @@ preparación; la migración de lo publicado no significa que estén desarrollado
 - Revisión docente independiente y piloto con principiantes siguen pendientes
   hasta que se realicen. Las pruebas automáticas no sustituyen esa evidencia.
 
-## Contrato de evidencias de las dieciocho publicaciones
+## Contrato de evidencias de las veinte publicaciones
 
 Las cuatro etapas requieren entregar una explicación. Las tres de código exigen
 además una predicción estructurada; integración añade un diagnóstico y la ejecución
@@ -129,3 +129,25 @@ minutos reales introducidos siguen siendo no negativos.
 Los cuestionarios y tres transferencias posteriores mantienen sus identificadores
 y problemas distintos. Se conservan logros previos. La revisión docente
 independiente y el piloto con principiantes continúan pendientes.
+
+## Distribución de Valores, tipos y operaciones
+
+El bloque se desarrolla en cuatro lecciones secuenciales, con una entrega por
+lección y cuatro etapas por entrega:
+
+1. Tipos y representación (`js-tipos-y-calculos`, ID conservado): valores de texto,
+   número, booleanos, ausencia y consulta con typeof. El proyecto solo añade el
+   tipo de los minutos; no exige todavía resta, división ni resto.
+2. Operaciones y unidades (`js-operaciones-y-unidades`): resta, división, resto,
+   agrupación, unidades y límites de Number. Añade horas, sobrante y margen diario.
+3. Comparaciones (`js-comparaciones`, ID conservado): igualdad estricta, diferencia
+   y fronteras inclusivas con cantidades que ya se saben interpretar.
+4. Integración (`js-integrar-valores`): otro pedido, datos nuevos, equivalencia
+   entre dos cuentas de una ampliación diaria y pruebas elegidas por el error que
+   revelan. Conserva el reporte y prepara el uso de booleanos en Decisiones.
+
+Se conservan IDs, completados y XP existentes; las nuevas lecciones no se acreditan
+automáticamente. Los prerrequisitos y las fuentes de entregas reflejan el nuevo
+orden. Las pruebas estructurales contrastan que los retos de tipos no exijan las
+operaciones ni el control de flujo de lecciones posteriores. El criterio de cierre
+incluye revisar la granularidad y la continuidad teórica, además de ejecutar casos.

@@ -380,3 +380,44 @@ Audio y alternativas de lectura pasan; los paneles del proyecto final se verific
 en 1440, 390 y 320 px, con ambos temas y auditorías automáticas WCAG. El contexto
 docente se regenera, excluyendo evaluaciones. Revisión docente independiente y
 piloto con principiantes permanecen pendientes.
+
+## Redistribución de Valores, tipos y operaciones
+
+Se sustituye la agrupación de dos lecciones por cuatro entregas secuenciales:
+**Tipos y representación**, **Operaciones y unidades**, **Comparaciones** e
+**Integración de valores**. Las dos lecciones existentes mantienen sus IDs,
+actividades y preguntas identificadas; el alcance de tipos se concentra y las
+operaciones nuevas reciben una lección y un concepto propios. El recorrido pasa
+a 20 publicaciones, con 80 etapas de proyecto y tres repasos posteriores.
+
+La primera entrega conserva la tarjeta inicial y añade únicamente la consulta de
+tipo. Explica textos, números, booleanos, undefined y null antes de evaluarlos;
+ninguno de sus retos exige resta, división, resto, comparaciones o control de flujo
+que corresponden a lecciones posteriores. La segunda introduce los símbolos,
+precedencia, agrupación, unidades y límites de Number, y añade horas, resto y margen.
+Comparaciones utiliza esas cantidades y comprueba tanto el resultado como su tipo
+booleano: imprimir un texto idéntico no satisface ese contrato.
+
+La integración utiliza otros nombres, metas y cantidades, conserva todos los
+campos y contrasta `(minutos + 5) * dias` con `total + 5 * dias` para los enteros
+pequeños admitidos. Su incidencia aplica el aumento diario una sola vez al total.
+Cero y ambos lados de las fronteras complementan la traza y la justificación. La
+versión integrada alimenta Decisiones; prerrequisitos académicos, progresión y
+fuentes de entregas reflejan el nuevo orden. No se añaden ramas ni ciclos en este
+bloque. La selección de casos se explica antes de exigirla.
+
+Se preservan completados y XP anteriores; las nuevas lecciones no se acreditan
+por esos logros históricos. Las pruebas de regresión verifican acceso, IDs,
+conservación de capacidades, evidencias reales, equivalencia, incidencias que
+fallan y ausencia de operaciones futuras en los retos de tipos. Las explicaciones
+continúan como entregas pendientes de revisión humana. Los doce bloques futuros,
+la revisión docente independiente y el piloto con principiantes siguen pendientes.
+
+Verificación de esta redistribución: 253 pruebas unitarias aprobadas; los 55
+módulos de aplicación cumplen los umbrales de cobertura. Se ejecutan 31 ejemplos
+y 522 casos declarados de actividades JavaScript. El recorrido completo pasa las
+20 lecciones en 1440 y 390 px; el recorrido general resuelve 272 actividades de
+126 lecciones. Un recorrido específico verifica las cuatro entregas, el rechazo
+de booleanos impresos como texto y la transferencia del código real a Decisiones.
+La revisión visual comprueba cuatro tarjetas y accesibilidad automática en ambos
+temas a 1440 y 320 px. Audio, formato, recursos y contenido pasan sus controles.

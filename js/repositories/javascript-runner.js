@@ -168,8 +168,7 @@ export function javascriptWorker() {
           : {}),
         ...(!argumentsMatch
           ? {
-              error:
-                'Presenta los rótulos y sus cantidades como valores separados, según el contrato.',
+              error: 'Presenta los rótulos y sus valores con los tipos del contrato.',
             }
           : {}),
         ...(callable && !unchanged
