@@ -463,8 +463,8 @@ inaccesibles por teclado dentro de controles deshabilitados en pantallas estrech
 
 Hay 41 ejemplos, 87 actividades ejecutables, 870 ejecuciones de casos declarados,
 28 análisis de decisiones y 131 preguntas. Son 112 etapas y tres repasos. Las 261
-pruebas unitarias pasan y los 55 módulos cumplen cobertura: 98,89 % de líneas,
-95,77 % de ramas y 96,67 % de funciones globalmente. La verificación general
+pruebas unitarias pasan y los 55 módulos cumplen cobertura: 98,83 % de líneas,
+95,64 % de ramas y 96,67 % de funciones globalmente. La verificación general
 renderiza 134 lecciones y resuelve 304 actividades, revisa 20 combinaciones de vista
 y tamaño y pasa 16 auditorías WCAG automáticas. El recorrido JavaScript completa
 28 lecciones desde cero a 1440 y 390 px, conservando las entregas del estudiante.
