@@ -479,3 +479,49 @@ quedan documentadas antes de redactar lecciones; no se publica ese alcance como
 material terminado. Permanecen pendientes los doce bloques futuros, la revisión
 docente independiente y el piloto con principiantes. Los resultados de CI no
 certifican comprensión ni ausencia absoluta de vacíos.
+
+## Dimensionar por el tema antes del piloto
+
+Decisión del usuario, 16 de noviembre de 2026. La coherencia del contenido se
+establece antes de entregarlo a principiantes. La cantidad de lecciones deriva del
+alcance, sus dependencias y la práctica necesaria; no existe una cuota común. Se
+actualizan los acuerdos persistentes y la [matriz de alcance y carga](fundamentos-alcance-y-carga.md).
+Se contrastan las familias de habilidades con seis guías actuales de MDN. No se
+introducen dependencias, tecnologías nuevas por novedad ni contenido de relleno.
+
+Listas pasa de cuatro a seis lecciones. Construir y consultar el arreglo se
+separa de leer una cantidad variable de entradas y validarlas. Contar posiciones
+que cumplen se separa de combinar suma y conteo en un resumen. Cada entrega
+consume la anterior y conserva el reporte; Registros: permite observar el arreglo
+real y detectar guardar textos en lugar de números antes de sumarlos. Los casos
+incluyen vacío, posiciones, repetidos, tipos distintos, fronteras, errores de
+entrada y conservación de argumentos. Las incidencias producen fallos observables.
+
+Los otros cuatro bloques de continuidad conservan sus objetivos principales y
+reciben transferencias a contratos nuevos: aforos con límites distintos, reservas
+con validación y clasificación, pedidos con aportes variables y cobro mediante
+composición y retornos tempranos. Las pistas son opcionales y los programas parten
+sin algoritmo prefijado. Se añaden ejemplos de += y del retorno undefined al
+imprimir sin devolver; no se crea una lección por cada variante de escritura.
+
+El núcleo reúne 30 publicaciones, 45 ejemplos, 97 actividades ejecutables con 993
+casos declarados, 30 análisis de decisiones y 139 preguntas. Son 120 etapas de
+proyecto y siete transferencias obligatorias; se preservan IDs, completados y XP.
+La distribución es 8/4/4/4/4/6 por los objetivos documentados. No se presenta como
+una cantidad óptima universal ni como el lenguaje completo. Las ampliaciones
+necesarias conservan un lugar explícito en los doce bloques en preparación.
+
+Los casos de funciones muestran ahora también todas las entradas del reporte,
+con número de línea y texto entre comillas; así se hacen visibles los campos vacíos
+sin exigir conocer JSON. Los argumentos de la llamada independiente se muestran
+por separado. Esta corrección permite reproducir los casos del protocolo variable.
+
+Verificación: 265 pruebas unitarias aprobadas y los 55 módulos cumplen los umbrales
+de cobertura. Pasan los 993 casos declarados y 45 ejemplos. El recorrido JavaScript
+completa las 30 lecciones desde cero en 1440/390 px. El recorrido general renderiza
+136 lecciones y resuelve 316 actividades; pasa 16 auditorías WCAG automáticas. La
+revisión focal a 1440/320 px recupera la entrega real de construcción, reproduce
+almacenamiento incorrecto de textos, muestra todas las entradas y resuelve las
+cuatro etapas de lectura validada; pasa ambos temas sin desbordamiento. Lector de
+teoría, caché con 180 XP anteriores conservados, contenido, formato y compilación
+pasan sus controles. La revisión docente independiente y el piloto siguen pendientes.

@@ -8,17 +8,17 @@ piloto que todavía no se ha realizado.
 
 ## Distribución y decisión
 
-| Bloque                       | Hallazgo                                                                                                                              | Distribución aplicada                                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Primer programa              | Ocho pasos acotados introducen editor, valores, errores, const, let, cálculos, entradas e integración. Las pistas se repetían.        | Se conservan las ocho lecciones y se corrigen las orientaciones de cada habilidad.                                              |
-| Valores, tipos y operaciones | La separación anterior ya distingue reconocer tipos, operar, comparar e integrar.                                                     | Se conservan cuatro lecciones y se revisan pistas y mensajes sin añadir temas nuevos.                                           |
-| Decisiones y validación      | if/else, varias categorías, operadores lógicos y comprobaciones de texto aparecían en dos lecciones.                                  | Dos caminos → categorías con else if → reglas con conjunción, disyunción y negación → texto, entero y rango.                    |
-| Repeticiones y trazas        | La segunda lección introducía a la vez for, acumulación y conteo condicional.                                                         | while → calendario equivalente con for → minutos acumulados → días que cumplen.                                                 |
-| Funciones y descomposición   | Definición, retorno, composición, extracción de reglas y retornos tempranos se concentraban en dos lecciones.                         | Parámetros y retorno → composición → reglas independientes → retornos tempranos y contratos.                                    |
-| Listas y análisis            | Crear, leer, sumar, contar, devolver listas y hallar un máximo aparecían en dos entregas. El título prometía texto sin desarrollarlo. | Construcción e índices → suma sin mutación → conteo y resumen → máximo e integración. El nombre refleja el contenido publicado. |
+| Bloque                       | Hallazgo                                                                                                                              | Distribución aplicada                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primer programa              | Ocho pasos acotados introducen editor, valores, errores, const, let, cálculos, entradas e integración. Las pistas se repetían.        | Se conservan las ocho lecciones y se corrigen las orientaciones de cada habilidad.                                                                 |
+| Valores, tipos y operaciones | La separación anterior ya distingue reconocer tipos, operar, comparar e integrar.                                                     | Se conservan cuatro lecciones y se revisan pistas y mensajes sin añadir temas nuevos.                                                              |
+| Decisiones y validación      | if/else, varias categorías, operadores lógicos y comprobaciones de texto aparecían en dos lecciones.                                  | Dos caminos → categorías con else if → reglas con conjunción, disyunción y negación → texto, entero y rango.                                       |
+| Repeticiones y trazas        | La segunda lección introducía a la vez for, acumulación y conteo condicional.                                                         | while → calendario equivalente con for → minutos acumulados → días que cumplen.                                                                    |
+| Funciones y descomposición   | Definición, retorno, composición, extracción de reglas y retornos tempranos se concentraban en dos lecciones.                         | Parámetros y retorno → composición → reglas independientes → retornos tempranos y contratos.                                                       |
+| Listas y análisis            | Crear, leer, sumar, contar, devolver listas y hallar un máximo aparecían en dos entregas. El título prometía texto sin desarrollarlo. | Construcción e índices → lectura validada → suma sin mutación → conteo → resumen → máximo e integración. El nombre refleja el contenido publicado. |
 
 Cada lección conserva entender → implementar → reescribir y comprobar → integrar
-y depurar. Hay 28 publicaciones y tres comprobaciones posteriores en otros
+y depurar. Hay 30 publicaciones y siete comprobaciones posteriores en otros
 contextos. Las lecciones nuevas no se acreditan automáticamente a quienes ya
 completaron una edición anterior; se conservan sus IDs, registros y XP.
 
@@ -89,3 +89,9 @@ propagación de objetos o encadenamiento opcional. Allí se explicará también 
 coalescencia nula y su diferencia con la disyunción. new precede a Map, Set y Date;
 try/catch precede a recuperar errores de JSON.parse. Estas capacidades continúan
 pendientes y no desaparecen al acotar el contenido publicado.
+
+La [revisión posterior de alcance](fundamentos-alcance-y-carga.md) fundamenta la
+cantidad en el tema y sus usos. Listas crece a seis lecciones y los otros bloques
+reciben prácticas de transferencia donde faltaba aplicar una habilidad a un
+contrato nuevo. Las cuatro etapas se mantienen dentro de cada lección; no fijan
+la cantidad de publicaciones.

@@ -117,7 +117,7 @@ test('the six available blocks form an uninterrupted progression and do not cred
   const route = indexRoute(read('content/curriculum/fundamentos.json')),
     completed = new Set();
   const available = route.lessons.filter((l) => l.status === 'published');
-  assert.equal(available.length, 28);
+  assert.equal(available.length, 30);
   for (const item of available) {
     assert.equal(accessState(route, item.id, completed).status, 'ready', item.id);
     completed.add(`fundamentos/${item.id}`);

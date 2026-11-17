@@ -41,7 +41,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
               (c) =>
                 `<li><strong>${e(c.name)}</strong>: ${
                   activity.entrypoint
-                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
+                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdin !== undefined ? `<p>Entradas del reporte (línea: texto entre comillas):</p><pre tabindex="0">${e(c.stdin.map((line, i) => i + 1 + ': ' + JSON.stringify(line)).join('\n'))}</pre>` : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
                     : `entradas ${e(JSON.stringify(c.globals ?? c.stdin ?? []))}; salida ${e(JSON.stringify(c.stdout))}`
                 }${c.overrides ? `<p>En otra ejecución se cambian solo estos valores iniciales:</p><pre tabindex="0">${e(JSON.stringify(c.overrides))}</pre>` : ''}${c.expectedBindings ? `<p>Valores que debe conservar tu programa al terminar:</p><pre tabindex="0">${e(JSON.stringify(c.expectedBindings))}</pre>` : ''}</li>`,
             )

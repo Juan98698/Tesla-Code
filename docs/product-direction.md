@@ -103,3 +103,11 @@ en todas las publicaciones para orientar sobre la habilidad y el error concretos
 La [matriz de decisiones](revision-granularidad-fundamentos.md) explica cada
 separación; no se añade contenido a los doce bloques aún planificados. Se conservan
 IDs, logros y XP. La revisión asistida no sustituye el piloto con principiantes.
+
+La revisión posterior dimensiona por el alcance del tema y sus usos, no por una
+cuota común ni por el número de etapas. Listas se separa en seis lecciones y se
+añaden transferencias de aforos, reservas, pedidos variables y cobros a los otros
+bloques. Hay 30 publicaciones. La [matriz de alcance y carga](fundamentos-alcance-y-carga.md)
+registra qué se enseña, qué se practica y qué sigue pendiente. El usuario exige
+entregar esa coherencia antes del piloto y mantener contenido y tecnologías
+vigentes, sin relleno.

@@ -26,3 +26,12 @@ necesidad de la tarea. Leer las instrucciones de cada skill que se aplique.
 
 Los cambios se verifican con las comprobaciones pertinentes del repositorio y se
 documentan en `docs/implementation-status.md`.
+
+- Dimensionar cada tema por su alcance, dependencias, explicaciones y práctica;
+  no fijar una cuota común de lecciones ni confundir las cuatro etapas con cuatro
+  publicaciones. Aumentar contenido, lecciones y actividades cuando falte una
+  habilidad necesaria; no añadir relleno para variar cantidades.
+- Entregar coherencia editorial antes del piloto. Las observaciones de principiantes
+  ajustan la enseñanza; no sustituyen la revisión previa del temario. Priorizar
+  JavaScript y tecnologías vigentes con usos concretos y fuentes verificables.
+  El criterio está en docs/fundamentos-alcance-y-carga.md.

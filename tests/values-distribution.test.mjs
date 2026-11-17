@@ -116,7 +116,7 @@ test('each lesson delivers real evidence and a rewrite that preserves its approv
     for (const c of caps)
       assert.ok(d.learningProject.capabilities.includes(c), d.id + ' lost ' + c);
     caps = d.learningProject.capabilities;
-    for (const a of d.activities) {
+    for (const a of d.activities.filter((a) => a.learningStep)) {
       const work = verifiedWork(a, d.activities[1].solution);
       assert.equal(projectAssessmentReady(a, work), true, a.id);
       if (a.assessment.rewrite) {

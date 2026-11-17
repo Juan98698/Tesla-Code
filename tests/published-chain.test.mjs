@@ -36,8 +36,8 @@ const runner = () => ({
   dispose() {},
 });
 
-test('all twenty-eight publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
-  assert.equal(lessons.length, 28);
+test('all thirty publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
+  assert.equal(lessons.length, 30);
   assert.deepEqual(source.learningModel.pendingMigration, []);
   assert.equal(source.learningModel.implementedThrough, lessons.at(-1).id);
   let previous = null,

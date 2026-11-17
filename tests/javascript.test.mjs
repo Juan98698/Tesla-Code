@@ -23,7 +23,7 @@ const source = JSON.parse(readFileSync('content/curriculum/fundamentos.json', 'u
 const route = indexRoute(source);
 
 test('new edition has an independent entry while preserving every old lesson and its progress', () => {
-  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 28);
+  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 30);
   assert.equal(route.archive.lessons.length, 68);
   const completed = new Set(route.archive.lessons.map((l) => 'fundamentos/' + l.id));
   assert.equal(nextLesson(route, completed).id, 'js-tu-primer-programa');
@@ -89,9 +89,9 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       activities++;
     }
   }
-  assert.equal(examples, 41);
-  assert.equal(activities, 87);
-  assert.equal(cases, 870);
+  assert.equal(examples, 45);
+  assert.equal(activities, 97);
+  assert.equal(cases, 993);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {

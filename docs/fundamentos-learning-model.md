@@ -41,12 +41,13 @@ versión no concede XP ni completa el nuevo contrato.
 
 ## Implementación incremental
 
-Las veintiocho lecciones publicadas construyen el mismo proyecto con las cuatro
-etapas. El primer módulo conserva ocho lecciones. Los cinco bloques siguientes
+Las treinta lecciones publicadas construyen el mismo proyecto con las cuatro
+etapas. El primer módulo conserva ocho lecciones. Los cuatro bloques siguientes
 tienen cuatro lecciones cada uno: valores y operaciones, decisiones y validación,
-repeticiones, funciones y listas. La distribución separa habilidades que antes se
-exigían simultáneamente. Conserva los tres repasos posteriores y sus IDs como transferencias
-obligatorias después de integrar. Los doce bloques posteriores continúan en
+repeticiones y funciones. Listas tiene seis lecciones. La distribución separa
+habilidades que antes se exigían simultáneamente. Conserva los tres repasos
+anteriores y sus IDs; se añaden cuatro transferencias obligatorias después de
+integrar. Los doce bloques posteriores continúan en
 preparación; la migración de lo publicado no significa que estén desarrollados.
 
 | Siguiente tramo                | Conocimientos que debe preparar                                                     | Incremento del proyecto             |
@@ -74,7 +75,7 @@ preparación; la migración de lo publicado no significa que estén desarrollado
 - Revisión docente independiente y piloto con principiantes siguen pendientes
   hasta que se realicen. Las pruebas automáticas no sustituyen esa evidencia.
 
-## Contrato de evidencias de las veintiocho publicaciones
+## Contrato de evidencias de las treinta publicaciones
 
 Las cuatro etapas requieren entregar una explicación. Las tres de código exigen
 además una predicción estructurada; integración añade un diagnóstico y la ejecución
@@ -127,7 +128,7 @@ define la vacía y comprueba extremos, repetidos y máximos en ambas puntas. El
 máximo también se contrasta con negativos en su contrato independiente; los
 minutos reales introducidos siguen siendo no negativos.
 
-Los cuestionarios y tres transferencias posteriores mantienen sus identificadores
+Los cuestionarios y las tres transferencias anteriores mantienen sus identificadores
 y problemas distintos. Se conservan logros previos. La revisión docente
 independiente y el piloto con principiantes continúan pendientes.
 
@@ -166,3 +167,14 @@ automáticamente. Los prerrequisitos y las fuentes de entregas reflejan el nuevo
 orden. Las pruebas estructurales contrastan que los retos de tipos no exijan las
 operaciones ni el control de flujo de lecciones posteriores. El criterio de cierre
 incluye revisar la granularidad y la continuidad teórica, además de ejecutar casos.
+
+## Dimensionar por el alcance del tema
+
+El usuario exige entregar coherencia antes del piloto: el contenido y la práctica
+determinan la cantidad de lecciones, sin una cuota común ni relleno. La
+[revisión de alcance y carga](fundamentos-alcance-y-carga.md) registra las
+habilidades, sus usos y las introducciones pendientes del lenguaje actual. Listas
+separa construcción, lectura validada, suma, conteo, resumen y máximo. En valores,
+decisiones, ciclos y funciones se añaden transferencias que comprueban límites,
+aportes variables y composición en problemas distintos. Cada etapa conserva el
+trabajo anterior; las APIs y herramientas nuevas se introducen antes de usarlas.

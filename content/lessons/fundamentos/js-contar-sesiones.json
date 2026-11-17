@@ -1,0 +1,1826 @@
+{
+  "id": "js-contar-sesiones",
+  "outcome": "Contar sesiones que alcanzan el objetivo: explicar y comprobar el incremento con sus datos y límites.",
+  "requiresConcepts": [
+    "js-editor-consola",
+    "js-console-log",
+    "js-secuencia",
+    "js-valores-literales",
+    "js-errores-iniciales",
+    "js-comentarios",
+    "js-const-inicial",
+    "js-nombres",
+    "js-let-inicial",
+    "js-reasignacion",
+    "js-suma-producto",
+    "js-unir-textos",
+    "js-entradas-prompt",
+    "js-conversion-number",
+    "js-integracion-inicial",
+    "js-tipos-y-calculos-concepto",
+    "js-operaciones-y-unidades-concepto",
+    "js-comparaciones-concepto",
+    "js-integrar-valores-concepto",
+    "js-decisiones-concepto",
+    "js-clasificar-planes-concepto",
+    "js-condiciones-logicas-concepto",
+    "js-validacion-concepto",
+    "js-ciclo-while-concepto",
+    "js-calendario-con-for-concepto",
+    "js-acumular-con-for-concepto",
+    "js-contar-dias-concepto",
+    "js-funciones-y-retorno-concepto",
+    "js-componer-funciones-concepto",
+    "js-reglas-con-parametros-concepto",
+    "js-descomponer-y-probar-concepto",
+    "js-crear-listas-concepto",
+    "js-leer-registros-concepto",
+    "js-listas-y-recorridos-concepto"
+  ],
+  "html": "<h3>Una regla sobre cada registro</h3><p>contarSesiones(datos, objetivo) devuelve cuántas posiciones tienen un valor mayor o igual al objetivo. El resultado es una cantidad de sesiones, no una suma de minutos. Cada posición cuenta por separado: [30, 30, 0] contiene dos coincidencias para un objetivo de treinta.</p><h3>Estado y frontera inclusiva</h3><p>Inicia el contador en cero, recorre índices válidos y agrega uno solo si datos[i] >= objetivo. Para objetivo treinta, los datos 29, 30 y 31 deben producir cero, una y una coincidencia. La lista vacía devuelve cero incluso con objetivo cero. Cada sesión de cero sí cuenta si ocupa una posición y el objetivo es cero.</p><h3>Conservar la colección y la suma</h3><p>La función consulta datos sin modificarlos. Mantén sumarSesiones y la lectura de registros, y añade Sesiones con meta: al reporte. Contrasta el retorno con otra lista distinta de la del reporte: leer registros globales en vez del parámetro daría un resultado incorrecto. La siguiente entrega reunirá suma y conteo en un solo arreglo de resultados.</p><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Mi plan de práctica: Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida.</p><p>Distingue sumar duraciones de contar posiciones que cumplen la regla. Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una.</p><p>Contrasta la predicción con la salida visible y repite con el caso límite indicado.</p><p>Cada ejecución comienza de nuevo. Las entradas del reporte y los argumentos de las funciones están separados en los casos.</p></section><h3>Predice y ejecuta</h3><pre data-language=\"javascript\">function contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i &lt; datos.length; i = i + 1) {\n    if (datos[i] &gt;= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\nconsole.log(contarSesiones([30, 30, 0], 30));\nconsole.log(contarSesiones([], 0));</pre><p>Salida esperada:</p><pre data-language=\"text\">2\n0</pre><h3>Tu entrega y la siguiente</h3><p>Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida.</p><p>Reescribir el conteo de for a while manteniendo frontera inclusiva, repetidos y conservación de los argumentos.</p><p>Conserva el reporte completo y consulta los casos. Los argumentos independientes comprueban retornos y conservación de datos. En integración reproduce la incidencia, registra síntoma, entrada, hipótesis, prueba, causa y corrección, y elige otro caso que revele un fallo distinto.</p><p>Registra tu predicción y tu explicación en la bitácora antes de comprobar. La reescritura compara tu entrega anterior real. La explicación se conserva pendiente de revisión humana; pasar casos no califica su calidad.</p>",
+  "examples": [
+    {
+      "id": "js-contar-sesiones-e1",
+      "language": "javascript",
+      "code": "function contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\nconsole.log(contarSesiones([30, 30, 0], 30));\nconsole.log(contarSesiones([], 0));",
+      "stdout": "2\n0\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "js-contar-sesiones-q1",
+      "type": "choice",
+      "prompt": "¿Qué devuelve contarSesiones([29,30,31], 30)?",
+      "options": [
+        "90",
+        "2",
+        "3"
+      ],
+      "answer": 1,
+      "explanation": "Treinta y treinta y uno alcanzan el límite.",
+      "concept": "js-contar-sesiones-concepto"
+    },
+    {
+      "id": "js-contar-sesiones-q2",
+      "type": "choice",
+      "prompt": "¿Qué devuelve contarSesiones([], 0)?",
+      "options": [
+        "0",
+        "1",
+        "undefined"
+      ],
+      "answer": 0,
+      "explanation": "No hay posiciones que cuenten.",
+      "concept": "js-contar-sesiones-concepto"
+    },
+    {
+      "id": "js-contar-sesiones-q3",
+      "type": "choice",
+      "prompt": "¿Qué devuelve contarSesiones([0,0], 0)?",
+      "options": [
+        "0",
+        "1",
+        "2"
+      ],
+      "answer": 2,
+      "explanation": "Ambas posiciones cumplen el objetivo inclusivo.",
+      "concept": "js-contar-sesiones-concepto"
+    },
+    {
+      "id": "js-contar-sesiones-q4",
+      "type": "choice",
+      "prompt": "¿Qué debe conservar la función?",
+      "options": [
+        "El arreglo recibido",
+        "Un contador global",
+        "Solo el primer registro"
+      ],
+      "answer": 0,
+      "explanation": "El análisis consulta la colección y recibe sus propios datos.",
+      "concept": "js-contar-sesiones-concepto"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-plan",
+      "type": "case-study",
+      "concept": "js-contar-sesiones-concepto",
+      "prompt": "Entiende el siguiente incremento de Mi plan de práctica.",
+      "brief": "Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida.",
+      "evidence": [
+        {
+          "label": "Entrega de partida",
+          "text": "Recupera tu código aprobado anterior y señala los campos que ya produce."
+        },
+        {
+          "label": "Incremento de esta lección",
+          "text": "Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida."
+        },
+        {
+          "label": "Decisión que debes justificar",
+          "text": "Distingue sumar duraciones de contar posiciones que cumplen la regla."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "entrada",
+          "prompt": "¿Qué debe conservar esta entrega?",
+          "options": [
+            "Solo la línea nueva, eliminando el resto de la tarjeta.",
+            "Las capacidades anteriores para datos válidos y el cambio justificado por el contrato.",
+            "El resultado fijo del ejemplo, aunque cambien los datos."
+          ],
+          "answer": 1,
+          "explanation": "El proyecto evoluciona sobre una entrega real; cada ampliación conserva comportamientos anteriores dentro de sus condiciones válidas.",
+          "errorHint": "Consulta la entrega anterior: conserva sus campos para los datos válidos y agrega o refina solo la capacidad que pide el nuevo contrato."
+        },
+        {
+          "id": "predecir",
+          "prompt": "¿Qué representa contarSesiones([30,30,0], 30)?",
+          "options": [
+            "Sesenta minutos",
+            "Dos sesiones",
+            "Tres duraciones distintas"
+          ],
+          "answer": 1,
+          "explanation": "Se cuentan posiciones que cumplen.",
+          "errorHint": "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una."
+        }
+      ],
+      "hint": "Distingue sumar duraciones de contar posiciones que cumplen la regla.",
+      "explanation": "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global. Los casos comprueban el contrato técnico; tu explicación se entrega pendiente de revisión humana.",
+      "assessment": {
+        "questions": []
+      },
+      "learningStep": {
+        "phase": "entender",
+        "label": "01 · Entender",
+        "project": "plan-practica",
+        "requires": [],
+        "from": "fundamentos/js-listas-y-recorridos/js-listas-y-recorridos-a3",
+        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "output": "Análisis y explicación entregada.",
+        "reflection": "Explica entrada, salida, precondiciones y plan. Justifica qué capacidad anterior conservarás y por qué el nuevo cambio es necesario."
+      },
+      "hints": [
+        "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una.",
+        "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global."
+      ],
+      "retryFeedback": "Revisa el primer caso que falla. Distingue sumar duraciones de contar posiciones que cumplen la regla."
+    },
+    {
+      "type": "javascript",
+      "prompt": "Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida. Conserva tu entrega anterior y decide qué instrucciones debes añadir.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  if (texto.trim() === \"\") { return false; }\n  if (!Number.isInteger(valor)) { return false; }\n  return valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  else if (cantidad >= 30) { return \"Constante\"; }\n  else { return \"Inicio\"; }\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\n\n\n\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = minutos + 5;\n      const totalAmpliado = calcularTotal(minutosAmpliados, dias);\n      const tipoMinutos = typeof minutos;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", total / 60);\n      console.log(\"Resto de 10:\", minutos % 10);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", minutos >= 30);\n      console.log(\"Igual a referencia:\", minutos === referencia);\n      console.log(\"Distinto de referencia:\", minutos !== referencia);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let dia = 1; dia <= dias; dia = dia + 1) {\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      \n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n      console.log(\"Sesiones con meta:\", contarSesiones(registros, minutos));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "cases": [
+        {
+          "name": "contarSesiones[[], 0] · ['Ana', 'aprender lógica', '30', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [],
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Luis', 'crear juegos', '0', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[29, 30, 31], 30] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              29,
+              30,
+              31
+            ],
+            30
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[30, 30, 0], 30] · ['Ana', 'aprender lógica', '29', '1', '2', '0', '29']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              30,
+              30,
+              0
+            ],
+            30
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[30], 30] · ['Ana', 'aprender lógica', '60', '2', '3', '60', '60', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              30
+            ],
+            30
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[1, 2, 3, 4], 3] · ['Ana', 'aprender lógica', '', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              1,
+              2,
+              3,
+              4
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0, 0], 1] · ['Ana', 'aprender lógica', 'hola', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "hola",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0,
+              0
+            ],
+            1
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[120], 120] · ['Ana', 'aprender lógica', '30', '8', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              120
+            ],
+            120
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '30', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Luis', 'crear juegos', '0', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '29', '1', '2', '0', '29']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '60', '2', '3', '60', '60', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "sumarSesiones[[2, 3, 4]] · reporte ['Ana', 'aprender lógica', '', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "sumarSesiones",
+          "args": [
+            [
+              2,
+              3,
+              4
+            ]
+          ],
+          "expected": 9,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[2, 3, 3], 3] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "hola",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              2,
+              3,
+              3
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        },
+        {
+          "name": "ampliarCinco[20] · reporte ['Ana', 'aprender lógica', '30', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "ampliarCinco",
+          "args": [
+            20
+          ],
+          "expected": 25,
+          "preserveArgs": true
+        },
+        {
+          "name": "recomendar[60] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "recomendar",
+          "args": [
+            60
+          ],
+          "expected": "Intensivo",
+          "preserveArgs": true
+        },
+        {
+          "name": "minutosValidos[''] · reporte ['Ana', 'aprender lógica', '120', '7']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "minutosValidos",
+          "args": [
+            ""
+          ],
+          "expected": false,
+          "preserveArgs": true
+        },
+        {
+          "name": "crearPar[0, 120] · reporte ['Ana', 'aprender lógica', '30', '5']",
+          "entrypoint": "crearPar",
+          "args": [
+            0,
+            120
+          ],
+          "expected": [
+            0,
+            120
+          ],
+          "preserveArgs": true,
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n"
+        }
+      ],
+      "hint": "Distingue sumar duraciones de contar posiciones que cumplen la regla.",
+      "explanation": "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global. Los casos comprueban el contrato técnico; tu explicación se entrega pendiente de revisión humana.",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "id": "js-contar-sesiones-a1",
+      "concept": "js-contar-sesiones-concepto",
+      "hints": [
+        "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una.",
+        "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global."
+      ],
+      "usesInput": true,
+      "entrypoint": "contarSesiones",
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "¿Cuántas sesiones de [29,30,31] alcanzan treinta?",
+            "answers": [
+              "2"
+            ],
+            "explanation": "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una. El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global.",
+            "responseFormat": "number"
+          }
+        ]
+      },
+      "syntax": {
+        "nodes": [
+          "IfStatement",
+          "FunctionDeclaration"
+        ]
+      },
+      "learningStep": {
+        "phase": "implementar",
+        "label": "02 · Implementar",
+        "project": "plan-practica",
+        "requires": [
+          "entender-plan"
+        ],
+        "from": "fundamentos/js-listas-y-recorridos/js-listas-y-recorridos-a3",
+        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
+        "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Distingue sumar duraciones de contar posiciones que cumplen la regla."
+    },
+    {
+      "type": "javascript",
+      "prompt": "Reescribir el conteo de for a while manteniendo frontera inclusiva, repetidos y conservación de los argumentos. Ejecuta las dos versiones con los mismos casos y justifica qué conservas.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  if (texto.trim() === \"\") { return false; }\n  if (!Number.isInteger(valor)) { return false; }\n  return valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  else if (cantidad >= 30) { return \"Constante\"; }\n  else { return \"Inicio\"; }\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\n\n\n\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = minutos + 5;\n      const totalAmpliado = calcularTotal(minutosAmpliados, dias);\n      const tipoMinutos = typeof minutos;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", total / 60);\n      console.log(\"Resto de 10:\", minutos % 10);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", minutos >= 30);\n      console.log(\"Igual a referencia:\", minutos === referencia);\n      console.log(\"Distinto de referencia:\", minutos !== referencia);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let dia = 1; dia <= dias; dia = dia + 1) {\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      \n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n      console.log(\"Sesiones con meta:\", contarSesiones(registros, minutos));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  let i = 0;\n  while (i < datos.length) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n    i = i + 1;\n  }\n  return cantidad;\n}\n\n\n\n\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      \n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n      console.log(\"Sesiones con meta:\", contarSesiones(registros, minutos));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "cases": [
+        {
+          "name": "contarSesiones[[], 0] · ['Ana', 'aprender lógica', '30', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [],
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Luis', 'crear juegos', '0', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[29, 30, 31], 30] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              29,
+              30,
+              31
+            ],
+            30
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[30, 30, 0], 30] · ['Ana', 'aprender lógica', '29', '1', '2', '0', '29']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              30,
+              30,
+              0
+            ],
+            30
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[30], 30] · ['Ana', 'aprender lógica', '60', '2', '3', '60', '60', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              30
+            ],
+            30
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[1, 2, 3, 4], 3] · ['Ana', 'aprender lógica', '', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              1,
+              2,
+              3,
+              4
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0, 0], 1] · ['Ana', 'aprender lógica', 'hola', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "hola",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0,
+              0
+            ],
+            1
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[120], 120] · ['Ana', 'aprender lógica', '30', '8', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              120
+            ],
+            120
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '30', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Luis', 'crear juegos', '0', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '29', '1', '2', '0', '29']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '60', '2', '3', '60', '60', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "sumarSesiones[[2, 3, 4]] · reporte ['Ana', 'aprender lógica', '', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "sumarSesiones",
+          "args": [
+            [
+              2,
+              3,
+              4
+            ]
+          ],
+          "expected": 9,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[2, 3, 3], 3] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "hola",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              2,
+              3,
+              3
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        },
+        {
+          "name": "ampliarCinco[20] · reporte ['Ana', 'aprender lógica', '30', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "ampliarCinco",
+          "args": [
+            20
+          ],
+          "expected": 25,
+          "preserveArgs": true
+        },
+        {
+          "name": "recomendar[60] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "recomendar",
+          "args": [
+            60
+          ],
+          "expected": "Intensivo",
+          "preserveArgs": true
+        },
+        {
+          "name": "minutosValidos[''] · reporte ['Ana', 'aprender lógica', '120', '7']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "minutosValidos",
+          "args": [
+            ""
+          ],
+          "expected": false,
+          "preserveArgs": true
+        },
+        {
+          "name": "crearPar[0, 120] · reporte ['Ana', 'aprender lógica', '30', '5']",
+          "entrypoint": "crearPar",
+          "args": [
+            0,
+            120
+          ],
+          "expected": [
+            0,
+            120
+          ],
+          "preserveArgs": true,
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n"
+        }
+      ],
+      "hint": "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una.",
+      "explanation": "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global. Los casos comprueban el contrato técnico; tu explicación se entrega pendiente de revisión humana.",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "id": "js-contar-sesiones-a2",
+      "concept": "js-contar-sesiones-concepto",
+      "hints": [
+        "Distingue sumar duraciones de contar posiciones que cumplen la regla.",
+        "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global."
+      ],
+      "usesInput": true,
+      "entrypoint": "contarSesiones",
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "¿Cuántas sesiones de [] alcanzan cero?",
+            "answers": [
+              "0"
+            ],
+            "explanation": "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una. El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global.",
+            "responseFormat": "number"
+          }
+        ],
+        "rewrite": true
+      },
+      "syntax": {
+        "nodes": [
+          "IfStatement",
+          "FunctionDeclaration"
+        ]
+      },
+      "learningStep": {
+        "phase": "reescribir",
+        "label": "03 · Reescribir y comprobar",
+        "project": "plan-practica",
+        "requires": [
+          "js-contar-sesiones-a1"
+        ],
+        "from": "fundamentos/js-contar-sesiones/js-contar-sesiones-a1",
+        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
+        "reflection": "Explica qué representación cambiaste, por qué conviene y qué casos conservaron salida y, cuando corresponde, retorno. Cita resultados antes y después."
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Distingue sumar duraciones de contar posiciones que cumplen la regla."
+    },
+    {
+      "type": "javascript",
+      "prompt": "Investiga la incidencia y entrega una versión protegida. Elige otro caso que pueda revelar un error distinto y documenta por qué lo elegiste. Se comprueba el reporte y también los retornos de las funciones indicadas en cada caso con argumentos independientes. Reutiliza crearPar para conservar el orden de los dos resultados.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  let i = 0;\n  while (i < datos.length) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n    i = i + 1;\n  }\n  return cantidad;\n}\n\n\n\n\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      \n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n      console.log(\"Sesiones con meta:\", contarSesiones(registros, minutos));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  let i = 0;\n  while (i < datos.length) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n    i = i + 1;\n  }\n  return cantidad;\n}\n\n\n\n\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      \n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n      console.log(\"Sesiones con meta:\", contarSesiones(registros, minutos));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "cases": [
+        {
+          "name": "contarSesiones[[], 0] · ['Ana', 'aprender lógica', '30', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [],
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Luis', 'crear juegos', '0', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[29, 30, 31], 30] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              29,
+              30,
+              31
+            ],
+            30
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[30, 30, 0], 30] · ['Ana', 'aprender lógica', '29', '1', '2', '0', '29']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              30,
+              30,
+              0
+            ],
+            30
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[30], 30] · ['Ana', 'aprender lógica', '60', '2', '3', '60', '60', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              30
+            ],
+            30
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[1, 2, 3, 4], 3] · ['Ana', 'aprender lógica', '', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              1,
+              2,
+              3,
+              4
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0, 0], 1] · ['Ana', 'aprender lógica', 'hola', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "hola",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0,
+              0
+            ],
+            1
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[120], 120] · ['Ana', 'aprender lógica', '30', '8', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              120
+            ],
+            120
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '30', '5', '3', '10', '30', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Luis', 'crear juegos', '0', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '29', '1', '2', '0', '29']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[0], 0] · ['Ana', 'aprender lógica', '60', '2', '3', '60', '60', '0']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\n",
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "sumarSesiones[[2, 3, 4]] · reporte ['Ana', 'aprender lógica', '', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "sumarSesiones",
+          "args": [
+            [
+              2,
+              3,
+              4
+            ]
+          ],
+          "expected": 9,
+          "preserveArgs": true
+        },
+        {
+          "name": "contarSesiones[[2, 3, 3], 3] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "hola",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "contarSesiones",
+          "args": [
+            [
+              2,
+              3,
+              3
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        },
+        {
+          "name": "ampliarCinco[20] · reporte ['Ana', 'aprender lógica', '30', '5']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n",
+          "entrypoint": "ampliarCinco",
+          "args": [
+            20
+          ],
+          "expected": 25,
+          "preserveArgs": true
+        },
+        {
+          "name": "recomendar[60] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\n",
+          "entrypoint": "recomendar",
+          "args": [
+            60
+          ],
+          "expected": "Intensivo",
+          "preserveArgs": true
+        },
+        {
+          "name": "minutosValidos[''] · reporte ['Ana', 'aprender lógica', '120', '7']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "120",
+            "7",
+            "1",
+            "120"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+          "entrypoint": "minutosValidos",
+          "args": [
+            ""
+          ],
+          "expected": false,
+          "preserveArgs": true
+        },
+        {
+          "name": "crearPar[0, 120] · reporte ['Ana', 'aprender lógica', '30', '5']",
+          "entrypoint": "crearPar",
+          "args": [
+            0,
+            120
+          ],
+          "expected": [
+            0,
+            120
+          ],
+          "preserveArgs": true,
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\n"
+        }
+      ],
+      "hint": "Distingue sumar duraciones de contar posiciones que cumplen la regla.",
+      "explanation": "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global. Los casos comprueban el contrato técnico; tu explicación se entrega pendiente de revisión humana.",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "id": "js-contar-sesiones-a3",
+      "concept": "js-contar-sesiones-concepto",
+      "hints": [
+        "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una.",
+        "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global."
+      ],
+      "usesInput": true,
+      "entrypoint": "contarSesiones",
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "¿Cuántas sesiones de [30,30,0] alcanzan treinta?",
+            "answers": [
+              "2"
+            ],
+            "explanation": "Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una. El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global.",
+            "responseFormat": "number"
+          },
+          {
+            "id": "causa",
+            "type": "choice",
+            "prompt": "¿Qué causa la diferencia observada en la incidencia?",
+            "options": [
+              "Se excluyó la igualdad del objetivo.",
+              "Se sumaron todos los valores negativos.",
+              "La lista vacía siempre contiene una sesión."
+            ],
+            "answer": 0,
+            "explanation": "El contador agrega uno con >= objetivo y empieza en cero fuera del ciclo. No modifica datos ni consulta la lista global."
+          }
+        ],
+        "debug": {
+          "id": "js-contar-sesiones-incidencia",
+          "context": "Una sesión que alcanza exactamente el objetivo no se está contando. Reproduce la copia y contrasta igualdad, un valor menor y otro mayor.",
+          "code": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  let i = 0;\n  while (i < datos.length) {\n    if (datos[i] > objetivo) { cantidad = cantidad + 1; }\n    i = i + 1;\n  }\n  return cantidad;\n}\n\n\n\n\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      \n      console.log(\"Minutos realizados:\", sumarSesiones(registros));\n      console.log(\"Sesiones con meta:\", contarSesiones(registros, minutos));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+          "entrypoint": "contarSesiones",
+          "cases": [
+            {
+              "name": "contarSesiones[[29, 30, 31], 30] · ['Ana', 'aprender lógica', '120', '7', '1', '120']",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "120",
+                "7",
+                "1",
+                "120"
+              ],
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\nSesiones realizadas: 1\nRegistros: [120]\nMinutos realizados: 120\nSesiones con meta: 1\n",
+              "entrypoint": "contarSesiones",
+              "args": [
+                [
+                  29,
+                  30,
+                  31
+                ],
+                30
+              ],
+              "expected": 2,
+              "preserveArgs": true
+            }
+          ]
+        }
+      },
+      "syntax": {
+        "nodes": [
+          "IfStatement",
+          "FunctionDeclaration"
+        ]
+      },
+      "learningStep": {
+        "phase": "integrar",
+        "label": "04 · Integrar y depurar",
+        "project": "plan-practica",
+        "requires": [
+          "js-contar-sesiones-a2"
+        ],
+        "from": "fundamentos/js-contar-sesiones/js-contar-sesiones-a2",
+        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
+        "reflection": "Documenta síntoma, entrada, hipótesis, prueba, causa y corrección. Incluye el resultado observado y una comprobación posterior distinta; justifica el caso límite y la conservación del contrato. Incluye una traza del estado y explica por qué el índice avanza hacia un límite finito; no uses el límite de tiempo del ejecutor como justificación de parada."
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Distingue sumar duraciones de contar posiciones que cumplen la regla."
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: arreglos desde cero",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Arrays"
+    },
+    {
+      "title": "MDN: contrato de push",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Cada ejecución comienza de nuevo. Las entradas del reporte y los argumentos de las funciones están separados en los casos."
+    ],
+    "workedExample": {
+      "problem": "Mi plan de práctica: Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida.",
+      "reasoning": "Distingue sumar duraciones de contar posiciones que cumplen la regla. Marca cada posición que alcanza el objetivo; dos registros iguales son dos coincidencias, no una.",
+      "result": "Contrasta la predicción con la salida visible y repite con el caso límite indicado."
+    },
+    "transferActivityIds": [
+      "js-contar-sesiones-a3"
+    ]
+  },
+  "coverage": {
+    "js-contar-sesiones-concepto": {
+      "explanationExcerpt": "contarSesiones(datos, objetivo) devuelve cuántas posiciones tienen un valor mayor o igual al objetivo. El resultado es una cantidad de sesiones, no una suma de minutos. Cada posición cuenta por separado: [30, 30, 0] contiene dos coincidencias para un objetivo de treinta.",
+      "assessmentIds": [
+        "js-contar-sesiones-q1",
+        "js-contar-sesiones-q2",
+        "js-contar-sesiones-q3",
+        "js-contar-sesiones-q4"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-16",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Construcción, índices, longitud, push y recorridos contrastados con las guías actuales de MDN. Ejemplos, retornos, lectura variable y rechazo se ejecutan con el motor real; no se atribuye una versión universal al navegador.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "plan-practica",
+    "name": "Mi plan de práctica",
+    "version": 2,
+    "increment": "Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida.",
+    "changeReason": "Añadir contarSesiones(datos, objetivo), preservar las sesiones y su suma y presentar cuántas alcanzan la duración elegida.",
+    "previous": "fundamentos/js-listas-y-recorridos/js-listas-y-recorridos-a3",
+    "capabilities": [
+      "Hola TeslaCode",
+      "Mi plan de práctica",
+      "Estado:",
+      "Sesión:",
+      "Minutos diarios:",
+      "Días:",
+      "Meta:",
+      "Recordatorio:",
+      "Referencia diaria:",
+      "Total:",
+      "Nombre:",
+      "Plan con 5 más:",
+      "Tipo de minutos:",
+      "Horas previstas:",
+      "Resto de 10:",
+      "Disponible hasta 120:",
+      "Alcanza 30:",
+      "Igual a referencia:",
+      "Distinto de referencia:",
+      "Recomendación:",
+      "Sesiones programadas:",
+      "Minutos programados:",
+      "Días pares:",
+      "Sesiones realizadas:",
+      "Minutos realizados:",
+      "Sesiones con meta:",
+      "Registros:"
+    ],
+    "rejection": "Entrada inválida\n"
+  }
+}
