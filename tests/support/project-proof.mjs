@@ -26,7 +26,9 @@ export function verifiedWork(a, previous) {
   };
   if (a.assessment.debug) {
     const f = a.assessment.debug,
-      observed = f.cases.map((c) => runJavaScript(f.code, c, false, f.entrypoint).result);
+      observed = f.cases.map(
+        (c) => runJavaScript(f.code, c, false, f.entrypoint, f.bindings).result,
+      );
     proof.debug = {
       fixture: f.id,
       failed: observed.some((r) => !r.passed),

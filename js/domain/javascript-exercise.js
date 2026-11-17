@@ -58,6 +58,11 @@ export function javascriptExerciseErrors(exercise) {
     errors.push(
       'Las comprobaciones de sintaxis deben declarar comentarios, comillas simples o estructuras admitidas explícitamente.',
     );
+  if (
+    exercise.retryFeedback !== undefined &&
+    (typeof exercise.retryFeedback !== 'string' || !exercise.retryFeedback.trim())
+  )
+    errors.push('La orientación de un intento fallido debe ser texto legible.');
   const callable = exercise.entrypoint !== undefined;
   if (
     callable &&

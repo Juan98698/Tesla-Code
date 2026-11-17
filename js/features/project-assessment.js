@@ -124,6 +124,7 @@ export function mountProjectAssessment(
           code: rule.debug.code,
           cases: rule.debug.cases,
           entrypoint: rule.debug.entrypoint,
+          bindings: rule.debug.bindings,
         });
         if (!alive) return;
         debug = {
@@ -140,6 +141,12 @@ export function mountProjectAssessment(
                 '\nObtenido: ' +
                 r.actual +
                 (rule.debug.entrypoint ? '\nSalida impresa observada:\n' + r.stdout : '') +
+                (r.bindingValues
+                  ? '\nDatos esperados: ' +
+                    r.bindingExpected +
+                    '\nDatos observados: ' +
+                    r.bindingValues
+                  : '') +
                 (r.error ? '\n' + r.error : ''),
             )
             .join('\n\n'),
@@ -174,6 +181,8 @@ export function mountProjectAssessment(
           status.textContent = 'Completa el incremento anterior para comparar con tu versión real.';
           return;
         }
+        status.textContent =
+          'Comparando los mismos casos con tu entrega anterior; todavía falta confirmar la equivalencia.';
         const cases = a.cases
           .filter((c) => !c.overrides)
           .map(({ overrides, expectedBindings, consoleArguments, ...c }) => c);

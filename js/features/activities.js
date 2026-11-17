@@ -52,8 +52,11 @@ export function mountActivities(root, activities, isSolved, onSolve, options = {
     for (const a of activities.filter((a) => a.learningStep)) {
       const section = root.querySelector(`[data-activity="${a.id}"]`);
       section.querySelector('[data-step-controls]').disabled = !ready(a);
-      if (section.querySelector('[data-assessment-controls]'))
-        section.querySelector('[data-assessment-controls]').disabled = !ready(a);
+      const assessmentControls = section.querySelector('[data-assessment-controls]');
+      if (assessmentControls) {
+        assessmentControls.disabled = !ready(a);
+        assessmentControls.hidden = !ready(a);
+      }
       section.querySelector('[data-step-status]').textContent = ready(a)
         ? solved.has(a.id)
           ? 'Etapa comprobada; puedes revisarla.'

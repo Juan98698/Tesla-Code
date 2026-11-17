@@ -57,7 +57,13 @@ export function javascriptWorker() {
         keys.every((key) => Object.hasOwn(actual, key) && same(actual[key], expected[key]))
       );
     };
+    const bindingDisplay = (values) =>
+      Object.entries(values)
+        .map(([name, value]) => name + ': ' + display(value) + ' [' + typeof value + ']')
+        .join('\n')
+        .slice(0, 6000);
     let boundMatch = true;
+    let bindingValues;
     let returned,
       unchanged = true;
     const probe = '__teslacode_call_' + Math.random().toString(36).slice(2);
@@ -90,6 +96,7 @@ export function javascriptWorker() {
       const names = Object.keys(item.expectedBindings);
       if (names.some((name) => !/^[a-zA-Z_$][\w$]*$/.test(name))) throw Error('Dato inválido.');
       self[probe] = (values) => {
+        bindingValues = bindingDisplay(values);
         boundMatch = same(values, item.expectedBindings);
       };
       suffix =
@@ -163,6 +170,9 @@ export function javascriptWorker() {
         actual,
         expected,
         passed: exploratory ? null : passed,
+        ...(item.expectedBindings && !exploratory
+          ? { bindingValues, bindingExpected: bindingDisplay(item.expectedBindings) }
+          : {}),
         ...(!boundMatch
           ? { error: 'Los datos declarados no tienen los valores o tipos del contrato.' }
           : {}),

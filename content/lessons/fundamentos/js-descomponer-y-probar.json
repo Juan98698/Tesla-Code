@@ -1,6 +1,6 @@
 {
   "id": "js-descomponer-y-probar",
-  "outcome": "Separar reglas y probar funciones: construir y explicar una solución que funcione con distintos datos y casos límite.",
+  "outcome": "Simplificar con retornos tempranos y probar contratos: explicar, implementar y comprobar el incremento del plan.",
   "requiresConcepts": [
     "js-editor-consola",
     "js-console-log",
@@ -22,19 +22,24 @@
     "js-comparaciones-concepto",
     "js-integrar-valores-concepto",
     "js-decisiones-concepto",
+    "js-clasificar-planes-concepto",
+    "js-condiciones-logicas-concepto",
     "js-validacion-concepto",
     "js-ciclo-while-concepto",
+    "js-calendario-con-for-concepto",
     "js-acumular-con-for-concepto",
-    "js-funciones-y-retorno-concepto"
+    "js-contar-dias-concepto",
+    "js-funciones-y-retorno-concepto",
+    "js-componer-funciones-concepto",
+    "js-reglas-con-parametros-concepto"
   ],
-  "html": "<p>Descomponer un programa consiste en separar responsabilidades con contratos claros; una función que recibe datos y devuelve un resultado puede probarse sin pedir entradas ni imprimir.</p>\n<h3>Una responsabilidad por parte</h3><p>Mantén prompt y console.log en la parte de interacción. La función de cálculo recibe valores ya preparados y devuelve el resultado. Esto permite llamar a la misma regla con cero, con un borde y con otros valores sin cambiar su código ni depender de datos globales.</p>\n<h3>Retornos según el contrato</h3><p>Una función puede usar if y devolver distintos resultados en cada rama. En function costo(unidades) { if (unidades === 0) { return 0; } return unidades * 4 + 2; }, el cero no paga envío; otras cantidades pagan cuatro por unidad y dos de envío. Tras el primer return no se ejecuta lo que viene después en esa llamada.</p>\n<h3>Prueba una regla, no el ejemplo</h3><p>Anota entrada y salida esperada antes de ejecutar. Prueba cero para distinguir un cargo fijo aplicado por error, uno para la primera compra y varias unidades para detectar una respuesta fija. Cambiar una constante para que coincida un caso no arregla una regla equivocada.</p>\n<h3>Proyecto pequeño</h3><p>Los retos de este bloque no exigen una librería de pruebas ni módulos. Tu función y las llamadas viven en el mismo programa síncrono. Los casos automáticos comprueban comportamiento; revisar la separación de responsabilidades requiere además leer y explicar el diseño. Una solución equivalente que calcula el mismo contrato sigue siendo válida.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Una tienda cobra cuatro fichas por unidad y dos de envío, excepto si no hay compra.</p><p>Aíslas la regla y devuelves cero antes del cálculo general cuando no hay unidades.</p><p>Las llamadas con cero y tres devuelven 0 y 14, sin pedir datos dentro de la función.</p><p>Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo.</p></section>\n<h3>Predice y prueba</h3><pre data-language=\"javascript\">function costo(unidades) {\n  if (unidades === 0) { return 0; }\n  return unidades * 4 + 2;\n}\nconsole.log(costo(0));\nconsole.log(costo(3));</pre><p>Salida esperada:</p><pre data-language=\"text\">0\n14</pre>\n<div class=\"callout\"><strong>Antes de avanzar</strong><p>Predice un caso diferente del ejemplo y explica tu elección. Completa entender, implementar, reescribir y comprobar, e integrar y depurar; después responde el cuestionario. Pasar los casos demuestra esos resultados, no una única forma de escribir el código.</p></div><h3>Tu proyecto continúa: contrato y conservación</h3><p>Separar minutosValidos y recomendar en funciones sin entradas ocultas. Reutilizar los cálculos anteriores y justificar las ramas y casos del contrato.</p><p>La entrega anterior es tu código aprobado de la lección previa. No lo sustituyas por una ficha nueva que pierda información. En los casos válidos conserva, en este orden, Hola TeslaCode, Mi plan de práctica, Estado:, Sesión:, Minutos diarios:, Días:, Meta:, Recordatorio:, Referencia diaria:, Total:, Nombre:, Plan con 5 más:, Tipo de minutos:, Horas previstas:, Resto de 10:, Disponible hasta 120:, Alcanza 30:, Igual a referencia:, Distinto de referencia:, Recomendación:, Sesiones programadas:, Minutos programados:, Días pares:. Los casos muestran el reporte completo.</p><p>Los minutos deben ser un texto con contenido que Number convierta en entero entre 0 y 120, incluidos los extremos. Se admite \"020\" o \"2.0\"; no se exige un formato de solo dígitos. Una entrada inválida produce únicamente Entrada inválida, sin reporte ni cálculos parciales. El cero válido conserva todas las capacidades. El nombre y la meta siguen siendo textos; no se añade una restricción nueva sobre ellos.</p><p>La entrada cuarta es el número de días: texto no vacío convertido a entero entre 0 y 7. La tarjeta usa esa cantidad en lugar del cinco fijo: es un cambio pedido por la persona, no una pérdida accidental de su plan. Con cero no hay líneas Día:, pero el encabezado Sesiones programadas: muestra 0. Con cinco se conservan las sesiones del plan original.</p><p>calcularTotal(minutosPorDia, cantidadDias) recibe enteros entre 0 y 125 y entre 0 y 7, y devuelve su producto numérico. ampliarCinco(cantidad) recibe minutos válidos y devuelve cantidad + 5. El límite 125 de calcularTotal permite proyectar cinco minutos más sobre una base válida de 120; la validación del dato base sigue limitada a 120. Las funciones reciben parámetros, no leen prompt ni imprimen. La presentación conserva sus console.log fuera de esas funciones. Comprobar prueba por separado valores que pueden diferir de los del reporte; devolver un texto con aspecto numérico no satisface un retorno numérico.</p><p>minutosValidos(texto) recibe un texto y devuelve un booleano según contenido, entero y rango. recomendar(cantidad) recibe minutos válidos y devuelve Inicio, Constante o Intensivo según los límites 30 y 60. Un retorno temprano termina esa llamada: las instrucciones posteriores no se ejecutan. Se pueden pasar llamadas como argumentos: primero se obtiene el retorno interior y luego se usa en la llamada exterior.</p><h3>Razona la reescritura antes de comprobar</h3><p>Reescribe minutosValidos con una expresión &amp;&amp; y recomendar con retornos tempranos, sin else después de return. Conserva todos los resultados y argumentos de prueba.</p><p>El comprobador ejecuta tu versión anterior real con los mismos casos comunes. Se comparan las salidas completas y, desde funciones, también los retornos. Mantener salida no autoriza cambiar el tipo o el valor devuelto. Los nuevos casos de una ampliación se comprueban además por separado.</p><h3>Predicción, traza y depuración</h3><p>Primero registra tu predicción y explicación en la bitácora. Una traza muestra valores antes de cada condición, qué rama o vuelta se ejecuta y qué cambia después. Compara luego con la ejecución y justifica el resultado. En integración pulsa Reproducir incidencia: ejecuta una copia defectuosa sin reemplazar tu borrador. Documenta síntoma, entrada, hipótesis, prueba, causa y corrección; comprueba después un caso diferente que pueda revelar otro error. Si tu versión ya evita el fallo, señala la instrucción que la protege y cita las pruebas.</p><p>Las respuestas estructuradas y ejecuciones se comprueban automáticamente. La explicación personal es obligatoria como entrega y permanece pendiente de revisión humana; no se califica por palabras clave. Los borradores, entregas aprobadas y evidencias tienen funciones distintas: una prueba fallida no reemplaza tu versión aprobada. Puedes consultar la entrega anterior y guardar una copia del progreso.</p>",
+  "html": "<h3>Una llamada termina en return</h3><p>Un retorno temprano resuelve un caso antes de continuar con los restantes. Si una rama devuelve, no necesita un else para impedir que esa llamada siga. Primero conserva el comportamiento y luego simplifica la estructura.</p><h3>Justificar un contrato con casos</h3><p>Prueba vacío, cero y los valores exactos alrededor de cada umbral. Con 29, 30, 59 y 60 puedes identificar qué rama toma la recomendación. Con argumentos diferentes de los globales verificas de dónde sale el resultado. Pasar algunos casos es evidencia concreta; la explicación de la regla sigue siendo necesaria.</p><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Quieres completar este incremento de Mi plan de práctica: Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato.</p><p>Antes de ejecutar, sigues esta decisión: Busca una rama que ya haya terminado su llamada con return. Traza qué instrucciones quedan alcanzables después de devolver un resultado.</p><p>El ejemplo muestra Constante; esos resultados se contrastan con una traza, no con una respuesta fija.</p><p>Cada ejecución comienza de nuevo; los casos indican las entradas del reporte y, cuando corresponde, los argumentos independientes de las funciones.</p></section><h3>Predice y ejecuta</h3><pre data-language=\"javascript\">function recomendar(cantidad) {\n  if (cantidad &gt;= 60) { return &quot;Intensivo&quot;; }\n  if (cantidad &gt;= 30) { return &quot;Constante&quot;; }\n  return &quot;Inicio&quot;;\n}\nconsole.log(recomendar(30));</pre><p>Salida esperada:</p><pre data-language=\"text\">Constante</pre><h3>Entrega y reescritura</h3><p>Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato.</p><p>Eliminar los else posteriores a un return conservando las respuestas de cada rama.</p><p>Conserva los campos anteriores del reporte. Consulta los casos visibles: indican las entradas y los resultados completos que se comprobarán. Una entrada rechazada muestra solo Entrada inválida. También se comprueba el valor y el tipo que devuelve cada función con los argumentos indicados.</p><h3>Cómo registrar y comprobar</h3><p>La bitácora guarda un borrador al escribir. Registrar predicción y explicación vincula tus respuestas con ese texto. Comprobar ejecuta el código; en reescritura también compara tu entrega anterior real. Primero registra el plan y después comprueba. En integración reproduce la copia defectuosa y anota síntoma, entrada, hipótesis, prueba, causa y corrección. Elige otra prueba que pueda revelar un error distinto. La explicación se entrega para revisión humana; su calidad no se califica automáticamente.</p>",
   "examples": [
     {
       "id": "js-descomponer-y-probar-e1",
       "language": "javascript",
-      "code": "function costo(unidades) {\n  if (unidades === 0) { return 0; }\n  return unidades * 4 + 2;\n}\nconsole.log(costo(0));\nconsole.log(costo(3));",
-      "stdin": [],
-      "stdout": "0\n14\n"
+      "code": "function recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\nconsole.log(recomendar(30));",
+      "stdout": "Constante\n"
     }
   ],
   "quiz": [
@@ -97,19 +102,19 @@
       "type": "case-study",
       "concept": "js-descomponer-y-probar-concepto",
       "prompt": "Entiende el siguiente incremento de Mi plan de práctica.",
-      "brief": "Separar minutosValidos y recomendar en funciones sin entradas ocultas. Reutilizar los cálculos anteriores y justificar las ramas y casos del contrato.",
+      "brief": "Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato.",
       "evidence": [
         {
           "label": "Entrega de partida",
-          "text": "Consulta tu código aprobado de la lección anterior y predice qué partes permanecerán."
+          "text": "Recupera tu código aprobado anterior y señala los campos que ya produce."
         },
         {
-          "label": "Nuevo contrato",
-          "text": "Separar minutosValidos y recomendar en funciones sin entradas ocultas. Reutilizar los cálculos anteriores y justificar las ramas y casos del contrato."
+          "label": "Incremento de esta lección",
+          "text": "Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato."
         },
         {
-          "label": "Plan de reescritura",
-          "text": "Reescribe minutosValidos con una expresión && y recomendar con retornos tempranos, sin else después de return. Conserva todos los resultados y argumentos de prueba."
+          "label": "Decisión que debes justificar",
+          "text": "Busca una rama que ya haya terminado su llamada con return."
         }
       ],
       "decisions": [
@@ -122,22 +127,24 @@
             "El resultado fijo del ejemplo, aunque cambien los datos."
           ],
           "answer": 1,
-          "explanation": "El proyecto evoluciona sobre una entrega real; cada ampliación conserva comportamientos anteriores dentro de sus condiciones válidas."
+          "explanation": "El proyecto evoluciona sobre una entrega real; cada ampliación conserva comportamientos anteriores dentro de sus condiciones válidas.",
+          "errorHint": "Consulta la entrega anterior: conserva sus campos para los datos válidos y agrega o refina solo la capacidad que pide el nuevo contrato."
         },
         {
           "id": "predecir",
-          "prompt": "¿Qué devuelve minutosValidos(\"   \")?",
+          "prompt": "¿Qué facilita probar una función de cálculo?",
           "options": [
-            "Un resultado fijo independiente de la entrada.",
-            "No hace falta decidirlo antes de ejecutar.",
-            "false"
+            "Pedir datos con prompt dentro de cada operación",
+            "Leer una variable global que cambia",
+            "Recibir parámetros y devolver resultados"
           ],
           "answer": 2,
-          "explanation": "Relaciona la regla recién explicada con su entrada antes de escribir código."
+          "explanation": "El contrato explicita entradas y salida.",
+          "errorHint": "Traza qué instrucciones quedan alcanzables después de devolver un resultado."
         }
       ],
-      "hint": "Separa lo que recibes, lo que transformas y lo que conservas. Consulta primero la teoría.",
-      "explanation": "Comprobaste decisiones del contrato; tu justificación personal queda pendiente de revisión.",
+      "hint": "Busca una rama que ya haya terminado su llamada con return.",
+      "explanation": "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "assessment": {
         "questions": []
       },
@@ -146,20 +153,25 @@
         "label": "01 · Entender",
         "project": "plan-practica",
         "requires": [],
-        "from": "fundamentos/js-funciones-y-retorno/js-funciones-y-retorno-a3",
+        "from": "fundamentos/js-reglas-con-parametros/js-reglas-con-parametros-a3",
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Análisis y explicación entregada.",
         "reflection": "Explica entrada, salida, precondiciones y plan. Justifica qué capacidad anterior conservarás y por qué el nuevo cambio es necesario."
-      }
+      },
+      "hints": [
+        "Traza qué instrucciones quedan alcanzables después de devolver un resultado.",
+        "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
+      ],
+      "retryFeedback": "Revisa el primer caso que falla. Busca una rama que ya haya terminado su llamada con return."
     },
     {
       "type": "javascript",
-      "prompt": "Implementa el incremento sobre tu versión anterior. Separar minutosValidos y recomendar en funciones sin entradas ocultas. Reutilizar los cálculos anteriores y justificar las ramas y casos del contrato. Conserva todas las líneas indicadas por los casos. Antes de ejecutar, registra tu predicción y una traza. El reporte lee entradas; las funciones de cálculo reciben argumentos, devuelven valores y no piden datos ni imprimen. Comprobar verifica ambas partes.",
+      "prompt": "Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato. Conserva el reporte completo para los datos válidos y registra tu predicción antes de comprobar. Se comprueba el reporte y también los retornos de las funciones indicadas en cada caso con argumentos independientes.",
       "starter": "// Recupera tu entrega anterior y adáptala al contrato.",
       "solution": "function calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  if (texto.trim() === \"\") { return false; }\n  if (!Number.isInteger(valor)) { return false; }\n  return valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  else if (cantidad >= 30) { return \"Constante\"; }\n  else { return \"Inicio\"; }\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const total = calcularTotal(minutos, dias);\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = calcularTotal(minutosAmpliados, dias);\n  const tipoMinutos = typeof minutos;\n  const recomendacion = recomendar(minutos);\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", total / 60);\n  console.log(\"Resto de 10:\", minutos % 10);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", minutos >= 30);\n  console.log(\"Igual a referencia:\", minutos === referencia);\n  console.log(\"Distinto de referencia:\", minutos !== referencia);\n  console.log(\"Recomendación:\", recomendacion);\n  console.log(\"Sesiones programadas:\", dias);\n  let programados = 0;\n  let pares = 0;\n  for (let dia = 1; dia <= dias; dia = dia + 1) {\n    console.log(\"Día:\", dia);\n    programados = programados + minutos;\n    if (dia % 2 === 0) { pares = pares + 1; }\n  }\n  console.log(\"Minutos programados:\", programados);\n  console.log(\"Días pares:\", pares);\n} else { console.log(\"Entrada inválida\"); }",
       "cases": [
         {
-          "name": "recomendar[0] · Ana · '30' · días 5",
+          "name": "recomendar[0] · reporte ['Ana', 'aprender lógica', '30', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -175,7 +187,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[29] · Luis · '0' · días 0",
+          "name": "recomendar[29] · reporte ['Luis', 'crear juegos', '0', '0']",
           "stdin": [
             "Luis",
             "crear juegos",
@@ -191,7 +203,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[30] · Ana · '120' · días 7",
+          "name": "recomendar[30] · reporte ['Ana', 'aprender lógica', '120', '7']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -207,7 +219,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[59] · Ana · '29' · días 1",
+          "name": "recomendar[59] · reporte ['Ana', 'aprender lógica', '29', '1']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -223,7 +235,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[60] · Ana · '60' · días 2",
+          "name": "recomendar[60] · reporte ['Ana', 'aprender lógica', '60', '2']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -239,7 +251,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[120] · Ana · '' · días 5",
+          "name": "recomendar[120] · reporte ['Ana', 'aprender lógica', '', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -256,7 +268,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos[''] · Ana · 'hola' · días 5",
+          "name": "minutosValidos[''] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -273,7 +285,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['   '] · Ana · '30' · días 8",
+          "name": "minutosValidos['   '] · reporte ['Ana', 'aprender lógica', '30', '8']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -290,7 +302,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['hola'] · Ana · '30' · días 5",
+          "name": "minutosValidos['hola'] · reporte ['Ana', 'aprender lógica', '30', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -306,7 +318,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['2.5'] · Luis · '0' · días 0",
+          "name": "minutosValidos['2.5'] · reporte ['Luis', 'crear juegos', '0', '0']",
           "stdin": [
             "Luis",
             "crear juegos",
@@ -322,7 +334,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['121'] · Ana · '120' · días 7",
+          "name": "minutosValidos['121'] · reporte ['Ana', 'aprender lógica', '120', '7']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -338,7 +350,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['0'] · Ana · '29' · días 1",
+          "name": "minutosValidos['0'] · reporte ['Ana', 'aprender lógica', '29', '1']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -354,7 +366,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['2.0'] · Ana · '60' · días 2",
+          "name": "minutosValidos['2.0'] · reporte ['Ana', 'aprender lógica', '60', '2']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -370,7 +382,7 @@
           "preserveArgs": true
         },
         {
-          "name": "calcularTotal[125,7] · proyección ampliada válida",
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -388,7 +400,7 @@
           "preserveArgs": true
         },
         {
-          "name": "ampliarCinco[20] · Ana · 'hola' · días 5",
+          "name": "ampliarCinco[20] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -405,8 +417,8 @@
           "preserveArgs": true
         }
       ],
-      "hint": "Consulta los casos visibles y escribe primero qué dato cambia y qué capacidades deben permanecer.",
-      "explanation": "El contrato técnico coincide en estos casos. Tu explicación y justificación se conservan para revisión humana; estas pruebas no demuestran comprensión para cualquier problema.",
+      "hint": "Busca una rama que ya haya terminado su llamada con return.",
+      "explanation": "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "stdin": [
         "Ana",
         "aprender lógica",
@@ -416,8 +428,8 @@
       "id": "js-descomponer-y-probar-a1",
       "concept": "js-descomponer-y-probar-concepto",
       "hints": [
-        "Haz una traza del estado antes y después de cada instrucción o vuelta. Incluye el caso cero y las fronteras que anuncia la regla.",
-        "Compara la primera diferencia con tu predicción. Cambia una sola causa y vuelve a comprobar todos los casos; si hay funciones, contrasta también sus retornos."
+        "Traza qué instrucciones quedan alcanzables después de devolver un resultado.",
+        "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
       ],
       "usesInput": true,
       "entrypoint": "recomendar",
@@ -430,7 +442,7 @@
             "answers": [
               "false"
             ],
-            "explanation": "Revisa la traza de instrucciones, tipos y fronteras explicada antes de la práctica."
+            "explanation": "Traza qué instrucciones quedan alcanzables después de devolver un resultado. Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
           }
         ]
       },
@@ -447,20 +459,21 @@
         "requires": [
           "analizar-contrato"
         ],
-        "from": "fundamentos/js-funciones-y-retorno/js-funciones-y-retorno-a3",
+        "from": "fundamentos/js-reglas-con-parametros/js-reglas-con-parametros-a3",
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
-      }
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Busca una rama que ya haya terminado su llamada con return."
     },
     {
       "type": "javascript",
-      "prompt": "Reescribe minutosValidos con una expresión && y recomendar con retornos tempranos, sin else después de return. Conserva todos los resultados y argumentos de prueba. Compara tu entrega real anterior con esta usando los mismos casos. El reporte lee entradas; las funciones de cálculo reciben argumentos, devuelven valores y no piden datos ni imprimen. Comprobar verifica ambas partes.",
+      "prompt": "Eliminar los else posteriores a un return conservando las respuestas de cada rama. El comprobador ejecutará tu entrega anterior real con los mismos casos. Se comprueba el reporte y también los retornos de las funciones indicadas en cada caso con argumentos independientes.",
       "starter": "// Recupera tu entrega anterior y adáptala al contrato.",
       "solution": "function calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const total = calcularTotal(minutos, dias);\n  const minutosAmpliados = ampliarCinco(minutos);\n  const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  const recomendacion = recomendar(minutos);\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n  console.log(\"Sesiones programadas:\", dias);\n  let programados = 0;\n  let pares = 0;\n  for (let i = 0; i < dias; i = i + 1) {\n    const dia = i + 1;\n    console.log(\"Día:\", dia);\n    programados = programados + minutos;\n    if (dia % 2 === 0) { pares = pares + 1; }\n  }\n  console.log(\"Minutos programados:\", programados);\n  console.log(\"Días pares:\", pares);\n} else { console.log(\"Entrada inválida\"); }",
       "cases": [
         {
-          "name": "recomendar[0] · Ana · '30' · días 5",
+          "name": "recomendar[0] · reporte ['Ana', 'aprender lógica', '30', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -476,7 +489,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[29] · Luis · '0' · días 0",
+          "name": "recomendar[29] · reporte ['Luis', 'crear juegos', '0', '0']",
           "stdin": [
             "Luis",
             "crear juegos",
@@ -492,7 +505,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[30] · Ana · '120' · días 7",
+          "name": "recomendar[30] · reporte ['Ana', 'aprender lógica', '120', '7']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -508,7 +521,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[59] · Ana · '29' · días 1",
+          "name": "recomendar[59] · reporte ['Ana', 'aprender lógica', '29', '1']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -524,7 +537,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[60] · Ana · '60' · días 2",
+          "name": "recomendar[60] · reporte ['Ana', 'aprender lógica', '60', '2']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -540,7 +553,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[120] · Ana · '' · días 5",
+          "name": "recomendar[120] · reporte ['Ana', 'aprender lógica', '', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -557,7 +570,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos[''] · Ana · 'hola' · días 5",
+          "name": "minutosValidos[''] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -574,7 +587,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['   '] · Ana · '30' · días 8",
+          "name": "minutosValidos['   '] · reporte ['Ana', 'aprender lógica', '30', '8']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -591,7 +604,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['hola'] · Ana · '30' · días 5",
+          "name": "minutosValidos['hola'] · reporte ['Ana', 'aprender lógica', '30', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -607,7 +620,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['2.5'] · Luis · '0' · días 0",
+          "name": "minutosValidos['2.5'] · reporte ['Luis', 'crear juegos', '0', '0']",
           "stdin": [
             "Luis",
             "crear juegos",
@@ -623,7 +636,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['121'] · Ana · '120' · días 7",
+          "name": "minutosValidos['121'] · reporte ['Ana', 'aprender lógica', '120', '7']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -639,7 +652,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['0'] · Ana · '29' · días 1",
+          "name": "minutosValidos['0'] · reporte ['Ana', 'aprender lógica', '29', '1']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -655,7 +668,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['2.0'] · Ana · '60' · días 2",
+          "name": "minutosValidos['2.0'] · reporte ['Ana', 'aprender lógica', '60', '2']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -671,7 +684,7 @@
           "preserveArgs": true
         },
         {
-          "name": "calcularTotal[125,7] · proyección ampliada válida",
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -689,7 +702,7 @@
           "preserveArgs": true
         },
         {
-          "name": "ampliarCinco[20] · Ana · 'hola' · días 5",
+          "name": "ampliarCinco[20] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -706,8 +719,8 @@
           "preserveArgs": true
         }
       ],
-      "hint": "Consulta los casos visibles y escribe primero qué dato cambia y qué capacidades deben permanecer.",
-      "explanation": "El contrato técnico coincide en estos casos. Tu explicación y justificación se conservan para revisión humana; estas pruebas no demuestran comprensión para cualquier problema.",
+      "hint": "Traza qué instrucciones quedan alcanzables después de devolver un resultado.",
+      "explanation": "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "stdin": [
         "Ana",
         "aprender lógica",
@@ -717,8 +730,8 @@
       "id": "js-descomponer-y-probar-a2",
       "concept": "js-descomponer-y-probar-concepto",
       "hints": [
-        "Haz una traza del estado antes y después de cada instrucción o vuelta. Incluye el caso cero y las fronteras que anuncia la regla.",
-        "Compara la primera diferencia con tu predicción. Cambia una sola causa y vuelve a comprobar todos los casos; si hay funciones, contrasta también sus retornos."
+        "Busca una rama que ya haya terminado su llamada con return.",
+        "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
       ],
       "usesInput": true,
       "entrypoint": "recomendar",
@@ -731,7 +744,7 @@
             "answers": [
               "Intensivo"
             ],
-            "explanation": "Revisa la traza de instrucciones, tipos y fronteras explicada antes de la práctica."
+            "explanation": "Traza qué instrucciones quedan alcanzables después de devolver un resultado. Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
           }
         ],
         "rewrite": true
@@ -753,16 +766,17 @@
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Explica qué representación cambiaste, por qué conviene y qué casos conservaron salida y, cuando corresponde, retorno. Cita resultados antes y después."
-      }
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Busca una rama que ya haya terminado su llamada con return."
     },
     {
       "type": "javascript",
-      "prompt": "Integra y depura tu entrega. Reproduce la incidencia, investiga su causa y entrega una versión protegida que conserve el contrato completo. Elige cómo organizar la solución; usa las pistas solo cuando las necesites. El reporte lee entradas; las funciones de cálculo reciben argumentos, devuelven valores y no piden datos ni imprimen. Comprobar verifica ambas partes.",
+      "prompt": "Investiga la incidencia y entrega una versión protegida. Elige otro caso que pueda revelar un error distinto y documenta por qué lo elegiste. Se comprueba el reporte y también los retornos de las funciones indicadas en cada caso con argumentos independientes.",
       "starter": "// Recupera tu entrega anterior y adáptala al contrato.",
       "solution": "function calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const total = calcularTotal(minutos, dias);\n  const minutosAmpliados = ampliarCinco(minutos);\n  const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  const recomendacion = recomendar(minutos);\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n  console.log(\"Sesiones programadas:\", dias);\n  let programados = 0;\n  let pares = 0;\n  for (let i = 0; i < dias; i = i + 1) {\n    const dia = i + 1;\n    console.log(\"Día:\", dia);\n    programados = programados + minutos;\n    if (dia % 2 === 0) { pares = pares + 1; }\n  }\n  console.log(\"Minutos programados:\", programados);\n  console.log(\"Días pares:\", pares);\n} else { console.log(\"Entrada inválida\"); }",
       "cases": [
         {
-          "name": "recomendar[0] · Ana · '30' · días 5",
+          "name": "recomendar[0] · reporte ['Ana', 'aprender lógica', '30', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -778,7 +792,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[29] · Luis · '0' · días 0",
+          "name": "recomendar[29] · reporte ['Luis', 'crear juegos', '0', '0']",
           "stdin": [
             "Luis",
             "crear juegos",
@@ -794,7 +808,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[30] · Ana · '120' · días 7",
+          "name": "recomendar[30] · reporte ['Ana', 'aprender lógica', '120', '7']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -810,7 +824,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[59] · Ana · '29' · días 1",
+          "name": "recomendar[59] · reporte ['Ana', 'aprender lógica', '29', '1']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -826,7 +840,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[60] · Ana · '60' · días 2",
+          "name": "recomendar[60] · reporte ['Ana', 'aprender lógica', '60', '2']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -842,7 +856,7 @@
           "preserveArgs": true
         },
         {
-          "name": "recomendar[120] · Ana · '' · días 5",
+          "name": "recomendar[120] · reporte ['Ana', 'aprender lógica', '', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -859,7 +873,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos[''] · Ana · 'hola' · días 5",
+          "name": "minutosValidos[''] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -876,7 +890,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['   '] · Ana · '30' · días 8",
+          "name": "minutosValidos['   '] · reporte ['Ana', 'aprender lógica', '30', '8']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -893,7 +907,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['hola'] · Ana · '30' · días 5",
+          "name": "minutosValidos['hola'] · reporte ['Ana', 'aprender lógica', '30', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -909,7 +923,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['2.5'] · Luis · '0' · días 0",
+          "name": "minutosValidos['2.5'] · reporte ['Luis', 'crear juegos', '0', '0']",
           "stdin": [
             "Luis",
             "crear juegos",
@@ -925,7 +939,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['121'] · Ana · '120' · días 7",
+          "name": "minutosValidos['121'] · reporte ['Ana', 'aprender lógica', '120', '7']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -941,7 +955,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['0'] · Ana · '29' · días 1",
+          "name": "minutosValidos['0'] · reporte ['Ana', 'aprender lógica', '29', '1']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -957,7 +971,7 @@
           "preserveArgs": true
         },
         {
-          "name": "minutosValidos['2.0'] · Ana · '60' · días 2",
+          "name": "minutosValidos['2.0'] · reporte ['Ana', 'aprender lógica', '60', '2']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -973,7 +987,7 @@
           "preserveArgs": true
         },
         {
-          "name": "calcularTotal[125,7] · proyección ampliada válida",
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -991,7 +1005,7 @@
           "preserveArgs": true
         },
         {
-          "name": "ampliarCinco[20] · Ana · 'hola' · días 5",
+          "name": "ampliarCinco[20] · reporte ['Ana', 'aprender lógica', 'hola', '5']",
           "stdin": [
             "Ana",
             "aprender lógica",
@@ -1008,8 +1022,8 @@
           "preserveArgs": true
         }
       ],
-      "hint": "Consulta los casos visibles y escribe primero qué dato cambia y qué capacidades deben permanecer.",
-      "explanation": "El contrato técnico coincide en estos casos. Tu explicación y justificación se conservan para revisión humana; estas pruebas no demuestran comprensión para cualquier problema.",
+      "hint": "Localiza la primera diferencia de la incidencia. Busca una rama que ya haya terminado su llamada con return.",
+      "explanation": "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "stdin": [
         "Ana",
         "aprender lógica",
@@ -1019,8 +1033,8 @@
       "id": "js-descomponer-y-probar-a3",
       "concept": "js-descomponer-y-probar-concepto",
       "hints": [
-        "Haz una traza del estado antes y después de cada instrucción o vuelta. Incluye el caso cero y las fronteras que anuncia la regla.",
-        "Compara la primera diferencia con tu predicción. Cambia una sola causa y vuelve a comprobar todos los casos; si hay funciones, contrasta también sus retornos."
+        "Traza qué instrucciones quedan alcanzables después de devolver un resultado.",
+        "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
       ],
       "usesInput": true,
       "entrypoint": "recomendar",
@@ -1033,40 +1047,40 @@
             "answers": [
               "Inicio"
             ],
-            "explanation": "Revisa la traza de instrucciones, tipos y fronteras explicada antes de la práctica."
+            "explanation": "Traza qué instrucciones quedan alcanzables después de devolver un resultado. Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
           },
           {
             "id": "causa",
             "type": "choice",
-            "prompt": "¿Qué hipótesis explica la diferencia observada en esta incidencia?",
+            "prompt": "¿Qué explica la primera diferencia observada en esta incidencia?",
             "options": [
-              "return conserva y devuelve siempre el último console.log.",
-              "La función leyó minutos globales en lugar de su parámetro.",
-              "Una función no puede recibir cantidades diferentes de las entradas de prompt."
+              "return continúa con todas las instrucciones posteriores de la llamada.",
+              "Los argumentos se convierten automáticamente en variables globales.",
+              "El límite de sesenta dejó de estar incluido."
             ],
-            "answer": 1,
-            "explanation": "Usar el parámetro y probar argumentos distintos de los del reporte."
+            "answer": 2,
+            "explanation": "Comprueba vacío, cero y las fronteras; una impresión igual no demuestra que se devolvió el valor correcto."
           }
         ],
         "debug": {
           "id": "js-descomponer-y-probar-incidencia",
-          "context": "Esta copia contiene el fallo que investigarás. Reproducirla conserva tu borrador. Compara el resultado esperado y el obtenido; si tu versión ya está protegida, demuestra por qué con los casos del contrato.",
-          "code": "function calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (minutos >= 60) { return \"Intensivo\"; }\n  if (minutos >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const total = calcularTotal(minutos, dias);\n  const minutosAmpliados = ampliarCinco(minutos);\n  const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  const recomendacion = recomendar(minutos);\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n  console.log(\"Sesiones programadas:\", dias);\n  let programados = 0;\n  let pares = 0;\n  for (let i = 0; i < dias; i = i + 1) {\n    const dia = i + 1;\n    console.log(\"Día:\", dia);\n    programados = programados + minutos;\n    if (dia % 2 === 0) { pares = pares + 1; }\n  }\n  console.log(\"Minutos programados:\", programados);\n  console.log(\"Días pares:\", pares);\n} else { console.log(\"Entrada inválida\"); }",
+          "context": "Esta copia falla en la habilidad de esta lección. Reproducirla no reemplaza tu borrador. Compara lo esperado con lo observado y contrasta una hipótesis antes de corregir tu entrega.",
+          "code": "function calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad > 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const total = calcularTotal(minutos, dias);\n  const minutosAmpliados = ampliarCinco(minutos);\n  const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  const recomendacion = recomendar(minutos);\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n  console.log(\"Sesiones programadas:\", dias);\n  let programados = 0;\n  let pares = 0;\n  for (let i = 0; i < dias; i = i + 1) {\n    const dia = i + 1;\n    console.log(\"Día:\", dia);\n    programados = programados + minutos;\n    if (dia % 2 === 0) { pares = pares + 1; }\n  }\n  console.log(\"Minutos programados:\", programados);\n  console.log(\"Días pares:\", pares);\n} else { console.log(\"Entrada inválida\"); }",
           "cases": [
             {
-              "name": "recomendar[30] · Ana · '120' · días 7",
+              "name": "recomendar[60] · Ana · '60' · días 2",
               "stdin": [
                 "Ana",
                 "aprender lógica",
-                "120",
-                "7"
+                "60",
+                "2"
               ],
-              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 120\nDías: 7\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 840\nNombre: Ana\nPlan con 5 más: 875\nTipo de minutos: number\nHoras previstas: 14\nResto de 10: 0\nDisponible hasta 120: 0\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 7\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nDía: 6\nDía: 7\nMinutos programados: 840\nDías pares: 3\n",
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\n",
               "entrypoint": "recomendar",
               "args": [
-                30
+                60
               ],
-              "expected": "Constante",
+              "expected": "Intensivo",
               "preserveArgs": true
             }
           ],
@@ -1090,7 +1104,8 @@
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Documenta síntoma, entrada, hipótesis, prueba, causa y corrección. Incluye el resultado observado y una comprobación posterior distinta; justifica el caso límite y la conservación del contrato."
-      }
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Busca una rama que ya haya terminado su llamada con return."
     }
   ],
   "sources": [
@@ -1105,12 +1120,12 @@
   ],
   "learningDesign": {
     "assumptions": [
-      "Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo."
+      "Cada ejecución comienza de nuevo; los casos indican las entradas del reporte y, cuando corresponde, los argumentos independientes de las funciones."
     ],
     "workedExample": {
-      "problem": "Una tienda cobra cuatro fichas por unidad y dos de envío, excepto si no hay compra.",
-      "reasoning": "Aíslas la regla y devuelves cero antes del cálculo general cuando no hay unidades.",
-      "result": "Las llamadas con cero y tres devuelven 0 y 14, sin pedir datos dentro de la función."
+      "problem": "Quieres completar este incremento de Mi plan de práctica: Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato.",
+      "reasoning": "Antes de ejecutar, sigues esta decisión: Busca una rama que ya haya terminado su llamada con return. Traza qué instrucciones quedan alcanzables después de devolver un resultado.",
+      "result": "El ejemplo muestra Constante; esos resultados se contrastan con una traza, no con una respuesta fija."
     },
     "transferActivityIds": [
       "js-descomponer-y-probar-a3"
@@ -1118,7 +1133,7 @@
   },
   "coverage": {
     "js-descomponer-y-probar-concepto": {
-      "explanationExcerpt": "Descomponer un programa consiste en separar responsabilidades con contratos claros; una función que recibe datos y devuelve un resultado puede probarse sin pedir entradas ni imprimir.",
+      "explanationExcerpt": "Un retorno temprano resuelve un caso antes de continuar con los restantes. Si una rama devuelve, no necesita un else para impedir que esa llamada siga. Primero conserva el comportamiento y luego simplifica la estructura.",
       "assessmentIds": [
         "js-descomponer-y-probar-q1",
         "js-descomponer-y-probar-q2",
@@ -1142,9 +1157,9 @@
     "id": "plan-practica",
     "name": "Mi plan de práctica",
     "version": 2,
-    "increment": "Separar minutosValidos y recomendar en funciones sin entradas ocultas. Reutilizar los cálculos anteriores y justificar las ramas y casos del contrato.",
-    "changeReason": "Separar minutosValidos y recomendar en funciones sin entradas ocultas. Reutilizar los cálculos anteriores y justificar las ramas y casos del contrato.",
-    "previous": "fundamentos/js-funciones-y-retorno/js-funciones-y-retorno-a3",
+    "increment": "Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato.",
+    "changeReason": "Reutilizar las reglas extraídas y ordenar sus retornos tempranos, justificando qué casos protegen cada contrato.",
+    "previous": "fundamentos/js-reglas-con-parametros/js-reglas-con-parametros-a3",
     "capabilities": [
       "Hola TeslaCode",
       "Mi plan de práctica",

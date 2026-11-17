@@ -318,8 +318,10 @@ test('activity UI requires real evidence, compares student snapshots and keeps a
     true,
     'Correct decisions alone omit delivered explanation',
   );
+  assert.equal(section(first).querySelector('[data-assessment-controls]').hidden, true);
   register(u);
   assert.equal(section(first).querySelector('[data-step-controls]').disabled, false);
+  assert.equal(section(first).querySelector('[data-assessment-controls]').hidden, false);
   change(section(first).querySelector('.code-editor'), first.solution + '\n');
   submit(section(first).querySelector('form'));
   assert.equal(jobs.length, 0, 'No code award before predictions and explanation');

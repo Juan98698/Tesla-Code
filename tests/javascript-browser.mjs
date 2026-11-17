@@ -203,6 +203,64 @@ await withBrowser(4323, async (browser, origin) => {
       `PASS JavaScript ${width}px: ${module.length} lecciones desde cero, ejercicios y análisis de decisiones, borradores, consola, accesibilidad, progreso y archivo anterior.`,
     );
   }
+  // Targeted inspection uses a fixture; the two complete learning flows above earn progress.
+  const feedbackContext = await learningContext(browser, {
+      viewport: { width: 320, height: 1000 },
+      reducedMotion: 'reduce',
+    }),
+    feedbackPage = await feedbackContext.newPage(),
+    logic = read('content/lessons/fundamentos/js-condiciones-logicas.json');
+  await feedbackPage.goto(origin);
+  await feedbackPage.evaluate(
+    (completed) =>
+      localStorage.setItem('teslacode:progress:v2', JSON.stringify({ version: 2, completed })),
+    module
+      .slice(
+        0,
+        module.findIndex((m) => m.id === logic.id),
+      )
+      .map((m) => 'fundamentos/' + m.id),
+  );
+  await feedbackPage.reload();
+  await feedbackPage.goto(`${origin}/#/leccion/fundamentos/${logic.id}/practicar`);
+  await feedbackPage.locator('[data-activity]').first().waitFor();
+  await solveActivity(feedbackPage, logic.activities[0]);
+  const rule = logic.activities[1],
+    ruleSection = feedbackPage.locator(`[data-activity="${rule.id}"]`);
+  await ruleSection
+    .locator('.code-editor')
+    .fill(rule.solution.replace('minutos >= minimo && minutos <= maximo', 'undefined'));
+  await prepareProjectEvidence(feedbackPage, rule);
+  await ruleSection.locator('[data-check]').click();
+  await ruleSection.locator('.practice-feedback.bad').waitFor();
+  assert.match(
+    await ruleSection.locator('.practice-feedback').innerText(),
+    /undefined \[undefined\]/,
+  );
+  assert.match(await ruleSection.locator('.practice-feedback').innerText(), /Datos esperados:/);
+  assert.equal(await ruleSection.locator('.badge.live').count(), 0);
+  await ruleSection.getByText('Casos que comprobará el ejercicio', { exact: true }).click();
+  for (const theme of ['dark', 'light']) {
+    await feedbackPage.evaluate((t) => (document.documentElement.dataset.theme = t), theme);
+    await waitForFiniteAnimations(feedbackPage);
+    await feedbackPage.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
+    const violations = await feedbackPage.evaluate(async () =>
+      (
+        await axe.run(document, {
+          runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
+        })
+      ).violations.map((v) => ({ id: v.id, targets: v.nodes.map((n) => n.target) })),
+    );
+    assert.deepEqual(violations, [], `Typed feedback and locked stages 320px / ${theme}`);
+    assert.ok(
+      await feedbackPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    );
+  }
+  await solveActivity(feedbackPage, rule);
+  await feedbackContext.close();
+  console.log(
+    'PASS devolución 320px: tipos observados, etapas bloqueadas accesibles y corrección posterior.',
+  );
   const page = await browser.newPage({ reducedMotion: 'reduce' });
   await page.goto(origin);
   await page.locator('.hero').waitFor();

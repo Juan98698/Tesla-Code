@@ -159,7 +159,11 @@ await withBrowser(4317, async (browser, origin) => {
     for (const a of data.activities) {
       const section = page.locator(`[data-activity="${a.id}"]`);
       await solveActivity(page, a);
-      assert.match(await section.locator('.practice-feedback').innerText(), /resolviste/);
+      const feedback = await section.locator('.practice-feedback').innerText();
+      assert.match(
+        feedback,
+        ['javascript', 'python', 'case-study'].includes(a.type) ? /coinciden/ : /resolviste/,
+      );
     }
     if (meta.id === 'variables') {
       await page.locator('.runner textarea').fill('a = 4\na = a + 3\nmostrar(a)');

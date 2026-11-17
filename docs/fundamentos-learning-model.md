@@ -41,10 +41,11 @@ versión no concede XP ni completa el nuevo contrato.
 
 ## Implementación incremental
 
-Las veinte lecciones publicadas construyen el mismo proyecto con las cuatro
-etapas. El segundo lote migra los diez temas posteriores: tipos, comparaciones,
-decisiones, validación, while, for, funciones, descomposición, listas y análisis de
-sesiones. Conserva los tres repasos posteriores y sus IDs como transferencias
+Las veintiocho lecciones publicadas construyen el mismo proyecto con las cuatro
+etapas. El primer módulo conserva ocho lecciones. Los cinco bloques siguientes
+tienen cuatro lecciones cada uno: valores y operaciones, decisiones y validación,
+repeticiones, funciones y listas. La distribución separa habilidades que antes se
+exigían simultáneamente. Conserva los tres repasos posteriores y sus IDs como transferencias
 obligatorias después de integrar. Los doce bloques posteriores continúan en
 preparación; la migración de lo publicado no significa que estén desarrollados.
 
@@ -52,7 +53,7 @@ preparación; la migración de lo publicado no significa que estén desarrollado
 | ------------------------------ | ----------------------------------------------------------------------------------- | ----------------------------------- |
 | Tipos y decisiones             | Tipos, comparación, booleanos, ramas y validación                                   | Admitir datos y recomendar un plan  |
 | Ciclos y funciones             | Traza, parada, acumulación, parámetros y retorno                                    | Procesar sesiones y separar reglas  |
-| Listas y texto                 | Índices, recorridos, mutabilidad y contratos                                        | Conservar y resumir sesiones        |
+| Listas y análisis              | Índices, recorridos, mutabilidad y contratos                                        | Conservar y resumir sesiones        |
 | Funciones como valores y datos | Callbacks, objetos, referencias, métodos y diccionarios                             | Consultar y agrupar planes          |
 | Resolver y medir               | Casos, invariantes, estrategias, recursión y coste                                  | Elegir y justificar soluciones      |
 | Lenguaje y herramientas        | Alcance, errores, módulos, archivos, terminal y depuración                          | Organizar el producto y sus pruebas |
@@ -73,7 +74,7 @@ preparación; la migración de lo publicado no significa que estén desarrollado
 - Revisión docente independiente y piloto con principiantes siguen pendientes
   hasta que se realicen. Las pruebas automáticas no sustituyen esa evidencia.
 
-## Contrato de evidencias de las veinte publicaciones
+## Contrato de evidencias de las veintiocho publicaciones
 
 Las cuatro etapas requieren entregar una explicación. Las tres de código exigen
 además una predicción estructurada; integración añade un diagnóstico y la ejecución
@@ -129,6 +130,20 @@ minutos reales introducidos siguen siendo no negativos.
 Los cuestionarios y tres transferencias posteriores mantienen sus identificadores
 y problemas distintos. Se conservan logros previos. La revisión docente
 independiente y el piloto con principiantes continúan pendientes.
+
+La [revisión de granularidad y claridad](revision-granularidad-fundamentos.md)
+registra las separaciones y su justificación. Decisiones introduce dos caminos,
+después categorías y reglas booleanas, y finalmente valida texto y números. Las
+reglas preparadas se reutilizan en validación; los valores iniciales alternativos
+y los datos esperados y observados son visibles al comprobar. Repeticiones separa
+while, for equivalente, acumulación y conteo condicional. Funciones separa retorno,
+composición, extracción de reglas y retornos tempranos. Listas separa construcción,
+suma, resumen y máximo; el par construido se reutiliza para devolver el resumen.
+
+Las pistas orientan desde el análisis hasta una traza de la habilidad concreta.
+Una respuesta incorrecta ofrece orientación local; una coincidencia técnica no
+aprueba la calidad del razonamiento escrito. Los errores de tipo muestran el valor
+y el tipo observados, aunque la salida impresa sea idéntica a la esperada.
 
 ## Distribución de Valores, tipos y operaciones
 

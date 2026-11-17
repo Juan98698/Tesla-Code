@@ -93,3 +93,13 @@ lecciones previas conservan sus IDs y el recorrido pasa a 20 publicaciones. La
 distribución separa las nuevas operaciones del reconocimiento de tipos y conecta
 la entrega integrada con Decisiones. Los doce bloques posteriores siguen en
 preparación; revisión independiente y piloto permanecen pendientes.
+
+Revisión del resto de bloques publicados, 17 de noviembre de 2026: se separan las
+habilidades que se concentraban en decisiones, repeticiones, funciones y listas.
+Cada bloque tiene ahora cuatro lecciones; el primer módulo conserva ocho y Valores
+conserva cuatro. El recorrido reúne 28 publicaciones con el mismo proyecto, sus
+cuatro etapas y los tres repasos posteriores. Las pistas y devoluciones se revisan
+en todas las publicaciones para orientar sobre la habilidad y el error concretos.
+La [matriz de decisiones](revision-granularidad-fundamentos.md) explica cada
+separación; no se añade contenido a los doce bloques aún planificados. Se conservan
+IDs, logros y XP. La revisión asistida no sustituye el piloto con principiantes.

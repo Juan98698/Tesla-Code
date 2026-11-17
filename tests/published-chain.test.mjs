@@ -36,8 +36,8 @@ const runner = () => ({
   dispose() {},
 });
 
-test('all twenty publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
-  assert.equal(lessons.length, 20);
+test('all twenty-eight publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
+  assert.equal(lessons.length, 28);
   assert.deepEqual(source.learningModel.pendingMigration, []);
   assert.equal(source.learningModel.implementedThrough, lessons.at(-1).id);
   let previous = null,
@@ -106,7 +106,7 @@ test('validation rejects empty, whitespace, fraction, infinity, negative and ove
 });
 
 test('function cases reject global dependencies and preserve typed returns even when report stdout agrees', () => {
-  const a = get('js-descomponer-y-probar').activities[3];
+  const a = get('js-reglas-con-parametros').activities[3];
   const bad = evaluate(a, a.assessment.debug.code);
   assert.ok(
     bad.some((r, i) => r.stdout === a.cases[i].stdout && !r.passed),
@@ -119,7 +119,7 @@ test('function cases reject global dependencies and preserve typed returns even 
     ),
   );
   const strings = get('js-funciones-y-retorno').activities[3];
-  const wrong = strings.solution.replace('return minutosPorDia * cantidadDias;', 'return "28";');
+  const wrong = strings.solution.replace('return producto;', 'return String(producto);');
   assert.ok(evaluate(strings, wrong).some((r) => !r.passed));
   const d = get('js-listas-y-recorridos'),
     list = d.activities[3];
@@ -248,7 +248,7 @@ test('follow-up UI locks execution until the integrated artifact is actually del
 
 test('rewriting functions compares learner returns and exposes a return-only incident to the student', async (t) => {
   installDOM(t);
-  const d = get('js-proyecto-mediciones'),
+  const d = get('js-resumir-sesiones'),
     a = d.activities[2],
     root = document.getElementById('root');
   root.innerHTML =

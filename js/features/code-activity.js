@@ -11,7 +11,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
     activity.usesInput ||
     activity.stdin?.length ||
     activity.cases?.some((item) => item.stdin?.length);
-  return `<p>${js ? 'Escribe, ejecuta y observa la salida. No necesitas instalar herramientas.' : 'Ejecuta y observa la salida. Python se descarga la primera vez; necesitas conexión.'}</p>${js && activity.entrypoint ? `<p>Comprobar llamará a <code>${e(activity.entrypoint)}</code> con los argumentos de cada caso y comparará el valor devuelto. Ejecutar solo ejecuta tu código: para explorar, añade una llamada con console.log; retírala antes de comprobar si el contrato pide una función sin impresiones.</p>` : ''}
+  return `<p>${js ? 'Escribe, ejecuta y observa la salida. No necesitas instalar herramientas.' : 'Ejecuta y observa la salida. Python se descarga la primera vez; necesitas conexión.'}</p>${js && activity.entrypoint ? `<p>${activity.cases?.some((c) => c.stdout?.trim()) ? 'Comprobar ejecuta el reporte con las entradas de cada caso y después llama a las funciones indicadas con argumentos independientes. Conserva la presentación del reporte; dentro de las funciones de cálculo devuelve valores sin imprimir ni leer entradas.' : 'Comprobar llama a la función indicada y compara su retorno. Para explorar, guarda el resultado de una llamada en una variable y muéstralo; retira esas impresiones al comprobar si el contrato exige una función sin salida.'}</p>` : ''}
     <form><label for="answer-${activity.id}">Tu código ${language}</label>
     <textarea id="answer-${activity.id}" class="code-editor" rows="10" spellcheck="false" wrap="off"
       autocapitalize="off" autocomplete="off" maxlength="${PYTHON_LIMITS.source}">${e(activity.starter)}</textarea>
@@ -43,7 +43,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
                   activity.entrypoint
                     ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
                     : `entradas ${e(JSON.stringify(c.globals ?? c.stdin ?? []))}; salida ${e(JSON.stringify(c.stdout))}`
-                }</li>`,
+                }${c.overrides ? `<p>En otra ejecución se cambian solo estos valores iniciales:</p><pre tabindex="0">${e(JSON.stringify(c.overrides))}</pre>` : ''}${c.expectedBindings ? `<p>Valores que debe conservar tu programa al terminar:</p><pre tabindex="0">${e(JSON.stringify(c.expectedBindings))}</pre>` : ''}</li>`,
             )
             .join(
               '',
@@ -221,14 +221,17 @@ export function mountCodeActivity(
       feedback.className = 'practice-feedback ' + (correct ? 'ok' : 'bad');
       feedback.innerHTML = `<p>${
         correct
-          ? '¡Lo resolviste! ' + e(activity.explanation)
-          : 'Todavía hay casos que revisar. Compara el resultado con el esperado.'
+          ? 'Los casos de esta versión coinciden. ' + e(activity.explanation)
+          : e(
+              activity.retryFeedback ??
+                'Todavía hay casos que revisar. Compara el resultado con el esperado.',
+            )
       }</p><ul>${result.results
         .map(
           (item) =>
             `<li>${item.passed ? '✓' : '✗'} ${e(item.name)}<pre tabindex="0">${e(
               item.error ?? 'Esperado: ' + item.expected + '\nObtenido: ' + item.actual,
-            )}</pre></li>`,
+            )}</pre>${item.bindingValues ? `<p>Datos esperados:</p><pre tabindex="0">${e(item.bindingExpected)}</pre><p>Datos observados:</p><pre tabindex="0">${e(item.bindingValues)}</pre>` : ''}</li>`,
         )
         .join('')}</ul>`;
       if (correct && editor.value !== submittedCode) {
@@ -250,7 +253,8 @@ export function mountCodeActivity(
         consoleError.textContent = error.message;
         if (mode === 'check') {
           feedback.className = 'practice-feedback bad';
-          feedback.textContent = error.message;
+          feedback.textContent =
+            error.message + (activity.retryFeedback ? '\n' + activity.retryFeedback : '');
         }
       }
     } finally {

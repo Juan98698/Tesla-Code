@@ -192,6 +192,7 @@ export function learningProjectErrors(
                 solution: proof.debug.code,
                 cases: proof.debug.cases,
                 entrypoint: proof.debug.entrypoint,
+                bindings: proof.debug.bindings,
               }),
             );
         }

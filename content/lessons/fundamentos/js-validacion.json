@@ -1,6 +1,6 @@
 {
   "id": "js-validacion",
-  "outcome": "Validar entradas antes de calcular: construir y explicar una solución que funcione con distintos datos y casos límite.",
+  "outcome": "Validar texto, conversión y rango antes del reporte: explicar, implementar y comprobar el incremento del plan.",
   "requiresConcepts": [
     "js-editor-consola",
     "js-console-log",
@@ -21,18 +21,23 @@
     "js-operaciones-y-unidades-concepto",
     "js-comparaciones-concepto",
     "js-integrar-valores-concepto",
-    "js-decisiones-concepto"
+    "js-decisiones-concepto",
+    "js-clasificar-planes-concepto",
+    "js-condiciones-logicas-concepto"
   ],
-  "html": "<p>Validar una entrada consiste en comprobar las condiciones del contrato antes de utilizarla; convertir un texto a número no demuestra que el dato sea válido.</p>\n<h3>Vacío no significa cero</h3><p>texto.trim() produce otro texto sin espacios en los extremos. No modifica el original. texto.trim() === &quot;&quot; detecta ausencia de contenido; Number(&quot;&quot;) y Number(&quot;   &quot;) producen cero. Comprueba el texto antes de aceptar ese cero como una cantidad.</p>\n<h3>Enteros admitidos</h3><p>Number.isInteger(numero) devuelve true para un número entero finito; devuelve false para NaN, Infinity y decimales. Primero usa Number, después consulta Number.isInteger. Esa función no convierte textos. Para un contrato de minutos entre cero y ciento veinte inclusive, exige también numero &gt;= 0 y numero &lt;= 120.</p>\n<h3>Combinar preguntas</h3><p>&amp;&amp; significa que ambas condiciones deben ser verdaderas; || que basta alguna verdadera. ! niega un booleano: !true es false. Se evalúa de izquierda a derecha y se omite lo que ya no hace falta decidir. Usa paréntesis para separar grupos y evitar depender de prioridades que no recuerdas. Aquí combinaremos booleanos; no generalizamos todavía estos operadores a otros valores.</p>\n<h3>Un contrato preciso</h3><p>En estas actividades aceptamos cualquier texto no vacío que Number convierta a un entero del rango: &quot;02&quot; representa dos y &quot;2.0&quot; también. No prometemos aceptar solo dígitos. Una entrada inválida produce un mensaje y no el cálculo. Faltar líneas para prompt sigue siendo un error del entorno; no es una cancelación simulada.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Un plan recibe minutos de cero a ciento veinte, sin admitir texto vacío ni fracciones.</p><p>Se comprueba contenido, entero y rango antes de sumar cinco; cero sí pertenece al contrato.</p><p>La entrada 0 produce 5, mientras un texto vacío debe producir Entrada inválida.</p><p>Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo.</p></section>\n<h3>Predice y prueba</h3><pre data-language=\"javascript\">const texto = prompt(\"Minutos\");\nconst minutos = Number(texto);\nif (texto.trim() !== \"\" &amp;&amp; Number.isInteger(minutos) &amp;&amp; minutos &gt;= 0 &amp;&amp; minutos &lt;= 120) {\n  console.log(minutos + 5);\n} else {\n  console.log(\"Entrada inválida\");\n}</pre><p>Salida esperada:</p><pre data-language=\"text\">5</pre>\n<div class=\"callout\"><strong>Antes de avanzar</strong><p>Predice un caso diferente del ejemplo y explica tu elección. Completa entender, implementar, reescribir y comprobar, e integrar y depurar; después responde el cuestionario. Pasar los casos demuestra esos resultados, no una única forma de escribir el código.</p></div><h3>Tu proyecto continúa: contrato y conservación</h3><p>Rechazar minutos vacíos, no enteros o fuera de 0 a 120 antes de calcular. Los datos válidos conservan el reporte completo; los inválidos producen solo Entrada inválida.</p><p>La entrega anterior es tu código aprobado de la lección previa. No lo sustituyas por una ficha nueva que pierda información. En los casos válidos conserva, en este orden, Hola TeslaCode, Mi plan de práctica, Estado:, Sesión:, Minutos diarios:, Días:, Meta:, Recordatorio:, Referencia diaria:, Total:, Nombre:, Plan con 5 más:, Tipo de minutos:, Horas previstas:, Resto de 10:, Disponible hasta 120:, Alcanza 30:, Igual a referencia:, Distinto de referencia:, Recomendación:. Los casos muestran el reporte completo.</p><p>Los minutos deben ser un texto con contenido que Number convierta en entero entre 0 y 120, incluidos los extremos. Se admite \"020\" o \"2.0\"; no se exige un formato de solo dígitos. Una entrada inválida produce únicamente Entrada inválida, sin reporte ni cálculos parciales. El cero válido conserva todas las capacidades. El nombre y la meta siguen siendo textos; no se añade una restricción nueva sobre ellos.</p><h3>Razona la reescritura antes de comprobar</h3><p>Reescribe la validación anidada como una condición con &amp;&amp; que exija contenido, entero y ambos límites. No conviertas el cero válido en ausencia.</p><p>El comprobador ejecuta tu versión anterior real con los mismos casos comunes. Se comparan las salidas completas y, desde funciones, también los retornos. Mantener salida no autoriza cambiar el tipo o el valor devuelto. Los nuevos casos de una ampliación se comprueban además por separado.</p><h3>Predicción, traza y depuración</h3><p>Primero registra tu predicción y explicación en la bitácora. Una traza muestra valores antes de cada condición, qué rama o vuelta se ejecuta y qué cambia después. Compara luego con la ejecución y justifica el resultado. En integración pulsa Reproducir incidencia: ejecuta una copia defectuosa sin reemplazar tu borrador. Documenta síntoma, entrada, hipótesis, prueba, causa y corrección; comprueba después un caso diferente que pueda revelar otro error. Si tu versión ya evita el fallo, señala la instrucción que la protege y cita las pruebas.</p><p>Las respuestas estructuradas y ejecuciones se comprueban automáticamente. La explicación personal es obligatoria como entrega y permanece pendiente de revisión humana; no se califica por palabras clave. Los borradores, entregas aprobadas y evidencias tienen funciones distintas: una prueba fallida no reemplaza tu versión aprobada. Puedes consultar la entrega anterior y guardar una copia del progreso.</p>",
+  "html": "<h3>Texto original y número convertido</h3><p>texto.trim() devuelve otro texto sin espacios en sus extremos; no cambia el original. texto.trim() === &quot;&quot; detecta ausencia de contenido. Number(&quot;&quot;) y Number(&quot;   &quot;) producen cero: por eso convertir no demuestra que alguien haya escrito una cantidad.</p><h3>Comprobar entero y rango</h3><p>Number.isInteger(numero) devuelve true solo si recibe un número entero finito. No convierte textos y devuelve false para fracciones, NaN e Infinity. La regla dentroDelRango que preparaste comprueba los límites de 0 y 120; ahora también se exige contenido y entero.</p><h3>Admitir o rechazar antes de presentar</h3><p>Combina esas tres condiciones antes de calcular. Cero es válido; vacío, fracciones y valores fuera del intervalo muestran solo Entrada inválida. &quot;02&quot; y &quot;2.0&quot; se admiten porque se valida el valor convertido, no un formato de solo dígitos. Faltar líneas de prompt sigue siendo un error de entradas del entorno.</p><section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Quieres completar este incremento de Mi plan de práctica: Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida.</p><p>Antes de ejecutar, sigues esta decisión: Primero distingue el texto vacío del texto que representa cero. Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes.</p><p>El ejemplo muestra true, true; esos resultados se contrastan con una traza, no con una respuesta fija.</p><p>Cada ejecución comienza de nuevo; consulta las entradas y los resultados completos de cada caso.</p></section><h3>Predice y ejecuta</h3><pre data-language=\"javascript\">const texto = &quot;   &quot;;\nconst numero = Number(texto);\nconsole.log(texto.trim() === &quot;&quot;);\nconsole.log(Number.isInteger(numero));</pre><p>Salida esperada:</p><pre data-language=\"text\">true\ntrue</pre><h3>Predice y ejecuta</h3><pre data-language=\"javascript\">const texto = &quot;0&quot;;\nconst minutos = Number(texto);\nconst dentroDelRango = minutos &gt;= 0 &amp;&amp; minutos &lt;= 120;\nif (texto.trim() !== &quot;&quot; &amp;&amp; Number.isInteger(minutos) &amp;&amp; dentroDelRango) {\n  console.log(&quot;Admitido&quot;);\n} else { console.log(&quot;Entrada inválida&quot;); }</pre><p>Salida esperada:</p><pre data-language=\"text\">Admitido</pre><h3>Entrega y reescritura</h3><p>Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida.</p><p>Pasar de comprobaciones anidadas a una condición con &amp;&amp; que reutilice dentroDelRango.</p><p>Conserva los campos anteriores del reporte. Consulta los casos visibles: indican las entradas y los resultados completos que se comprobarán. Una entrada rechazada muestra solo Entrada inválida.</p><h3>Cómo registrar y comprobar</h3><p>La bitácora guarda un borrador al escribir. Registrar predicción y explicación vincula tus respuestas con ese texto. Comprobar ejecuta el código; en reescritura también compara tu entrega anterior real. Primero registra el plan y después comprueba. En integración reproduce la copia defectuosa y anota síntoma, entrada, hipótesis, prueba, causa y corrección. Elige otra prueba que pueda revelar un error distinto. La explicación se entrega para revisión humana; su calidad no se califica automáticamente.</p>",
   "examples": [
     {
       "id": "js-validacion-e1",
       "language": "javascript",
-      "code": "const texto = prompt(\"Minutos\");\nconst minutos = Number(texto);\nif (texto.trim() !== \"\" && Number.isInteger(minutos) && minutos >= 0 && minutos <= 120) {\n  console.log(minutos + 5);\n} else {\n  console.log(\"Entrada inválida\");\n}",
-      "stdin": [
-        "0"
-      ],
-      "stdout": "5\n"
+      "code": "const texto = \"   \";\nconst numero = Number(texto);\nconsole.log(texto.trim() === \"\");\nconsole.log(Number.isInteger(numero));",
+      "stdout": "true\ntrue\n"
+    },
+    {
+      "id": "js-validacion-e2",
+      "language": "javascript",
+      "code": "const texto = \"0\";\nconst minutos = Number(texto);\nconst dentroDelRango = minutos >= 0 && minutos <= 120;\nif (texto.trim() !== \"\" && Number.isInteger(minutos) && dentroDelRango) {\n  console.log(\"Admitido\");\n} else { console.log(\"Entrada inválida\"); }",
+      "stdout": "Admitido\n"
     }
   ],
   "quiz": [
@@ -95,19 +100,19 @@
       "type": "case-study",
       "concept": "js-validacion-concepto",
       "prompt": "Entiende el siguiente incremento de Mi plan de práctica.",
-      "brief": "Rechazar minutos vacíos, no enteros o fuera de 0 a 120 antes de calcular. Los datos válidos conservan el reporte completo; los inválidos producen solo Entrada inválida.",
+      "brief": "Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida.",
       "evidence": [
         {
           "label": "Entrega de partida",
-          "text": "Consulta tu código aprobado de la lección anterior y predice qué partes permanecerán."
+          "text": "Recupera tu código aprobado anterior y señala los campos que ya produce."
         },
         {
-          "label": "Nuevo contrato",
-          "text": "Rechazar minutos vacíos, no enteros o fuera de 0 a 120 antes de calcular. Los datos válidos conservan el reporte completo; los inválidos producen solo Entrada inválida."
+          "label": "Incremento de esta lección",
+          "text": "Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida."
         },
         {
-          "label": "Plan de reescritura",
-          "text": "Reescribe la validación anidada como una condición con && que exija contenido, entero y ambos límites. No conviertas el cero válido en ausencia."
+          "label": "Decisión que debes justificar",
+          "text": "Primero distingue el texto vacío del texto que representa cero."
         }
       ],
       "decisions": [
@@ -120,22 +125,24 @@
             "El resultado fijo del ejemplo, aunque cambien los datos."
           ],
           "answer": 1,
-          "explanation": "El proyecto evoluciona sobre una entrega real; cada ampliación conserva comportamientos anteriores dentro de sus condiciones válidas."
+          "explanation": "El proyecto evoluciona sobre una entrega real; cada ampliación conserva comportamientos anteriores dentro de sus condiciones válidas.",
+          "errorHint": "Consulta la entrega anterior: conserva sus campos para los datos válidos y agrega o refina solo la capacidad que pide el nuevo contrato."
         },
         {
           "id": "predecir",
-          "prompt": "¿Qué único mensaje produce una entrada de minutos vacía?",
+          "prompt": "¿Por qué Number(\"\") no basta para validar minutos?",
           "options": [
-            "Un resultado fijo independiente de la entrada.",
-            "Entrada inválida",
-            "No hace falta decidirlo antes de ejecutar."
+            "Siempre lanza un error",
+            "Produce un texto",
+            "Produce cero aunque falte el dato"
           ],
-          "answer": 1,
-          "explanation": "Relaciona la regla recién explicada con su entrada antes de escribir código."
+          "answer": 2,
+          "explanation": "El vacío requiere una comprobación propia.",
+          "errorHint": "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes."
         }
       ],
-      "hint": "Separa lo que recibes, lo que transformas y lo que conservas. Consulta primero la teoría.",
-      "explanation": "Comprobaste decisiones del contrato; tu justificación personal queda pendiente de revisión.",
+      "hint": "Primero distingue el texto vacío del texto que representa cero.",
+      "explanation": "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "assessment": {
         "questions": []
       },
@@ -144,17 +151,22 @@
         "label": "01 · Entender",
         "project": "plan-practica",
         "requires": [],
-        "from": "fundamentos/js-decisiones/js-decisiones-a3",
+        "from": "fundamentos/js-condiciones-logicas/js-condiciones-logicas-a3",
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Análisis y explicación entregada.",
         "reflection": "Explica entrada, salida, precondiciones y plan. Justifica qué capacidad anterior conservarás y por qué el nuevo cambio es necesario."
-      }
+      },
+      "hints": [
+        "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes.",
+        "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
+      ],
+      "retryFeedback": "Revisa el primer caso que falla. Primero distingue el texto vacío del texto que representa cero."
     },
     {
       "type": "javascript",
-      "prompt": "Implementa el incremento sobre tu versión anterior. Rechazar minutos vacíos, no enteros o fuera de 0 a 120 antes de calcular. Los datos válidos conservan el reporte completo; los inválidos producen solo Entrada inválida. Conserva todas las líneas indicadas por los casos. Antes de ejecutar, registra tu predicción y una traza.",
+      "prompt": "Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida. Conserva el reporte completo para los datos válidos y registra tu predicción antes de comprobar.",
       "starter": "// Recupera tu entrega anterior y adáptala al contrato.",
-      "solution": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nif (textoMinutos.trim() !== \"\") {\n  if (Number.isInteger(minutos)) {\n    if (minutos >= 0 && minutos <= 120) {\n      const total = minutos * dias;\n      const minutosAmpliados = minutos + 5;\n      const totalAmpliado = minutosAmpliados * dias;\n      const tipoMinutos = typeof minutos;\n      let recomendacion;\n      if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n      else {\n        if (minutos >= 30) { recomendacion = \"Constante\"; }\n        else { recomendacion = \"Inicio\"; }\n      }\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", total / 60);\n      console.log(\"Resto de 10:\", minutos % 10);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", minutos >= 30);\n      console.log(\"Igual a referencia:\", minutos === referencia);\n      console.log(\"Distinto de referencia:\", minutos !== referencia);\n      console.log(\"Recomendación:\", recomendacion);\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
+      "solution": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nconst minimo = 0;\nconst maximo = 120;\nconst dentroDelRango = minutos >= minimo && minutos <= maximo;\nconst fueraDelRango = minutos < minimo || minutos > maximo;\nconst noAlcanza = !(minutos >= 30);\nif (textoMinutos.trim() !== \"\") {\n  if (Number.isInteger(minutos)) {\n    if (dentroDelRango) {\n      const total = minutos * dias;\n      const minutosAmpliados = minutos + 5;\n      const totalAmpliado = minutosAmpliados * dias;\n      const tipoMinutos = typeof minutos;\n      let recomendacion;\n      if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n      else {\n        if (minutos >= 30) { recomendacion = \"Constante\"; }\n        else { recomendacion = \"Inicio\"; }\n      }\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", total / 60);\n      console.log(\"Resto de 10:\", minutos % 10);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", minutos >= 30);\n      console.log(\"Igual a referencia:\", minutos === referencia);\n      console.log(\"Distinto de referencia:\", minutos !== referencia);\n      console.log(\"Recomendación:\", recomendacion);\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }",
       "cases": [
         {
           "name": "Ana · '30' · días 5",
@@ -290,8 +302,8 @@
           "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 2\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 10\nNombre: Ana\nPlan con 5 más: 35\nTipo de minutos: number\nHoras previstas: 0.16666666666666666\nResto de 10: 2\nDisponible hasta 120: 118\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\n"
         }
       ],
-      "hint": "Consulta los casos visibles y escribe primero qué dato cambia y qué capacidades deben permanecer.",
-      "explanation": "El contrato técnico coincide en estos casos. Tu explicación y justificación se conservan para revisión humana; estas pruebas no demuestran comprensión para cualquier problema.",
+      "hint": "Primero distingue el texto vacío del texto que representa cero.",
+      "explanation": "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "stdin": [
         "Ana",
         "aprender lógica",
@@ -301,8 +313,8 @@
       "concept": "js-validacion-concepto",
       "usesInput": true,
       "hints": [
-        "Haz una traza del estado antes y después de cada instrucción o vuelta. Incluye el caso cero y las fronteras que anuncia la regla.",
-        "Compara la primera diferencia con tu predicción. Cambia una sola causa y vuelve a comprobar todos los casos; si hay funciones, contrasta también sus retornos."
+        "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes.",
+        "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
       ],
       "assessment": {
         "questions": [
@@ -313,7 +325,7 @@
             "answers": [
               "Entrada inválida"
             ],
-            "explanation": "Revisa la traza de instrucciones, tipos y fronteras explicada antes de la práctica."
+            "explanation": "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes. trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
           }
         ]
       },
@@ -329,17 +341,18 @@
         "requires": [
           "entender-plan"
         ],
-        "from": "fundamentos/js-decisiones/js-decisiones-a3",
+        "from": "fundamentos/js-condiciones-logicas/js-condiciones-logicas-a3",
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
-      }
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Primero distingue el texto vacío del texto que representa cero."
     },
     {
       "type": "javascript",
-      "prompt": "Reescribe la validación anidada como una condición con && que exija contenido, entero y ambos límites. No conviertas el cero válido en ausencia. Compara tu entrega real anterior con esta usando los mismos casos.",
+      "prompt": "Pasar de comprobaciones anidadas a una condición con && que reutilice dentroDelRango. El comprobador ejecutará tu entrega anterior real con los mismos casos.",
       "starter": "// Recupera tu entrega anterior y adáptala al contrato.",
-      "solution": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nif (textoMinutos.trim() !== \"\" && Number.isInteger(minutos) && minutos >= 0 && minutos <= 120) {\n  const total = minutos * dias;\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = minutosAmpliados * dias;\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  let recomendacion;\n  if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n  else if (minutos >= 30) { recomendacion = \"Constante\"; }\n  else { recomendacion = \"Inicio\"; }\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n} else { console.log(\"Entrada inválida\"); }",
+      "solution": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nconst minimo = 0;\nconst maximo = 120;\nconst dentroDelRango = minutos >= minimo && minutos <= maximo;\nconst fueraDelRango = minutos < minimo || minutos > maximo;\nconst noAlcanza = !(minutos >= 30);\nif (textoMinutos.trim() !== \"\" && Number.isInteger(minutos) && dentroDelRango) {\n  const total = minutos * dias;\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = minutosAmpliados * dias;\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  let recomendacion;\n  if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n  else if (minutos >= 30) { recomendacion = \"Constante\"; }\n  else { recomendacion = \"Inicio\"; }\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n} else { console.log(\"Entrada inválida\"); }",
       "cases": [
         {
           "name": "Ana · '30' · días 5",
@@ -475,8 +488,8 @@
           "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 2\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 10\nNombre: Ana\nPlan con 5 más: 35\nTipo de minutos: number\nHoras previstas: 0.16666666666666666\nResto de 10: 2\nDisponible hasta 120: 118\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\n"
         }
       ],
-      "hint": "Consulta los casos visibles y escribe primero qué dato cambia y qué capacidades deben permanecer.",
-      "explanation": "El contrato técnico coincide en estos casos. Tu explicación y justificación se conservan para revisión humana; estas pruebas no demuestran comprensión para cualquier problema.",
+      "hint": "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes.",
+      "explanation": "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "stdin": [
         "Ana",
         "aprender lógica",
@@ -486,8 +499,8 @@
       "concept": "js-validacion-concepto",
       "usesInput": true,
       "hints": [
-        "Haz una traza del estado antes y después de cada instrucción o vuelta. Incluye el caso cero y las fronteras que anuncia la regla.",
-        "Compara la primera diferencia con tu predicción. Cambia una sola causa y vuelve a comprobar todos los casos; si hay funciones, contrasta también sus retornos."
+        "Primero distingue el texto vacío del texto que representa cero.",
+        "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
       ],
       "assessment": {
         "questions": [
@@ -498,7 +511,7 @@
             "answers": [
               "true"
             ],
-            "explanation": "Revisa la traza de instrucciones, tipos y fronteras explicada antes de la práctica."
+            "explanation": "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes. trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
           }
         ],
         "rewrite": true
@@ -519,13 +532,14 @@
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Explica qué representación cambiaste, por qué conviene y qué casos conservaron salida y, cuando corresponde, retorno. Cita resultados antes y después."
-      }
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Primero distingue el texto vacío del texto que representa cero."
     },
     {
       "type": "javascript",
-      "prompt": "Integra y depura tu entrega. Reproduce la incidencia, investiga su causa y entrega una versión protegida que conserve el contrato completo. Elige cómo organizar la solución; usa las pistas solo cuando las necesites.",
+      "prompt": "Investiga la incidencia y entrega una versión protegida. Elige otro caso que pueda revelar un error distinto y documenta por qué lo elegiste.",
       "starter": "// Recupera tu entrega anterior y adáptala al contrato.",
-      "solution": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nif (textoMinutos.trim() !== \"\" && Number.isInteger(minutos) && minutos >= 0 && minutos <= 120) {\n  const total = minutos * dias;\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = minutosAmpliados * dias;\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  let recomendacion;\n  if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n  else if (minutos >= 30) { recomendacion = \"Constante\"; }\n  else { recomendacion = \"Inicio\"; }\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n} else { console.log(\"Entrada inválida\"); }",
+      "solution": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nconst minimo = 0;\nconst maximo = 120;\nconst dentroDelRango = minutos >= minimo && minutos <= maximo;\nconst fueraDelRango = minutos < minimo || minutos > maximo;\nconst noAlcanza = !(minutos >= 30);\nif (textoMinutos.trim() !== \"\" && Number.isInteger(minutos) && dentroDelRango) {\n  const total = minutos * dias;\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = minutosAmpliados * dias;\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  let recomendacion;\n  if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n  else if (minutos >= 30) { recomendacion = \"Constante\"; }\n  else { recomendacion = \"Inicio\"; }\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n} else { console.log(\"Entrada inválida\"); }",
       "cases": [
         {
           "name": "Ana · '30' · días 5",
@@ -661,8 +675,8 @@
           "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 2\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 10\nNombre: Ana\nPlan con 5 más: 35\nTipo de minutos: number\nHoras previstas: 0.16666666666666666\nResto de 10: 2\nDisponible hasta 120: 118\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\n"
         }
       ],
-      "hint": "Consulta los casos visibles y escribe primero qué dato cambia y qué capacidades deben permanecer.",
-      "explanation": "El contrato técnico coincide en estos casos. Tu explicación y justificación se conservan para revisión humana; estas pruebas no demuestran comprensión para cualquier problema.",
+      "hint": "Localiza la primera diferencia de la incidencia. Primero distingue el texto vacío del texto que representa cero.",
+      "explanation": "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra. Las ejecuciones contrastan el contrato técnico; tu explicación personal queda pendiente de revisión humana.",
       "stdin": [
         "Ana",
         "aprender lógica",
@@ -671,8 +685,8 @@
       "id": "js-validacion-a3",
       "concept": "js-validacion-concepto",
       "hints": [
-        "Haz una traza del estado antes y después de cada instrucción o vuelta. Incluye el caso cero y las fronteras que anuncia la regla.",
-        "Compara la primera diferencia con tu predicción. Cambia una sola causa y vuelve a comprobar todos los casos; si hay funciones, contrasta también sus retornos."
+        "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes.",
+        "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
       ],
       "usesInput": true,
       "assessment": {
@@ -684,25 +698,25 @@
             "answers": [
               "false"
             ],
-            "explanation": "Revisa la traza de instrucciones, tipos y fronteras explicada antes de la práctica."
+            "explanation": "Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes. trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
           },
           {
             "id": "causa",
             "type": "choice",
-            "prompt": "¿Qué hipótesis explica la diferencia observada en esta incidencia?",
+            "prompt": "¿Qué explica la primera diferencia observada en esta incidencia?",
             "options": [
-              "Number convirtió la ausencia de contenido en cero y se aceptó como dato.",
-              "El valor numérico cero está fuera del rango admitido.",
-              "Number.isInteger comprueba por sí solo si el texto original estaba vacío."
+              "El texto vacío se convirtió en cero antes de comprobar su contenido.",
+              "El valor cero está fuera del rango permitido.",
+              "Number.isInteger comprueba el contenido del texto original."
             ],
             "answer": 0,
-            "explanation": "Comprobar texto.trim() además del entero y el rango."
+            "explanation": "trim examina el contenido; Number.isInteger examina el valor convertido. Ninguna de las dos comprobaciones sustituye a la otra."
           }
         ],
         "debug": {
           "id": "js-validacion-incidencia",
-          "context": "Esta copia contiene el fallo que investigarás. Reproducirla conserva tu borrador. Compara el resultado esperado y el obtenido; si tu versión ya está protegida, demuestra por qué con los casos del contrato.",
-          "code": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nif (Number.isInteger(minutos) && minutos >= 0 && minutos <= 120) {\n  const total = minutos * dias;\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = minutosAmpliados * dias;\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  let recomendacion;\n  if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n  else if (minutos >= 30) { recomendacion = \"Constante\"; }\n  else { recomendacion = \"Inicio\"; }\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n} else { console.log(\"Entrada inválida\"); }",
+          "context": "Esta copia falla en la habilidad de esta lección. Reproducirla no reemplaza tu borrador. Compara lo esperado con lo observado y contrasta una hipótesis antes de corregir tu entrega.",
+          "code": "const nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst dias = 5;\nconst referencia = 20;\nconst minimo = 0;\nconst maximo = 120;\nconst dentroDelRango = minutos >= minimo && minutos <= maximo;\nconst fueraDelRango = minutos < minimo || minutos > maximo;\nconst noAlcanza = !(minutos >= 30);\nif (Number.isInteger(minutos) && dentroDelRango) {\n  const total = minutos * dias;\n  const minutosAmpliados = minutos + 5;\n  const totalAmpliado = minutosAmpliados * dias;\n  const tipoMinutos = typeof minutos;\n  const horas = total / 60;\n  const restoDiez = minutos % 10;\n  let recomendacion;\n  if (minutos >= 60) { recomendacion = \"Intensivo\"; }\n  else if (minutos >= 30) { recomendacion = \"Constante\"; }\n  else { recomendacion = \"Inicio\"; }\n  console.log(\"Hola TeslaCode\");\n  console.log(\"Mi plan de práctica\");\n  console.log(\"Estado: listo\");\n  console.log(\"Sesión: JavaScript\");\n  console.log(\"Minutos diarios:\", minutos);\n  console.log(\"Días:\", dias);\n  console.log(\"Meta:\", meta);\n  console.log(\"Recordatorio:\", meta);\n  console.log(\"Referencia diaria:\", referencia);\n  console.log(\"Total:\", total);\n  console.log(\"Nombre:\", nombre);\n  console.log(\"Plan con 5 más:\", totalAmpliado);\n  console.log(\"Tipo de minutos:\", tipoMinutos);\n  console.log(\"Horas previstas:\", horas);\n  console.log(\"Resto de 10:\", restoDiez);\n  console.log(\"Disponible hasta 120:\", 120 - minutos);\n  console.log(\"Alcanza 30:\", 30 <= minutos);\n  console.log(\"Igual a referencia:\", referencia === minutos);\n  console.log(\"Distinto de referencia:\", referencia !== minutos);\n  console.log(\"Recomendación:\", recomendacion);\n} else { console.log(\"Entrada inválida\"); }",
           "cases": [
             {
               "name": "Ana · '' · días 5",
@@ -733,7 +747,8 @@
         "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Documenta síntoma, entrada, hipótesis, prueba, causa y corrección. Incluye el resultado observado y una comprobación posterior distinta; justifica el caso límite y la conservación del contrato."
-      }
+      },
+      "retryFeedback": "Revisa el primer caso que falla. Primero distingue el texto vacío del texto que representa cero."
     }
   ],
   "sources": [
@@ -748,12 +763,12 @@
   ],
   "learningDesign": {
     "assumptions": [
-      "Los datos satisfacen el contrato indicado en cada actividad; las entradas se precargan para prompt y cada ejecución empieza de nuevo."
+      "Cada ejecución comienza de nuevo; consulta las entradas y los resultados completos de cada caso."
     ],
     "workedExample": {
-      "problem": "Un plan recibe minutos de cero a ciento veinte, sin admitir texto vacío ni fracciones.",
-      "reasoning": "Se comprueba contenido, entero y rango antes de sumar cinco; cero sí pertenece al contrato.",
-      "result": "La entrada 0 produce 5, mientras un texto vacío debe producir Entrada inválida."
+      "problem": "Quieres completar este incremento de Mi plan de práctica: Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida.",
+      "reasoning": "Antes de ejecutar, sigues esta decisión: Primero distingue el texto vacío del texto que representa cero. Traza el texto original, Number(texto), Number.isInteger y la regla de rango preparada antes.",
+      "result": "El ejemplo muestra true, true; esos resultados se contrastan con una traza, no con una respuesta fija."
     },
     "transferActivityIds": [
       "js-validacion-a3"
@@ -761,7 +776,7 @@
   },
   "coverage": {
     "js-validacion-concepto": {
-      "explanationExcerpt": "Validar una entrada consiste en comprobar las condiciones del contrato antes de utilizarla; convertir un texto a número no demuestra que el dato sea válido.",
+      "explanationExcerpt": "texto.trim() devuelve otro texto sin espacios en sus extremos; no cambia el original. texto.trim() === \"\" detecta ausencia de contenido. Number(\"\") y Number(\" \") producen cero: por eso convertir no demuestra que alguien haya escrito una cantidad.",
       "assessmentIds": [
         "js-validacion-q1",
         "js-validacion-q2",
@@ -785,9 +800,9 @@
     "id": "plan-practica",
     "name": "Mi plan de práctica",
     "version": 2,
-    "increment": "Rechazar minutos vacíos, no enteros o fuera de 0 a 120 antes de calcular. Los datos válidos conservan el reporte completo; los inválidos producen solo Entrada inválida.",
-    "changeReason": "Rechazar minutos vacíos, no enteros o fuera de 0 a 120 antes de calcular. Los datos válidos conservan el reporte completo; los inválidos producen solo Entrada inválida.",
-    "previous": "fundamentos/js-decisiones/js-decisiones-a3",
+    "increment": "Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida.",
+    "changeReason": "Comprobar contenido, entero y rango antes de calcular: el cero válido conserva el reporte y las entradas rechazadas muestran solo Entrada inválida.",
+    "previous": "fundamentos/js-condiciones-logicas/js-condiciones-logicas-a3",
     "capabilities": [
       "Hola TeslaCode",
       "Mi plan de práctica",

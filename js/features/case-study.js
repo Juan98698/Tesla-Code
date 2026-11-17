@@ -41,13 +41,14 @@ export function mountCaseStudy(section, activity, isSolved, onSolve, onEvidence 
       group.setAttribute('aria-invalid', String(!decision.correct));
       note.textContent = decision.correct
         ? `Correcto. ${activity.decisions[index].explanation}`
-        : 'Revisa esta decisión con el material de referencia y vuelve a comprobar.';
+        : (activity.decisions[index].errorHint ??
+          'Revisa esta decisión con el material de referencia y vuelve a comprobar.');
     }
     const feedback = section.querySelector('.practice-feedback');
     feedback.hidden = false;
     feedback.className = `practice-feedback ${result.passed ? 'ok' : 'bad'}`;
     feedback.textContent = result.passed
-      ? `¡Lo resolviste! ${activity.explanation}`
+      ? `Las decisiones del caso coinciden. ${activity.explanation}`
       : `Has resuelto ${result.decisions.filter((decision) => decision.correct).length} de ${result.decisions.length} decisiones. Revisa las señaladas.`;
     const report = section.querySelector('.case-report');
     report.hidden = !result.passed;

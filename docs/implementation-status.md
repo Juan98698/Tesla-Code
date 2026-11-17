@@ -421,3 +421,61 @@ y 522 casos declarados de actividades JavaScript. El recorrido completo pasa las
 de booleanos impresos como texto y la transferencia del código real a Decisiones.
 La revisión visual comprueba cuatro tarjetas y accesibilidad automática en ambos
 temas a 1440 y 320 px. Audio, formato, recursos y contenido pasan sus controles.
+
+## Revisión de granularidad, explicaciones y devoluciones
+
+17 de noviembre de 2026. Se revisaron las 28 publicaciones resultantes y el
+alcance de los doce bloques en preparación según el acuerdo de retos encadenados.
+La [matriz de revisión](revision-granularidad-fundamentos.md) distingue los
+hallazgos, la distribución aplicada y las condiciones pendientes para el temario.
+El primer módulo conserva ocho lecciones y Valores conserva cuatro; cada uno de
+los cuatro bloques posteriores pasa de dos a cuatro lecciones:
+
+- Decisiones: dos caminos, clasificación, reglas booleanas y validación.
+- Repeticiones: while, calendario equivalente con for, acumulación y conteo.
+- Funciones: parámetros/retorno, composición, reglas independientes y retornos
+  tempranos con casos que protegen contratos.
+- Listas: construcción, suma sin mutación, resumen y máximo integrado.
+
+Se añaden ocho IDs sin eliminar los anteriores. Se actualizan prerrequisitos,
+orden de progresión, conceptos y recuperación de entregas para el mismo producto.
+Cada publicación mantiene las cuatro etapas, la conservación del reporte,
+predicciones, explicaciones entregadas, comparación con código real anterior e
+incidencias que efectivamente fallan. Los tres repasos posteriores conservan sus
+IDs y su condición obligatoria; los logros y XP históricos permanecen.
+
+Las pistas de las 28 publicaciones orientan sobre la habilidad concreta y avanzan
+hacia una traza y una comprobación. Las decisiones fallidas reciben orientación
+local. Las funciones empiezan por guardar y mostrar el retorno antes de componer
+llamadas. La clasificación muestra decisiones anidadas y su cadena equivalente.
+La lectura y construcción de sesiones preceden a su análisis; el par preparado se
+reutiliza para devolver el resumen. Los ejemplos no exigen los métodos del tramo
+siguiente.
+
+El comprobador muestra las variaciones de datos iniciales y los valores que
+consulta al terminar. Un dato equivocado muestra su valor y tipo, incluso cuando
+la impresión del reporte coincide; undefined conserva su representación. Las
+incidencias también muestran esos datos. El mensaje correcto describe coincidencia
+de casos; la comparación con la entrega anterior informa su estado por separado.
+La explicación personal continúa pendiente de revisión humana. Las evidencias de
+etapas bloqueadas se presentan al habilitarse: esto evita regiones de código
+inaccesibles por teclado dentro de controles deshabilitados en pantallas estrechas.
+
+Hay 41 ejemplos, 87 actividades ejecutables, 870 ejecuciones de casos declarados,
+28 análisis de decisiones y 131 preguntas. Son 112 etapas y tres repasos. Las 261
+pruebas unitarias pasan y los 55 módulos cumplen cobertura: 98,89 % de líneas,
+95,77 % de ramas y 96,67 % de funciones globalmente. La verificación general
+renderiza 134 lecciones y resuelve 304 actividades, revisa 20 combinaciones de vista
+y tamaño y pasa 16 auditorías WCAG automáticas. El recorrido JavaScript completa
+28 lecciones desde cero a 1440 y 390 px, conservando las entregas del estudiante.
+La devolución de tipos se revisa también a 320 px, con fallo, corrección, etapas
+bloqueadas, ambos temas y ausencia de desbordamiento; no acredita una ejecución
+fallida. El lector de teoría pasa sus recorridos, incluido el caso sin API a 320 px.
+Contenido, recursos y formato se comprueban con los comandos del repositorio.
+
+La revisión del temario pendiente evita suponer objetos, texto avanzado o
+herramientas locales al continuar desde las listas publicadas. Sus separaciones
+quedan documentadas antes de redactar lecciones; no se publica ese alcance como
+material terminado. Permanecen pendientes los doce bloques futuros, la revisión
+docente independiente y el piloto con principiantes. Los resultados de CI no
+certifican comprensión ni ausencia absoluta de vacíos.

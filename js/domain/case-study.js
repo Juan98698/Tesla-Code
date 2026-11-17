@@ -17,6 +17,8 @@ export function caseStudyErrors(activity) {
     if (!text(decision.id) || ids.has(decision.id))
       errors.push('ID de decisión vacío o duplicado.');
     ids.add(decision.id);
+    if (decision.errorHint !== undefined && !text(decision.errorHint))
+      errors.push('La pista de una decisión debe ser texto legible.');
     if (!text(decision.prompt) || !text(decision.explanation))
       errors.push('Falta pregunta o devolución de la decisión.');
     if (
