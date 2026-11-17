@@ -525,3 +525,40 @@ almacenamiento incorrecto de textos, muestra todas las entradas y resuelve las
 cuatro etapas de lectura validada; pasa ambos temas sin desbordamiento. Lector de
 teoría, caché con 180 XP anteriores conservados, contenido, formato y compilación
 pasan sus controles. La revisión docente independiente y el piloto siguen pendientes.
+
+## Correspondencia editorial por habilidad antes del piloto
+
+17 de noviembre de 2026. La revisión cruza las 30 publicaciones de la edición
+actual con su explicación, ejemplos ejecutables, práctica guiada y aplicación
+independiente. Las 40 filas de la matriz incluyen habilidades transversales
+como formular predicciones, elegir casos para fronteras y justificar una
+corrección. Cada reto compartido remite a la lección donde se usa. Los doce
+bloques en preparación conservan su alcance planificado.
+[Matriz de correspondencia editorial](fundamentos-correspondencia-editorial.md).
+
+Se detallan los cambios guiados sobre el código acumulado y se agregan cuatro
+ejemplos para practicar comillas simples, contrastar estimaciones, observar una
+disyunción y probar una regla con sus propios argumentos. Se corrigen
+instrucciones de lectura y conteo que pedían reutilizar el par de resultados
+antes de la lección de resumen.
+
+Se suman 22 aplicaciones independientes. El recorrido alcanza 29 retos
+posteriores a la integración. Cada uno tiene sus propios datos y resultado
+esperado. Los retos nuevos cuentan como prácticas requeridas para completar
+una lección desde cero, o se asignan a una lección posterior cuando esa tarea
+puede comprobar varias habilidades. Los identificadores, las entregas y los
+logros históricos se conservan.
+
+La revisión de la matriz encontró cada referencia de ejemplo y actividad.
+La validación ejecutó 49 ejemplos y 1076 casos declarados de JavaScript. Los
+contrastes dirigidos rechazaron trece fallos plausibles, entre ellos imprimir
+una cantidad como texto, guardar el dato inicial en dos lugares, excluir una
+frontera inclusiva e iniciar un máximo con cero cuando todos los valores son
+negativos. La lectura de las explicaciones y decisiones, la revisión docente
+independiente y el pilotaje con principiantes quedan pendientes.
+
+Pasaron 265 pruebas unitarias y los umbrales de cobertura de los 55 módulos.
+El navegador completó las 30 lecciones desde cero en escritorio y móvil. La
+suite general recorrió 136 lecciones y 338 actividades. También pasaron las
+comprobaciones automatizadas de accesibilidad, lectura de teoría, migración
+de caché y conservación del progreso anterior.

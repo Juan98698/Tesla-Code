@@ -309,7 +309,7 @@
           "entender-plan"
         ],
         "from": "fundamentos/js-decisiones/js-decisiones-a3",
-        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "input": "Localiza la recomendación de dos caminos. Traza 29, 30, 59 y 60. Decide qué camino se evalúa primero y marca la única rama que asigna el mensaje en cada caso.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
       },
@@ -665,6 +665,72 @@
         "reflection": "Documenta síntoma, entrada, hipótesis, prueba, causa y corrección. Incluye el resultado observado y una comprobación posterior distinta; justifica el caso límite y la conservación del contrato."
       },
       "retryFeedback": "Revisa el primer caso que falla. Decide qué condición debe comprobarse primero para no ocultar una categoría."
+    },
+    {
+      "id": "transferir-envios",
+      "type": "javascript",
+      "concept": "js-clasificar-planes-concepto",
+      "prompt": "Una tienda clasifica un paquete por peso en kilos enteros válidos. Desde 20 corresponde Carga, desde 8 corresponde Mediano y los demás son Liviano. Las reglas se superponen. Muestra exactamente una categoría con una cadena de decisiones.",
+      "starter": "",
+      "solution": "const peso = Number(prompt(\"Peso\"));\nlet clase;\nif (peso >= 20) {\n  clase = \"Carga\";\n} else if (peso >= 8) {\n  clase = \"Mediano\";\n} else {\n  clase = \"Liviano\";\n}\nconsole.log(clase);",
+      "cases": [
+        {
+          "name": "Debajo del primer corte",
+          "stdout": "Liviano\n",
+          "stdin": [
+            "7"
+          ]
+        },
+        {
+          "name": "Primer corte",
+          "stdout": "Mediano\n",
+          "stdin": [
+            "8"
+          ]
+        },
+        {
+          "name": "Último mediano",
+          "stdout": "Mediano\n",
+          "stdin": [
+            "19"
+          ]
+        },
+        {
+          "name": "Segundo corte",
+          "stdout": "Carga\n",
+          "stdin": [
+            "20"
+          ]
+        },
+        {
+          "name": "Peso alto",
+          "stdout": "Carga\n",
+          "stdin": [
+            "22"
+          ]
+        }
+      ],
+      "hint": "Identifica un peso que cumple las dos comparaciones.",
+      "hints": [
+        "Traza las reglas en un orden que produzca una sola categoría para ese peso."
+      ],
+      "explanation": "La primera condición verdadera decide la categoría.",
+      "retryFeedback": "Identifica un peso que cumple las dos comparaciones.",
+      "followUp": {
+        "requires": [
+          "js-clasificar-planes-a3"
+        ],
+        "reason": "Aplica lo aprendido a una situación distinta. Puedes consultar pistas si las necesitas."
+      },
+      "syntax": {
+        "nodes": [
+          "IfStatement"
+        ]
+      },
+      "stdin": [
+        "20"
+      ],
+      "usesInput": true
     }
   ],
   "sources": [
@@ -687,7 +753,7 @@
       "result": "El ejemplo muestra Intensivo dos veces: ambas escrituras toman la misma decisión. Cambia los minutos y contrasta también los límites con una traza."
     },
     "transferActivityIds": [
-      "js-clasificar-planes-a3"
+      "transferir-envios"
     ]
   },
   "coverage": {
@@ -740,6 +806,9 @@
       "Igual a referencia:",
       "Distinto de referencia:",
       "Recomendación:"
+    ],
+    "followUpIds": [
+      "transferir-envios"
     ]
   }
 }

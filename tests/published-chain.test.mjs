@@ -185,6 +185,12 @@ test('completion and backup preserve the new evidence while requiring follow-up 
   }
   assert.equal(completeIfReady(state, key, d), false, 'Transfer remains mandatory');
   state.practices.push(key + '/' + d.activities[4].id);
+  assert.equal(
+    completeIfReady(state, key, d),
+    false,
+    'The original transfer alone is insufficient',
+  );
+  state.practices.push(key + '/' + d.activities[5].id);
   const comparison = state.projectArtifacts[key + '/' + d.activities[2].id].assessment.rewrite;
   comparison.kind = 'stdout';
   assert.equal(

@@ -587,7 +587,7 @@
           "entender-plan"
         ],
         "from": "fundamentos/js-crear-listas/js-crear-listas-a3",
-        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "input": "Localiza el arreglo vacío del reporte. Traza cantidad anunciada, línea leída, número guardado y estado de la validación para dos registros, uno de ellos inválido.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
       },
@@ -1480,6 +1480,81 @@
         "reflection": "Documenta síntoma, entrada, hipótesis, prueba, causa y corrección. Incluye el resultado observado y una comprobación posterior distinta; justifica el caso límite y la conservación del contrato. Incluye una traza del estado y explica por qué el índice avanza hacia un límite finito; no uses el límite de tiempo del ejecutor como justificación de parada."
       },
       "retryFeedback": "Revisa el primer caso que falla. Relaciona el número anunciado con las líneas que debes consumir y con los valores que guardas."
+    },
+    {
+      "id": "transferir-inventario",
+      "type": "javascript",
+      "concept": "js-leer-registros-concepto",
+      "prompt": "Un inventario recibe cuántas cajas se revisaron y luego las unidades de cada caja. Admite entre cero y cuatro cajas y entre cero y veinte unidades por caja, con texto no vacío y cantidades enteras. Si la cantidad de cajas es válida, lee todas las líneas anunciadas. Guarda unidades como números. Presenta Cajas: con la lista completa o Inventario inválido como único mensaje si algún dato se rechaza.",
+      "starter": "",
+      "solution": "const textoCantidad = prompt(\"Cajas\");\nconst cantidad = Number(textoCantidad);\nconst cajas = [];\nlet valido = textoCantidad.trim() !== \"\" && Number.isInteger(cantidad) && cantidad >= 0 && cantidad <= 4;\nif (valido) {\n  for (let i = 0; i < cantidad; i = i + 1) {\n    const texto = prompt(\"Unidades\");\n    const unidades = Number(texto);\n    if (texto.trim() !== \"\" && Number.isInteger(unidades) && unidades >= 0 && unidades <= 20) {\n      cajas.push(unidades);\n    } else {\n      valido = false;\n    }\n  }\n}\nif (valido) { console.log(\"Cajas:\", cajas); }\nelse { console.log(\"Inventario inválido\"); }",
+      "cases": [
+        {
+          "name": "Cajas con cero unidades",
+          "stdout": "Cajas: [0,4]\n",
+          "stdin": [
+            "2",
+            "0",
+            "4"
+          ]
+        },
+        {
+          "name": "Sin cajas",
+          "stdout": "Cajas: []\n",
+          "stdin": [
+            "0"
+          ]
+        },
+        {
+          "name": "Cantidad fuera del rango",
+          "stdout": "Inventario inválido\n",
+          "stdin": [
+            "5"
+          ]
+        },
+        {
+          "name": "Cantidad vacía",
+          "stdout": "Inventario inválido\n",
+          "stdin": [
+            ""
+          ]
+        },
+        {
+          "name": "Unidad inválida antes de otra válida",
+          "stdout": "Inventario inválido\n",
+          "stdin": [
+            "2",
+            "21",
+            "4"
+          ]
+        },
+        {
+          "name": "Unidad vacía",
+          "stdout": "Inventario inválido\n",
+          "stdin": [
+            "1",
+            ""
+          ]
+        }
+      ],
+      "hint": "Separa la regla de cuántas líneas debes leer de la regla que admite sus contenidos.",
+      "hints": [
+        "Si una caja falla, recuerda ese resultado aunque la siguiente sea válida."
+      ],
+      "explanation": "El reporte presenta la colección completa de números o un único rechazo.",
+      "retryFeedback": "Separa la regla de cuántas líneas debes leer de la regla que admite sus contenidos.",
+      "followUp": {
+        "requires": [
+          "js-leer-registros-a3"
+        ],
+        "reason": "Aplica lo aprendido a una situación distinta. Puedes consultar pistas si las necesitas."
+      },
+      "stdin": [
+        "2",
+        "0",
+        "4"
+      ],
+      "usesInput": true
     }
   ],
   "sources": [
@@ -1502,7 +1577,7 @@
       "result": "Contrasta la predicción con la salida visible y repite con el caso límite indicado."
     },
     "transferActivityIds": [
-      "js-leer-registros-a3"
+      "transferir-inventario"
     ]
   },
   "coverage": {
@@ -1561,6 +1636,9 @@
       "Sesiones realizadas:",
       "Registros:"
     ],
-    "rejection": "Entrada inválida\n"
+    "rejection": "Entrada inválida\n",
+    "followUpIds": [
+      "transferir-inventario"
+    ]
   }
 }

@@ -711,7 +711,7 @@
           "entender-plan"
         ],
         "from": "fundamentos/js-contar-sesiones/js-contar-sesiones-a3",
-        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "input": "Localiza las funciones que ya calculan suma y conteo. Anota qué debe aparecer en la posición cero y en la uno. Comprueba esos resultados antes de unirlos en el reporte.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
       },
@@ -1857,6 +1857,150 @@
         "reflection": "Documenta síntoma, entrada, hipótesis, prueba, causa y corrección. Incluye el resultado observado y una comprobación posterior distinta; justifica el caso límite y la conservación del contrato. Incluye una traza del estado y explica por qué el índice avanza hacia un límite finito; no uses el límite de tiempo del ejecutor como justificación de parada."
       },
       "retryFeedback": "Revisa el primer caso que falla. Distingue sumar minutos de contar sesiones que cumplen la meta."
+    },
+    {
+      "id": "transferir-resumen-de-pedidos",
+      "type": "javascript",
+      "concept": "js-resumir-sesiones-concepto",
+      "prompt": "Define totalPedidos(datos) para sumar las cantidades, grandesPedidos(datos, umbral) para contar y resumenPedidos(datos, umbral) para reunir los dos resultados. Las cantidades son enteras no negativas. Devuelve una lista con el total de unidades en la primera posición y cuántos pedidos llegan al umbral en la segunda. Conserva la lista recibida. Decide qué acumulaciones hacen falta y qué devolver cuando no hay pedidos.",
+      "starter": "",
+      "solution": "function totalPedidos(datos) {\n  let total = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    total = total + datos[i];\n  }\n  return total;\n}\nfunction grandesPedidos(datos, umbral) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= umbral) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\nfunction resumenPedidos(datos, umbral) {\n  return [totalPedidos(datos), grandesPedidos(datos, umbral)];\n}",
+      "cases": [
+        {
+          "name": "Aportes distintos",
+          "args": [
+            [
+              2,
+              8,
+              10
+            ],
+            8
+          ],
+          "expected": [
+            20,
+            2
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Mismo arreglo, otra meta",
+          "args": [
+            [
+              2,
+              8,
+              10
+            ],
+            11
+          ],
+          "expected": [
+            20,
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin pedidos",
+          "args": [
+            [],
+            0
+          ],
+          "expected": [
+            0,
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Duplicados y cero",
+          "args": [
+            [
+              8,
+              8,
+              0
+            ],
+            8
+          ],
+          "expected": [
+            16,
+            2
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Uno de cero",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": [
+            0,
+            1
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Suma que usa el último dato",
+          "args": [
+            [
+              1,
+              0,
+              7
+            ]
+          ],
+          "expected": 8,
+          "entrypoint": "totalPedidos",
+          "preserveArgs": true
+        },
+        {
+          "name": "Suma vacía",
+          "args": [
+            []
+          ],
+          "expected": 0,
+          "entrypoint": "totalPedidos",
+          "preserveArgs": true
+        },
+        {
+          "name": "Conteo con límite inclusivo",
+          "args": [
+            [
+              4,
+              5,
+              5,
+              6
+            ],
+            5
+          ],
+          "expected": 3,
+          "entrypoint": "grandesPedidos",
+          "preserveArgs": true
+        },
+        {
+          "name": "Conteo sin datos",
+          "args": [
+            [],
+            0
+          ],
+          "expected": 0,
+          "entrypoint": "grandesPedidos",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Describe qué representa cada número del resultado.",
+      "hints": [
+        "En igualdad una posición cuenta. Con lista vacía no se visita ninguna posición."
+      ],
+      "explanation": "El resumen conserva la lista y devuelve el total y el conteo en sus propias posiciones.",
+      "retryFeedback": "Describe qué representa cada número del resultado.",
+      "followUp": {
+        "requires": [
+          "js-resumir-sesiones-a3"
+        ],
+        "reason": "Aplica lo aprendido a una situación distinta. Puedes consultar pistas si las necesitas."
+      },
+      "entrypoint": "resumenPedidos"
     }
   ],
   "sources": [
@@ -1879,7 +2023,7 @@
       "result": "El ejemplo muestra [60,2]; esos resultados se contrastan con una traza, no con una respuesta fija."
     },
     "transferActivityIds": [
-      "js-resumir-sesiones-a3"
+      "transferir-resumen-de-pedidos"
     ]
   },
   "coverage": {
@@ -1940,6 +2084,9 @@
       "Sesiones con meta:",
       "Registros:"
     ],
-    "rejection": "Entrada inválida\n"
+    "rejection": "Entrada inválida\n",
+    "followUpIds": [
+      "transferir-resumen-de-pedidos"
+    ]
   }
 }

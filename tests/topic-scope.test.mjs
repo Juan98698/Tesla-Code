@@ -108,7 +108,16 @@ test('new transfer problems reject different boundary, conversion, accumulation 
   ];
   for (const [id, before, after] of mutations) {
     const d = read(id),
-      a = d.activities.at(-1);
+      a = d.activities.find(
+        (item) =>
+          item.id ===
+          {
+            'js-integrar-valores': 'transferir-cupos',
+            'js-validacion': 'transferir-reservas',
+            'js-contar-dias': 'transferir-pedidos',
+            'js-descomponer-y-probar': 'transferir-cobro',
+          }[id],
+      );
     assert.deepEqual(a.followUp.requires, [d.activities[3].id]);
     assert.ok(
       checks(a).every((r) => r.passed),

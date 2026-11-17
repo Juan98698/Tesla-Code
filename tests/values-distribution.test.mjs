@@ -162,7 +162,7 @@ test('history retains previous lesson and quiz identities while new learners mus
       [1, 2, 3, 4].map((n) => d.id + '-q' + n),
     );
     assert.deepEqual(
-      d.activities.slice(1).map((a) => a.id),
+      d.activities.slice(1, 4).map((a) => a.id),
       [1, 2, 3].map((n) => d.id + '-a' + n),
     );
   }

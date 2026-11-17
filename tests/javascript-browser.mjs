@@ -135,7 +135,7 @@ await withBrowser(4323, async (browser, origin) => {
         }
       }
       if (index === 0) {
-        const lastActivity = data.activities.at(-1);
+        const lastActivity = data.activities.find((a) => a.learningStep?.phase === 'integrar');
         const last = page.locator(`[data-activity="${lastActivity.id}"]`);
         const note = 'Predije tres líneas y comparé el orden con mi versión anterior.';
         await last.locator('[data-project-journal]').fill(note);

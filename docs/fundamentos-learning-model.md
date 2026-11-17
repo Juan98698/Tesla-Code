@@ -46,9 +46,9 @@ etapas. El primer módulo conserva ocho lecciones. Los cuatro bloques siguientes
 tienen cuatro lecciones cada uno: valores y operaciones, decisiones y validación,
 repeticiones y funciones. Listas tiene seis lecciones. La distribución separa
 habilidades que antes se exigían simultáneamente. Conserva los tres repasos
-anteriores y sus IDs; se añaden cuatro transferencias obligatorias después de
-integrar. Los doce bloques posteriores continúan en
-preparación; la migración de lo publicado no significa que estén desarrollados.
+anteriores y sus identificadores. La edición tiene 29 retos posteriores a la
+integración. Sus casos y pistas plantean problemas con decisiones propias. Los
+doce bloques posteriores continúan en preparación.
 
 | Siguiente tramo                | Conocimientos que debe preparar                                                     | Incremento del proyecto             |
 | ------------------------------ | ----------------------------------------------------------------------------------- | ----------------------------------- |
@@ -178,3 +178,9 @@ separa construcción, lectura validada, suma, conteo, resumen y máximo. En valo
 decisiones, ciclos y funciones se añaden transferencias que comprueban límites,
 aportes variables y composición en problemas distintos. Cada etapa conserva el
 trabajo anterior; las APIs y herramientas nuevas se introducen antes de usarlas.
+
+La [matriz de correspondencia editorial](fundamentos-correspondencia-editorial.md)
+localiza la explicación, el ejemplo ejecutable, la práctica guiada y la
+aplicación independiente de las habilidades publicadas. Los pasos guiados indican
+dónde intervenir en el programa acumulado. Cada reto independiente añade un
+problema que el estudiante puede resolver con los conocimientos ya enseñados.

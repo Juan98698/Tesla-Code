@@ -726,7 +726,7 @@
           "entender-plan"
         ],
         "from": "fundamentos/js-resumir-sesiones/js-resumir-sesiones-a3",
-        "input": "Recupera y consulta tu entrega anterior; identifica datos, resultados y capacidades que conservarás.",
+        "input": "Localiza dónde termina la lectura y dónde se muestran las mediciones. Traza una lista vacía y otra de negativos antes de añadir el candidato máximo.",
         "output": "Código comprobado, predicción contrastada y explicación entregada para revisión.",
         "reflection": "Anota tu predicción antes de ejecutar, traza instrucciones o valores y contrasta lo observado. Justifica las decisiones con el contrato."
       },
@@ -1915,6 +1915,144 @@
         "reason": "Comprobación posterior con otra situación: aplica conocimientos previos sin copiar la solución del proyecto."
       },
       "retryFeedback": "Comprueba el contrato de este repaso con otros datos. Describe con palabras qué significa quedar fuera de un intervalo."
+    },
+    {
+      "id": "transferir-maximo-del-sensor",
+      "type": "javascript",
+      "concept": "js-proyecto-mediciones-concepto",
+      "prompt": "Define lecturaMayor(datos) para devolver la temperatura más alta de un arreglo de enteros. Si el arreglo está vacío devuelve el texto Sin lecturas. Puede haber datos negativos y repetidos. Conserva la lista y devuelve el resultado sin imprimir. En la misma entrega, define margenPico(datos, limite). Usa el máximo para devolver cuánto falta desde el pico hasta el límite. Puede resultar negativo si el pico supera el límite. Para una lista vacía conserva el mensaje Sin lecturas.",
+      "starter": "",
+      "solution": "function lecturaMayor(datos) {\n  if (datos.length === 0) { return \"Sin lecturas\"; }\n  let mayor = datos[0];\n  for (let i = 1; i < datos.length; i = i + 1) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n  }\n  return mayor;\n}\n\nfunction margenPico(datos, limite) {\n  const pico = lecturaMayor(datos);\n  if (pico === \"Sin lecturas\") { return pico; }\n  return limite - pico;\n}",
+      "cases": [
+        {
+          "name": "Vacía",
+          "args": [
+            []
+          ],
+          "expected": "Sin lecturas",
+          "preserveArgs": true
+        },
+        {
+          "name": "Solo negativos",
+          "args": [
+            [
+              -10,
+              -2,
+              -8
+            ]
+          ],
+          "expected": -2,
+          "preserveArgs": true
+        },
+        {
+          "name": "Mayor al final",
+          "args": [
+            [
+              0,
+              -4,
+              7
+            ]
+          ],
+          "expected": 7,
+          "preserveArgs": true
+        },
+        {
+          "name": "Mayor al comienzo",
+          "args": [
+            [
+              8,
+              0,
+              1
+            ]
+          ],
+          "expected": 8,
+          "preserveArgs": true
+        },
+        {
+          "name": "Una lectura",
+          "args": [
+            [
+              -3
+            ]
+          ],
+          "expected": -3,
+          "preserveArgs": true
+        },
+        {
+          "name": "Empate",
+          "args": [
+            [
+              -5,
+              -5
+            ]
+          ],
+          "expected": -5,
+          "preserveArgs": true
+        },
+        {
+          "name": "Hay margen",
+          "args": [
+            [
+              -8,
+              -3,
+              -10
+            ],
+            5
+          ],
+          "expected": 8,
+          "entrypoint": "margenPico",
+          "preserveArgs": true
+        },
+        {
+          "name": "Límite superado",
+          "args": [
+            [
+              8,
+              7
+            ],
+            6
+          ],
+          "expected": -2,
+          "entrypoint": "margenPico",
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin margen",
+          "args": [
+            [
+              2,
+              6
+            ],
+            6
+          ],
+          "expected": 0,
+          "entrypoint": "margenPico",
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin lecturas para comparar",
+          "args": [
+            [],
+            10
+          ],
+          "expected": "Sin lecturas",
+          "entrypoint": "margenPico",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Decide de dónde sale el primer candidato cuando hay datos.",
+      "hints": [
+        "Traza candidatos para una lista de valores negativos y una vacía."
+      ],
+      "explanation": "El máximo pertenece a la lista y el caso vacío tiene su propio resultado.",
+      "retryFeedback": "Decide de dónde sale el primer candidato cuando hay datos.",
+      "followUp": {
+        "requires": [
+          "js-proyecto-mediciones-a3"
+        ],
+        "reason": "Aplica lo aprendido a una situación distinta. Puedes consultar pistas si las necesitas."
+      },
+      "entrypoint": "lecturaMayor"
     }
   ],
   "sources": [
@@ -1937,8 +2075,8 @@
       "result": "El ejemplo muestra -3, Sin datos; esos resultados se contrastan con una traza, no con una respuesta fija."
     },
     "transferActivityIds": [
-      "js-proyecto-mediciones-a3",
-      "repaso-rango"
+      "repaso-rango",
+      "transferir-maximo-del-sensor"
     ]
   },
   "coverage": {
@@ -2002,7 +2140,8 @@
     ],
     "rejection": "Entrada inválida\n",
     "followUpIds": [
-      "repaso-rango"
+      "repaso-rango",
+      "transferir-maximo-del-sensor"
     ]
   }
 }

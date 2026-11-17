@@ -89,9 +89,9 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       activities++;
     }
   }
-  assert.equal(examples, 45);
-  assert.equal(activities, 97);
-  assert.equal(cases, 993);
+  assert.equal(examples, 49);
+  assert.equal(activities, 119);
+  assert.equal(cases, 1076);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {

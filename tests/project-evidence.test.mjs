@@ -98,7 +98,7 @@ test('eight increments preserve capabilities, the confirmed duration and actual 
         runJavaScript(rewrite.solution, c).result.stdout,
         d.id,
       );
-    for (const a of d.activities)
+    for (const a of d.activities.filter((a) => a.learningStep))
       assert.equal(projectAssessmentReady(a, evidence(a, implementation.solution)), true, a.id);
     assert.ok(
       integrate.assessment.debug.cases.some(
@@ -177,7 +177,7 @@ test('new completion requires predictions, delivered reflection, reproduction an
   );
   state.practices = d.activities.map((a) => key + '/' + a.id);
   assert.equal(completeIfReady(state, key, d), false);
-  for (const a of d.activities)
+  for (const a of d.activities.filter((a) => a.learningStep))
     recordProjectArtifact(
       state,
       key + '/' + a.id,

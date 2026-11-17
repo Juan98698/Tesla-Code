@@ -35,3 +35,7 @@ documentan en `docs/implementation-status.md`.
   ajustan la enseñanza; no sustituyen la revisión previa del temario. Priorizar
   JavaScript y tecnologías vigentes con usos concretos y fuentes verificables.
   El criterio está en docs/fundamentos-alcance-y-carga.md.
+- Al revisar o publicar una habilidad de Fundamentos, localizar su explicación,
+  ejemplo ejecutable, práctica guiada y aplicación independiente. Registrar la
+  correspondencia en docs/fundamentos-correspondencia-editorial.md y corregir
+  cualquier vacío antes del piloto.
