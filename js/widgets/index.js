@@ -2,9 +2,10 @@ import { loadPractice } from '../repositories/content-repository.js';
 import { mountPractice } from './practice.js';
 
 const practiceWidget = (id) => async () => ({
-  mount: async (el, ctx) => {
-    const item = (await loadPractice()).find((candidate) => candidate.id === id);
-    if (item) mountPractice(el, item, { onSolved: () => ctx?.solve(id) });
+  mount: async (el, ctx, load = loadPractice) => {
+    const item = (await load()).find((candidate) => candidate.id === id);
+    if (!item) throw Error('Práctica desconocida');
+    mountPractice(el, item, { onSolved: () => ctx?.solve(id) });
   },
 });
 

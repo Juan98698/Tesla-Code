@@ -277,8 +277,8 @@ test('progress and practice views show real evidence and valid bookmarks', (t) =
   assert.match(root.textContent, /archivo/);
   assert.equal(root.querySelectorAll('.evidence-row').length, 1);
   root.innerHTML = views.practicePage(routes, state);
-  assert.match(root.textContent, /Guardado para volver/);
-  assert.equal(root.querySelectorAll('[data-lab]').length, 3);
+  assert.match(root.textContent, /Práctica por ruta/);
+  assert.equal(root.querySelectorAll('[data-lab]').length, 1);
   assert.ok(root.querySelector('[data-lab="practice-hub"]'));
   assert.equal(root.querySelector('[href*="bad/missing"]'), null);
 });

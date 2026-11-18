@@ -37,7 +37,7 @@ function frame(root, item, body) {
 export function mountChoice(el, choice, onResult = () => {}) {
   el.innerHTML = `<p class="lab-question">${e(choice.prompt)}</p><div class="opts">${choice.options
     .map((option, i) => `<button type="button" class="opt" data-i="${i}">${e(option)}</button>`)
-    .join('')}</div><p class="practice-feedback" role="status" data-feedback></p>`;
+    .join('')}</div><p class="practice-feedback" role="status" tabindex="-1" data-feedback></p>`;
   const feedback = el.querySelector('[data-feedback]');
   el.querySelector('.opts').addEventListener('click', (event) => {
     const button = event.target.closest('[data-i]');
@@ -52,7 +52,9 @@ export function mountChoice(el, choice, onResult = () => {}) {
     feedback.className = `practice-feedback ${ok ? 'ok' : 'bad'}`;
     feedback.textContent = ok
       ? `Correcto. ${choice.explanation}`
-      : 'Todavía no. Revisa el programa paso a paso e inténtalo con otra opción.';
+      : 'Todavía no. ' +
+        (choice.hint ?? 'Revisa los datos y la regla antes de elegir otra opción.');
+    (ok ? feedback : el.querySelector('.opt:not(:disabled)'))?.focus({ preventScroll: true });
     onResult(ok);
   });
 }
@@ -61,7 +63,7 @@ function mountTrace(root, item, hooks) {
   frame(
     root,
     item,
-    '<div data-predict></div><div class="lab-code" data-code tabindex="0" role="region" aria-label="Código del programa"></div><div class="memory-cells" data-vars aria-live="polite"></div><p class="practice-feedback" role="status" data-note></p><div class="btns"><button type="button" class="btn small" data-step>Ejecutar siguiente paso</button><button type="button" class="btn ghost small" data-reset>Reiniciar</button></div><div class="lab-challenge" data-challenge hidden></div>',
+    '<div class="lab-code" data-code tabindex="0" role="region" aria-label="Código del programa"></div><div data-predict></div><p class="lab-progress" data-trace-progress></p><div class="memory-cells" data-vars></div><p class="practice-feedback" role="status" data-note></p><div class="btns"><button type="button" class="btn small" data-step>Ejecutar siguiente paso</button><button type="button" class="btn ghost small" data-back>Retroceder</button><button type="button" class="btn ghost small" data-reset>Reiniciar</button></div><div class="lab-challenge" data-challenge hidden></div>',
   );
   const q = (selector) => root.querySelector(selector);
   let done = 0;
@@ -83,13 +85,22 @@ function mountTrace(root, item, hooks) {
       : '<span class="lab-empty">Memoria vacía: todavía no existe ninguna variable.</span>';
     q('[data-note]').textContent =
       state.note ?? 'Pulsa «Ejecutar siguiente paso». La línea resaltada es la que se ejecutará.';
+    q('[data-trace-progress]').textContent = `Paso ${done} de ${item.steps.length}`;
     q('[data-step]').disabled = state.finished;
+    q('[data-back]').disabled = done === 0;
     q('[data-challenge]').hidden = !state.finished;
   }
   resetChoices();
   q('[data-step]').addEventListener('click', () => {
     done += 1;
     draw();
+    if (q('[data-step]').disabled)
+      (q('[data-challenge] .opt:not(:disabled)') ?? q('[data-back]')).focus();
+  });
+  q('[data-back]').addEventListener('click', () => {
+    done -= 1;
+    draw();
+    if (done === 0) q('[data-step]').focus();
   });
   q('[data-reset]').addEventListener('click', () => {
     done = 0;
@@ -136,9 +147,11 @@ function mountBug(root, item, hooks) {
         options: item.fixes,
         answer: item.fix,
         explanation: item.explanation,
+        hint: 'Compara qué cambia en esta línea con el resultado que debería producir.',
       },
       (ok2) => ok2 && hooks.onSolved?.(item),
     );
+    fix.querySelector('button').focus();
   });
 }
 
@@ -146,7 +159,7 @@ function mountOrder(root, item, hooks) {
   frame(
     root,
     item,
-    '<div class="opts" data-pool></div><div class="lab-code" data-answer tabindex="0" role="region" aria-label="Tu programa"></div><p class="practice-feedback" role="status" data-note></p><div class="btns"><button type="button" class="btn small" data-check>Comprobar</button><button type="button" class="btn ghost small" data-clear>Borrar</button></div>',
+    '<div class="opts" data-pool></div><div class="lab-code" data-answer tabindex="0" role="region" aria-label="Tu programa"></div><p class="practice-feedback" role="status" tabindex="-1" data-note></p><div class="btns"><button type="button" class="btn small" data-check>Comprobar</button><button type="button" class="btn ghost small" data-undo>Deshacer última</button><button type="button" class="btn ghost small" data-clear>Borrar</button></div>',
   );
   const q = (selector) => root.querySelector(selector);
   const pool = shuffle(
@@ -167,18 +180,28 @@ function mountOrder(root, item, hooks) {
       ? codeLines(picked.map((line) => line.text))
       : '<span class="lab-empty">Toca las líneas en orden.</span>';
     q('[data-check]').disabled = picked.length !== pool.length || solved;
+    q('[data-undo]').disabled = !picked.length || solved;
     q('[data-clear]').disabled = solved;
   }
   q('[data-pool]').addEventListener('click', (event) => {
     const button = event.target.closest('[data-id]');
     if (!button || button.disabled) return;
     picked.push(pool.find((line) => line.id === Number(button.dataset.id)));
+    q('[data-note]').textContent = '';
     draw();
+    (q('[data-pool] button:not(:disabled)') ?? q('[data-check]')).focus();
+  });
+  q('[data-undo]').addEventListener('click', () => {
+    const last = picked.pop();
+    q('[data-note]').textContent = '';
+    draw();
+    q(`[data-pool] [data-id="${last.id}"]`).focus();
   });
   q('[data-clear]').addEventListener('click', () => {
     picked = [];
     q('[data-note]').textContent = '';
     draw();
+    q('[data-pool] button').focus();
   });
   q('[data-check]').addEventListener('click', () => {
     const ok = gradeOrder(
@@ -189,12 +212,13 @@ function mountOrder(root, item, hooks) {
     note.className = `practice-feedback ${ok ? 'ok' : 'bad'}`;
     note.textContent = ok
       ? `Correcto. ${item.explanation}`
-      : 'Todavía no. Piensa qué debe existir antes de usarse y pulsa Borrar para reordenar.';
+      : 'Todavía no. Piensa qué debe existir antes de usarse. Deshaz la última línea o borra el orden.';
     if (ok) {
       solved = true;
       hooks.onSolved?.(item);
     }
     draw();
+    note.focus();
   });
   draw();
 }
@@ -234,6 +258,7 @@ function mountDecide(root, item, hooks) {
   q('[data-next]').addEventListener('click', () => {
     index += 1;
     show();
+    q('[data-scenario] .opt').focus();
   });
   show();
 }

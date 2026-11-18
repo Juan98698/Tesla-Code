@@ -1,10 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { installDOM } from './support/dom.mjs';
+import { change, installDOM, until } from './support/dom.mjs';
+import { catalog, labContext } from './support/laboratory.mjs';
 import {
   PRACTICE_TYPES,
-  TOPICS,
   filterPractice,
   gradeBugLine,
   gradeChoice,
@@ -16,15 +15,16 @@ import { mountPractice } from '../js/widgets/practice.js';
 import { mount as mountHub } from '../js/widgets/practice-hub.js';
 import { widgets } from '../js/widgets/index.js';
 
-const items = JSON.parse(readFileSync('content/practice/items.json', 'utf8')).items;
+const { items } = catalog;
 const byId = (id) => items.find((item) => item.id === id);
 const root = () => document.getElementById('root');
 const click = (el) => el.click();
+const select = (el, value) => change(el, value, 'change');
 
 test('todas las prácticas del contenido son válidas, únicas y cubren todos los tipos', () => {
   assert.deepEqual(items.flatMap(validatePractice), []);
   assert.equal(new Set(items.map((item) => item.id)).size, items.length);
-  for (const topic of Object.keys(TOPICS))
+  for (const topic of ['operadores', 'condicionales', 'ciclos', 'funciones'])
     assert.ok(
       items.filter((item) => item.topic === topic).length >= 3,
       `pocas prácticas de ${topic}`,
@@ -78,6 +78,14 @@ test('las funciones de dominio califican, filtran y trazan', () => {
   assert.equal(gradeOrder(order, order.lines), true);
   assert.equal(gradeOrder(order, [...order.lines].reverse()), false);
   assert.equal(gradeOrder(order, order.lines.slice(1)), false);
+  const exactCases = byId('ordena-segun');
+  assert.equal(gradeOrder(exactCases, exactCases.alternatives[0]), true);
+  assert.match(
+    validatePractice({ ...exactCases, alternatives: [['línea distinta', ...order.lines]] }).join(
+      '|',
+    ),
+    /las mismas líneas/,
+  );
   assert.equal(filterPractice(items, 'all').length, items.length);
   assert.ok(filterPractice(items, 'bug').every((item) => item.type === 'bug'));
 });
@@ -180,44 +188,135 @@ test('ordenar: valida solo con todas las líneas, permite borrar y resuelve al a
   assert.ok([...r.querySelectorAll('[data-pool] .opt')].every((b) => b.disabled));
 });
 
-test('el centro de práctica filtra por tipo, abre retos y registra lo resuelto', async (t) => {
+test('el laboratorio identifica ruta, tipo y tema y conserva el intento al filtrar', async (t) => {
   installDOM(t);
   const r = root();
   const solvedIds = [];
-  const ctx = { isSolved: (id) => solvedIds.includes(id), solve: (id) => solvedIds.push(id) };
-  await mountHub(r, ctx, async () => items);
-  assert.equal(r.querySelectorAll('.practice-chip').length, 12);
-  assert.equal(r.querySelectorAll('.practice-card').length, items.length);
-  assert.match(r.querySelector('.practice-count').textContent, new RegExp(`0 de ${items.length}`));
-  click(r.querySelector('[data-group="type"][data-value="bug"]'));
-  assert.equal(document.activeElement.dataset.value, 'bug');
-  const bugs = items.filter((item) => item.type === 'bug');
+  const ctx = labContext({
+    isSolved: (id) => solvedIds.includes(id),
+    solve: (id) => solvedIds.push(id),
+  });
+  await mountHub(r, ctx, async () => catalog);
+  const filterRoute = r.querySelector('[data-filter-route]');
+  const filterType = r.querySelector('[data-filter-type]');
+  const filterTopic = r.querySelector('[data-filter-topic]');
+  assert.equal(r.querySelectorAll('.practice-card').length, 0);
+  click(r.querySelector('[data-route-group="algoritmia"] summary'));
+  await until(() => r.querySelector('[data-id="ordena-suma"]'));
+  select(filterRoute, 'algoritmia');
+  select(filterType, 'bug');
+  const bugs = items.filter((item) => item.type === 'bug' && item.route === 'algoritmia');
   assert.equal(r.querySelectorAll('.practice-card').length, bugs.length);
-  click(r.querySelector('.practice-list'));
-  const card = r.querySelector('.practice-card');
+  const card = r.querySelector('[data-id="arregla-promedio"]');
+  assert.match(card.textContent, /Algoritmia · Operadores/);
   const open = card.querySelector('[data-open]');
   click(open);
   assert.equal(open.getAttribute('aria-expanded'), 'true');
-  assert.equal(card.querySelector('.practice-body').hidden, false);
-  const item = byId(card.dataset.id);
-  click(card.querySelector(`[data-line="${item.bugLine}"]`));
-  click(card.querySelectorAll('[data-fix] .opt')[item.fix]);
-  assert.deepEqual(solvedIds, [item.id]);
-  assert.equal(card.querySelectorAll('.badge').length, 1);
+  click(card.querySelector('[data-line="2"]'));
+  click(card.querySelectorAll('[data-fix] .opt')[1]);
+  select(filterTopic, 'algoritmia/ciclos');
+  assert.equal(card.isConnected, false);
+  select(filterTopic, 'all');
+  assert.equal(card.isConnected, true);
+  assert.equal(card.querySelectorAll('[data-fix] .opt')[1].disabled, true);
+  click(card.querySelectorAll('[data-fix] .opt')[0]);
+  assert.deepEqual(solvedIds, ['arregla-promedio']);
+  assert.equal(card.querySelector('[data-solved]').hidden, false);
   assert.match(r.querySelector('.practice-count').textContent, new RegExp(`1 de ${bugs.length}`));
   click(open);
   assert.equal(card.querySelector('.practice-body').hidden, true);
   click(open);
   assert.equal(card.querySelector('.practice-body').hidden, false);
-  const [firstOptionHost] = card.querySelectorAll('[data-fix] .opt');
-  assert.ok(firstOptionHost);
-  click(r.querySelector('[data-group="type"][data-value="all"]'));
-  assert.equal(r.querySelectorAll('.badge').length, 1);
-  const sinContexto = document.createElement('div');
-  await mountHub(sinContexto, undefined, async () => items);
-  click(sinContexto.querySelector('[data-open]'));
-  click(sinContexto.querySelector('[data-group="type"][data-value="predict"]'));
-  click(sinContexto.querySelector('[data-open]'));
+  select(filterType, 'all');
+  assert.equal(r.querySelectorAll('[data-solved]:not([hidden])').length, 1);
+});
+
+test('las lecciones y las guardadas conservan ruta y tema y ofrecen una salida cuando no hay retos', async (t) => {
+  const dom = installDOM(t);
+  const r = root();
+  const ctx = labContext();
+  ctx.state.bookmarks = ['bad/missing', 'fundamentos/variables', 'frontend/como-funciona-internet'];
+  await mountHub(r, ctx, async () => catalog);
+  const route = r.querySelector('[data-filter-route]');
+  select(route, 'frontend');
+  assert.match(r.querySelector('.practice-list').textContent, /Sin resultados/);
+  click(r.querySelector('[data-lesson-option]'));
+  assert.equal(r.querySelector('[data-mode="lessons"]').getAttribute('aria-pressed'), 'true');
+  assert.ok(r.querySelector('a[href="#/leccion/frontend/como-funciona-internet/practicar"]'));
+  assert.equal(r.querySelector('[data-filter-format]').hidden, true);
+  click(r.querySelector('[data-mode="saved"]'));
+  select(route, 'all');
+  click(r.querySelector('[data-route-group="fundamentos"] summary'));
+  await until(() => r.querySelector('[data-route-group="fundamentos"] .lab-lesson-link'));
+  assert.ok(r.querySelector('a[href="#/leccion/fundamentos/variables/aprender"]'));
+  assert.match(r.querySelector('[data-route-group="fundamentos"]').textContent, /Edición anterior/);
+  assert.equal(r.querySelector('a[href*="bad/missing"]'), null);
+  click(r.querySelector('[data-mode="catalog"]'));
+  const query = r.querySelector('[data-filter-query]');
+  query.value = 'DIFUSION';
+  query.dispatchEvent(new dom.window.Event('input'));
+  assert.ok(r.querySelector('[data-id="difusion-lab"]'));
+  assert.equal(r.querySelector('[data-id="acumulador-suma"]'), null);
+  click(r.querySelector('[data-reset-filters]'));
+  assert.equal(query.value, '');
+  assert.equal(document.activeElement, route);
+});
+
+test('la ronda ofrece variantes por tema, cuenta el primer intento y conserva el avance general', async (t) => {
+  installDOM(t);
+  const r = root();
+  const saved = [];
+  await mountHub(
+    r,
+    labContext({ route: 'fundamentos', solve: (id) => saved.push(id) }),
+    async () => catalog,
+  );
+  click(r.querySelector('[data-start-round]'));
+  const round = r.querySelector('[data-round]');
+  assert.equal(round.hidden, false);
+  assert.match(round.textContent, /1 de 2/);
+  assert.match(round.textContent, /admite cero plazas/);
+  click(round.querySelectorAll('.opt')[0]);
+  assert.match(round.querySelector('[data-feedback]').textContent, /Ambas entradas/);
+  assert.equal(round.querySelector('[data-next-round]').hidden, true);
+  click(round.querySelectorAll('.opt')[2]);
+  click(round.querySelector('[data-next-round]'));
+  assert.match(round.textContent, /2 de 2/);
+  click(round.querySelectorAll('.opt')[0]);
+  click(round.querySelector('[data-next-round]'));
+  assert.match(round.textContent, /1 de 2 al primer intento/);
+  assert.ok(round.querySelector('a[href="#/leccion/fundamentos/js-validacion/aprender"]'));
+  assert.deepEqual(saved, []);
+  click(round.querySelector('[data-close-round]'));
+  assert.equal(round.hidden, true);
+  assert.equal(document.activeElement, r.querySelector('[data-start-round]'));
+});
+
+test('un proyecto enlaza a la versión pública y los simuladores se cargan una sola vez al abrirlos', async (t) => {
+  installDOM(t);
+  const r = root();
+  const loaded = [];
+  await mountHub(
+    r,
+    labContext({
+      route: 'ia',
+      mountWidget: (el, name) => {
+        loaded.push(name);
+        el.innerHTML = '<p>Simulación cargada</p>';
+      },
+    }),
+    async () => catalog,
+  );
+  const open = r.querySelector('[data-id="token-lab"] [data-open]');
+  assert.deepEqual(loaded, []);
+  click(open);
+  click(open);
+  click(open);
+  assert.deepEqual(loaded, ['token-lab']);
+  select(r.querySelector('[data-filter-route]'), 'fundamentos');
+  assert.ok(
+    r.querySelector('[data-id="laboratorio-plan"] [href^="assets/labs/plan/laboratorio.html"]'),
+  );
 });
 
 test('los laboratorios de las lecciones cargan su práctica desde el contenido', async (t) => {
@@ -243,8 +342,10 @@ test('los laboratorios de las lecciones cargan su práctica desde el contenido',
   }
   assert.deepEqual(solved, ['acumulador-suma', 'condicion-limite']);
   const missing = document.createElement('div');
-  globalThis.fetch = async () => ({ ok: true, json: async () => ({ items: [] }) });
-  await (await widgets['cycle-lab']()).mount(missing);
+  await assert.rejects(
+    (await widgets['cycle-lab']()).mount(missing, undefined, async () => []),
+    /desconocida/,
+  );
   const hub = await widgets['practice-hub']();
   assert.equal(typeof hub.mount, 'function');
 });
@@ -328,14 +429,14 @@ test('el idioma de la práctica se indica cuando no es pseudocódigo', (t) => {
 test('el centro de práctica filtra también por tema', async (t) => {
   installDOM(t);
   const r = root();
-  await mountHub(r, undefined, async () => items);
-  click(r.querySelector('[data-group="topic"][data-value="funciones"]'));
-  const funciones = items.filter((item) => item.topic === 'funciones');
-  assert.equal(r.querySelectorAll('.practice-card').length, funciones.length);
-  click(r.querySelector('[data-group="type"][data-value="example"]'));
-  assert.ok(r.querySelectorAll('.practice-card').length < funciones.length);
-  assert.equal(
-    r.querySelector('[data-group="topic"][aria-pressed="true"]').dataset.value,
-    'funciones',
+  await mountHub(r, labContext({ route: 'algoritmia' }), async () => catalog);
+  const topic = r.querySelector('[data-filter-topic]');
+  select(topic, 'algoritmia/funciones');
+  const funciones = items.filter(
+    (item) => item.route === 'algoritmia' && item.topic === 'funciones',
   );
+  assert.equal(r.querySelectorAll('.practice-card').length, funciones.length);
+  select(r.querySelector('[data-filter-type]'), 'example');
+  assert.ok(r.querySelectorAll('.practice-card').length < funciones.length);
+  assert.equal(topic.value, 'algoritmia/funciones');
 });

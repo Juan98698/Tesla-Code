@@ -6,6 +6,12 @@ import { pythonExerciseErrors } from '../js/domain/python-exercise.js';
 import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 import { caseStudyErrors } from '../js/domain/case-study.js';
 import {
+  validateExperiment,
+  validateLabReference,
+  validatePractice,
+} from '../js/domain/practice.js';
+import { widgets } from '../js/widgets/index.js';
+import {
   digest,
   lessonDigest,
   reviewErrors,
@@ -90,6 +96,28 @@ function visit(key) {
   visited.add(key);
 }
 for (const key of lessons.keys()) visit(key);
+const laboratory = read('content/practice/items.json');
+const laboratoryIds = new Set();
+for (const item of laboratory.items) {
+  for (const error of validatePractice(item)) fail('Laboratorio: ' + error);
+  checkLaboratoryReference(item);
+}
+for (const item of laboratory.experiments) {
+  if (!validateExperiment(item)) fail('Laboratorio: simulador o proyecto inválido');
+  else if (
+    (item.widget && (!Object.hasOwn(widgets, item.widget) || item.widget === 'practice-hub')) ||
+    (item.asset && !existsSync(item.asset))
+  )
+    fail('Laboratorio: recurso no disponible para ' + item.id);
+  checkLaboratoryReference(item);
+}
+function checkLaboratoryReference(item) {
+  if (!item) return;
+  if (laboratoryIds.has(item.id)) fail('Laboratorio: id duplicado ' + item.id);
+  laboratoryIds.add(item.id);
+  if (!routes.includes(item.route) || !validateLabReference(item, lessons))
+    fail('Laboratorio: ruta o lección de referencia inválida para ' + item.id);
+}
 function ancestors(key, seen = new Set()) {
   for (const dep of lessons.get(key)?.dependsOn ?? []) {
     if (!seen.has(dep)) {

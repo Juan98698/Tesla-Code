@@ -39,3 +39,9 @@ documentan en `docs/implementation-status.md`.
   ejemplo ejecutable, práctica guiada y aplicación independiente. Registrar la
   correspondencia en docs/fundamentos-correspondencia-editorial.md y corregir
   cualquier vacío antes del piloto.
+
+- Diseñar el Laboratorio para practicar y recordar. Identificar la ruta, el tema
+  y la lección de referencia, conservar los intentos al filtrar y ofrecer una
+  situación distinta para repasar lo aprendido. Contrastar retroalimentación,
+  teclado, móvil y conservación del progreso. Registrar el aprendizaje y la
+  retención con evidencia de estudiantes cuando se realicen pilotos.

@@ -27,6 +27,7 @@ npm run test:python  # Primer módulo Python completo, ejecución real y recuper
 npm run test:console # Consola, entradas, errores y ejemplos en escritorio y móvil
 npm run test:javascript # JavaScript: 78 lecciones desde cero, escritorio y móvil
 npm run test:javascript-lab # Interfaz web del proyecto, a 320 y 1440 px
+npm run test:laboratorio # Catálogo, filtros, rondas y simuladores en escritorio y móvil
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
 npm run test:tutor   # Tutor contra HTTP real con proveedor simulado, ambos temas y móvil
@@ -62,7 +63,7 @@ La consola JavaScript usa el motor del navegador y se inicia al ejecutar. Esta e
 - Algoritmia: **12 de 45 lecciones**: once del núcleo conceptual y en pseudocódigo, hasta invariantes, y un laboratorio Python opcional con código ejecutable. Cada una tiene al menos tres prácticas; cotas e invariantes añaden casos de transferencia con decisiones justificadas. El laboratorio no bloquea el núcleo ni presupone conocer el lenguaje.
 - Python: **7 de 67 lecciones**: un primer módulo desde cero hasta un presupuesto con entradas variables. Enseña cada instrucción antes de utilizarla, con predicción, reparación y construcción; incluye doce actividades de código. Los diez módulos restantes están planificados.
 - Frontend, Backend y Bases de datos tienen dos lecciones publicadas cada una. Todas las rutas tienen entrada libre; la progresión obligatoria se conserva dentro de cada una, separada de sus dependencias académicas.
-- Laboratorios de variables, ciclos, condicionales, segmentación de texto y señal/ruido; proyectos de propinas y adivinación; intérprete acotado de pseudocódigo.
+- **Laboratorio por ruta y tema.** Incluye 34 retos, simuladores y proyectos identificados con su lección de referencia. Usa los filtros de ruta, tema y formato o busca por texto. Las prácticas de lección y las guardadas tienen sus propias vistas. La ronda ofrece hasta tres situaciones diferentes y muestra los aciertos al primer intento. Los simuladores de variables, ciclos, condicionales, texto y señal, los proyectos de propinas y adivinación y la consola de pseudocódigo siguen accesibles.
 
 Las simulaciones de IA son didácticas y locales: no ejecutan modelos ni consumen APIs. El editor de pseudocódigo acepta asignaciones numéricas, aritmética y `mostrar`. Las trece prácticas Python y los 43 ejemplos compatibles incluyen una consola con **Pyodide 314.0.7 / Python 3.14.2**. **Ejecutar código** muestra lo impreso y los errores; permite proporcionar entradas para `input()`, detener y limpiar la consola. **Comprobar ejercicio** evalúa los casos publicados y puede acreditar la práctica; experimentar por sí solo no concede progreso. Los borradores se conservan y se puede restaurar el código inicial.
 

@@ -7,6 +7,7 @@ import { mount as mountTip } from '../js/widgets/tip-calculator.js';
 import { mount as mountVariables } from '../js/widgets/variables-sim.js';
 import { mountTokens, mountDiffusion, mountRunner } from '../js/widgets/labs.js';
 import { widgets } from '../js/widgets/index.js';
+import { catalog, labContext } from './support/laboratory.mjs';
 const lesson = (id) =>
   JSON.parse(readFileSync(`content/lessons/fundamentos/${id}.json`, 'utf8')).html;
 function root() {
@@ -85,8 +86,7 @@ test('cycle simulator respects bounds, terminal state and reset after configurat
   installDOM(t);
   const r = root();
   const hub = await widgets['practice-hub']();
-  const items = JSON.parse(readFileSync('content/practice/items.json', 'utf8')).items;
-  await hub.mount(r, null, async () => items);
+  await hub.mount(r, labContext({ route: 'algoritmia' }), async () => catalog);
   const card = r.querySelector('[data-id="acumulador-suma"]');
   assert.ok(card, 'tarjeta de acumulador encontrada en el centro');
   card.querySelector('[data-open]').click();
@@ -105,8 +105,7 @@ test('condition simulator distinguishes boundary, empty and invalid ages', async
   installDOM(t);
   const r = root();
   const hub = await widgets['practice-hub']();
-  const items = JSON.parse(readFileSync('content/practice/items.json', 'utf8')).items;
-  await hub.mount(r, null, async () => items);
+  await hub.mount(r, labContext({ route: 'algoritmia' }), async () => catalog);
   const card = r.querySelector('[data-id="condicion-limite"]');
   assert.ok(card, 'tarjeta de condición encontrada en el centro');
   card.querySelector('[data-open]').click();
@@ -124,6 +123,10 @@ test('illustrative segmentation is Unicode aware, empty-safe and never interpret
   mountTokens(r);
   change(r.querySelector('[data-text]'), '¡Hola, IA!');
   assert.equal(r.querySelectorAll('.token').length, 5);
+  change(r.querySelector('[data-text]'), 'cafe\u0301');
+  assert.equal(r.querySelectorAll('.token').length, 1);
+  r.querySelector('[data-sample]').click();
+  assert.equal(r.querySelectorAll('.token').length, 2);
   change(r.querySelector('[data-text]'), '<img src=x>');
   assert.equal(r.querySelector('img'), null);
   change(r.querySelector('[data-text]'), '');

@@ -188,7 +188,11 @@ test('controller coordinates navigation, learning, search, preferences, export a
   document.getElementById('retry').click();
   await until(() => document.getElementById('lesson'));
   assert.equal(document.querySelector('h1').textContent, 'Del editor a la ejecución');
-  await navigate('practica', () => document.querySelector('[data-signal]'));
+  await navigate('practica/ia', () =>
+    document.querySelector('[data-id="difusion-lab"] [data-open]'),
+  );
+  document.querySelector('[data-id="difusion-lab"] [data-open]').click();
+  await until(() => document.querySelector('[data-signal]'));
   await navigate('progreso', () => document.getElementById('export-progress'));
   let downloaded = false,
     revoked = false;

@@ -623,3 +623,33 @@ La verificación local incluye 146 ejemplos, 2.209 casos de JavaScript y las
 descargables pasaron en una carpeta independiente. Allí también se ejecutó
 el ejemplo con argumentos de Node y se recuperó el archivo de un commit con
 git show.
+
+## Laboratorio organizado por ruta y tema
+
+El catálogo identifica la ruta, el tema, el formato y la lección de
+referencia. Conserva los 30 retos originales y suma cuatro casos cortos
+de JavaScript, Python e IA. También reúne el planificador web, los
+simuladores de archivo, el intérprete acotado y las dos demostraciones
+interactivas de IA. Las prácticas accesibles de las siete rutas y las
+lecciones guardadas se filtran desde el mismo apartado.
+
+Los filtros mantienen el intento abierto, incluso al volver a un reto
+que quedó temporalmente fuera de los resultados. El laboratorio permite
+retroceder en una traza, deshacer una línea y volver a intentar una
+respuesta con orientación. El orden equivalente de los casos de una
+selección se acepta. La segmentación conserva las tildes combinadas.
+Cada simulador se prepara cuando se abre y un fallo de descarga ofrece
+un reintento desde el propio apartado.
+
+La ronda toma hasta tres variantes del catálogo que coincide con los
+filtros y devuelve aciertos al primer intento. Las variantes cambian
+datos, reglas o situaciones para volver a aplicar el concepto. Se
+conservan el progreso y los identificadores de actividades anteriores.
+Las rondas registran el resultado durante la sesión. Su efecto sobre la
+retención se podrá observar con estudiantes.
+
+En tres aperturas con contextos nuevos de Chromium a 390 px, el área del
+Laboratorio pasó de 536 elementos iniciales a 91. Los grupos construyen sus
+fichas al desplegarse o al aplicar un filtro. El módulo de simulación se
+descarga al abrir el primer simulador. La comparación usa un servidor local
+y no mide el tiempo de carga de estudiantes en sus dispositivos.

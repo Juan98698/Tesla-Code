@@ -118,7 +118,7 @@ await withBrowser(4317, async (browser, origin) => {
   assert.match(await page.locator('#search-results').innerText(), /Difusión/);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#search-results').isHidden(), true);
-  await page.goto(origin + '/#/practica');
+  await page.goto(origin + '/#/practica/algoritmia');
   await page.locator('[data-id="acumulador-suma"] [data-open]').click();
   await page.locator('[data-step]').waitFor();
   await page.locator('[data-step]').click();
@@ -127,6 +127,9 @@ await withBrowser(4317, async (browser, origin) => {
   await page.locator('[data-id="condicion-limite"] [data-step]').waitFor();
   await page.locator('[data-id="condicion-limite"] [data-step]').click();
   assert.match(await page.locator('[data-id="condicion-limite"] [data-vars]').innerText(), /edad/);
+  await page.getByLabel('Ruta', { exact: true }).selectOption('ia');
+  await page.locator('[data-id="token-lab"] [data-open]').click();
+  await page.locator('[data-id="difusion-lab"] [data-open]').click();
   await page.locator('[data-text]').fill('<img src=x>');
   assert.equal(await page.locator('[data-tokens] img').count(), 0);
   await page.locator('[data-signal]').fill('100');
@@ -258,6 +261,7 @@ await withBrowser(4317, async (browser, origin) => {
       await page.reload();
       await page.locator('.page').waitFor();
       if (hash === 'practica') {
+        await page.locator('[data-route-group="algoritmia"] summary').click();
         await page.locator('[data-id="acumulador-suma"] [data-open]').click();
         await page.locator('[data-step]').waitFor();
       }

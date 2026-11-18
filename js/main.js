@@ -140,12 +140,34 @@ const labContext = {
     save();
   },
 };
-async function mountLabs(root, version) {
-  for (const el of root.querySelectorAll('[data-lab]')) {
-    const widget = await widgets[el.dataset.lab]();
+async function mountWidget(el, name, version, context = labContext) {
+  if (version !== renderVersion) return;
+  const showLoading = !el.childElementCount;
+  if (showLoading) el.innerHTML = '<p role="status">Cargando actividad…</p>';
+  try {
+    if (!Object.hasOwn(widgets, name)) throw Error('Actividad desconocida');
+    const widget = await widgets[name]();
     if (version !== renderVersion) return;
-    widget.mount(el, labContext);
+    if (showLoading) el.replaceChildren();
+    await widget.mount(el, context);
+  } catch {
+    if (version !== renderVersion) return;
+    if (showLoading) el.replaceChildren();
+    const notice = document.createElement('div');
+    notice.className = 'lab-load-error';
+    notice.innerHTML =
+      '<p role="alert">No se pudo cargar esta actividad.</p><button type="button" class="btn ghost small">Reintentar</button>';
+    el.append(notice);
+    notice.querySelector('button').onclick = () => {
+      notice.remove();
+      mountWidget(el, name, version, context);
+    };
   }
+}
+function mountLabs(root, version) {
+  return Promise.all(
+    [...root.querySelectorAll('[data-lab]')].map((el) => mountWidget(el, el.dataset.lab, version)),
+  );
 }
 async function render() {
   disposeView();
@@ -242,9 +264,15 @@ async function render() {
         }
       };
     } else if (view === 'practica') {
-      root.innerHTML = practicePage(routes, state);
+      root.innerHTML = practicePage();
       disposeView = mountDepthScene(root);
-      await mountLabs(root, version);
+      await mountWidget(root.querySelector('[data-lab="practice-hub"]'), 'practice-hub', version, {
+        ...labContext,
+        routes,
+        state,
+        route: rid,
+        mountWidget: (body, name) => mountWidget(body, name, version),
+      });
     } else if (view === 'progreso') {
       root.innerHTML = progressPage(routes, state, concepts);
       const disposeDepth = mountDepthScene(root);
@@ -339,9 +367,8 @@ async function render() {
           mountTraceGame($('lesson-trace-game'), data.traceGame);
         }
         if (tab === 'aprender' && data.widget) {
-          const widget = await widgets[data.widget]();
+          await mountWidget($('lesson-widget') ?? $('lesson'), data.widget, version);
           if (version !== renderVersion) return;
-          widget.mount($('lesson-widget') ?? $('lesson'));
         }
         if (tab === 'practicar') {
           const refresh = () => {
@@ -434,8 +461,10 @@ async function render() {
         '<div class="empty-state"><h1>Este camino todavía no existe.</h1><p>Vuelve a tus rutas para encontrar el siguiente paso.</p><a class="btn" href="#/rutas">Explorar rutas →</a></div>';
     if (version !== renderVersion) return;
     if (view !== 'leccion') document.title = 'TeslaCode · Aprende, experimenta, construye';
-    root.focus({ preventScroll: true });
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (view !== 'practica' || !root.contains(document.activeElement)) {
+      root.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   } catch (error) {
     if (version !== renderVersion) return;
     disposeView();

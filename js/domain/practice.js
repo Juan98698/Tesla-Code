@@ -12,9 +12,24 @@ export const TOPICS = Object.freeze({
   condicionales: 'Condicionales',
   ciclos: 'Ciclos',
   funciones: 'Funciones',
+  conversion: 'Tipos y validación',
+  colecciones: 'Colecciones',
+  entradas: 'Entradas y conversiones',
+  evaluacion: 'Evaluación de respuestas',
+  tokens: 'Segmentación y contexto',
+  difusion: 'Ruido y difusión',
+  proyectos: 'Proyectos web',
+  variables: 'Variables y memoria',
+});
+
+export const LAB_FORMATS = Object.freeze({
+  ...PRACTICE_TYPES,
+  simulator: 'Simulador',
+  project: 'Proyecto',
 });
 
 const text = (value) => typeof value === 'string' && value.trim() !== '';
+const slug = (value) => text(value) && /^[a-z0-9-]+$/.test(value);
 const lines = (value, min) =>
   Array.isArray(value) && value.length >= min && value.every((line) => typeof line === 'string');
 const inRange = (value, size) => Number.isInteger(value) && value >= 0 && value < size;
@@ -25,7 +40,14 @@ const choice = (c) =>
   Array.isArray(c.options) &&
   c.options.length >= 2 &&
   c.options.every(text) &&
+  new Set(c.options).size === c.options.length &&
+  (c.hint === undefined || text(c.hint)) &&
   inRange(c.answer, c.options.length);
+
+export function validateLabReference(item, lessons) {
+  const reference = (item.lessonRoute ?? item.route) + '/' + item.lesson;
+  return slug(item.route) && slug(item.lesson) && lessons.get(reference)?.status === 'published';
+}
 
 export function validatePractice(item) {
   if (!item || !text(item.id)) return ['práctica sin id'];
@@ -36,6 +58,9 @@ export function validatePractice(item) {
   for (const key of ['title', 'concept', 'level', 'goal'])
     if (!text(item[key])) fail(`falta ${key}`);
   if (!Object.hasOwn(TOPICS, item.topic)) fail(`tema desconocido "${item.topic}"`);
+  if (!slug(item.route) || !slug(item.lesson) || (item.lessonRoute && !slug(item.lessonRoute)))
+    fail('faltan la ruta y la lección de referencia');
+  if (item.review !== undefined && !choice(item.review)) fail('repaso inválido');
   if (item.language !== undefined && !text(item.language)) fail('language inválido');
   if (!Number.isInteger(item.minutes) || item.minutes < 1)
     fail('minutes debe ser un entero positivo');
@@ -45,9 +70,11 @@ export function validatePractice(item) {
     else
       item.steps.forEach((step, i) => {
         const ok =
+          step &&
           inRange(step.line, item.lines?.length ?? 0) &&
           step.vars &&
           typeof step.vars === 'object' &&
+          !Array.isArray(step.vars) &&
           text(step.note);
         if (!ok) fail(`el paso ${i + 1} es inválido`);
       });
@@ -66,13 +93,24 @@ export function validatePractice(item) {
   } else if (item.type === 'order') {
     if (!lines(item.lines, 3)) fail('order necesita al menos 3 líneas');
     if (!text(item.explanation)) fail('falta explanation');
+    if (
+      item.alternatives !== undefined &&
+      (!lines(item.lines, 3) ||
+        !Array.isArray(item.alternatives) ||
+        item.alternatives.some(
+          (order) =>
+            !lines(order, 3) ||
+            JSON.stringify([...order].sort()) !== JSON.stringify([...(item.lines ?? [])].sort()),
+        ))
+    )
+      fail('las alternativas de orden deben conservar las mismas líneas');
   } else if (item.type === 'example') {
     if (!lines(item.lines, 1)) fail('example necesita código');
     if (item.python !== undefined && !lines(item.python, 1)) fail('python inválido');
     if (
       !Array.isArray(item.parts) ||
       item.parts.length < 2 ||
-      !item.parts.every((part) => text(part.title) && text(part.text))
+      !item.parts.every((part) => part && text(part.title) && text(part.text))
     )
       fail('example necesita al menos 2 partes');
     if (!choice(item.check)) fail('check inválido');
@@ -85,6 +123,21 @@ export function validatePractice(item) {
       fail('decide necesita al menos 2 situaciones válidas');
   }
   return errors;
+}
+
+export function validateExperiment(item) {
+  return Boolean(
+    item &&
+    slug(item.id) &&
+    slug(item.route) &&
+    slug(item.lesson) &&
+    Object.hasOwn(TOPICS, item.topic) &&
+    ['simulator', 'project'].includes(item.type) &&
+    text(item.title) &&
+    text(item.goal) &&
+    (!item.widget || slug(item.widget)) &&
+    (!item.asset || /^assets\/labs\/[a-z0-9/-]+\.html$/.test(item.asset)),
+  );
 }
 
 export function traceState(item, done) {
@@ -100,7 +153,9 @@ export function traceState(item, done) {
 export const gradeChoice = (c, index) => index === c.answer;
 export const gradeBugLine = (item, index) => index === item.bugLine;
 export const gradeOrder = (item, picked) =>
-  picked.length === item.lines.length && picked.every((line, i) => line === item.lines[i]);
+  [item.lines, ...(item.alternatives ?? [])].some(
+    (order) => picked.length === order.length && picked.every((line, i) => line === order[i]),
+  );
 export const filterPractice = (items, type = 'all', topic = 'all') =>
   items.filter(
     (item) => (type === 'all' || item.type === type) && (topic === 'all' || item.topic === topic),

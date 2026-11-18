@@ -6,7 +6,6 @@ import {
   isUnlocked,
   nextLesson,
   accessState,
-  includeArchives,
   routeEdition,
 } from '../domain/curriculum.js';
 import { conceptEvidence } from '../domain/progress.js';
@@ -151,32 +150,11 @@ export function progressPage(routes, state, concepts) {
       '',
     )}</div></section><section class="progress-evidence" aria-labelledby="progress-evidence-heading"><div class="section-heading"><div><span class="section-index">02 / APRENDER TAMBIÉN ES VOLVER</span><h2 id="progress-evidence-heading">Conceptos para reforzar</h2><p>Se toma el último intento de cada lección. Una comprobación no garantiza dominio permanente.</p></div></div>${weak.length ? `<div class="evidence-grid">${weak.map((i) => `<a class="evidence-row" href="#/ruta/${concepts.get(i.id)?.introducedBy.split('/')[0]}/${concepts.get(i.id)?.introducedBy.split('/')[1]}"><div><strong>${e(i.label)}</strong><small>${i.correct} de ${i.total} respuestas correctas en los últimos intentos</small></div><span>Repasar →</span></a>`).join('')}</div>` : '<div class="empty-state"><span class="evidence-symbol" aria-hidden="true">✦</span><h3>' + (items.length ? 'Sin dificultades registradas en tus últimos intentos' : 'Tu evidencia de aprendizaje empieza con una práctica') + '</h3><p>Las comprobaciones te ayudarán a identificar qué conviene repasar.</p><a class="btn" href="#/practica">Ir al laboratorio →</a></div>'}</section><section class="progress-vault" aria-label="Copias de tu progreso"><div class="vault-copy"><span class="section-index">03 / LLEVA CONTIGO LO APRENDIDO</span><h2>Tu progreso merece<br>un lugar seguro.</h2><p>Se guarda en este navegador. Exporta una copia antes de borrar sus datos o cambiar de dispositivo.</p><button class="btn" id="export-progress">Exportar progreso ↓</button><small>Archivo JSON · Copia local, sin cuenta sincronizada</small></div>${importMarkup()}</section></div>`;
 }
-export function practicePage(routes, state) {
-  const bookmarks = state.bookmarks.filter((key) => {
-    const [rid, lid] = key.split('/');
-    return routeEdition(
-      routes.find((r) => r.id === rid),
-      lid,
-    )?.lessons.some((l) => l.id === lid);
-  });
-  const available = routes.flatMap((r) =>
-    r.lessons
-      .filter((l) => isUnlocked(r, l.id, new Set(state.completed)))
-      .map((l) => ({ route: r, lesson: l })),
-  );
-  return `<div class="page laboratory-dashboard"><header class="workspace-hero laboratory-hero"><div class="workspace-hero-copy"><div class="eyebrow">MENOS MEMORIZAR. MÁS EXPERIMENTAR.</div><h1>Tu laboratorio<br>de <em>ideas.</em></h1><p>Predice, prueba y descubre qué cambia. Aquí los errores son información para tu siguiente intento.</p><div class="laboratory-notes"><span>01 / Elige un reto</span><span>02 / Ponlo a prueba</span><span>03 / Descubre por qué</span></div></div><div class="lab-assembly" data-depth-scene aria-hidden="true"><div class="assembly-grid"></div><div class="assembly-platform platform-back"><span>COMPRENDER</span></div><div class="assembly-platform platform-middle"><span>EXPERIMENTAR</span></div><div class="assembly-platform platform-front"><span>CONSTRUIR</span><strong>{ }</strong><div class="assembly-cells"><i></i><i></i><i></i><i></i></div></div><div class="assembly-label"><span class="launch-signal"></span> IDEAS EN MOVIMIENTO</div></div></header><section class="challenge-workbench" aria-labelledby="challenge-heading"><div class="section-heading"><div><span class="section-index">01 / TU MESA DE EXPERIMENTOS</span><h2 id="challenge-heading">Entrena con retos</h2><p>Seis formas de pensar. Una idea nueva en cada intento.</p></div><span class="badge">Pseudocódigo · 2 a 5 min</span></div><div data-lab="practice-hub"></div></section><section aria-labelledby="simulation-heading"><div class="section-heading"><div><span class="section-index">02 / EXPLORA LO INVISIBLE</span><h2 id="simulation-heading">Simulaciones de IA</h2><p>Manipula el concepto y observa qué sucede.</p></div><span class="badge">Locales · Sin API</span></div><div class="lab-grid"><div data-lab="diffusion-lab"></div><div data-lab="token-lab"></div></div></section><section aria-labelledby="journey-practice-heading"><div class="section-heading"><div><span class="section-index">03 / CONECTA CON TU RECORRIDO</span><h2 id="journey-practice-heading">Prácticas de tu recorrido</h2></div></div><div class="review-list">${available.map(({ route: r, lesson: l }) => `<a class="card" href="${lessonHref(r.id, l.id, 'practicar')}"><div><div class="eyebrow">${e(r.name)}</div><h3>${e(l.title)}</h3><p>${state.completed.includes(lessonKey(r.id, l.id)) ? 'Vuelve con un nuevo intento' : 'Un ejercicio para aplicar lo aprendido'}</p></div><span class="btn ghost small">Practicar →</span></a>`).join('')}</div></section>${
-    bookmarks.length
-      ? `<div class="section-heading" style="margin-top:32px"><h2>Guardado para volver</h2></div><div class="review-list">${bookmarks
-          .map((key) => {
-            const [rid, lid] = key.split('/'),
-              r = routeEdition(
-                routes.find((r) => r.id === rid),
-                lid,
-              ),
-              l = r.lessons.find((l) => l.id === lid);
-            return `<a class="card" href="${lessonHref(rid, lid)}">${e(l.title)} <span>→</span></a>`;
-          })
-          .join('')}</div>`
-      : ''
-  }</div>`;
+export function practicePage() {
+  return `<div class="page laboratory-dashboard"><header class="workspace-hero laboratory-hero">
+    <div class="workspace-hero-copy"><h1>Laboratorio</h1><p>Elige una ruta y un tema. Predice qué pasará, prueba tu idea y vuelve a usarla en un problema distinto.</p></div>
+    <div class="lab-assembly" data-depth-scene aria-hidden="true"><div class="assembly-grid"></div><div class="assembly-platform platform-back"></div><div class="assembly-platform platform-middle"></div><div class="assembly-platform platform-front"><strong>{ }</strong><div class="assembly-cells"><i></i><i></i><i></i><i></i></div></div></div>
+  </header><section class="challenge-workbench" aria-labelledby="challenge-heading">
+    <h2 id="challenge-heading">Práctica por ruta</h2><div data-lab="practice-hub"></div>
+  </section></div>`;
 }

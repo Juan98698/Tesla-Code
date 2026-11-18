@@ -8,11 +8,11 @@ export function mountTokens(root) {
     root,
     'Mira el texto por partes',
     'Segmentación ilustrativa por palabras y signos. Un tokenizador real puede dividir palabras y producir otro conteo.',
-    '<label>Tu texto <input maxlength="160" value="Hola, estoy aprendiendo IA." data-text></label><div class="tokens" data-tokens></div><p data-total role="status"></p>',
+    '<label>Tu texto <input maxlength="160" value="Hola, estoy aprendiendo IA." data-text></label><div class="btns"><button type="button" class="btn ghost small" data-sample="café 12">Palabra y número</button><button type="button" class="btn ghost small" data-sample="¿Café? ¡Sí!">Con signos</button></div><div class="tokens" data-tokens></div><p data-total role="status"></p>',
   );
   const input = root.querySelector('[data-text]');
   function draw() {
-    const parts = input.value.match(/[\p{L}\p{N}]+|[^\s\p{L}\p{N}]/gu) ?? [];
+    const parts = input.value.match(/[\p{L}\p{N}][\p{L}\p{M}\p{N}]*|[^\s]/gu) ?? [];
     root.querySelector('[data-tokens]').innerHTML = parts
       .map((p) => `<span class="token">${e(p)}</span>`)
       .join('');
@@ -20,6 +20,11 @@ export function mountTokens(root) {
       `${parts.length} segmentos ilustrativos. No son un cálculo de tokens ni de costo de una API.`;
   }
   input.oninput = draw;
+  for (const sample of root.querySelectorAll('[data-sample]'))
+    sample.onclick = () => {
+      input.value = sample.dataset.sample;
+      draw();
+    };
   draw();
 }
 export function mountDiffusion(root) {
@@ -27,18 +32,26 @@ export function mountDiffusion(root) {
     root,
     'Del ruido a una forma',
     'Interpolación didáctica con ruido fijo. Mueve el control para descubrir una forma; no se ejecuta un modelo de IA.',
-    '<canvas class="noise-canvas" width="80" height="56" role="img" aria-label="Simulación de señal mezclada con ruido"></canvas><label>Porcentaje de señal <input type="range" min="0" max="100" value="15" data-signal></label><p data-caption role="status"></p>',
+    '<canvas class="noise-canvas" width="80" height="56" role="img" aria-label="Simulación de señal mezclada con ruido"></canvas><label>Porcentaje de señal <input type="range" min="0" max="100" value="15" data-signal></label><div class="btns"><button type="button" class="btn ghost small" data-level="0">Solo ruido</button><button type="button" class="btn ghost small" data-level="50">Mitad señal</button><button type="button" class="btn ghost small" data-level="100">Solo señal</button></div><p data-caption role="status"></p>',
   );
   const canvas = root.querySelector('canvas'),
-    ctx = canvas.getContext('2d'),
     input = root.querySelector('[data-signal]');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    canvas.hidden = true;
+    input.disabled = true;
+    for (const preset of root.querySelectorAll('[data-level]')) preset.disabled = true;
+    root.querySelector('[data-caption]').textContent =
+      'Este navegador no puede dibujar el simulador. Con más señal, la figura se distingue mejor del ruido.';
+    return;
+  }
+  const image = ctx.createImageData(80, 56);
   const noise = Array.from(
     { length: 80 * 56 },
     (_, i) => (((Math.sin(i * 12.9898 + 78.233) * 43758.5453) % 1) + 1) % 1,
   );
   function draw() {
-    const amount = Number(input.value) / 100,
-      image = ctx.createImageData(80, 56);
+    const amount = Number(input.value) / 100;
     for (let y = 0; y < 56; y++)
       for (let x = 0; x < 80; x++) {
         const i = y * 80 + x,
@@ -53,6 +66,11 @@ export function mountDiffusion(root) {
       `Señal: ${input.value}% · Ruido: ${100 - Number(input.value)}%. En un modelo real, una red estima los pasos de eliminación.`;
   }
   input.oninput = draw;
+  for (const preset of root.querySelectorAll('[data-level]'))
+    preset.onclick = () => {
+      input.value = preset.dataset.level;
+      draw();
+    };
   draw();
 }
 export function mountRunner(root) {
