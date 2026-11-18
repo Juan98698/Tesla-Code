@@ -37,14 +37,14 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
     </section>
     ${
       practice
-        ? `<details><summary>Casos que comprobará el ejercicio</summary><ul>${activity.cases
+        ? `<details class="practice-cases"><summary>Casos que comprobará el ejercicio</summary><ul>${activity.cases
             .map(
               (c) =>
                 `<li><strong>${e(c.name)}</strong>: ${
                   activity.entrypoint
                     ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdin !== undefined ? `<p>Entradas del reporte (línea: texto entre comillas):</p><pre tabindex="0">${e(c.stdin.map((line, i) => i + 1 + ': ' + JSON.stringify(line)).join('\n'))}</pre>` : ''}${c.http ? `<p>Respuesta de prueba: ${c.http.offline ? 'fallo de red' : e(c.http.status)} · <code>${e(c.http.url)}</code></p><pre tabindex="0">${e(c.http.body)}</pre>` : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
                     : `entradas ${e(JSON.stringify(c.globals ?? c.stdin ?? []))}; salida ${e(JSON.stringify(c.stdout))}`
-                }${c.overrides ? `<p>En otra ejecución se cambian solo estos valores iniciales:</p><pre tabindex="0">${e(JSON.stringify(c.overrides))}</pre>` : ''}${c.expectedBindings ? `<p>Valores que debe conservar tu programa al terminar:</p><pre tabindex="0">${e(JSON.stringify(c.expectedBindings))}</pre>` : ''}</li>`,
+                }${Number.isInteger(c.maxArrayReads) ? `<p>Lee como máximo ${e(c.maxArrayReads)} posiciones del primer arreglo. Cada acceso por índice cuenta, incluso si repites la posición.</p>` : ''}${c.overrides ? `<p>En otra ejecución se cambian solo estos valores iniciales:</p><pre tabindex="0">${e(JSON.stringify(c.overrides))}</pre>` : ''}${c.expectedBindings ? `<p>Valores que debe conservar tu programa al terminar:</p><pre tabindex="0">${e(JSON.stringify(c.expectedBindings))}</pre>` : ''}</li>`,
             )
             .join(
               '',
@@ -243,7 +243,7 @@ export function mountCodeActivity(
           (item) =>
             `<li>${item.passed ? '✓' : '✗'} ${e(item.name)}<pre tabindex="0">${e(
               item.error ?? 'Esperado: ' + item.expected + '\nObtenido: ' + item.actual,
-            )}</pre>${item.bindingValues ? `<p>Datos esperados:</p><pre tabindex="0">${e(item.bindingExpected)}</pre><p>Datos observados:</p><pre tabindex="0">${e(item.bindingValues)}</pre>` : ''}</li>`,
+            )}</pre>${Number.isInteger(item.arrayReads) ? `<p>Lecturas observadas ${e(item.arrayReads)} de ${e(item.maxArrayReads)} permitidas.</p>` : ''}${item.bindingValues ? `<p>Datos esperados:</p><pre tabindex="0">${e(item.bindingExpected)}</pre><p>Datos observados:</p><pre tabindex="0">${e(item.bindingValues)}</pre>` : ''}</li>`,
         )
         .join('')}</ul>`;
       if (correct && editor.value !== submittedCode) {

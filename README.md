@@ -25,7 +25,7 @@ npm run test:access  # Entradas libres, orientación, repasos y secuencia intern
 npm run test:module  # Piloto de la edición anterior: 17 lecciones, escritorio y móvil
 npm run test:python  # Primer módulo Python completo, ejecución real y recuperación del progreso
 npm run test:console # Consola, entradas, errores y ejemplos en escritorio y móvil
-npm run test:javascript # JavaScript: 72 lecciones desde cero, escritorio y móvil
+npm run test:javascript # JavaScript: 78 lecciones desde cero, escritorio y móvil
 npm run test:javascript-lab # Interfaz web del proyecto, a 320 y 1440 px
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
@@ -54,8 +54,8 @@ La consola JavaScript usa el motor del navegador y se inicia al ejecutar. Esta e
 ## Qué está disponible
 
 - Siete mapas: Fundamentos, Algoritmia, Python, Frontend, Backend, Bases de datos e IA.
-- **110 lecciones publicadas en las rutas actuales**, además de **68 de la edición anterior de Fundamentos**, con sus enlaces y logros. El inventario contiene 506 entradas entre las ediciones actuales, las archivadas y las planificadas.
-- **Fundamentos con JavaScript: 72 lecciones en 18 bloques.** El estudiante empieza en el editor y termina con una aplicación web modular que valida y guarda datos, consulta sugerencias, responde a errores y puede publicar. Cada entrega del planificador alimenta la siguiente. Hay 134 ejemplos ejecutables, 288 actividades de código, 72 análisis de decisiones, 308 preguntas y ocho juegos opcionales de traza. El proyecto web tiene una referencia y una plantilla descargable. Consulta la [distribución por tema](docs/fundamentos-alcance-y-carga.md) y la [matriz editorial](docs/fundamentos-correspondencia-editorial.md).
+- **116 lecciones publicadas en las rutas actuales**, además de **68 de la edición anterior de Fundamentos**, con sus enlaces y logros. El inventario contiene 512 entradas entre las ediciones actuales, las archivadas y las planificadas.
+- **Fundamentos con JavaScript: 78 lecciones en 18 bloques.** El estudiante empieza en el editor y termina con una aplicación web modular que valida y guarda datos, consulta sugerencias, responde a errores y puede publicar. Cada entrega del planificador alimenta la siguiente. Hay 146 ejemplos ejecutables, 312 actividades de código, 78 análisis de decisiones, 333 preguntas y diez juegos opcionales de traza. El proyecto web tiene una referencia y una plantilla descargable. La [entrega de reservas](docs/fundamentos-cierre-y-piloto.md) pide adaptar la aplicación, añadir pruebas propias y demostrar su funcionamiento. Consulta la [distribución por tema](docs/fundamentos-alcance-y-carga.md) y la [matriz editorial](docs/fundamentos-correspondencia-editorial.md).
 - La edición anterior conserva sus 68 lecciones desde Primeros pasos hasta Experto. Se consulta desde el mapa de Fundamentos y desde sus URLs originales. Sus finalizaciones y XP permanecen; no acreditan las nuevas prácticas JavaScript.
 - Primeros pasos (edición anterior): sus dos lecciones incluyen fuentes, ejemplos razonados, errores frecuentes y tres actividades cada una: comprensión, práctica guiada y transferencia. La revisión asistida reduce la deuda editorial a 81 lecciones; la revisión independiente sigue pendiente.
 - IA: 13 lecciones de exploración desde cero, con 52 prácticas, 39 casos de evidencia y 68 preguntas. LLM, difusión y NCM son centrales. El mapa de 96 temas añade puentes de JavaScript, Python y matemáticas, ingeniería y proyectos; 83 temas siguen en preparación. Consulta el [temario y sus límites](docs/ia-curriculum.md).

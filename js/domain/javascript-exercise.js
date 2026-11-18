@@ -151,6 +151,17 @@ export function javascriptExerciseErrors(exercise) {
       if (item?.preserveArgs !== undefined && (!callable || typeof item.preserveArgs !== 'boolean'))
         errors.push('Conservar argumentos es una opción booleana de los casos de función.');
       if (
+        item?.maxArrayReads !== undefined &&
+        (!callable ||
+          !Array.isArray(item.args?.[0]) ||
+          !Number.isInteger(item.maxArrayReads) ||
+          item.maxArrayReads < 0 ||
+          item.maxArrayReads > 10_000)
+      )
+        errors.push(
+          'El límite de lecturas necesita un arreglo como primer argumento y un entero de 0 a 10000.',
+        );
+      if (
         item?.stdin !== undefined &&
         (!Array.isArray(item.stdin) || item.stdin.some((value) => typeof value !== 'string'))
       )

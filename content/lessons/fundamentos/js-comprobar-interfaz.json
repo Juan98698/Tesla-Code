@@ -1,0 +1,1053 @@
+{
+  "id": "js-comprobar-interfaz",
+  "outcome": "Probar teclado, foco y recuperación en la interfaz",
+  "requiresConcepts": [
+    "js-calidad-datos-accesibilidad-concepto"
+  ],
+  "html": "<h3>Cómo funciona</h3><p>Una prueba de interfaz empieza con un estado conocido, realiza una acción y observa la página. Entrar un nombre, pulsar Enter y leer el resultado prueba un flujo. Ver una función devolver un texto comprueba una parte de ese flujo.</p><p>Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. Abre las herramientas de desarrollo del navegador, elige Consola y escribe document.activeElement para inspeccionar el foco. Devuelve el elemento que recibiría la siguiente acción del teclado.</p><p>Una vista de prueba puede representarse como texto y estados observables. En este contrato recibes la vista anterior, la vista candidata y una lista ya validada de controles inválidos. Devuelve {vista, foco, errores}. Con errores, el foco es el primero y la vista queda intacta. Con éxito actualiza la vista y usa foco igual a null.</p><p>Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha.</p><h3>Ejemplo razonado</h3><p>Problema: Devuelve el estado observable de la interfaz tras enviar el plan. Una entrada inválida debe mantener el último resultado.</p><p>Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. Abre las herramientas de desarrollo del navegador, elige Consola y escribe document.activeElement para inspeccionar el foco. Devuelve el elemento que recibiría la siguiente acción del teclado.</p><p>El caso de referencia produce {&quot;vista&quot;:&quot;Plan Ana&quot;,&quot;foco&quot;:&quot;nombre&quot;,&quot;errores&quot;:[&quot;nombre&quot;,&quot;dias&quot;]}. Contrasta después las variantes del contrato, incluidos los bordes indicados.</p><p>Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior.</p><p>La consola del ejemplo llama vistaTrasEnvio con [&quot;Plan Ana&quot;,&quot;Plan Luna&quot;,[&quot;nombre&quot;,&quot;dias&quot;]] y comprueba su retorno.</p><pre data-language=\"javascript\">function vistaTrasEnvio(anterior, candidata, errores) {\n  if (errores.length &gt; 0) {\n    return { vista: anterior, foco: errores[0], errores: errores.slice() };\n  }\n  return { vista: candidata, foco: null, errores: [] };\n}</pre><p>Resultado esperado: {&quot;vista&quot;:&quot;Plan Ana&quot;,&quot;foco&quot;:&quot;nombre&quot;,&quot;errores&quot;:[&quot;nombre&quot;,&quot;dias&quot;]}</p><h3>Otra escritura del mismo contrato</h3><p>Compara los pasos de estos dos programas con la misma entrada y examina qué se conserva.</p><pre data-language=\"javascript\">function vistaTrasEnvio(anterior, candidata, errores) {\n  const hayErrores = errores.length &gt; 0;\n  const vista = hayErrores ? anterior : candidata;\n  const foco = errores[0] ?? null;\n  return { vista, foco, errores: [...errores] };\n}</pre><h3>Guion de aceptación del laboratorio</h3><p>Abre el laboratorio y prepara un plan válido con tu nombre. Recorre con Tab. Deja Nombre vacío y escribe 8 en Días. Envía con Enter y comprueba que la vista anterior sigue ahí, se anuncian ambos campos y el foco va a Nombre. Corrige Nombre y Días usando solo teclado. Repite a 320 px. En tu propia copia elimina temporalmente la guarda que protege la vista anterior, registra la diferencia y restáurala.</p><pre data-language=\"text\">document.activeElement.id</pre><p><a href=\"./assets/labs/plan/laboratorio.html\" target=\"_blank\" rel=\"noopener\">Abrir el planificador de referencia</a></p>",
+  "examples": [
+    {
+      "id": "js-comprobar-interfaz-e1",
+      "language": "javascript",
+      "code": "function vistaTrasEnvio(anterior, candidata, errores) {\n  if (errores.length > 0) {\n    return { vista: anterior, foco: errores[0], errores: errores.slice() };\n  }\n  return { vista: candidata, foco: null, errores: [] };\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          "Plan Ana",
+          "Plan Luna",
+          [
+            "nombre",
+            "dias"
+          ]
+        ],
+        "expected": {
+          "vista": "Plan Ana",
+          "foco": "nombre",
+          "errores": [
+            "nombre",
+            "dias"
+          ]
+        },
+        "preserveArgs": true,
+        "entrypoint": "vistaTrasEnvio"
+      }
+    },
+    {
+      "id": "js-comprobar-interfaz-e2",
+      "language": "javascript",
+      "code": "function vistaTrasEnvio(anterior, candidata, errores) {\n  const hayErrores = errores.length > 0;\n  const vista = hayErrores ? anterior : candidata;\n  const foco = errores[0] ?? null;\n  return { vista, foco, errores: [...errores] };\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          "Plan Ana",
+          "Plan Luna",
+          [
+            "nombre",
+            "dias"
+          ]
+        ],
+        "expected": {
+          "vista": "Plan Ana",
+          "foco": "nombre",
+          "errores": [
+            "nombre",
+            "dias"
+          ]
+        },
+        "preserveArgs": true,
+        "entrypoint": "vistaTrasEnvio"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "id": "js-comprobar-interfaz-criterio-1",
+      "type": "choice",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "¿Qué preparación descubre que un envío inválido borra una vista válida?",
+      "options": [
+        "Enviar primero un plan válido.",
+        "Cargar y cerrar la página vacía.",
+        "Cambiar el tamaño sin enviar."
+      ],
+      "answer": 0,
+      "explanation": "La vista debe existir antes de intentar conservarla."
+    },
+    {
+      "id": "js-comprobar-interfaz-criterio-2",
+      "type": "choice",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "¿Qué compruebas después de enviar nombre y días inválidos?",
+      "options": [
+        "Solo que se imprima una frase.",
+        "Que el primer control inválido tenga el foco y el resultado anterior se conserve.",
+        "Que se borre el estado."
+      ],
+      "answer": 1,
+      "explanation": "La recuperación incluye datos, posición de teclado y resultado."
+    },
+    {
+      "id": "js-comprobar-interfaz-criterio-3",
+      "type": "choice",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "¿Qué observación permite verificar el foco sin utilizar ratón?",
+      "options": [
+        "El nombre del archivo CSS.",
+        "La cantidad de botones.",
+        "document.activeElement junto con el foco visible."
+      ],
+      "answer": 2,
+      "explanation": "Puedes confirmar en qué control estás y comprobar que el indicador sea visible."
+    },
+    {
+      "id": "js-comprobar-interfaz-criterio-4",
+      "type": "choice",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "¿Qué añade probar con Tab y Enter además de ejecutar la función?",
+      "options": [
+        "Comprueba que los controles y el envío realmente cooperan.",
+        "Hace innecesarios los contratos.",
+        "Impide cualquier error de red."
+      ],
+      "answer": 0,
+      "explanation": "El navegador participa en el flujo real junto con los módulos."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-plan",
+      "type": "case-study",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "Analiza el cambio que necesita tu plan",
+      "brief": "Devuelve el estado observable de la interfaz tras enviar el plan. Una entrada inválida debe mantener el último resultado.",
+      "evidence": [
+        {
+          "label": "Regla",
+          "text": "Una prueba de interfaz empieza con un estado conocido, realiza una acción y observa la página. Entrar un nombre, pulsar Enter y leer el resultado prueba un flujo. Ver una función devolver un texto comprueba una parte de ese flujo."
+        },
+        {
+          "label": "Caso de partida",
+          "text": "Entrada [\"Plan Ana\",\"Plan Luna\",[\"nombre\",\"dias\"]] y salida esperada {\"vista\":\"Plan Ana\",\"foco\":\"nombre\",\"errores\":[\"nombre\",\"dias\"]}."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "La vista dice Plan Ana. Un borrador inválido tiene errores en días y luego nombre. ¿Qué observas?",
+          "options": [
+            "Plan Ana y foco en días.",
+            "El borrador y foco en nombre.",
+            "Sin vista y foco en el botón."
+          ],
+          "answer": 0,
+          "explanation": "El rechazo conserva el último éxito y enfoca el primer campo inválido del orden indicado.",
+          "id": "decision-1",
+          "errorHint": "El rechazo conserva el último éxito y enfoca el primer campo inválido del orden indicado."
+        },
+        {
+          "prompt": "Tras el rechazo corriges los datos y envías con Enter. ¿Qué evidencia completa la prueba?",
+          "options": [
+            "La vista nueva y el resultado anunciado.",
+            "Solo el resultado que ya se veía.",
+            "Solo que el teclado cambió de posición."
+          ],
+          "answer": 0,
+          "explanation": "La recuperación tiene que ejecutar y anunciar un resultado nuevo.",
+          "id": "decision-2",
+          "errorHint": "La recuperación tiene que ejecutar y anunciar un resultado nuevo."
+        }
+      ],
+      "hint": "Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. document.activeElement permite inspeccionarlo en la consola del navegador.",
+      "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha.",
+      "assessment": {
+        "questions": []
+      },
+      "learningStep": {
+        "phase": "entender",
+        "label": "01 · Entender",
+        "project": "plan-practica",
+        "requires": [],
+        "input": "Abre el análisis del caso y consulta la entrega anterior.",
+        "output": "Decisiones y explicación registrada.",
+        "reflection": "Describe datos, resultado, borde y evidencia con tus propias palabras.",
+        "from": "fundamentos/js-calidad-datos-accesibilidad/js-calidad-datos-accesibilidad-a3"
+      },
+      "hints": [
+        "El rechazo conserva el último éxito y enfoca el primer campo inválido del orden indicado.",
+        "La recuperación tiene que ejecutar y anunciar un resultado nuevo."
+      ],
+      "retryFeedback": "La recuperación tiene que ejecutar y anunciar un resultado nuevo."
+    },
+    {
+      "id": "js-comprobar-interfaz-a1",
+      "type": "javascript",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "Implementa este incremento. Devuelve el estado observable de la interfaz tras enviar el plan. Una entrada inválida debe mantener el último resultado.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}\n\nfunction vistaTrasEnvio(anterior, candidata, errores) {\n  if (errores.length > 0) {\n    return { vista: anterior, foco: errores[0], errores: errores.slice() };\n  }\n  return { vista: candidata, foco: null, errores: [] };\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [\"Plan Ana\",\"Plan Luna\",[\"nombre\",\"dias\"]]",
+          "args": [
+            "Plan Ana",
+            "Plan Luna",
+            [
+              "nombre",
+              "dias"
+            ]
+          ],
+          "expected": {
+            "vista": "Plan Ana",
+            "foco": "nombre",
+            "errores": [
+              "nombre",
+              "dias"
+            ]
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [\"Plan Ana\",\"Plan Luna\",[]]",
+          "args": [
+            "Plan Ana",
+            "Plan Luna",
+            []
+          ],
+          "expected": {
+            "vista": "Plan Luna",
+            "foco": null,
+            "errores": []
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [\"\",\"Borrador\",[\"minutos\"]]",
+          "args": [
+            "",
+            "Borrador",
+            [
+              "minutos"
+            ]
+          ],
+          "expected": {
+            "vista": "",
+            "foco": "minutos",
+            "errores": [
+              "minutos"
+            ]
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "Contrato 4 · [\"Anterior\",\"\",[]]",
+          "args": [
+            "Anterior",
+            "",
+            []
+          ],
+          "expected": {
+            "vista": "",
+            "foco": null,
+            "errores": []
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. document.activeElement permite inspeccionarlo en la consola del navegador.",
+      "hints": [
+        "La recuperación incluye datos, posición de teclado y resultado.",
+        "Guarda la última vista confirmada entre intentos. Una cadena vacía puede ser una confirmación válida."
+      ],
+      "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha.",
+      "retryFeedback": "Puedes confirmar en qué control estás y comprobar que el indicador sea visible. Comprueba el resultado actual contra el esperado.",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "implementar",
+        "label": "02 · Implementar",
+        "project": "plan-practica",
+        "requires": [
+          "entender-plan"
+        ],
+        "input": "Añade vistaTrasEnvio según el contrato. Comienza con el enfoque directo del ejemplo y ajusta los nombres en tu entrega anterior.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Predice el resultado. Identifica el fragmento nuevo y una condición que conserve tu contrato anterior.",
+        "from": "fundamentos/js-calidad-datos-accesibilidad/js-calidad-datos-accesibilidad-a3"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [\"Plan Ana\",\"Plan Luna\",[\"nombre\",\"dias\"]]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "{\"vista\":\"Plan Ana\",\"foco\":\"nombre\",\"errores\":[\"nombre\",\"dias\"]}"
+            ],
+            "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha."
+          }
+        ]
+      },
+      "entrypoint": "vistaTrasEnvio"
+    },
+    {
+      "id": "js-comprobar-interfaz-a2",
+      "type": "javascript",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "Reescribe vistaTrasEnvio con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}\n\nfunction vistaTrasEnvio(anterior, candidata, errores) {\n  if (errores.length > 0) {\n    return { vista: anterior, foco: errores[0], errores: errores.slice() };\n  }\n  return { vista: candidata, foco: null, errores: [] };\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}\n\nfunction vistaTrasEnvio(anterior, candidata, errores) {\n  const hayErrores = errores.length > 0;\n  const vista = hayErrores ? anterior : candidata;\n  const foco = errores[0] ?? null;\n  return { vista, foco, errores: [...errores] };\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [\"Plan Ana\",\"Plan Luna\",[\"nombre\",\"dias\"]]",
+          "args": [
+            "Plan Ana",
+            "Plan Luna",
+            [
+              "nombre",
+              "dias"
+            ]
+          ],
+          "expected": {
+            "vista": "Plan Ana",
+            "foco": "nombre",
+            "errores": [
+              "nombre",
+              "dias"
+            ]
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [\"Plan Ana\",\"Plan Luna\",[]]",
+          "args": [
+            "Plan Ana",
+            "Plan Luna",
+            []
+          ],
+          "expected": {
+            "vista": "Plan Luna",
+            "foco": null,
+            "errores": []
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [\"\",\"Borrador\",[\"minutos\"]]",
+          "args": [
+            "",
+            "Borrador",
+            [
+              "minutos"
+            ]
+          ],
+          "expected": {
+            "vista": "",
+            "foco": "minutos",
+            "errores": [
+              "minutos"
+            ]
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "Contrato 4 · [\"Anterior\",\"\",[]]",
+          "args": [
+            "Anterior",
+            "",
+            []
+          ],
+          "expected": {
+            "vista": "",
+            "foco": null,
+            "errores": []
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. document.activeElement permite inspeccionarlo en la consola del navegador.",
+      "hints": [
+        "La recuperación incluye datos, posición de teclado y resultado.",
+        "Guarda la última vista confirmada entre intentos. Una cadena vacía puede ser una confirmación válida."
+      ],
+      "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha.",
+      "retryFeedback": "Puedes confirmar en qué control estás y comprobar que el indicador sea visible. Comprueba el resultado actual contra el esperado.",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "reescribir",
+        "label": "03 · Reescribir y comprobar",
+        "project": "plan-practica",
+        "requires": [
+          "js-comprobar-interfaz-a1"
+        ],
+        "input": "Reescribe vistaTrasEnvio con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Traduce la decisión a la nueva escritura. Explica por qué los mismos casos y valores de frontera producen los mismos resultados.",
+        "from": "fundamentos/js-comprobar-interfaz/js-comprobar-interfaz-a1"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [\"Plan Ana\",\"Plan Luna\",[]]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "{\"vista\":\"Plan Luna\",\"foco\":null,\"errores\":[]}"
+            ],
+            "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha."
+          }
+        ],
+        "rewrite": true
+      },
+      "entrypoint": "vistaTrasEnvio"
+    },
+    {
+      "id": "js-comprobar-interfaz-a3",
+      "type": "javascript",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "Integra la decisión y reproduce la incidencia de probar teclado, foco y recuperación en la interfaz.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}\n\nfunction vistaTrasEnvio(anterior, candidata, errores) {\n  const hayErrores = errores.length > 0;\n  const vista = hayErrores ? anterior : candidata;\n  const foco = errores[0] ?? null;\n  return { vista, foco, errores: [...errores] };\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}\n\nfunction vistaTrasEnvio(anterior, candidata, errores) {\n  const hayErrores = errores.length > 0;\n  const vista = hayErrores ? anterior : candidata;\n  const foco = errores[0] ?? null;\n  return { vista, foco, errores: [...errores] };\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [\"Plan Ana\",\"Plan Luna\",[\"nombre\",\"dias\"]]",
+          "args": [
+            "Plan Ana",
+            "Plan Luna",
+            [
+              "nombre",
+              "dias"
+            ]
+          ],
+          "expected": {
+            "vista": "Plan Ana",
+            "foco": "nombre",
+            "errores": [
+              "nombre",
+              "dias"
+            ]
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [\"Plan Ana\",\"Plan Luna\",[]]",
+          "args": [
+            "Plan Ana",
+            "Plan Luna",
+            []
+          ],
+          "expected": {
+            "vista": "Plan Luna",
+            "foco": null,
+            "errores": []
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [\"\",\"Borrador\",[\"minutos\"]]",
+          "args": [
+            "",
+            "Borrador",
+            [
+              "minutos"
+            ]
+          ],
+          "expected": {
+            "vista": "",
+            "foco": "minutos",
+            "errores": [
+              "minutos"
+            ]
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "Contrato 4 · [\"Anterior\",\"\",[]]",
+          "args": [
+            "Anterior",
+            "",
+            []
+          ],
+          "expected": {
+            "vista": "",
+            "foco": null,
+            "errores": []
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. document.activeElement permite inspeccionarlo en la consola del navegador.",
+      "hints": [
+        "La recuperación incluye datos, posición de teclado y resultado.",
+        "Guarda la última vista confirmada entre intentos. Una cadena vacía puede ser una confirmación válida."
+      ],
+      "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha.",
+      "retryFeedback": "Puedes confirmar en qué control estás y comprobar que el indicador sea visible. Comprueba el resultado actual contra el esperado.",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "integrar",
+        "label": "04 · Integrar y depurar",
+        "project": "plan-practica",
+        "requires": [
+          "js-comprobar-interfaz-a2"
+        ],
+        "input": "Reproduce la incidencia, registra la hipótesis y comprueba tu entrega.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "En la copia del laboratorio, guarda el dato válido previo, el control enfocado tras el error y el resultado de la recuperación. Comprueba el nombre accesible del control y el mensaje relacionado con él.",
+        "from": "fundamentos/js-comprobar-interfaz/js-comprobar-interfaz-a2"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [\"\",\"Borrador\",[\"minutos\"]]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "{\"vista\":\"\",\"foco\":\"minutos\",\"errores\":[\"minutos\"]}"
+            ],
+            "explanation": "Para observar una regresión, primero genera un resultado correcto y luego envía dos campos inválidos. Si solo pruebas un formulario vacío, podrías pasar por alto que el código borra un resultado válido. Repite la recuperación con Tab y Enter y prueba con una pantalla estrecha."
+          },
+          {
+            "id": "diagnostico",
+            "type": "choice",
+            "prompt": "Un envío inválido borra el resultado válido anterior, aunque enfoca el primer campo correcto. ¿Qué regla falla?",
+            "options": [
+              "Conservar vista anterior cuando hay errores.",
+              "Consultar el elemento enfocado.",
+              "Guardar el nombre del archivo."
+            ],
+            "answer": 0,
+            "explanation": "El estado debe conservarse incluso cuando la lógica de foco funciona."
+          }
+        ],
+        "debug": {
+          "id": "js-comprobar-interfaz-incidencia",
+          "context": "Ejecuta el caso defectuoso. Contrasta el resultado esperado y el observado antes de abrir tu solución.",
+          "code": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction compararCatalogos(sesiones, permitidas) {\n  let lecturas = 0;\n  const conLista = sesiones.filter(sesion => permitidas.some(modalidad => {\n    lecturas += 1;\n    return modalidad === sesion;\n  })).length;\n  const conjunto = new Set(permitidas);\n  const conSet = sesiones.filter(sesion => conjunto.has(sesion)).length;\n  return [conLista, conSet, lecturas, permitidas.length + sesiones.length];\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction historialDeMetas(inicio, acciones) {\n  const pasado = [];\n  let futuro = [];\n  let actual = inicio;\n  return acciones.map(accion => {\n    switch (accion.tipo) {\n      case \"aplicar\":\n        pasado.push(actual);\n        actual = accion.valor;\n        futuro = [];\n        break;\n      case \"deshacer\":\n        if (pasado.length > 0) {\n          futuro.push(actual);\n          actual = pasado.pop();\n        }\n        break;\n      case \"rehacer\":\n        if (futuro.length > 0) {\n          pasado.push(actual);\n          actual = futuro.pop();\n        }\n    }\n    return actual;\n  });\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction aplicarCambiosAlPlan(inicio, cambios) {\n  class CuentaPlan {\n    constructor(saldo) { this.saldo = saldo; }\n    mover(valor) { this.saldo += valor; return this.saldo; }\n  }\n  const cuenta = new CuentaPlan(inicio);\n  const aplicar = cuenta.mover.bind(cuenta);\n  return cambios.map(aplicar);\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction modoDelPlan(argumentos) {\n  if (argumentos.length !== 1) return \"ayuda\";\n  switch (argumentos[0]) {\n    case \"--resumen\": return \"resumen\";\n    case \"--validar\": return \"validar\";\n    default: return \"ayuda\";\n  }\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}\n\nfunction lineasDelPanel(nombre, minutos, dias) {\n  const { estado, total } = modeloPlan(minutos, dias);\n  return [nombre, etiquetaDeEstado(estado, dias), `${total} min`];\n}\n\nfunction aplicarFormulario(nombre, minutos, dias) {\n  const diasValidos = diasDelFormulario(dias);\n  const limpio = nombre.trim();\n  if (!limpio || !minutosValidos(minutos) || diasValidos === null) return null;\n  return { nombre: limpio, minutos: Number(minutos), dias: diasValidos };\n}\n\nfunction reducirSesiones(datos, accion) {\n  switch (accion.tipo) {\n    case \"deshacer\": return datos.slice(0, -1);\n    case \"agregar\":\n      if (Number.isInteger(accion.minutos) && accion.minutos >= 0 && accion.minutos <= 120) return [...datos, accion.minutos];\n  }\n  return [...datos];\n}\n\nfunction restaurarSesiones(texto) {\n  const vacio = estado => ({ estado, sesiones: [] });\n  if (texto === null) return vacio(\"nuevo\");\n  try {\n    const copia = JSON.parse(texto);\n    if (copia?.version !== 1 || !Array.isArray(copia.sesiones)) return vacio(\"invalido\");\n    const sesiones = importarMinutos(JSON.stringify(copia.sesiones));\n    return sesiones === null ? vacio(\"invalido\") : { estado: \"guardado\", sesiones };\n  } catch { return vacio(\"invalido\"); }\n}\n\nfunction ordenDeTareas(etiqueta) {\n  const pasos = [etiqueta + \" inicia\"];\n  const termina = new Promise(resolve => {\n    setTimeout(() => { pasos.push(\"tarea\"); resolve(pasos); }, 0);\n  });\n  Promise.resolve().then(() => pasos.push(\"microtarea\"));\n  pasos.push(\"fin síncrono\");\n  return termina;\n}\n\nfunction combinarEstimaciones(a, b) {\n  const leer = n => n < 0 ? Promise.reject(Error(\"sin dato\")) : Promise.resolve(n);\n  return Promise.all([leer(a), leer(b)])\n    .then(([primero, segundo]) => primero + segundo)\n    .catch(() => \"Sin estimación\");\n}\n\nfunction urlSugerencias(tema, limite) {\n  return `/sugerencias?tema=${encodeURIComponent(tema)}&limite=${limite}`;\n}\n\nasync function pedirSugerencia(url) {\n  try {\n    const respuesta = await fetch(url);\n    if (!respuesta.ok) return `HTTP ${respuesta.status}`;\n    const dato = await respuesta.json();\n    return typeof dato?.titulo === \"string\" && dato.titulo.trim() !== \"\" ? dato.titulo : \"Sin sugerencia\";\n  } catch { return \"Sin sugerencia\"; }\n}\n\nfunction resultadoVigente(respuestas, version) {\n  return respuestas.reduce((visible, respuesta) =>\n    respuesta.version === version ? respuesta.texto : visible, \"Pendiente\");\n}\n\nfunction resumenIntegrado(nombre, minutos, dias) {\n  const datos = aplicarFormulario(nombre, minutos, dias);\n  return datos === null ? \"Entrada inválida\" : lineasDelPanel(datos.nombre, datos.minutos, datos.dias).join(\" · \");\n}\n\nfunction erroresDelPlan(nombre, minutos, dias) {\n  const campos = [[\"nombre\", nombre.trim() !== \"\"], [\"minutos\", minutosValidos(minutos)], [\"dias\", diasDelFormulario(dias) !== null]];\n  return campos.filter(par => !par[1]).map(par => par[0]);\n}\n\nfunction vistaTrasEnvio(anterior, candidata, errores) {\n  const hayErrores = errores.length > 0;\n  const vista = candidata;\n  const foco = errores[0] ?? null;\n  return { vista, foco, errores: [...errores] };\n}",
+          "cases": [
+            {
+              "name": "Contrato 1 · [\"Plan Ana\",\"Plan Luna\",[\"nombre\",\"dias\"]]",
+              "args": [
+                "Plan Ana",
+                "Plan Luna",
+                [
+                  "nombre",
+                  "dias"
+                ]
+              ],
+              "expected": {
+                "vista": "Plan Ana",
+                "foco": "nombre",
+                "errores": [
+                  "nombre",
+                  "dias"
+                ]
+              },
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "30",
+                "5",
+                "3",
+                "10",
+                "30",
+                "0"
+              ]
+            }
+          ],
+          "entrypoint": "vistaTrasEnvio"
+        }
+      },
+      "entrypoint": "vistaTrasEnvio"
+    },
+    {
+      "id": "js-comprobar-interfaz-aplicar",
+      "type": "javascript",
+      "concept": "js-comprobar-interfaz-concepto",
+      "prompt": "En una biblioteca, una lectora revisa un préstamo. Simula una secuencia de intentos {vista, errores}. A partir de un mensaje inicial, devuelve un arreglo de pares [mensajeVisible, foco] después de cada intento. Un intento exitoso cambia el mensaje y usa null como foco. Uno inválido conserva el último éxito y enfoca el primer control inválido. En tu laboratorio reproduce éxito, rechazo y recuperación con teclado. Implementa resolverCaso.",
+      "starter": "function resolverCaso(inicial, intentos) {\n  // Escribe tu solución.\n}",
+      "solution": "function resolverCaso(inicial, intentos) {\n  let visible = inicial;\n  return intentos.map(intento => {\n    if (intento.errores.length === 0) visible = intento.vista;\n    return [visible, intento.errores[0] ?? null];\n  });\n}",
+      "entrypoint": "resolverCaso",
+      "cases": [
+        {
+          "name": "Caso 1 · [\"Inicio\",[{\"vista\":\"Préstamo A\",\"errores\":[]},{\"vista\":\"B\",\"errores\":[\"lector\",\"dias\"]},{\"vista\":\"Préstamo C\",\"errores\"",
+          "args": [
+            "Inicio",
+            [
+              {
+                "vista": "Préstamo A",
+                "errores": []
+              },
+              {
+                "vista": "B",
+                "errores": [
+                  "lector",
+                  "dias"
+                ]
+              },
+              {
+                "vista": "Préstamo C",
+                "errores": []
+              }
+            ]
+          ],
+          "expected": [
+            [
+              "Préstamo A",
+              null
+            ],
+            [
+              "Préstamo A",
+              "lector"
+            ],
+            [
+              "Préstamo C",
+              null
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 2 · [\"Inicio\",[{\"vista\":\"\",\"errores\":[]},{\"vista\":\"Error\",\"errores\":[\"dias\"]}]]",
+          "args": [
+            "Inicio",
+            [
+              {
+                "vista": "",
+                "errores": []
+              },
+              {
+                "vista": "Error",
+                "errores": [
+                  "dias"
+                ]
+              }
+            ]
+          ],
+          "expected": [
+            [
+              "",
+              null
+            ],
+            [
+              "",
+              "dias"
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 3 · [\"\",[]]",
+          "args": [
+            "",
+            []
+          ],
+          "expected": [],
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 4 · [\"Inicial\",[{\"vista\":\"X\",\"errores\":[\"nombre\"]},{\"vista\":\"Y\",\"errores\":[\"turno\"]}]]",
+          "args": [
+            "Inicial",
+            [
+              {
+                "vista": "X",
+                "errores": [
+                  "nombre"
+                ]
+              },
+              {
+                "vista": "Y",
+                "errores": [
+                  "turno"
+                ]
+              }
+            ]
+          ],
+          "expected": [
+            [
+              "Inicial",
+              "nombre"
+            ],
+            [
+              "Inicial",
+              "turno"
+            ]
+          ],
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Guarda la última vista confirmada entre intentos. Una cadena vacía puede ser una confirmación válida.",
+      "hints": [
+        "Predice un caso con frontera o ausencia y compáralo con uno que deba cambiar el resultado."
+      ],
+      "explanation": "Guarda la última vista confirmada entre intentos. Una cadena vacía puede ser una confirmación válida.",
+      "retryFeedback": "Guarda la última vista confirmada entre intentos. Una cadena vacía puede ser una confirmación válida.",
+      "followUp": {
+        "requires": [
+          "js-comprobar-interfaz-a3"
+        ],
+        "reason": "Resuelve esta situación nueva y prueba el borde antes de cerrar la lección."
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "Referencia técnica oficial",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior."
+    ],
+    "workedExample": {
+      "problem": "Problema: Devuelve el estado observable de la interfaz tras enviar el plan. Una entrada inválida debe mantener el último resultado.",
+      "reasoning": "Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Si un envío es inválido, conserva la vista aprobada, muestra los errores y lleva el foco al primer control inválido. El foco es el elemento al que llega el teclado. Abre las herramientas de desarrollo del navegador, elige Consola y escribe document.activeElement para inspeccionar el foco. Devuelve el elemento que recibiría la siguiente acción del teclado.",
+      "result": "El caso de referencia produce {\"vista\":\"Plan Ana\",\"foco\":\"nombre\",\"errores\":[\"nombre\",\"dias\"]}. Contrasta después las variantes del contrato, incluidos los bordes indicados."
+    },
+    "transferActivityIds": [
+      "js-comprobar-interfaz-aplicar"
+    ]
+  },
+  "coverage": {
+    "js-comprobar-interfaz-concepto": {
+      "explanationExcerpt": "Una prueba de interfaz empieza con un estado conocido, realiza una acción y observa la página. Entrar un nombre, pulsar Enter y leer el resultado prueba un flujo. Ver una función devolver un texto comprueba una parte de ese flujo.",
+      "assessmentIds": [
+        "js-comprobar-interfaz-criterio-1",
+        "js-comprobar-interfaz-criterio-2",
+        "js-comprobar-interfaz-criterio-3",
+        "js-comprobar-interfaz-criterio-4"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-17",
+    "reviewDue": "2027-02-04",
+    "technologyRefs": [
+      "foundations",
+      "web",
+      "node",
+      "git-ci"
+    ],
+    "testedVersions": [],
+    "note": "Referencia oficial y casos del curso contrastados en el motor JavaScript. Los ejercicios de archivos y APIs de página se practican sobre el laboratorio HTTP de la ruta.",
+    "policyDigest": "05e0ea6482a350e15fc31a0dd3cd8999c163ab347bf042dba098704574344adc"
+  },
+  "learningProject": {
+    "id": "plan-practica",
+    "name": "Mi plan de práctica",
+    "version": 2,
+    "increment": "Devuelve el estado observable de la interfaz tras enviar el plan. Una entrada inválida debe mantener el último resultado.",
+    "changeReason": "Añade una decisión comprobada al proyecto: probar teclado, foco y recuperación en la interfaz.",
+    "previous": "fundamentos/js-calidad-datos-accesibilidad/js-calidad-datos-accesibilidad-a3",
+    "capabilities": [
+      "Hola TeslaCode",
+      "Mi plan de práctica",
+      "Estado:",
+      "Sesión:",
+      "Minutos diarios:",
+      "Días:",
+      "Meta:",
+      "Recordatorio:",
+      "Referencia diaria:",
+      "Total:",
+      "Nombre:",
+      "Plan con 5 más:",
+      "Tipo de minutos:",
+      "Horas previstas:",
+      "Resto de 10:",
+      "Disponible hasta 120:",
+      "Alcanza 30:",
+      "Igual a referencia:",
+      "Distinto de referencia:",
+      "Recomendación:",
+      "Sesiones programadas:",
+      "Minutos programados:",
+      "Días pares:",
+      "Sesiones realizadas:",
+      "Minutos realizados:",
+      "Sesiones con meta:",
+      "Máximo realizado:",
+      "Registros:"
+    ],
+    "rejection": "Entrada inválida\n",
+    "followUpIds": [
+      "js-comprobar-interfaz-aplicar"
+    ]
+  }
+}

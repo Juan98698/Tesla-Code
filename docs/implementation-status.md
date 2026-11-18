@@ -592,3 +592,34 @@ laboratorio web. La copia de progreso completa conservó 288 entregas al
 importar, exportar y deshacer. La auditoría automática del laboratorio incluye
 320 y 1440 px. La revisión docente independiente y un piloto con principiantes
 quedan pendientes para medir comprensión, ritmo y retención.
+
+## Profundidad y evaluación de Fundamentos con JavaScript
+
+La ruta tiene 78 lecciones en 18 bloques. Se añadieron incrementos para
+comparar estrategias de coste, practicar pilas con deshacer y rehacer, conservar
+el receptor de un callback, trabajar desde la terminal con Node, probar la
+recuperación en el navegador y adaptar el planificador a reservas. Git tiene
+un ejercicio de recuperación desde un commit. El reto de cola pasó a comprobar
+el orden de atención y el caso vacío. Se conservaron los identificadores y
+logros anteriores.
+
+El reto independiente de búsqueda ordenada comprueba el índice, el arreglo
+intacto y las lecturas observadas. Una búsqueda lineal devuelve el resultado
+correcto del caso de 128 precios, pero realiza 108 lecturas y supera el límite
+de 8. La versión que descarta mitades pasa los casos con coincidencia, ausencia,
+repetidos y cero lecturas en vacío. La devolución muestra los conteos en el
+editor y se puede leer a 320 px.
+
+La entrega final incluye contratos distintos de reservas y devoluciones,
+pruebas descargables para ejecutar con Node y un guion de interfaz tras una
+recarga o un error. La [rúbrica y el piloto](fundamentos-cierre-y-piloto.md)
+explican la revisión de decisiones, recuperación, teclado y reproducción
+desde una copia limpia. El problema posterior también aparece en la lección.
+Quedan pendientes el contraste docente independiente y la aplicación con
+principiantes.
+
+La verificación local incluye 146 ejemplos, 2.209 casos de JavaScript y las
+312 entregas de la ruta en una copia de progreso recuperada. Las pruebas
+descargables pasaron en una carpeta independiente. Allí también se ejecutó
+el ejemplo con argumentos de Node y se recuperó el archivo de un commit con
+git show.

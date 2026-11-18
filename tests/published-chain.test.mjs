@@ -36,8 +36,8 @@ const runner = () => ({
   dispose() {},
 });
 
-test('all seventy-two publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
-  assert.equal(lessons.length, 72);
+test('all seventy-eight publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
+  assert.equal(lessons.length, 78);
   assert.deepEqual(source.learningModel.pendingMigration, []);
   assert.equal(source.learningModel.implementedThrough, lessons.at(-1).id);
   let previous = null,
@@ -63,6 +63,10 @@ test('all seventy-two publications form one chain with no pending migration and 
     capabilities = d.learningProject.capabilities;
   }
   assert.equal(get('js-descomponer-y-probar').activities[0].id, 'analizar-contrato');
+  const toolSequence = metadata
+    .filter((lesson) => lesson.levelId === 'js-bloque-13')
+    .map((lesson) => lesson.id);
+  assert.deepEqual(toolSequence.slice(0, 2), ['js-terminal-y-node', 'js-node-git-reproducible']);
 });
 
 test('new increments produce complete evidence, equivalent actual observations and reproducibly failing incidents', async () => {

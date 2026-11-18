@@ -77,7 +77,7 @@ export function javascriptWorker() {
         .slice(0, 6000);
     let boundMatch = true;
     let bindingValues;
-    let returned, originalArgs;
+    let returned, originalArgs, arrayReads, measuringReads;
     const probe = '__teslacode_call_' + Math.random().toString(36).slice(2);
     const callable = entrypoint !== undefined && !exploratory;
     let suffix = '';
@@ -86,7 +86,27 @@ export function javascriptWorker() {
       self[probe] = (fn) => {
         if (typeof fn !== 'function') throw Error('Define la función ' + entrypoint + '.');
         originalArgs = JSON.parse(JSON.stringify(item.args));
-        returned = fn(...originalArgs);
+        let args = originalArgs;
+        if (item.maxArrayReads !== undefined) {
+          args = [...originalArgs];
+          arrayReads = 0;
+          measuringReads = true;
+          const countIndex = (key) => {
+            if (measuringReads && typeof key === 'string' && /^(0|[1-9]\d*)$/.test(key))
+              arrayReads++;
+          };
+          args[0] = new Proxy(args[0], {
+            get(target, key, receiver) {
+              countIndex(key);
+              return Reflect.get(target, key, receiver);
+            },
+            getOwnPropertyDescriptor(target, key) {
+              countIndex(key);
+              return Reflect.getOwnPropertyDescriptor(target, key);
+            },
+          });
+        }
+        returned = fn(...args);
       };
       // A separate statement in the same classic script also supports lexical
       // declarations (const/let), without eval or accepting source text matches.
@@ -152,7 +172,9 @@ export function javascriptWorker() {
       delete self[probe];
     }
     const report = () => {
+      measuringReads = false;
       const unchanged = !item.preserveArgs || same(originalArgs, item.args);
+      const withinBudget = arrayReads === undefined || arrayReads <= item.maxArrayReads;
       if (callable && display(returned).length > 6000) {
         returned = undefined;
         failure = { error: 'El resultado supera 6000 caracteres.' };
@@ -173,6 +195,7 @@ export function javascriptWorker() {
         );
       const passed =
         !failure &&
+        withinBudget &&
         (callable
           ? same(returned, item.expected) && unchanged && stdout === (item.stdout ?? '')
           : stdout === expected && boundMatch && argumentsMatch);
@@ -184,6 +207,7 @@ export function javascriptWorker() {
           actual,
           expected,
           passed: exploratory ? null : passed,
+          ...(arrayReads !== undefined ? { arrayReads, maxArrayReads: item.maxArrayReads } : {}),
           ...(item.expectedBindings && !exploratory
             ? { bindingValues, bindingExpected: bindingDisplay(item.expectedBindings) }
             : {}),
@@ -193,6 +217,12 @@ export function javascriptWorker() {
           ...(!argumentsMatch
             ? {
                 error: 'Presenta los rótulos y sus valores con los tipos del contrato.',
+              }
+            : {}),
+          ...(!withinBudget
+            ? {
+                error:
+                  'Se superó el límite de lecturas del arreglo. Usa su orden para descartar posiciones.',
               }
             : {}),
           ...(callable && !unchanged

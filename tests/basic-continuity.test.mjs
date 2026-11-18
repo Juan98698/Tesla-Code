@@ -113,15 +113,15 @@ test('new learners must analyze reuse while historic completions keep their acce
   assert.equal(historical.xp, 90);
 });
 
-test('the six available blocks form an uninterrupted progression and do not credit future blocks', () => {
+test('the eighteen available blocks form an uninterrupted progression and do not credit future blocks', () => {
   const route = indexRoute(read('content/curriculum/fundamentos.json')),
     completed = new Set();
   const available = route.lessons.filter((l) => l.status === 'published');
-  assert.equal(available.length, 72);
+  assert.equal(available.length, 78);
   for (const item of available) {
     assert.equal(accessState(route, item.id, completed).status, 'ready', item.id);
     completed.add(`fundamentos/${item.id}`);
   }
-  assert.equal(available.at(-1).id, 'js-entrega-y-publicacion');
+  assert.equal(available.at(-1).id, 'js-reto-de-reservas');
   assert.ok(route.lessons.every((lesson) => lesson.status === 'published'));
 });

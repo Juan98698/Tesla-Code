@@ -107,6 +107,21 @@ await withBrowser(dimensions[0] === 390 ? 4339 : 4323, async (browser, origin) =
       for (let stepIndex = 0; stepIndex < data.activities.length; stepIndex++) {
         const activity = data.activities[stepIndex];
         const section = page.locator(`[data-activity="${activity.id}"]`);
+        if (activity.id === 'js-buscar-en-orden-aplicar') {
+          await section.getByText('Casos que comprobará el ejercicio').click();
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+          await section
+            .locator('.code-editor')
+            .fill('function resolverCaso(datos, meta) { return datos.findIndex(n => n >= meta); }');
+          await section.locator('[data-check]').click();
+          const feedback = section.locator('.practice-feedback.bad');
+          await feedback
+            .getByText(/superó el límite de lecturas/)
+            .first()
+            .waitFor();
+          assert.match(await feedback.innerText(), /Lecturas observadas 108 de 8 permitidas/);
+          assert.equal(await section.locator('.badge.live').count(), 0);
+        }
         if (activity.learningStep && stepIndex > 1) {
           const previousKey = `fundamentos/${meta.id}/${data.activities[stepIndex - 1].id}`;
           const previous = await page.evaluate(

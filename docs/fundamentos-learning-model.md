@@ -41,7 +41,7 @@ versión no concede XP ni completa el nuevo contrato.
 
 ## Implementación incremental
 
-Las 72 lecciones publicadas construyen el mismo planificador. Las cuatro etapas se conservan en cada entrega. La edición tiene 72 aplicaciones independientes posteriores a la integración. En ocho lecciones, un juego de traza invita a tomar decisiones, revisar la explicación y volver a intentarlo. Los juegos son optativos y el progreso depende de las prácticas y las comprobaciones.
+Las 78 lecciones publicadas construyen el mismo planificador. Las cuatro etapas se conservan en cada entrega. La edición tiene 78 aplicaciones independientes posteriores a la integración. En diez lecciones, un juego de traza invita a tomar decisiones, revisar la explicación y volver a intentarlo. Los juegos son optativos y el progreso depende de las prácticas y las comprobaciones.
 
 | Tramo                          | Conocimientos que debe preparar                                                     | Incremento del proyecto             |
 | ------------------------------ | ----------------------------------------------------------------------------------- | ----------------------------------- |
@@ -60,6 +60,17 @@ Hasta los módulos, el estudiante recupera su entrega aprobada y sigue conservan
 
 El editor comprueba retornos y resultados de consola para los contratos, incluidos los asíncronos. Las instrucciones de la interfaz tienen una comprobación observable, como recargar después de guardar, recorrer por teclado o verificar que una respuesta antigua no reemplaza a la actual. La bitácora conserva esa evidencia y las pruebas del laboratorio publicado automatizan el recorrido de referencia.
 
+En [búsqueda ordenada](../content/lessons/fundamentos/js-buscar-en-orden.json),
+el comprobador registra las lecturas por índice y las compara con un límite
+explícito. Esto separa el resultado correcto de la estrategia que evita leer
+posiciones innecesarias. La bitácora recoge tres vueltas e identifica la mitad
+descartada en cada una.
+
+La [adaptación final a reservas y sus criterios](fundamentos-cierre-y-piloto.md)
+comprueban el trabajo en una situación nueva. La evaluación del navegador,
+las decisiones y el informe de depuración usan evidencias reproducibles.
+Se conserva un problema posterior para observar transferencia después de un intervalo.
+
 ## Condiciones de cierre de un módulo
 
 - Cada construcción usada tiene introducción, ejemplo y práctica identificables.
@@ -74,7 +85,7 @@ El editor comprueba retornos y resultados de consola para los contratos, incluid
 - Revisión docente independiente y piloto con principiantes siguen pendientes
   hasta que se realicen. Las pruebas automáticas no sustituyen esa evidencia.
 
-## Contrato de evidencias de las treinta publicaciones
+## Contrato de evidencias del proyecto
 
 Las cuatro etapas requieren entregar una explicación. Las tres de código exigen
 además una predicción estructurada; integración añade un diagnóstico y la ejecución

@@ -23,7 +23,7 @@ const source = JSON.parse(readFileSync('content/curriculum/fundamentos.json', 'u
 const route = indexRoute(source);
 
 test('new edition has an independent entry while preserving every old lesson and its progress', () => {
-  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 72);
+  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 78);
   assert.equal(route.archive.lessons.length, 68);
   const completed = new Set(route.archive.lessons.map((l) => 'fundamentos/' + l.id));
   assert.equal(nextLesson(route, completed).id, 'js-tu-primer-programa');
@@ -94,9 +94,9 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       activities++;
     }
   }
-  assert.equal(examples, 134);
-  assert.equal(activities, 288);
-  assert.equal(cases, 2055);
+  assert.equal(examples, 146);
+  assert.equal(activities, 312);
+  assert.equal(cases, 2209);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {
@@ -138,6 +138,54 @@ test('real script semantics preserve output on errors, reject top-level return a
       cases: [{ name: '', stdout: 3, stdin: [1] }],
     }).length >= 3,
   );
+});
+
+test('search activity distinguishes a correct result from an excessive number of reads', () => {
+  const data = JSON.parse(
+    readFileSync('content/lessons/fundamentos/js-buscar-en-orden.json', 'utf8'),
+  );
+  const activity = data.activities.at(-1);
+  const linear =
+    'function resolverCaso(datos, minimo) { return datos.findIndex(n => n >= minimo); }';
+  const measured = activity.cases.find((item) => item.maxArrayReads > 0);
+  const { maxArrayReads, ...resultOnly } = measured;
+  assert.equal(runJavaScript(linear, resultOnly, false, activity.entrypoint).result.passed, true);
+
+  const slow = runJavaScript(linear, measured, false, activity.entrypoint).result;
+  assert.equal(slow.actual, slow.expected);
+  assert.equal(slow.passed, false);
+  assert.ok(slow.arrayReads > maxArrayReads);
+  assert.match(slow.error, /límite de lecturas/);
+
+  const fast = runJavaScript(activity.solution, measured, false, activity.entrypoint).result;
+  assert.equal(fast.passed, true);
+  assert.ok(fast.arrayReads > 0 && fast.arrayReads <= maxArrayReads);
+  const empty = activity.cases.find((item) => item.maxArrayReads === 0);
+  assert.equal(
+    runJavaScript(activity.solution, empty, false, activity.entrypoint).result.arrayReads,
+    0,
+  );
+  const descriptorReads = `
+    function resolverCaso(datos, minimo) {
+      for (let i = 0; i < datos.length; i++)
+        if (Object.getOwnPropertyDescriptor(datos, String(i)).value >= minimo) return i;
+      return -1;
+    }`;
+  assert.equal(
+    runJavaScript(descriptorReads, measured, false, activity.entrypoint).result.arrayReads,
+    slow.arrayReads,
+  );
+  for (const invalid of [
+    { ...measured, args: [5, 2] },
+    { ...measured, maxArrayReads: 2.5 },
+    { ...measured, maxArrayReads: -1 },
+  ]) {
+    assert.ok(
+      javascriptExerciseErrors({ ...activity, cases: [invalid] }).some((error) =>
+        error.includes('límite de lecturas'),
+      ),
+    );
+  }
 });
 
 test('runner accepts only its own frame/channel and releases on success, stop, timeout and replacement', async (t) => {
