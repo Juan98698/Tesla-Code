@@ -1,6 +1,7 @@
 import { escapeHtml as e } from '../core/html.js';
 import { createPythonRunner } from '../repositories/python-runner.js';
 import { PYTHON_LIMITS } from '../domain/python-exercise.js';
+import { JAVASCRIPT_LIMITS } from '../domain/javascript-exercise.js';
 import { createJavaScriptRunner } from '../repositories/javascript-runner.js';
 
 export function codeActivityMarkup(activity, { practice = true } = {}) {
@@ -14,7 +15,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
   return `<p>${js ? 'Escribe, ejecuta y observa la salida. No necesitas instalar herramientas.' : 'Ejecuta y observa la salida. Python se descarga la primera vez; necesitas conexión.'}</p>${js && activity.entrypoint ? `<p>${activity.cases?.some((c) => c.stdout?.trim()) ? 'Comprobar ejecuta el reporte con las entradas de cada caso y después llama a las funciones indicadas con argumentos independientes. Conserva la presentación del reporte; dentro de las funciones de cálculo devuelve valores sin imprimir ni leer entradas.' : 'Comprobar llama a la función indicada y compara su retorno. Para explorar, guarda el resultado de una llamada en una variable y muéstralo; retira esas impresiones al comprobar si el contrato exige una función sin salida.'}</p>` : ''}
     <form><label for="answer-${activity.id}">Tu código ${language}</label>
     <textarea id="answer-${activity.id}" class="code-editor" rows="10" spellcheck="false" wrap="off"
-      autocapitalize="off" autocomplete="off" maxlength="${PYTHON_LIMITS.source}">${e(activity.starter)}</textarea>
+      autocapitalize="off" autocomplete="off" maxlength="${(js ? JAVASCRIPT_LIMITS : PYTHON_LIMITS).source}">${e(activity.starter)}</textarea>
     <details class="console-inputs" ${input ? '' : 'hidden'}><summary>Entradas para ${js ? 'prompt()' : 'input()'} · una por línea</summary>
       <label for="stdin-${activity.id}">Entradas de tu ejecución</label>
       <textarea id="stdin-${activity.id}" data-stdin rows="3" maxlength="12000" aria-describedby="stdin-help-${activity.id}">${e((activity.stdin ?? []).join('\n'))}</textarea>
@@ -41,7 +42,7 @@ export function codeActivityMarkup(activity, { practice = true } = {}) {
               (c) =>
                 `<li><strong>${e(c.name)}</strong>: ${
                   activity.entrypoint
-                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdin !== undefined ? `<p>Entradas del reporte (línea: texto entre comillas):</p><pre tabindex="0">${e(c.stdin.map((line, i) => i + 1 + ': ' + JSON.stringify(line)).join('\n'))}</pre>` : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
+                    ? `argumentos ${e(JSON.stringify(c.args))}; resultado ${e(JSON.stringify(c.expected))}${c.preserveArgs ? '; conserva los argumentos' : ''}${c.stdin !== undefined ? `<p>Entradas del reporte (línea: texto entre comillas):</p><pre tabindex="0">${e(c.stdin.map((line, i) => i + 1 + ': ' + JSON.stringify(line)).join('\n'))}</pre>` : ''}${c.http ? `<p>Respuesta de prueba: ${c.http.offline ? 'fallo de red' : e(c.http.status)} · <code>${e(c.http.url)}</code></p><pre tabindex="0">${e(c.http.body)}</pre>` : ''}${c.stdout !== undefined ? `<details><summary>Reporte esperado de este caso</summary><pre tabindex="0">${e(c.stdout)}</pre></details>` : ''}`
                     : `entradas ${e(JSON.stringify(c.globals ?? c.stdin ?? []))}; salida ${e(JSON.stringify(c.stdout))}`
                 }${c.overrides ? `<p>En otra ejecución se cambian solo estos valores iniciales:</p><pre tabindex="0">${e(JSON.stringify(c.overrides))}</pre>` : ''}${c.expectedBindings ? `<p>Valores que debe conservar tu programa al terminar:</p><pre tabindex="0">${e(JSON.stringify(c.expectedBindings))}</pre>` : ''}</li>`,
             )
@@ -102,7 +103,11 @@ export function mountCodeActivity(
   };
   try {
     const draft = storage?.getItem(key);
-    if (draft !== null && draft !== undefined && draft.length <= PYTHON_LIMITS.source) {
+    if (
+      draft !== null &&
+      draft !== undefined &&
+      draft.length <= (js ? JAVASCRIPT_LIMITS : PYTHON_LIMITS).source
+    ) {
       editor.value = draft;
       hasOwnWork = true;
     }
@@ -155,25 +160,32 @@ export function mountCodeActivity(
     } else if (feedback) feedback.hidden = true;
     try {
       const job =
-        mode === 'run'
+        mode === 'run' && activity.exampleCase
           ? {
-              mode: 'run',
-              code: editor.value,
-              cases: [
-                {
-                  name: 'Tu ejecución',
-                  stdin: stdin.value === '' ? [] : stdin.value.replaceAll('\r\n', '\n').split('\n'),
-                  globals: activity.cases?.[0]?.globals,
-                },
-              ],
-            }
-          : {
               code: submittedCode,
-              cases: activity.cases,
-              entrypoint: activity.entrypoint,
-              bindings: activity.bindings,
-              syntax: activity.syntax,
-            };
+              entrypoint: activity.exampleCase.entrypoint,
+              cases: [activity.exampleCase],
+            }
+          : mode === 'run'
+            ? {
+                mode: 'run',
+                code: editor.value,
+                cases: [
+                  {
+                    name: 'Tu ejecución',
+                    stdin:
+                      stdin.value === '' ? [] : stdin.value.replaceAll('\r\n', '\n').split('\n'),
+                    globals: activity.cases?.[0]?.globals,
+                  },
+                ],
+              }
+            : {
+                code: submittedCode,
+                cases: activity.cases,
+                entrypoint: activity.entrypoint,
+                bindings: activity.bindings,
+                syntax: activity.syntax,
+              };
       const result = await runner.run(
         job,
         (phase) => {
@@ -199,7 +211,7 @@ export function mountCodeActivity(
           return (
             (mode === 'check' ? '── ' + item.name + ' ──\n' : '') +
             (printed || '(El programa terminó sin imprimir salida.)') +
-            (mode === 'check' && activity.entrypoint && !item.error
+            ((activity.exampleCase || (mode === 'check' && activity.entrypoint)) && !item.error
               ? '\nResultado devuelto: ' + item.actual
               : '')
           );
@@ -305,6 +317,7 @@ export function mountCodeExamples(root, data, options = {}) {
         type: example.language,
         starter: example.code,
         stdin: example.stdin,
+        exampleCase: example.sample,
       };
       panel.innerHTML =
         '<summary>Probar este ejemplo en la consola</summary>' +

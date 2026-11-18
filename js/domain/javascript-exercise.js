@@ -1,4 +1,4 @@
-export const JAVASCRIPT_LIMITS = Object.freeze({ source: 12000, cases: 20, output: 6000 });
+export const JAVASCRIPT_LIMITS = Object.freeze({ source: 20000, cases: 20, output: 6000 });
 
 const jsonValue = (value, depth = 0) =>
   depth <= 20 &&
@@ -12,7 +12,9 @@ const jsonValue = (value, depth = 0) =>
 export function javascriptExerciseErrors(exercise) {
   const errors = [];
   if (typeof exercise.starter !== 'string' || exercise.starter.length > JAVASCRIPT_LIMITS.source)
-    errors.push('El código inicial debe ser texto de hasta 12000 caracteres.');
+    errors.push(
+      'El código inicial debe ser texto de hasta ' + JAVASCRIPT_LIMITS.source + ' caracteres.',
+    );
   if (
     typeof exercise.solution !== 'string' ||
     !exercise.solution.trim() ||
@@ -48,9 +50,15 @@ export function javascriptExerciseErrors(exercise) {
             !value.length ||
             value.some(
               (v) =>
-                !['IfStatement', 'WhileStatement', 'ForStatement', 'FunctionDeclaration'].includes(
-                  v,
-                ),
+                ![
+                  'IfStatement',
+                  'WhileStatement',
+                  'DoWhileStatement',
+                  'ForStatement',
+                  'FunctionDeclaration',
+                  'BreakStatement',
+                  'ContinueStatement',
+                ].includes(v),
             )
           : value !== true,
       ))
@@ -119,6 +127,25 @@ export function javascriptExerciseErrors(exercise) {
         errors.push(
           'El caso necesita un nombre simple de función dentro de un contrato de funciones.',
         );
+      if (item?.awaitResult !== undefined && (!callable || typeof item.awaitResult !== 'boolean'))
+        errors.push('La espera debe pertenecer a un caso de función.');
+      if (item?.http !== undefined) {
+        const http = item.http;
+        if (
+          !item.awaitResult ||
+          !http ||
+          typeof http.url !== 'string' ||
+          !/^\/(?!\/)/.test(http.url) ||
+          http.url.length > 200 ||
+          !Number.isInteger(http.status) ||
+          http.status < 200 ||
+          http.status > 599 ||
+          typeof http.body !== 'string' ||
+          http.body.length > JAVASCRIPT_LIMITS.output ||
+          (http.offline !== undefined && typeof http.offline !== 'boolean')
+        )
+          errors.push('La respuesta HTTP debe ser un caso acotado de la función asíncrona.');
+      }
       if (item?.rejected !== undefined && typeof item.rejected !== 'boolean')
         errors.push('El rechazo de una entrada debe declararse como booleano.');
       if (item?.preserveArgs !== undefined && (!callable || typeof item.preserveArgs !== 'boolean'))

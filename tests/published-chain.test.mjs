@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { indexRoute } from '../js/domain/curriculum.js';
 import { runJavaScript } from './support/javascript.mjs';
-import { verifiedWork } from './support/project-proof.mjs';
+import { verifiedWork, verifiedWorkAsync } from './support/project-proof.mjs';
 import { projectAssessmentReady, executionObservation } from '../js/domain/project-assessment.js';
 import { emptyProgress } from '../js/domain/progress-state.js';
 import { recordProjectArtifact } from '../js/domain/learning-project.js';
@@ -36,8 +36,8 @@ const runner = () => ({
   dispose() {},
 });
 
-test('all thirty publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
-  assert.equal(lessons.length, 30);
+test('all seventy-two publications form one chain with no pending migration and preserve prior capabilities and IDs', () => {
+  assert.equal(lessons.length, 72);
   assert.deepEqual(source.learningModel.pendingMigration, []);
   assert.equal(source.learningModel.implementedThrough, lessons.at(-1).id);
   let previous = null,
@@ -65,10 +65,10 @@ test('all thirty publications form one chain with no pending migration and prese
   assert.equal(get('js-descomponer-y-probar').activities[0].id, 'analizar-contrato');
 });
 
-test('new increments produce complete evidence, equivalent actual observations and reproducibly failing incidents', () => {
+test('new increments produce complete evidence, equivalent actual observations and reproducibly failing incidents', async () => {
   for (const d of lessons.slice(8))
     for (const a of d.activities.slice(0, 4)) {
-      const proof = verifiedWork(a, d.activities[1].solution);
+      const proof = await verifiedWorkAsync(a, d.activities[1].solution);
       assert.equal(projectAssessmentReady(a, proof), true, a.id);
       if (a.assessment.rewrite) {
         assert.deepEqual(proof.assessment.rewrite.before, proof.assessment.rewrite.after, a.id);

@@ -29,64 +29,39 @@ de entregar el material a principiantes; el piloto ajustará ritmo y comprensió
    Priorizar capacidades estables usadas en los problemas de la ruta. Una técnica
    básica no es obsoleta por su edad; una API reciente no es obligatoria por ser nueva.
 
-## Resultado sobre el núcleo publicado
+## Distribución de los 18 bloques
 
-| Bloque                       | Distribución | Justificación de la carga y refuerzo                                                                                                                                                                                                                |
-| ---------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Primer programa              | 8            | Introduce desde cero editor/salida, valores/secuencia, errores, const, let, cálculos, entradas y proyecto. Cada paso prepara una herramienta o representación todavía desconocida.                                                                  |
-| Valores, tipos y operaciones | 4            | Reconocer valores, elegir cálculos/unidades, expresar relaciones e integrar son objetivos distintos. Los operadores aritméticos relacionados permanecen juntos. Se añade transferencia de aforos para distinguir < de <= y exigir booleanos reales. |
-| Decisiones y validación      | 4            | Dos ramas, clasificación ordenada, combinación de reglas y admisión de datos forman cuatro avances del contrato. Una reserva nueva comprueba clasificación y rechazo sin copiar los umbrales de minutos.                                            |
-| Repeticiones y trazas        | 4            | Parada con while, estructura de for, acumulación y conteo exigen razonamientos distintos. Se explica += con una traza y se añade un problema con aportes variables; no basta multiplicar una duración constante.                                    |
-| Funciones y descomposición   | 4            | Parámetros/retorno, composición, reglas independientes y retornos tempranos conservan focos identificables. Un ejemplo hace visible el retorno undefined al imprimir sin return y una transferencia integra cobro, composición y límites.           |
-| Listas y análisis            | 6            | Construcción → lectura validada → suma → conteo → resumen → máximo. La representación se practica antes del protocolo variable y el conteo produce una función aprobada antes de componer el resumen.                                               |
+| Bloque                                  | Distribución | Justificación de la carga y refuerzo                                                                                                                                                                                                                |
+| --------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primer programa                         | 8            | Introduce desde cero editor/salida, valores/secuencia, errores, const, let, cálculos, entradas y proyecto. Cada paso prepara una herramienta o representación todavía desconocida.                                                                  |
+| Valores, tipos y operaciones            | 4            | Reconocer valores, elegir cálculos/unidades, expresar relaciones e integrar son objetivos distintos. Los operadores aritméticos relacionados permanecen juntos. Se añade transferencia de aforos para distinguir < de <= y exigir booleanos reales. |
+| Decisiones y validación                 | 4            | Dos ramas, clasificación ordenada, combinación de reglas y admisión de datos forman cuatro avances del contrato. Una reserva nueva comprueba clasificación y rechazo sin copiar los umbrales de minutos.                                            |
+| Repeticiones y trazas                   | 5            | Parada con while, estructura de for, acumulación, conteo y control con break y continue exigen razonamientos distintos. Se explica += con una traza y se añade un problema con aportes variables; no basta multiplicar una duración constante.      |
+| Funciones y descomposición              | 4            | Parámetros/retorno, composición, reglas independientes y retornos tempranos conservan focos identificables. Un ejemplo hace visible el retorno undefined al imprimir sin return y una transferencia integra cobro, composición y límites.           |
+| Listas y análisis                       | 6            | Construcción → lectura validada → suma → conteo → resumen → máximo. La representación se practica antes del protocolo variable y el conteo produce una función aprobada antes de componer el resumen.                                               |
+| Recorridos y métodos de arreglo         | 5            | Empieza por recorrer valores. Separa callbacks, transformación, filtrado/búsqueda y reducción para contrastar cada método con su ciclo y sus casos vacíos.                                                                                          |
+| Texto, objetos y colecciones con claves | 5            | Separa normalización, objetos y referencias, ausencia y opciones, JSON y colecciones Map/Set. El formato de intercambio llega después de la representación.                                                                                         |
+| Contratos y coste                       | 2            | Primero decide qué comportamiento preservar. Después cuenta operaciones y contrasta cómo cambia el trabajo al crecer la entrada.                                                                                                                    |
+| Búsqueda, orden y patrones              | 3            | Cada lección cambia la estrategia y sus supuestos. Búsqueda ordenada, ranking estable y ventana con frecuencias.                                                                                                                                    |
+| Estructuras y recorridos                | 3            | Árbol con recursión, pila y cola, y grafo con visitados. Las tres representaciones resuelven problemas distintos.                                                                                                                                   |
+| JavaScript avanzado                     | 4            | Cierres y alcance, clases y this, fechas y zonas, y representación con BigInt y Symbol. Cada tema tiene un uso y límites específicos.                                                                                                               |
+| Herramientas y módulos                  | 3            | Entorno reproducible y Git, importaciones y exportaciones ES, y pruebas locales con depuración.                                                                                                                                                     |
+| HTML y CSS para el proyecto             | 2            | La forma de representar información y controles precede a su presentación adaptable. Se evalúan con el mismo formulario.                                                                                                                            |
+| DOM, eventos y estado                   | 4            | Render seguro, envío y errores, transiciones de estado y persistencia. Cada lección agrega una función observable en la interfaz.                                                                                                                   |
+| Asincronía y HTTP                       | 5            | Orden de ejecución, promesas, contrato HTTP, consumo con fetch y cancelación. Separar el protocolo de la función asíncrona permite diagnosticar los fallos.                                                                                         |
+| Calidad web                             | 3            | Pruebas de integración, errores y accesibilidad, y trabajo de renderizado. Cada objetivo requiere evidencias distintas.                                                                                                                             |
+| Proyecto y publicación                  | 2            | Una entrega conecta las capacidades anteriores y la siguiente prueba que otra persona las puede usar a partir de una copia limpia.                                                                                                                  |
 
-La coincidencia de cuatro en algunos bloques es resultado de los objetivos del
-núcleo descrito, no una norma para los siguientes. La distribución vuelve a abrirse
-si una capacidad requerida no tiene introducción y práctica suficientes. Estas
-cantidades describen lo implementado, no una garantía de carga óptima universal.
+La distribución abarca 72 lecciones. Los bloques de dos lecciones tienen dos resultados que pueden comprobarse por separado. Los de cinco o más separan representaciones u operaciones que requieren practicar casos distintos antes de combinarlas.
 
-El primer registro del proyecto está vacío; la siguiente lección lo llena con
-entradas reales. Registros: muestra el arreglo para que almacenar textos en lugar
-de números sea un fallo observable antes de sumar. El conteo mantiene suma y datos;
-el resumen reutiliza crearPar, sumarSesiones y contarSesiones. No se acreditan las
-lecciones nuevas por haber completado una edición anterior.
+## Competencias de salida
 
-## Ampliaciones del lenguaje que no se dan por aprendidas
+El estudiante parte de un primer programa en la consola y termina con un planificador modular, accesible por teclado, que valida entradas y conserva sesiones. Puede explicar decisiones de representación y coste, investigar fallos con casos reproducibles y comprobar respuestas HTTP, cancelación y conservación del estado.
 
-Los seis bloques son el núcleo publicado, no el lenguaje completo. El alcance del
-mapa conserva estas introducciones pendientes, antes de exigirlas en proyectos:
+La ruta profundiza en JavaScript moderno en el navegador y emplea Node.js para herramientas y pruebas. Los problemas usan lenguaje estándar, módulos ES, APIs web y dependencias mínimas. Los marcos de frontend, los servicios de backend, las bases de datos y las APIs específicas de producción pertenecen a sus respectivas rutas.
 
-- Bloque 7: funciones como valores y flechas, for...of y control de recorridos con
-  break/continue antes de búsquedas y filtros; métodos de arreglo uno por uno tras
-  su ciclo equivalente. El condicional como expresión requiere su ejemplo propio.
-  do...while se contrasta con while cuando un intento inicial sea parte del problema.
-- Bloque 8: texto, objetos, propiedades, referencias, copias y diccionarios antes
-  de agrupar o serializar; selección de opciones por valor con switch y su salida
-  controlada; valores truthy/falsy antes de contrastar acceso opcional y coalescencia
-  nula. new y recuperación de errores preceden a Map/Set/Date y JSON.parse.
-- Bloque 12: alcance y capturas, prototipos, this, clases, composición y los casos
-  específicos de BigInt/Symbol. No reemplaza la introducción práctica anterior.
-- Bloques 13–18: entorno local, módulos ES, pruebas y Git; HTML/CSS antes de DOM;
-  eventos y estado antes de persistencia; promesas y HTTP antes de async/await y
-  fetch; errores, cancelación, accesibilidad y publicación dentro de sus proyectos.
+## Referencias y revisión
 
-Estas capacidades siguen en preparación; no se suprimen del alcance ni se atribuyen
-al estudiante por finalizar las listas. Su cantidad de lecciones se decidirá con
-el mismo inventario, sin copiar la cantidad del bloque anterior.
+Los fundamentos de operadores, decisiones, ciclos, funciones y colecciones se contrastan con [MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting). Las lecciones enlazan referencias particulares de JavaScript, APIs web, accesibilidad, Node.js, Git y publicación, con una fecha de revisión técnica.
 
-## Referencias contrastadas
-
-Consultadas el 16 de noviembre de 2026; las seis direcciones respondieron con sus
-guías actuales. Se usan para contrastar operaciones, semántica y familias de
-habilidades, no como una prueba de popularidad ni como un currículo para copiar.
-
-- [Números y operadores, MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Math).
-- [Decisiones, MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Conditionals).
-- [Recorridos, MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Loops).
-- [Funciones, MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Functions).
-- [Arreglos, MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Arrays).
-- [Contrato de push, MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push).
-
-La comprobación editorial revisa el contenido y sus dependencias; las pruebas
-comprueban comportamientos y regresiones. La revisión docente independiente y el
-piloto siguen pendientes y no se presentan como condición para redactar lo básico.
+La [matriz de correspondencia](fundamentos-correspondencia-editorial.md) documenta dónde se enseña, practica y aplica cada habilidad. La revisión independiente de un docente y el piloto con principiantes quedan pendientes. El piloto debe medir la carga, dónde se quedan sin estrategias y si las pistas les sirven para avanzar.

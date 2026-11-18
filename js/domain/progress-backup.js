@@ -2,7 +2,7 @@ import { normalizeProgress } from './progress-state.js';
 import { XP } from './gamification.js';
 import { validProjectArtifact, mergeProjectArtifacts } from './learning-project.js';
 
-export const MAX_BACKUP_BYTES = 2 * 1024 * 1024;
+export const MAX_BACKUP_BYTES = 6 * 1024 * 1024;
 const object = (value) => value && typeof value === 'object' && !Array.isArray(value);
 const unique = (a, b) => [...new Set([...a, ...b])];
 const ledgerXP = (state) =>
@@ -10,7 +10,7 @@ const ledgerXP = (state) =>
 
 export function parseBackup(text) {
   if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_BACKUP_BYTES)
-    throw Error('La copia debe ser un archivo JSON de hasta 2 MB.');
+    throw Error('La copia debe ser un archivo JSON de hasta 6 MB.');
   let raw;
   try {
     raw = JSON.parse(text);

@@ -77,7 +77,7 @@ test('invalid or oversized artifacts cannot be imported as verified work', () =>
   const valid = state.projectArtifacts[key];
   for (const item of [
     null,
-    { ...valid, code: 'x'.repeat(12001) },
+    { ...valid, code: 'x'.repeat(20001) },
     { ...valid, report: 'x'.repeat(6001) },
     { ...valid, notes: 'x'.repeat(2001) },
     { ...valid, updatedAt: 'wrong' },

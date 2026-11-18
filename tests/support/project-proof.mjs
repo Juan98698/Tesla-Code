@@ -1,15 +1,16 @@
 import assert from 'node:assert/strict';
-import { runJavaScript } from './javascript.mjs';
+import { runJavaScript, runJavaScriptAsync } from './javascript.mjs';
 import { executionObservation } from '../../js/domain/project-assessment.js';
 import { caseStudyReport } from '../../js/domain/case-study.js';
-export function verifiedWork(a, previous) {
+
+const commonCases = (a) =>
+  a.cases.filter((c) => !c.overrides).map(({ expectedBindings, consoleArguments, ...c }) => c);
+
+function buildWork(a, results, observed, before) {
   const code = a.solution ?? '';
-  const results = a.cases?.map(
-    (c) => runJavaScript(code, c, false, a.entrypoint, a.bindings, a.syntax).result,
-  );
   if (results)
     assert.ok(
-      results.every((r) => r.passed),
+      results.every((result) => result.passed),
       a.id,
     );
   const responses = Object.fromEntries(
@@ -24,24 +25,16 @@ export function verifiedWork(a, previous) {
     reviewStatus: 'pending',
     technical: { passed: true, cases: a.cases?.length ?? a.decisions.length },
   };
-  if (a.assessment.debug) {
-    const f = a.assessment.debug,
-      observed = f.cases.map(
-        (c) => runJavaScript(f.code, c, false, f.entrypoint, f.bindings).result,
-      );
+  if (observed) {
     proof.debug = {
-      fixture: f.id,
+      fixture: a.assessment.debug.id,
       failed: observed.some((r) => !r.passed),
       stdout: observed.map((r) => r.stdout).join('\n'),
       error: observed.map((r) => r.error ?? '').join('\n'),
     };
     assert.equal(proof.debug.failed, true, a.id + ' incident');
   }
-  if (a.assessment.rewrite) {
-    const common = a.cases
-      .filter((c) => !c.overrides)
-      .map(({ expectedBindings, consoleArguments, ...c }) => c);
-    const before = common.map((c) => runJavaScript(previous, c, false, a.entrypoint).result);
+  if (before) {
     proof.rewrite = {
       source: a.learningStep.from,
       kind: a.entrypoint ? 'return-and-stdout' : 'stdout',
@@ -61,4 +54,31 @@ export function verifiedWork(a, previous) {
     verifiedAt: '2026-11-16T16:00:00.000Z',
     assessment: proof,
   };
+}
+
+function jobs(a, previous) {
+  const d = a.assessment.debug;
+  return [
+    a.cases?.map((c) => [a.solution, c, false, a.entrypoint, a.bindings, a.syntax]),
+    d?.cases.map((c) => [d.code, c, false, d.entrypoint, d.bindings]),
+    a.assessment.rewrite
+      ? commonCases(a).map((c) => [previous, c, false, a.entrypoint])
+      : undefined,
+  ];
+}
+
+export function verifiedWork(a, previous) {
+  return buildWork(
+    a,
+    ...jobs(a, previous).map((batch) => batch?.map((job) => runJavaScript(...job).result)),
+  );
+}
+
+export async function verifiedWorkAsync(a, previous) {
+  const observations = [];
+  for (const batch of jobs(a, previous)) {
+    const results = batch && (await Promise.all(batch.map((job) => runJavaScriptAsync(...job))));
+    observations.push(results?.map((job) => job.result));
+  }
+  return buildWork(a, ...observations);
 }

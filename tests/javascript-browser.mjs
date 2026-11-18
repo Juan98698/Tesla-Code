@@ -12,8 +12,13 @@ const examples = module.flatMap(
   (meta) => read(`content/lessons/fundamentos/${meta.id}.json`).examples,
 );
 await mkdir('coverage/javascript', { recursive: true });
-await withBrowser(4323, async (browser, origin) => {
-  for (const width of [1440, 390]) {
+const dimensions = process.argv.includes('--desktop')
+  ? [1440]
+  : process.argv.includes('--mobile')
+    ? [390]
+    : [1440, 390];
+await withBrowser(dimensions[0] === 390 ? 4339 : 4323, async (browser, origin) => {
+  for (const width of dimensions) {
     const context = await learningContext(browser, {
         viewport: { width, height: 1000 },
         reducedMotion: 'reduce',
@@ -68,6 +73,14 @@ await withBrowser(4323, async (browser, origin) => {
           path: `coverage/javascript/first-example-${width}.png`,
           fullPage: true,
         });
+      }
+      if (meta.id === 'js-control-del-recorrido') {
+        const game = page.getByRole('region', { name: 'Control de la pista' });
+        await game.getByRole('button', { name: 'break', exact: true }).click();
+        assert.match(await game.getByRole('status').textContent(), /Intenta otra vez/);
+        await game.getByRole('button', { name: 'continue', exact: true }).click();
+        await game.getByRole('button', { name: 'Siguiente paso' }).click();
+        assert.match(await game.innerText(), /Paso 2 de 3/);
       }
       await page.getByRole('tab', { name: /Practicar/ }).click();
       await page.locator('[data-activity]').first().waitFor();
@@ -273,7 +286,7 @@ await withBrowser(4323, async (browser, origin) => {
       const checkedExamples = [];
       for (const example of examples) {
         const result = await run(example.code, [
-          { name: example.id, stdin: example.stdin, stdout: example.stdout },
+          example.sample ?? { name: example.id, stdin: example.stdin, stdout: example.stdout },
         ]);
         checkedExamples.push(result.results[0]);
       }

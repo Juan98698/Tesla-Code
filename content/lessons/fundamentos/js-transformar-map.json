@@ -1,0 +1,1046 @@
+{
+  "id": "js-transformar-map",
+  "outcome": "Transformar datos sin mutar con map",
+  "requiresConcepts": [
+    "js-funciones-como-valores-concepto"
+  ],
+  "html": "<h3>Cómo funciona</h3><p>Transformar conserva una posición por entrada y cambia su valor. Con un ciclo construyes otro arreglo y agregas cada resultado. Con datos.map(regla), el método crea la lista nueva y llama regla con el valor, índice y arreglo original. Una flecha de un argumento solo utiliza el valor.</p><p>Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.</p><p>Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta.</p><h3>Ejemplo razonado</h3><p>Problema: Un temporizador recibe una secuencia de minutos y necesita segundos por paso. Devuelve una nueva secuencia, incluidos ceros y repetidos, y conserva la entrada.</p><p>Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.</p><p>El caso de referencia produce [0,120,60]. Contrasta después las variantes del contrato, incluidos los bordes indicados.</p><p>Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior.</p><p>La consola del ejemplo llama segundosPorSesion con [[0,2,1]] y comprueba su retorno.</p><pre data-language=\"javascript\">function segundosPorSesion(datos) {\n  const segundos = [];\n  for (const minutos of datos) { segundos.push(minutos * 60); }\n  return segundos;\n}</pre><p>Resultado esperado: [0,120,60]</p><h3>Otra escritura del mismo contrato</h3><p>Compara los pasos de estos dos programas con la misma entrada y examina qué se conserva.</p><pre data-language=\"javascript\">function segundosPorSesion(datos) {\n  return datos.map(minutos =&gt; minutos * 60);\n}</pre>",
+  "examples": [
+    {
+      "id": "js-transformar-map-e1",
+      "language": "javascript",
+      "code": "function segundosPorSesion(datos) {\n  const segundos = [];\n  for (const minutos of datos) { segundos.push(minutos * 60); }\n  return segundos;\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          [
+            0,
+            2,
+            1
+          ]
+        ],
+        "expected": [
+          0,
+          120,
+          60
+        ],
+        "preserveArgs": true,
+        "entrypoint": "segundosPorSesion"
+      }
+    },
+    {
+      "id": "js-transformar-map-e2",
+      "language": "javascript",
+      "code": "function segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          [
+            0,
+            2,
+            1
+          ]
+        ],
+        "expected": [
+          0,
+          120,
+          60
+        ],
+        "preserveArgs": true,
+        "entrypoint": "segundosPorSesion"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "id": "js-transformar-map-resultado-1",
+      "type": "choice",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Con [[0,2,1]], ¿qué retorna segundosPorSesion?",
+      "options": [
+        "[0,120,60]",
+        "[]",
+        "[300,600]"
+      ],
+      "answer": 0,
+      "explanation": "El contrato para [[0,2,1]] exige [0,120,60]. La transformación debe conservar ceros y longitud."
+    },
+    {
+      "id": "js-transformar-map-resultado-2",
+      "type": "choice",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Con [[]], ¿qué retorna segundosPorSesion?",
+      "options": [
+        "[0,120,60]",
+        "[300,600]",
+        "[]"
+      ],
+      "answer": 2,
+      "explanation": "El contrato para [[]] exige []. La transformación debe conservar ceros y longitud."
+    },
+    {
+      "id": "js-transformar-map-resultado-3",
+      "type": "choice",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "¿Qué revisión permite saber si tu reescritura conserva este contrato?",
+      "options": [
+        "Comparar las entradas y resultados completos antes y después, incluidos los casos límite.",
+        "Contar las líneas de las dos versiones y elegir la más corta.",
+        "Comprobar solamente el caso que ya aparece en el primer ejemplo."
+      ],
+      "answer": 0,
+      "explanation": "Incluye una variante que fuerce una rama distinta y comprueba también el reporte y los argumentos conservados."
+    },
+    {
+      "id": "js-transformar-map-criterio",
+      "type": "choice",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "¿Cómo conviertes [0, 1, 2] minutos a segundos manteniendo cada posición?",
+      "options": [
+        "filter con una regla que acepta valores mayores a cero.",
+        "map con una regla que multiplica por 60."
+      ],
+      "answer": 1,
+      "explanation": "La transformación debe conservar ceros y longitud."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-plan",
+      "type": "case-study",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Analiza el cambio que necesita tu plan",
+      "brief": "Un temporizador recibe una secuencia de minutos y necesita segundos por paso. Devuelve una nueva secuencia, incluidos ceros y repetidos, y conserva la entrada.",
+      "evidence": [
+        {
+          "label": "Regla",
+          "text": "Transformar conserva una posición por entrada y cambia su valor. Con un ciclo construyes otro arreglo y agregas cada resultado. Con datos.map(regla), el método crea la lista nueva y llama regla con el valor, índice y arreglo original. Una flecha de un argumento solo utiliza el valor."
+        },
+        {
+          "label": "Caso de partida",
+          "text": "Entrada [[0,2,1]] y salida esperada [0,120,60]."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué debe ocurrir con el caso [[0,2,1]]?",
+          "options": [
+            "[0,120,60]",
+            "No existe un resultado esperado."
+          ],
+          "answer": 0,
+          "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta.",
+          "id": "decision-1",
+          "errorHint": "Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos."
+        },
+        {
+          "prompt": "¿Cómo compruebas que puedes recuperar la entrega anterior?",
+          "options": [
+            "Conservas sus capacidades y comparas los mismos casos después de la reescritura.",
+            "Eliminas el reporte anterior para distinguir el resultado nuevo."
+          ],
+          "answer": 0,
+          "explanation": "La equivalencia se comprueba ejecutando tu versión anterior, junto con las entradas de frontera.",
+          "id": "decision-2",
+          "errorHint": "Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos."
+        }
+      ],
+      "hint": "Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.",
+      "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta.",
+      "assessment": {
+        "questions": []
+      },
+      "learningStep": {
+        "phase": "entender",
+        "label": "01 · Entender",
+        "project": "plan-practica",
+        "requires": [],
+        "input": "Abre el análisis del caso y consulta la entrega anterior.",
+        "output": "Decisiones y explicación registrada.",
+        "reflection": "Describe datos, resultado, borde y evidencia con tus propias palabras.",
+        "from": "fundamentos/js-funciones-como-valores/js-funciones-como-valores-a3"
+      },
+      "hints": [
+        "Entrada [[0,2,1]] y salida esperada [0,120,60].",
+        "Usa este caso para distinguir la decisión nueva de lo que ya hacía tu versión anterior."
+      ],
+      "retryFeedback": "Transformar conserva una posición por entrada y cambia su valor. Con un ciclo construyes otro arreglo y agregas cada resultado. Con datos.map(regla), el método crea la lista nueva y llama regla con el valor, índice y arreglo original. Una flecha de un argumento solo utiliza el valor."
+    },
+    {
+      "id": "js-transformar-map-a1",
+      "type": "javascript",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Implementa este incremento. Un temporizador recibe una secuencia de minutos y necesita segundos por paso. Devuelve una nueva secuencia, incluidos ceros y repetidos, y conserva la entrada.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  const segundos = [];\n  for (const minutos of datos) { segundos.push(minutos * 60); }\n  return segundos;\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [[0,2,1]]",
+          "args": [
+            [
+              0,
+              2,
+              1
+            ]
+          ],
+          "expected": [
+            0,
+            120,
+            60
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [[]]",
+          "args": [
+            []
+          ],
+          "expected": [],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [[5,10]]",
+          "args": [
+            [
+              5,
+              10
+            ]
+          ],
+          "expected": [
+            300,
+            600
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "Contrato 4 · [[1,1,0]]",
+          "args": [
+            [
+              1,
+              1,
+              0
+            ]
+          ],
+          "expected": [
+            60,
+            60,
+            0
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [[]].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [[]].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "implementar",
+        "label": "02 · Implementar",
+        "project": "plan-practica",
+        "requires": [
+          "entender-plan"
+        ],
+        "input": "Añade segundosPorSesion según el contrato. Comienza con el enfoque directo del ejemplo y ajusta los nombres en tu entrega anterior.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Predice el resultado. Identifica el fragmento nuevo y una condición que conserve tu contrato anterior.",
+        "from": "fundamentos/js-funciones-como-valores/js-funciones-como-valores-a3"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [[0,2,1]]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "[0,120,60]"
+            ],
+            "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta."
+          }
+        ]
+      },
+      "entrypoint": "segundosPorSesion"
+    },
+    {
+      "id": "js-transformar-map-a2",
+      "type": "javascript",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Reescribe segundosPorSesion con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  const segundos = [];\n  for (const minutos of datos) { segundos.push(minutos * 60); }\n  return segundos;\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [[0,2,1]]",
+          "args": [
+            [
+              0,
+              2,
+              1
+            ]
+          ],
+          "expected": [
+            0,
+            120,
+            60
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [[]]",
+          "args": [
+            []
+          ],
+          "expected": [],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [[5,10]]",
+          "args": [
+            [
+              5,
+              10
+            ]
+          ],
+          "expected": [
+            300,
+            600
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "Contrato 4 · [[1,1,0]]",
+          "args": [
+            [
+              1,
+              1,
+              0
+            ]
+          ],
+          "expected": [
+            60,
+            60,
+            0
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [[]].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [[]].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "reescribir",
+        "label": "03 · Reescribir y comprobar",
+        "project": "plan-practica",
+        "requires": [
+          "js-transformar-map-a1"
+        ],
+        "input": "Reescribe segundosPorSesion con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Traduce la decisión a la nueva escritura. Explica por qué los mismos casos y valores de frontera producen los mismos resultados.",
+        "from": "fundamentos/js-transformar-map/js-transformar-map-a1"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [[]]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "[]"
+            ],
+            "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta."
+          }
+        ],
+        "rewrite": true
+      },
+      "entrypoint": "segundosPorSesion"
+    },
+    {
+      "id": "js-transformar-map-a3",
+      "type": "javascript",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Integra la decisión y reproduce la incidencia de transformar datos sin mutar con map.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [[0,2,1]]",
+          "args": [
+            [
+              0,
+              2,
+              1
+            ]
+          ],
+          "expected": [
+            0,
+            120,
+            60
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [[]]",
+          "args": [
+            []
+          ],
+          "expected": [],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [[5,10]]",
+          "args": [
+            [
+              5,
+              10
+            ]
+          ],
+          "expected": [
+            300,
+            600
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "Contrato 4 · [[1,1,0]]",
+          "args": [
+            [
+              1,
+              1,
+              0
+            ]
+          ],
+          "expected": [
+            60,
+            60,
+            0
+          ],
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "60",
+            "2",
+            "3",
+            "60",
+            "60",
+            "0"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [[]].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [[]].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "integrar",
+        "label": "04 · Integrar y depurar",
+        "project": "plan-practica",
+        "requires": [
+          "js-transformar-map-a2"
+        ],
+        "input": "Reproduce la incidencia, registra la hipótesis y comprueba tu entrega.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Describe síntoma, dato que lo reproduce, hipótesis, corrección y una prueba adicional. Explica dónde llamaría esta regla el proyecto.",
+        "from": "fundamentos/js-transformar-map/js-transformar-map-a2"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [[5,10]]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "[300,600]"
+            ],
+            "explanation": "Cambiar la etiqueta de una medición no equivale a cambiar su unidad. Traza 0, 2 y 1 minutos como 0, 120 y 60 segundos; verifica que la lista anterior sigue intacta."
+          },
+          {
+            "id": "diagnostico",
+            "type": "choice",
+            "prompt": "¿Qué debes comprobar para explicar la incidencia?",
+            "options": [
+              "La primera diferencia observable entre caso, regla y resultado.",
+              "Solo el número de líneas de la solución."
+            ],
+            "answer": 0,
+            "explanation": "Contrasta el caso y la regla antes de cambiar el código."
+          }
+        ],
+        "debug": {
+          "id": "js-transformar-map-incidencia",
+          "context": "Esta copia contiene una decisión incorrecta. Busca qué caso contradice el contrato y reproduce el fallo antes de reparar.",
+          "code": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos + 60);\n}",
+          "cases": [
+            {
+              "name": "Contrato 1 · [[0,2,1]]",
+              "args": [
+                [
+                  0,
+                  2,
+                  1
+                ]
+              ],
+              "expected": [
+                0,
+                120,
+                60
+              ],
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "30",
+                "5",
+                "3",
+                "10",
+                "30",
+                "0"
+              ]
+            },
+            {
+              "name": "Contrato 2 · [[]]",
+              "args": [
+                []
+              ],
+              "expected": [],
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+              "stdin": [
+                "Luis",
+                "crear juegos",
+                "0",
+                "0",
+                "0"
+              ]
+            },
+            {
+              "name": "Contrato 3 · [[5,10]]",
+              "args": [
+                [
+                  5,
+                  10
+                ]
+              ],
+              "expected": [
+                300,
+                600
+              ],
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "29",
+                "1",
+                "2",
+                "0",
+                "29"
+              ]
+            },
+            {
+              "name": "Contrato 4 · [[1,1,0]]",
+              "args": [
+                [
+                  1,
+                  1,
+                  0
+                ]
+              ],
+              "expected": [
+                60,
+                60,
+                0
+              ],
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 60\nDías: 2\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 120\nNombre: Ana\nPlan con 5 más: 130\nTipo de minutos: number\nHoras previstas: 2\nResto de 10: 0\nDisponible hasta 120: 60\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Intensivo\nSesiones programadas: 2\nDía: 1\nDía: 2\nMinutos programados: 120\nDías pares: 1\nSesiones realizadas: 3\nRegistros: [60,60,0]\nMinutos realizados: 120\nSesiones con meta: 2\nMáximo realizado: 60\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "60",
+                "2",
+                "3",
+                "60",
+                "60",
+                "0"
+              ]
+            }
+          ],
+          "entrypoint": "segundosPorSesion"
+        }
+      },
+      "entrypoint": "segundosPorSesion"
+    },
+    {
+      "id": "js-transformar-map-aplicar",
+      "type": "javascript",
+      "concept": "js-transformar-map-concepto",
+      "prompt": "Una cocina tiene una lista de recetas expresada en porciones. Devuelve los gramos requeridos por receta según una tasa de gramos por porción que puede cambiar. Mantén índices, ceros y repetidos. Implementa resolverCaso.",
+      "starter": "function resolverCaso(porciones, gramosPorPorcion) {\n  // Escribe tu solución.\n}",
+      "solution": "function resolverCaso(porciones, gramosPorPorcion) {\n  return porciones.map(cantidad => cantidad * gramosPorPorcion);\n}",
+      "entrypoint": "resolverCaso",
+      "cases": [
+        {
+          "name": "Caso 1 · [[1,0,2],25]",
+          "args": [
+            [
+              1,
+              0,
+              2
+            ],
+            25
+          ],
+          "expected": [
+            25,
+            0,
+            50
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 2 · [[2,2],7]",
+          "args": [
+            [
+              2,
+              2
+            ],
+            7
+          ],
+          "expected": [
+            14,
+            14
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 3 · [[],12]",
+          "args": [
+            [],
+            12
+          ],
+          "expected": [],
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 4 · [[3],0]",
+          "args": [
+            [
+              3
+            ],
+            0
+          ],
+          "expected": [
+            0
+          ],
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Cada valor de salida usa su propia porción y la misma tasa recibida.",
+      "hints": [
+        "Escribe una salida esperada antes de ejecutar. Usa el caso más corto que cambie al omitir la regla nueva."
+      ],
+      "explanation": "El factor es un dato de entrada, así que 60 no sirve para todas las recetas.",
+      "retryFeedback": "El factor es un dato de entrada, así que 60 no sirve para todas las recetas.",
+      "followUp": {
+        "requires": [
+          "js-transformar-map-a3"
+        ],
+        "reason": "Resuelve esta situación nueva y prueba el borde antes de cerrar la lección."
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "Referencia técnica oficial",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior."
+    ],
+    "workedExample": {
+      "problem": "Problema: Un temporizador recibe una secuencia de minutos y necesita segundos por paso. Devuelve una nueva secuencia, incluidos ceros y repetidos, y conserva la entrada.",
+      "reasoning": "Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Si la entrada mide minutos y la salida segundos, multiplica cada elemento por 60. No sumes las posiciones ni filtres ceros: la longitud y el orden importan. map no modifica por sí mismo la entrada, aunque un callback sí podría hacerlo si escribe sobre los datos.",
+      "result": "El caso de referencia produce [0,120,60]. Contrasta después las variantes del contrato, incluidos los bordes indicados."
+    },
+    "transferActivityIds": [
+      "js-transformar-map-aplicar"
+    ]
+  },
+  "coverage": {
+    "js-transformar-map-concepto": {
+      "explanationExcerpt": "Transformar conserva una posición por entrada y cambia su valor. Con un ciclo construyes otro arreglo y agregas cada resultado. Con datos.map(regla), el método crea la lista nueva y llama regla con el valor, índice y arreglo original. Una flecha de un argumento solo utiliza el valor.",
+      "assessmentIds": [
+        "js-transformar-map-resultado-1",
+        "js-transformar-map-resultado-2",
+        "js-transformar-map-resultado-3",
+        "js-transformar-map-criterio"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-17",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Referencia oficial y casos del curso contrastados en el motor JavaScript. Los ejercicios de archivos y APIs de página se practican sobre el laboratorio HTTP de la ruta.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "plan-practica",
+    "name": "Mi plan de práctica",
+    "version": 2,
+    "increment": "Un temporizador recibe una secuencia de minutos y necesita segundos por paso. Devuelve una nueva secuencia, incluidos ceros y repetidos, y conserva la entrada.",
+    "changeReason": "Añade una decisión comprobada al proyecto: transformar datos sin mutar con map.",
+    "previous": "fundamentos/js-funciones-como-valores/js-funciones-como-valores-a3",
+    "capabilities": [
+      "Hola TeslaCode",
+      "Mi plan de práctica",
+      "Estado:",
+      "Sesión:",
+      "Minutos diarios:",
+      "Días:",
+      "Meta:",
+      "Recordatorio:",
+      "Referencia diaria:",
+      "Total:",
+      "Nombre:",
+      "Plan con 5 más:",
+      "Tipo de minutos:",
+      "Horas previstas:",
+      "Resto de 10:",
+      "Disponible hasta 120:",
+      "Alcanza 30:",
+      "Igual a referencia:",
+      "Distinto de referencia:",
+      "Recomendación:",
+      "Sesiones programadas:",
+      "Minutos programados:",
+      "Días pares:",
+      "Sesiones realizadas:",
+      "Minutos realizados:",
+      "Sesiones con meta:",
+      "Máximo realizado:",
+      "Registros:"
+    ],
+    "rejection": "Entrada inválida\n",
+    "followUpIds": [
+      "js-transformar-map-aplicar"
+    ]
+  },
+  "traceGame": {
+    "title": "Taller de conversiones",
+    "brief": "Cada ficha representa una sesión. Conserva sus posiciones al pasar de minutos a segundos.",
+    "rounds": [
+      {
+        "prompt": "La primera ficha tiene cero minutos. ¿Qué sale?",
+        "options": [
+          "Se quita la primera posición",
+          "0 segundos"
+        ],
+        "answer": 1,
+        "explanation": "map transforma cada posición. Cero se convierte en cero."
+      },
+      {
+        "prompt": "El cargamento es [1, 0, 2]. ¿Cuál es la secuencia final?",
+        "options": [
+          "[60, 0, 120]",
+          "[60, 120]"
+        ],
+        "answer": 0,
+        "explanation": "Se conserva el orden y también la ficha que vale cero."
+      },
+      {
+        "prompt": "¿Qué herramienta describe mejor este encargo?",
+        "options": [
+          "reduce a un solo número",
+          "map"
+        ],
+        "answer": 1,
+        "explanation": "Se requiere una salida por posición."
+      }
+    ]
+  }
+}

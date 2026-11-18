@@ -333,6 +333,11 @@ async function render() {
               'No pudimos cargar la lectura en voz alta. Puedes seguir leyendo la teoría.';
           }
         }
+        if (tab === 'aprender' && data.traceGame) {
+          const { mountTraceGame } = await import('./features/trace-game.js');
+          if (version !== renderVersion) return;
+          mountTraceGame($('lesson-trace-game'), data.traceGame);
+        }
         if (tab === 'aprender' && data.widget) {
           const widget = await widgets[data.widget]();
           if (version !== renderVersion) return;

@@ -4,7 +4,7 @@ import { prepareBindingCases } from '../../js/domain/javascript-contract.js';
 
 // Runs trusted repository examples with the same worker evaluator, using V8's
 // classic-script semantics. Browser tests separately exercise actual Worker/CSP.
-export function runJavaScript(
+function runSandbox(
   code,
   item = { name: 'programa', stdout: '' },
   exploratory = false,
@@ -18,10 +18,12 @@ export function runJavaScript(
   }
   const messages = [],
     blobs = new Map();
+  let execution;
   let context,
     serial = 0;
   const sandbox = {
     performance,
+    setTimeout,
     Blob: class {
       constructor(parts) {
         this.source = parts.join('');
@@ -60,14 +62,30 @@ export function runJavaScript(
         value: sandbox[key],
       });
     javascriptWorker();
-    sandbox.onmessage({ data: { code, item, exploratory, entrypoint } });
+    execution = sandbox.onmessage({ data: { code, item, exploratory, entrypoint } });
   } finally {
     for (const [key, descriptor] of previous) {
       if (descriptor) Object.defineProperty(globalThis, key, descriptor);
       else delete globalThis[key];
     }
   }
-  return { result: messages.find((message) => message.type === 'result').result, messages, blobs };
+  return { execution, messages, blobs };
+}
+
+const resultOf = ({ messages, blobs }) => ({
+  result: messages.find((message) => message.type === 'result').result,
+  messages,
+  blobs,
+});
+
+export function runJavaScript(...args) {
+  return resultOf(runSandbox(...args));
+}
+
+export async function runJavaScriptAsync(...args) {
+  const run = runSandbox(...args);
+  await run.execution;
+  return resultOf(run);
 }
 
 export async function solveJavaScriptActivity(page, activity) {

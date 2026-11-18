@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { runJavaScript } from './support/javascript.mjs';
+import { runJavaScript, runJavaScriptAsync } from './support/javascript.mjs';
 import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 import {
   createJavaScriptRunner,
@@ -23,7 +23,7 @@ const source = JSON.parse(readFileSync('content/curriculum/fundamentos.json', 'u
 const route = indexRoute(source);
 
 test('new edition has an independent entry while preserving every old lesson and its progress', () => {
-  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 30);
+  assert.equal(route.lessons.filter((l) => l.status === 'published').length, 72);
   assert.equal(route.archive.lessons.length, 68);
   const completed = new Set(route.archive.lessons.map((l) => 'fundamentos/' + l.id));
   assert.equal(nextLesson(route, completed).id, 'js-tu-primer-programa');
@@ -38,18 +38,19 @@ test('new edition has an independent entry while preserving every old lesson and
   assert.equal(accessState(route.archive, 'tu-primer-paso', completed).status, 'done');
 });
 
-test('all JavaScript lessons have executable examples, correct solutions and effective counterexamples', () => {
+test('all JavaScript lessons have executable examples, correct solutions and effective counterexamples', async () => {
   let examples = 0,
     activities = 0,
     cases = 0;
   for (const meta of route.lessons.filter((l) => l.status === 'published')) {
     const data = JSON.parse(readFileSync(`content/lessons/fundamentos/${meta.id}.json`, 'utf8'));
     for (const example of data.examples) {
-      const { result } = runJavaScript(example.code, {
-        name: example.id,
-        stdin: example.stdin,
-        stdout: example.stdout,
-      });
+      const { result } = await runJavaScriptAsync(
+        example.code,
+        example.sample ?? { name: example.id, stdin: example.stdin, stdout: example.stdout },
+        false,
+        example.sample?.entrypoint,
+      );
       assert.equal(result.passed, true, example.id + ': ' + JSON.stringify(result));
       examples++;
     }
@@ -57,30 +58,34 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       assert.deepEqual(javascriptExerciseErrors(activity), [], activity.id);
       for (const item of activity.cases) {
         assert.equal(
-          runJavaScript(
-            activity.solution,
-            item,
-            false,
-            activity.entrypoint,
-            activity.bindings,
-            activity.syntax,
+          (
+            await runJavaScriptAsync(
+              activity.solution,
+              item,
+              false,
+              activity.entrypoint,
+              activity.bindings,
+              activity.syntax,
+            )
           ).result.passed,
           true,
           activity.id + '/' + item.name,
         );
         assert.equal(
-          runJavaScript('console.log("incorrecto");', item, false, activity.entrypoint).result
-            .passed,
+          (await runJavaScriptAsync('console.log("incorrecto");', item, false, activity.entrypoint))
+            .result.passed,
           false,
         );
         assert.equal(
-          runJavaScript(
-            '// Otra escritura correcta\n' + activity.solution,
-            item,
-            false,
-            activity.entrypoint,
-            activity.bindings,
-            activity.syntax,
+          (
+            await runJavaScriptAsync(
+              '// Otra escritura correcta\n' + activity.solution,
+              item,
+              false,
+              activity.entrypoint,
+              activity.bindings,
+              activity.syntax,
+            )
           ).result.passed,
           true,
         );
@@ -89,9 +94,9 @@ test('all JavaScript lessons have executable examples, correct solutions and eff
       activities++;
     }
   }
-  assert.equal(examples, 49);
-  assert.equal(activities, 119);
-  assert.equal(cases, 1076);
+  assert.equal(examples, 134);
+  assert.equal(activities, 288);
+  assert.equal(cases, 2055);
 });
 
 test('real script semantics preserve output on errors, reject top-level return and bound output', () => {

@@ -43,6 +43,19 @@ export function javascriptWorker() {
         throw Error('Faltan entradas para prompt(). Escríbelas antes de ejecutar, una por línea.');
       return item.stdin[position++];
     };
+    // Curriculum fixtures make network outcomes repeatable. The frame CSP
+    // still disallows real connections from student code.
+    if (item.http) {
+      const fixture = item.http;
+      self.fetch = async (url) => {
+        if (url !== fixture.url || fixture.offline) throw Error('No se pudo obtener la respuesta.');
+        return {
+          status: fixture.status,
+          ok: fixture.status >= 200 && fixture.status < 300,
+          json: async () => JSON.parse(fixture.body),
+        };
+      };
+    }
     const same = (actual, expected) => {
       if (actual === expected) return true;
       if (!actual || !expected || typeof actual !== 'object' || typeof expected !== 'object')
@@ -64,8 +77,7 @@ export function javascriptWorker() {
         .slice(0, 6000);
     let boundMatch = true;
     let bindingValues;
-    let returned,
-      unchanged = true;
+    let returned, originalArgs;
     const probe = '__teslacode_call_' + Math.random().toString(36).slice(2);
     const callable = entrypoint !== undefined && !exploratory;
     let suffix = '';
@@ -73,13 +85,8 @@ export function javascriptWorker() {
       if (!/^[a-zA-Z_$][\w$]*$/.test(entrypoint)) throw Error('Nombre de función inválido.');
       self[probe] = (fn) => {
         if (typeof fn !== 'function') throw Error('Define la función ' + entrypoint + '.');
-        const args = JSON.parse(JSON.stringify(item.args));
-        returned = fn(...args);
-        if (display(returned).length > 6000) {
-          returned = undefined;
-          throw Error('El resultado supera 6000 caracteres.');
-        }
-        unchanged = !item.preserveArgs || same(args, item.args);
+        originalArgs = JSON.parse(JSON.stringify(item.args));
+        returned = fn(...originalArgs);
       };
       // A separate statement in the same classic script also supports lexical
       // declarations (const/let), without eval or accepting source text matches.
@@ -144,55 +151,76 @@ export function javascriptWorker() {
       URL.revokeObjectURL(url);
       delete self[probe];
     }
-    stdout = stdout.replaceAll('\r\n', '\n');
-    const format = (value) => (typeof value === 'string' ? JSON.stringify(value) : display(value));
-    const expected = callable
-      ? format(item.expected)
-      : (item.stdout ?? '').replaceAll('\r\n', '\n');
-    const actual = callable ? format(returned) : stdout;
-    const argumentsMatch =
-      !item.consoleArguments ||
-      Object.entries(item.consoleArguments).every(([label, value]) =>
-        consoleArguments.some(
-          (args) => args.length === 2 && args[0] === label && same(args[1], value),
-        ),
-      );
-    const passed =
-      !failure &&
-      (callable
-        ? same(returned, item.expected) && unchanged && stdout === (item.stdout ?? '')
-        : stdout === expected && boundMatch && argumentsMatch);
-    send({
-      type: 'result',
-      result: {
-        name: item.name,
-        stdout,
-        actual,
-        expected,
-        passed: exploratory ? null : passed,
-        ...(item.expectedBindings && !exploratory
-          ? { bindingValues, bindingExpected: bindingDisplay(item.expectedBindings) }
-          : {}),
-        ...(!boundMatch
-          ? { error: 'Los datos declarados no tienen los valores o tipos del contrato.' }
-          : {}),
-        ...(!argumentsMatch
-          ? {
-              error: 'Presenta los rótulos y sus valores con los tipos del contrato.',
-            }
-          : {}),
-        ...(callable && !unchanged
-          ? { error: 'La función modificó los argumentos; debe conservarlos.' }
-          : callable && stdout !== (item.stdout ?? '')
+    const report = () => {
+      const unchanged = !item.preserveArgs || same(originalArgs, item.args);
+      if (callable && display(returned).length > 6000) {
+        returned = undefined;
+        failure = { error: 'El resultado supera 6000 caracteres.' };
+      }
+      stdout = stdout.replaceAll('\r\n', '\n');
+      const format = (value) =>
+        typeof value === 'string' ? JSON.stringify(value) : display(value);
+      const expected = callable
+        ? format(item.expected)
+        : (item.stdout ?? '').replaceAll('\r\n', '\n');
+      const actual = callable ? format(returned) : stdout;
+      const argumentsMatch =
+        !item.consoleArguments ||
+        Object.entries(item.consoleArguments).every(([label, value]) =>
+          consoleArguments.some(
+            (args) => args.length === 2 && args[0] === label && same(args[1], value),
+          ),
+        );
+      const passed =
+        !failure &&
+        (callable
+          ? same(returned, item.expected) && unchanged && stdout === (item.stdout ?? '')
+          : stdout === expected && boundMatch && argumentsMatch);
+      send({
+        type: 'result',
+        result: {
+          name: item.name,
+          stdout,
+          actual,
+          expected,
+          passed: exploratory ? null : passed,
+          ...(item.expectedBindings && !exploratory
+            ? { bindingValues, bindingExpected: bindingDisplay(item.expectedBindings) }
+            : {}),
+          ...(!boundMatch
+            ? { error: 'Los datos declarados no tienen los valores o tipos del contrato.' }
+            : {}),
+          ...(!argumentsMatch
             ? {
-                error: item.stdout
-                  ? 'El reporte impreso no coincide con la salida completa esperada. Comprueba también los valores devueltos.'
-                  : 'La salida impresa no cumple el contrato. Devuelve el resultado de la función.',
+                error: 'Presenta los rótulos y sus valores con los tipos del contrato.',
               }
             : {}),
-        ...failure,
-      },
-    });
+          ...(callable && !unchanged
+            ? { error: 'La función modificó los argumentos; debe conservarlos.' }
+            : callable && stdout !== (item.stdout ?? '')
+              ? {
+                  error: item.stdout
+                    ? 'El reporte impreso no coincide con la salida completa esperada. Comprueba también los valores devueltos.'
+                    : 'La salida impresa no cumple el contrato. Devuelve el resultado de la función.',
+                }
+              : {}),
+          ...failure,
+        },
+      });
+    };
+    if (!failure && callable && item.awaitResult) {
+      return Promise.resolve(returned).then(
+        (value) => {
+          returned = value;
+          report();
+        },
+        (error) => {
+          returned = undefined;
+          failure = { error: String(error) };
+          report();
+        },
+      );
+    } else report();
   };
 }
 
@@ -286,7 +314,9 @@ export function createJavaScriptRunner({
         !job.code.trim() ||
         job.code.length > JAVASCRIPT_LIMITS.source
       )
-        return Promise.reject(Error('Escribe un programa de hasta 12000 caracteres.'));
+        return Promise.reject(
+          Error('Escribe un programa de hasta ' + JAVASCRIPT_LIMITS.source + ' caracteres.'),
+        );
       if (
         !Array.isArray(job.cases) ||
         !job.cases.length ||

@@ -243,7 +243,7 @@ test('proof survives journals and backup, stays attached to its tested code and 
   for (const proof of [
     { version: 2 },
     { ...previous[key].assessment, rewrite: { before: 'string', after: [] } },
-    { ...previous[key].assessment, testedCode: 'x'.repeat(12001) },
+    { ...previous[key].assessment, testedCode: 'x'.repeat(20001) },
   ])
     assert.equal(validProjectArtifact(key, { ...previous[key], assessment: proof }), false);
 });

@@ -12,8 +12,14 @@ export function withProgressLock(operation, locks = globalThis.navigator?.locks)
 
 export function createProgressRepository(storage) {
   let baseline = emptyProgress();
-  const read = () =>
-    normalizeProgress(JSON.parse(storage.getItem(PROGRESS_KEY) || storage.getItem(LEGACY)));
+  const read = () => {
+    const stored = JSON.parse(storage.getItem(PROGRESS_KEY) || storage.getItem(LEGACY));
+    if (stored?.compactProjects === true)
+      for (const artifact of Object.values(stored.projectArtifacts ?? {}))
+        if (artifact?.assessment?.testedCode === null)
+          artifact.assessment.testedCode = artifact.code;
+    return normalizeProgress(stored);
+  };
   return {
     load() {
       try {
@@ -47,7 +53,19 @@ export function createProgressRepository(storage) {
             (key) => !removed.has(key),
           );
         }
-        storage.setItem(PROGRESS_KEY, JSON.stringify(next));
+        // Verified code is usually identical to the saved delivery. Store one copy locally.
+        const projectArtifacts = Object.fromEntries(
+          Object.entries(next.projectArtifacts).map(([key, artifact]) => [
+            key,
+            artifact.assessment?.testedCode === artifact.code
+              ? { ...artifact, assessment: { ...artifact.assessment, testedCode: null } }
+              : artifact,
+          ]),
+        );
+        storage.setItem(
+          PROGRESS_KEY,
+          JSON.stringify({ ...next, projectArtifacts, compactProjects: true }),
+        );
         baseline = structuredClone(next);
         Object.assign(state, next);
         return true;

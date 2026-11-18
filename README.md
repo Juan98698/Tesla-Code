@@ -25,7 +25,8 @@ npm run test:access  # Entradas libres, orientación, repasos y secuencia intern
 npm run test:module  # Piloto de la edición anterior: 17 lecciones, escritorio y móvil
 npm run test:python  # Primer módulo Python completo, ejecución real y recuperación del progreso
 npm run test:console # Consola, entradas, errores y ejemplos en escritorio y móvil
-npm run test:javascript # Continuidad JavaScript: 30 lecciones, decisiones, ciclos, funciones y listas
+npm run test:javascript # JavaScript: 72 lecciones desde cero, escritorio y móvil
+npm run test:javascript-lab # Interfaz web del proyecto, a 320 y 1440 px
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
 npm run test:tutor   # Tutor contra HTTP real con proveedor simulado, ambos temas y móvil
@@ -53,8 +54,8 @@ La consola JavaScript usa el motor del navegador y se inicia al ejecutar. Esta e
 ## Qué está disponible
 
 - Siete mapas: Fundamentos, Algoritmia, Python, Frontend, Backend, Bases de datos e IA.
-- **68 lecciones publicadas en los recorridos actuales**, más **68 en la edición anterior de Fundamentos**, conservadas con sus enlaces y logros. El inventario completo tiene 476 entradas, incluidas las archivadas y los bloques futuros. Los temas pendientes aparecen **en preparación**.
-- **Fundamentos con JavaScript: primer módulo completo de ocho lecciones**, 17 ejemplos ejecutables, 31 ejercicios de código y 41 preguntas. Enseña editor y consola, textos/números, secuencia, errores/comentarios, const, let, operaciones, lectura de entradas y conversión antes del proyecto de tarjeta y plan de práctica. La continuidad añade veintidós lecciones en cinco bloques: valores/tipos/operaciones con integración, decisiones y validación, ciclos, funciones y listas. Listas tiene seis lecciones y los otros cuatro bloques de continuidad tienen cuatro cada uno. En total hay 30 lecciones, 49 ejemplos, 119 ejercicios ejecutables, 30 análisis de decisiones y 139 preguntas. Cada entrega reutiliza la anterior; las pistas y devoluciones orientan sobre su habilidad concreta. Consulta la [revisión de alcance y carga](docs/fundamentos-alcance-y-carga.md). La [matriz editorial](docs/fundamentos-correspondencia-editorial.md) indica dónde se explica, practica y aplica cada habilidad. Los doce bloques posteriores siguen en preparación.
+- **110 lecciones publicadas en las rutas actuales**, además de **68 de la edición anterior de Fundamentos**, con sus enlaces y logros. El inventario contiene 506 entradas entre las ediciones actuales, las archivadas y las planificadas.
+- **Fundamentos con JavaScript: 72 lecciones en 18 bloques.** El estudiante empieza en el editor y termina con una aplicación web modular que valida y guarda datos, consulta sugerencias, responde a errores y puede publicar. Cada entrega del planificador alimenta la siguiente. Hay 134 ejemplos ejecutables, 288 actividades de código, 72 análisis de decisiones, 308 preguntas y ocho juegos opcionales de traza. El proyecto web tiene una referencia y una plantilla descargable. Consulta la [distribución por tema](docs/fundamentos-alcance-y-carga.md) y la [matriz editorial](docs/fundamentos-correspondencia-editorial.md).
 - La edición anterior conserva sus 68 lecciones desde Primeros pasos hasta Experto. Se consulta desde el mapa de Fundamentos y desde sus URLs originales. Sus finalizaciones y XP permanecen; no acreditan las nuevas prácticas JavaScript.
 - Primeros pasos (edición anterior): sus dos lecciones incluyen fuentes, ejemplos razonados, errores frecuentes y tres actividades cada una: comprensión, práctica guiada y transferencia. La revisión asistida reduce la deuda editorial a 81 lecciones; la revisión independiente sigue pendiente.
 - IA: 13 lecciones de exploración desde cero, con 52 prácticas, 39 casos de evidencia y 68 preguntas. LLM, difusión y NCM son centrales. El mapa de 96 temas añade puentes de JavaScript, Python y matemáticas, ingeniería y proyectos; 83 temas siguen en preparación. Consulta el [temario y sus límites](docs/ia-curriculum.md).

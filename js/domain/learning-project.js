@@ -1,3 +1,4 @@
+import { JAVASCRIPT_LIMITS } from './javascript-exercise.js';
 const object = (value) => value && typeof value === 'object' && !Array.isArray(value);
 const date = (value) =>
   typeof value === 'string' &&
@@ -18,7 +19,7 @@ function validAssessment(proof) {
     typeof proof.reflection === 'string' &&
     proof.reflection.length <= 2000 &&
     typeof proof.testedCode === 'string' &&
-    proof.testedCode.length <= 12000 &&
+    proof.testedCode.length <= JAVASCRIPT_LIMITS.source &&
     object(proof.technical) &&
     typeof proof.technical.passed === 'boolean' &&
     Number.isInteger(proof.technical.cases) &&
@@ -52,7 +53,7 @@ export function validProjectArtifact(key, artifact) {
     typeof artifact.project === 'string' &&
     /^[a-z0-9-]+$/.test(artifact.project) &&
     typeof artifact.code === 'string' &&
-    artifact.code.length <= 12000 &&
+    artifact.code.length <= JAVASCRIPT_LIMITS.source &&
     typeof artifact.report === 'string' &&
     artifact.report.length <= 6000 &&
     typeof artifact.notes === 'string' &&

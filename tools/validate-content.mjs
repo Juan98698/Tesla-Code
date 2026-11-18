@@ -216,6 +216,16 @@ for (const [key, meta] of lessons) {
             example.stdin.some((value) => typeof value !== 'string'))
         )
           fail(path + ': entradas de ejemplo inválidas');
+        if (example.sample !== undefined) {
+          const errors = javascriptExerciseErrors({
+            starter: '',
+            solution: example.code,
+            entrypoint: example.sample?.entrypoint,
+            cases: [example.sample],
+          });
+          if (example.language !== 'javascript' || !example.sample?.entrypoint || errors.length)
+            fail(path + ': llamada de ejemplo inválida');
+        }
         if (
           !example.id ||
           !['python', 'javascript'].includes(example.language) ||
@@ -252,6 +262,28 @@ for (const [key, meta] of lessons) {
       (!Array.isArray(a.hints) || a.hints.some((hint) => typeof hint !== 'string' || !hint.trim()))
     )
       fail(`${path}/${a.id}: pistas adicionales inválidas`);
+  }
+  if (data.traceGame) {
+    const game = data.traceGame;
+    if (
+      !game.title?.trim() ||
+      !game.brief?.trim() ||
+      !Array.isArray(game.rounds) ||
+      game.rounds.length < 2 ||
+      game.rounds.length > 8 ||
+      game.rounds.some(
+        (round) =>
+          !round.prompt?.trim() ||
+          !round.explanation?.trim() ||
+          !Array.isArray(round.options) ||
+          round.options.length < 2 ||
+          new Set(round.options).size !== round.options.length ||
+          round.options.some((option) => typeof option !== 'string' || !option.trim()) ||
+          !Number.isInteger(round.answer) ||
+          !round.options[round.answer],
+      )
+    )
+      fail(path + ': juego de trazas incompleto');
   }
   const knownWidgets = [
     'variables-sim',

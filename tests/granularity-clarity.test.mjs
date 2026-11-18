@@ -43,7 +43,10 @@ const inserted = [
 
 test('later blocks split distinct learning steps while preserving existing identities and transfers', () => {
   for (const id of ['js-bloque-03', 'js-bloque-04', 'js-bloque-05'])
-    assert.equal(route.levels.find((l) => l.id === id).lessons.length, 4);
+    assert.equal(
+      route.levels.find((l) => l.id === id).lessons.length,
+      id === 'js-bloque-04' ? 5 : 4,
+    );
   for (const id of inserted) assert.ok(route.pos[id] >= 12);
   for (const id of [
     'js-decisiones',

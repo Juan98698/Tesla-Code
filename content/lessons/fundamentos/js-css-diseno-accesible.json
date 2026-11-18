@@ -1,0 +1,829 @@
+{
+  "id": "js-css-diseno-accesible",
+  "outcome": "Dar forma al panel con CSS y comprobarlo con teclado",
+  "requiresConcepts": [
+    "js-html-formulario-concepto"
+  ],
+  "html": "<h3>Cómo funciona</h3><p>CSS selecciona elementos y declara propiedades. .panel selecciona una clase. display: grid crea una cuadrícula y gap separa sus elementos. max-width limita la medida del contenido sin fijar un ancho que obligue a desplazar horizontalmente.</p><p>Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.</p><p>El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio.</p><h3>Ejemplo razonado</h3><p>Problema: Un panel de tareas necesita un estado comprensible sin colores. Construye el texto con el singular de día solo en el caso exacto de uno.</p><p>Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.</p><p>El caso de referencia produce Inicio · 0 días. Contrasta después las variantes del contrato, incluidos los bordes indicados.</p><p>Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior.</p><p>La consola del ejemplo llama etiquetaDeEstado con [&quot;Inicio&quot;,0] y comprueba su retorno.</p><pre data-language=\"javascript\">function etiquetaDeEstado(estado, dias) {\n  return estado + (dias === 1 ? &quot; · 1 día&quot; : &quot; · &quot; + dias + &quot; días&quot;);\n}</pre><p>Resultado esperado: Inicio · 0 días</p><h3>Otra escritura del mismo contrato</h3><p>Compara los pasos de estos dos programas con la misma entrada y examina qué se conserva.</p><pre data-language=\"javascript\">function etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? &quot;día&quot; : &quot;días&quot;;\n  return `${estado} · ${dias} ${unidad}`;\n}</pre><h3>Laboratorio en tu navegador</h3><p>Conecta tu hoja con link rel=&quot;stylesheet&quot;. Prueba primero a 320 px y luego en escritorio. Navega con Tab y aumenta el texto. Guarda una explicación de qué regla permite reordenar las columnas y añade un indicador de foco.</p><p><a href=\"./assets/labs/plan/laboratorio.html\" target=\"_blank\" rel=\"noopener\">Abrir laboratorio Mi plan de práctica</a> · <a href=\"./assets/labs/plan/estudiante.zip\" download>Descargar archivos de trabajo</a></p><p>estilos.css</p><pre data-language=\"css\">.panel {\n  display: grid;\n  gap: 1rem;\n  max-width: 58rem;\n}\n@media (min-width: 46rem) {\n  .panel { grid-template-columns: 1fr 1fr; }\n}\n:focus-visible { outline: 3px solid currentColor; }</pre><p>Comprueba el módulo, el DOM y los archivos en tu copia con la lista del laboratorio. La comprobación de TeslaCode valida el contrato de JavaScript mostrado en cada caso. Registra el contraste con tu navegador en la bitácora.</p>",
+  "examples": [
+    {
+      "id": "js-css-diseno-accesible-e1",
+      "language": "javascript",
+      "code": "function etiquetaDeEstado(estado, dias) {\n  return estado + (dias === 1 ? \" · 1 día\" : \" · \" + dias + \" días\");\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          "Inicio",
+          0
+        ],
+        "expected": "Inicio · 0 días",
+        "preserveArgs": true,
+        "entrypoint": "etiquetaDeEstado"
+      }
+    },
+    {
+      "id": "js-css-diseno-accesible-e2",
+      "language": "javascript",
+      "code": "function etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          "Inicio",
+          0
+        ],
+        "expected": "Inicio · 0 días",
+        "preserveArgs": true,
+        "entrypoint": "etiquetaDeEstado"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "id": "js-css-diseno-accesible-resultado-1",
+      "type": "choice",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Con [\"Inicio\",0], ¿qué retorna etiquetaDeEstado?",
+      "options": [
+        "\"Inicio · 0 días\"",
+        "\"Constante · 1 día\"",
+        "\"Intensivo · 7 días\""
+      ],
+      "answer": 0,
+      "explanation": "El contrato para [\"Inicio\",0] exige \"Inicio · 0 días\". La presentación se adapta y mantiene posible navegar."
+    },
+    {
+      "id": "js-css-diseno-accesible-resultado-2",
+      "type": "choice",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Con [\"Constante\",1], ¿qué retorna etiquetaDeEstado?",
+      "options": [
+        "\"Inicio · 0 días\"",
+        "\"Intensivo · 7 días\"",
+        "\"Constante · 1 día\""
+      ],
+      "answer": 2,
+      "explanation": "El contrato para [\"Constante\",1] exige \"Constante · 1 día\". La presentación se adapta y mantiene posible navegar."
+    },
+    {
+      "id": "js-css-diseno-accesible-resultado-3",
+      "type": "choice",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "¿Qué revisión permite saber si tu reescritura conserva este contrato?",
+      "options": [
+        "Comparar las entradas y resultados completos antes y después, incluidos los casos límite.",
+        "Contar las líneas de las dos versiones y elegir la más corta.",
+        "Comprobar solamente el caso que ya aparece en el primer ejemplo."
+      ],
+      "answer": 0,
+      "explanation": "Incluye una variante que fuerce una rama distinta y comprueba también el reporte y los argumentos conservados."
+    },
+    {
+      "id": "js-css-diseno-accesible-criterio",
+      "type": "choice",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "¿Qué compruebas en una vista estrecha con teclado?",
+      "options": [
+        "Solo si se conservan dos columnas como en escritorio.",
+        "El foco visible y la ausencia de desplazamiento horizontal."
+      ],
+      "answer": 1,
+      "explanation": "La presentación se adapta y mantiene posible navegar."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-plan",
+      "type": "case-study",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Analiza el cambio que necesita tu plan",
+      "brief": "Un panel de tareas necesita un estado comprensible sin colores. Construye el texto con el singular de día solo en el caso exacto de uno.",
+      "evidence": [
+        {
+          "label": "Regla",
+          "text": "CSS selecciona elementos y declara propiedades. .panel selecciona una clase. display: grid crea una cuadrícula y gap separa sus elementos. max-width limita la medida del contenido sin fijar un ancho que obligue a desplazar horizontalmente."
+        },
+        {
+          "label": "Caso de partida",
+          "text": "Entrada [\"Inicio\",0] y salida esperada Inicio · 0 días."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué debe ocurrir con el caso [\"Inicio\",0]?",
+          "options": [
+            "Inicio · 0 días",
+            "No existe un resultado esperado."
+          ],
+          "answer": 0,
+          "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio.",
+          "id": "decision-1",
+          "errorHint": "Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color."
+        },
+        {
+          "prompt": "¿Cómo compruebas que puedes recuperar la entrega anterior?",
+          "options": [
+            "Conservas sus capacidades y comparas los mismos casos después de la reescritura.",
+            "Eliminas el reporte anterior para distinguir el resultado nuevo."
+          ],
+          "answer": 0,
+          "explanation": "La equivalencia se comprueba ejecutando tu versión anterior, junto con las entradas de frontera.",
+          "id": "decision-2",
+          "errorHint": "Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color."
+        }
+      ],
+      "hint": "Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.",
+      "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio.",
+      "assessment": {
+        "questions": []
+      },
+      "learningStep": {
+        "phase": "entender",
+        "label": "01 · Entender",
+        "project": "plan-practica",
+        "requires": [],
+        "input": "Abre el análisis del caso y consulta la entrega anterior.",
+        "output": "Decisiones y explicación registrada.",
+        "reflection": "Describe datos, resultado, borde y evidencia con tus propias palabras.",
+        "from": "fundamentos/js-html-formulario/js-html-formulario-a3"
+      },
+      "hints": [
+        "Entrada [\"Inicio\",0] y salida esperada Inicio · 0 días.",
+        "Usa este caso para distinguir la decisión nueva de lo que ya hacía tu versión anterior."
+      ],
+      "retryFeedback": "CSS selecciona elementos y declara propiedades. .panel selecciona una clase. display: grid crea una cuadrícula y gap separa sus elementos. max-width limita la medida del contenido sin fijar un ancho que obligue a desplazar horizontalmente."
+    },
+    {
+      "id": "js-css-diseno-accesible-a1",
+      "type": "javascript",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Implementa este incremento. Un panel de tareas necesita un estado comprensible sin colores. Construye el texto con el singular de día solo en el caso exacto de uno.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  return estado + (dias === 1 ? \" · 1 día\" : \" · \" + dias + \" días\");\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [\"Inicio\",0]",
+          "args": [
+            "Inicio",
+            0
+          ],
+          "expected": "Inicio · 0 días",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [\"Constante\",1]",
+          "args": [
+            "Constante",
+            1
+          ],
+          "expected": "Constante · 1 día",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [\"Intensivo\",7]",
+          "args": [
+            "Intensivo",
+            7
+          ],
+          "expected": "Intensivo · 7 días",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [\"Constante\",1].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [\"Constante\",1].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "implementar",
+        "label": "02 · Implementar",
+        "project": "plan-practica",
+        "requires": [
+          "entender-plan"
+        ],
+        "input": "Añade etiquetaDeEstado según el contrato. Comienza con el enfoque directo del ejemplo y ajusta los nombres en tu entrega anterior.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Predice el resultado. Identifica el fragmento nuevo y una condición que conserve tu contrato anterior.",
+        "from": "fundamentos/js-html-formulario/js-html-formulario-a3"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [\"Inicio\",0]. Usa el valor o el texto sin comillas.",
+            "answers": [
+              "Inicio · 0 días"
+            ],
+            "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio."
+          }
+        ]
+      },
+      "entrypoint": "etiquetaDeEstado"
+    },
+    {
+      "id": "js-css-diseno-accesible-a2",
+      "type": "javascript",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Reescribe etiquetaDeEstado con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  return estado + (dias === 1 ? \" · 1 día\" : \" · \" + dias + \" días\");\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [\"Inicio\",0]",
+          "args": [
+            "Inicio",
+            0
+          ],
+          "expected": "Inicio · 0 días",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [\"Constante\",1]",
+          "args": [
+            "Constante",
+            1
+          ],
+          "expected": "Constante · 1 día",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [\"Intensivo\",7]",
+          "args": [
+            "Intensivo",
+            7
+          ],
+          "expected": "Intensivo · 7 días",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [\"Constante\",1].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [\"Constante\",1].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "reescribir",
+        "label": "03 · Reescribir y comprobar",
+        "project": "plan-practica",
+        "requires": [
+          "js-css-diseno-accesible-a1"
+        ],
+        "input": "Reescribe etiquetaDeEstado con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Traduce la decisión a la nueva escritura. Explica por qué los mismos casos y valores de frontera producen los mismos resultados.",
+        "from": "fundamentos/js-css-diseno-accesible/js-css-diseno-accesible-a1"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [\"Constante\",1]. Usa el valor o el texto sin comillas.",
+            "answers": [
+              "Constante · 1 día"
+            ],
+            "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio."
+          }
+        ],
+        "rewrite": true
+      },
+      "entrypoint": "etiquetaDeEstado"
+    },
+    {
+      "id": "js-css-diseno-accesible-a3",
+      "type": "javascript",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Integra la decisión y reproduce la incidencia de dar forma al panel con css y comprobarlo con teclado.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias === 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [\"Inicio\",0]",
+          "args": [
+            "Inicio",
+            0
+          ],
+          "expected": "Inicio · 0 días",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [\"Constante\",1]",
+          "args": [
+            "Constante",
+            1
+          ],
+          "expected": "Constante · 1 día",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [\"Intensivo\",7]",
+          "args": [
+            "Intensivo",
+            7
+          ],
+          "expected": "Intensivo · 7 días",
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [\"Constante\",1].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [\"Constante\",1].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "integrar",
+        "label": "04 · Integrar y depurar",
+        "project": "plan-practica",
+        "requires": [
+          "js-css-diseno-accesible-a2"
+        ],
+        "input": "Reproduce la incidencia, registra la hipótesis y comprueba tu entrega.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Describe síntoma, dato que lo reproduce, hipótesis, corrección y una prueba adicional. Documenta también la comprobación del laboratorio en tu propia copia.",
+        "from": "fundamentos/js-css-diseno-accesible/js-css-diseno-accesible-a2"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [\"Intensivo\",7]. Usa el valor o el texto sin comillas.",
+            "answers": [
+              "Intensivo · 7 días"
+            ],
+            "explanation": "El código del plan entrega nombres de estados para el panel. El estado textual debe diferenciar Inicio, Constante e Intensivo incluso sin estilos. No uses los píxeles del contenedor para tomar decisiones de negocio."
+          },
+          {
+            "id": "diagnostico",
+            "type": "choice",
+            "prompt": "¿Qué debes comprobar para explicar la incidencia?",
+            "options": [
+              "La primera diferencia observable entre caso, regla y resultado.",
+              "Solo el número de líneas de la solución."
+            ],
+            "answer": 0,
+            "explanation": "Contrasta el caso y la regla antes de cambiar el código."
+          }
+        ],
+        "debug": {
+          "id": "js-css-diseno-accesible-incidencia",
+          "context": "Esta copia contiene una decisión incorrecta. Busca qué caso contradice el contrato y reproduce el fallo antes de reparar.",
+          "code": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}\n\nfunction minutosDelModo(modo, detalle) {\n  let base;\n  switch (modo) {\n    case \"normal\": base = 25; break;\n    case \"rapido\": base = 10; break;\n    default: base = 15;\n  }\n  return detalle?.minutos ?? base;\n}\n\nfunction importarMinutos(texto) {\n  try {\n    const datos = JSON.parse(texto);\n    if (!Array.isArray(datos) || !datos.every(n => Number.isInteger(n) && n >= 0 && n <= 120)) return null;\n    return datos;\n  } catch { return null; }\n}\n\nfunction totalesPorTema(registros) {\n  const mapa = new Map();\n  for (const dato of registros) {\n    mapa.set(dato.tema, (mapa.get(dato.tema) ?? 0) + dato.minutos);\n  }\n  return [...mapa];\n}\n\nfunction mejorRacha(datos, meta) {\n  let actual = 0;\n  let mejor = 0;\n  for (const valor of datos) {\n    actual = valor >= meta ? actual + 1 : 0;\n    mejor = Math.max(mejor, actual);\n  }\n  return mejor;\n}\n\nfunction pasosMitad(opciones) {\n  let pasos = 0;\n  for (; opciones > 1; opciones = Math.ceil(opciones / 2)) pasos += 1;\n  return pasos;\n}\n\nfunction contieneDuracion(datos, objetivo) {\n  let inicio = 0;\n  let fin = datos.length - 1;\n  while (inicio <= fin) {\n    const medio = Math.floor((inicio + fin) / 2);\n    if (datos[medio] === objetivo) return true;\n    if (datos[medio] < objetivo) inicio = medio + 1;\n    else fin = medio - 1;\n  }\n  return false;\n}\n\nfunction ordenarDuraciones(datos) {\n  return datos.toSorted((a, b) => a - b);\n}\n\nfunction picoSemanal(datos, k) {\n  if (k < 1 || k > datos.length) return null;\n  let total = 0;\n  for (let i = 0; i < k; i += 1) total += datos[i];\n  let mejor = total;\n  for (let i = k; i < datos.length; i += 1) {\n    total += datos[i] - datos[i - k];\n    mejor = Math.max(mejor, total);\n  }\n  return mejor;\n}\n\nfunction minutosDelArbol(nodo) {\n  if (nodo === null) return 0;\n  return nodo.hijos.reduce((total, hijo) => total + minutosDelArbol(hijo), nodo.minutos);\n}\n\nfunction primeraTareaEnNivel(raiz, objetivo) {\n  if (raiz === null) return null;\n  const cola = [[raiz, 0]];\n  for (let i = 0; i < cola.length; i += 1) {\n    const [nodo, nivel] = cola[i];\n    if (nivel === objetivo) return nodo.id;\n    for (const hijo of nodo.hijos) cola.push([hijo, nivel + 1]);\n  }\n  return null;\n}\n\nfunction tareasAlcanzables(conexiones, inicio) {\n  const orden = [inicio];\n  const vistos = new Set(orden);\n  for (let i = 0; i < orden.length; i += 1) {\n    const id = orden[i];\n    for (const vecino of (Object.hasOwn(conexiones, id) ? conexiones[id] : [])) {\n      if (vistos.has(vecino)) continue;\n      vistos.add(vecino);\n      orden.push(vecino);\n    }\n  }\n  return orden;\n}\n\nfunction probarContadores(inicio, cambios) {\n  const crear = base => {\n    let total = base;\n    return valor => { total += valor; return total; };\n  };\n  const primero = crear(inicio);\n  const segundo = crear(0);\n  return [primero(cambios[0]), segundo(cambios[1]), primero(cambios[2])];\n}\n\nfunction duracionDeSesion(inicio, cambios) {\n  class Sesion {\n    constructor(minutos) { this.total = minutos; }\n    agregar(valor) { this.total += valor; return this.total; }\n  }\n  const sesion = new Sesion(inicio);\n  return cambios.map(valor => sesion.agregar(valor));\n}\n\nfunction fechaEnZona(iso, zona) {\n  const partes = new Intl.DateTimeFormat(\"en\", { timeZone: zona, year: \"numeric\", month: \"2-digit\", day: \"2-digit\" }).formatToParts(new Date(iso));\n  const leer = tipo => partes.find(parte => parte.type === tipo).value;\n  return `${leer(\"year\")}-${leer(\"month\")}-${leer(\"day\")}`;\n}\n\nfunction siguienteCodigo(texto, salto) {\n  const siguiente = BigInt(texto) + BigInt(salto);\n  return String(siguiente);\n}\n\nfunction archivoDelPlan(texto) {\n  const base = texto.toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\");\n  return `${base || \"plan\"}.json`;\n}\n\nfunction modeloPlan(minutos, dias) {\n  const total = calcularTotal(minutos, dias);\n  const estado = recomendar(minutos);\n  const alcanza = minutos >= 30;\n  return { total, estado, alcanza };\n}\n\nfunction pruebasUmbral(objetivo) {\n  const entradas = [objetivo - 1, objetivo, objetivo + 1];\n  return entradas.map((entrada, indice) => [entrada, indice !== 0]);\n}\n\nfunction diasDelFormulario(texto) {\n  const dias = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7 ? dias : null;\n}\n\nfunction etiquetaDeEstado(estado, dias) {\n  const unidad = dias <= 1 ? \"día\" : \"días\";\n  return `${estado} · ${dias} ${unidad}`;\n}",
+          "cases": [
+            {
+              "name": "Contrato 1 · [\"Inicio\",0]",
+              "args": [
+                "Inicio",
+                0
+              ],
+              "expected": "Inicio · 0 días",
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "30",
+                "5",
+                "3",
+                "10",
+                "30",
+                "0"
+              ]
+            },
+            {
+              "name": "Contrato 2 · [\"Constante\",1]",
+              "args": [
+                "Constante",
+                1
+              ],
+              "expected": "Constante · 1 día",
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+              "stdin": [
+                "Luis",
+                "crear juegos",
+                "0",
+                "0",
+                "0"
+              ]
+            },
+            {
+              "name": "Contrato 3 · [\"Intensivo\",7]",
+              "args": [
+                "Intensivo",
+                7
+              ],
+              "expected": "Intensivo · 7 días",
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "29",
+                "1",
+                "2",
+                "0",
+                "29"
+              ]
+            }
+          ],
+          "entrypoint": "etiquetaDeEstado"
+        }
+      },
+      "entrypoint": "etiquetaDeEstado"
+    },
+    {
+      "id": "js-css-diseno-accesible-aplicar",
+      "type": "javascript",
+      "concept": "js-css-diseno-accesible-concepto",
+      "prompt": "Un tablero deportivo debe mostrar tiempo en segundos. Diseña en el laboratorio un estado legible a 320 px, con nombre de estado y cantidad visibles aun sin color. Comprueba su lectura con un rótulo largo. Implementa aquí el rótulo con la cantidad primero, luego segundo o segundos y al final el estado. Separa ambos con un guion. Implementa resolverCaso.",
+      "starter": "function resolverCaso(estado, segundos) {\n  // Escribe tu solución.\n}",
+      "solution": "function resolverCaso(estado, segundos) {\n  const unidad = segundos === 1 ? \"segundo\" : \"segundos\";\n  return `${segundos} ${unidad} - ${estado}`;\n}",
+      "entrypoint": "resolverCaso",
+      "cases": [
+        {
+          "name": "Caso 1 · [\"En pausa\",1]",
+          "args": [
+            "En pausa",
+            1
+          ],
+          "expected": "1 segundo - En pausa",
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 2 · [\"Activo\",0]",
+          "args": [
+            "Activo",
+            0
+          ],
+          "expected": "0 segundos - Activo",
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 3 · [\"Activo\",12]",
+          "args": [
+            "Activo",
+            12
+          ],
+          "expected": "12 segundos - Activo",
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 4 · [\"Pendiente de una confirmación extensa\",2]",
+          "args": [
+            "Pendiente de una confirmación extensa",
+            2
+          ],
+          "expected": "2 segundos - Pendiente de una confirmación extensa",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Conserva toda la información en el texto. Solo uno cambia de plural a singular.",
+      "hints": [
+        "Escribe una salida esperada antes de ejecutar. Usa el caso más corto que cambie al omitir la regla nueva."
+      ],
+      "explanation": "Comprueba orden, separación y plural para cero, uno y varios.",
+      "retryFeedback": "Comprueba orden, separación y plural para cero, uno y varios.",
+      "followUp": {
+        "requires": [
+          "js-css-diseno-accesible-a3"
+        ],
+        "reason": "Resuelve esta situación nueva y prueba el borde antes de cerrar la lección."
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "Referencia técnica oficial",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior."
+    ],
+    "workedExample": {
+      "problem": "Problema: Un panel de tareas necesita un estado comprensible sin colores. Construye el texto con el singular de día solo en el caso exacto de uno.",
+      "reasoning": "Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Una consulta @media adapta la cuadrícula en pantallas estrechas. Unidades como rem acompañan el tamaño de texto. :focus-visible permite destacar el foco cuando navegas con teclado. Mantén el orden lógico de HTML y evita comunicar errores solo con color.",
+      "result": "El caso de referencia produce Inicio · 0 días. Contrasta después las variantes del contrato, incluidos los bordes indicados."
+    },
+    "transferActivityIds": [
+      "js-css-diseno-accesible-aplicar"
+    ]
+  },
+  "coverage": {
+    "js-css-diseno-accesible-concepto": {
+      "explanationExcerpt": "CSS selecciona elementos y declara propiedades. .panel selecciona una clase. display: grid crea una cuadrícula y gap separa sus elementos. max-width limita la medida del contenido sin fijar un ancho que obligue a desplazar horizontalmente.",
+      "assessmentIds": [
+        "js-css-diseno-accesible-resultado-1",
+        "js-css-diseno-accesible-resultado-2",
+        "js-css-diseno-accesible-resultado-3",
+        "js-css-diseno-accesible-criterio"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-17",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Referencia oficial y casos del curso contrastados en el motor JavaScript. Los ejercicios de archivos y APIs de página se practican sobre el laboratorio HTTP de la ruta.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "plan-practica",
+    "name": "Mi plan de práctica",
+    "version": 2,
+    "increment": "Un panel de tareas necesita un estado comprensible sin colores. Construye el texto con el singular de día solo en el caso exacto de uno.",
+    "changeReason": "Añade una decisión comprobada al proyecto: dar forma al panel con css y comprobarlo con teclado.",
+    "previous": "fundamentos/js-html-formulario/js-html-formulario-a3",
+    "capabilities": [
+      "Hola TeslaCode",
+      "Mi plan de práctica",
+      "Estado:",
+      "Sesión:",
+      "Minutos diarios:",
+      "Días:",
+      "Meta:",
+      "Recordatorio:",
+      "Referencia diaria:",
+      "Total:",
+      "Nombre:",
+      "Plan con 5 más:",
+      "Tipo de minutos:",
+      "Horas previstas:",
+      "Resto de 10:",
+      "Disponible hasta 120:",
+      "Alcanza 30:",
+      "Igual a referencia:",
+      "Distinto de referencia:",
+      "Recomendación:",
+      "Sesiones programadas:",
+      "Minutos programados:",
+      "Días pares:",
+      "Sesiones realizadas:",
+      "Minutos realizados:",
+      "Sesiones con meta:",
+      "Máximo realizado:",
+      "Registros:"
+    ],
+    "rejection": "Entrada inválida\n",
+    "followUpIds": [
+      "js-css-diseno-accesible-aplicar"
+    ]
+  }
+}

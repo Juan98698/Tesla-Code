@@ -7,12 +7,29 @@ const evidence = (state) =>
     ),
   );
 
+async function encodeUndo(record) {
+  const text = JSON.stringify(record);
+  if (text.length < 128_000 || typeof CompressionStream === 'undefined') return text;
+  const compressed = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  const bytes = new Uint8Array(await new Response(compressed).arrayBuffer());
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return 'gzip:' + btoa(binary);
+}
+
+async function decodeUndo(snapshot) {
+  if (!snapshot?.startsWith('gzip:')) return JSON.parse(snapshot);
+  const bytes = Uint8Array.from(atob(snapshot.slice(5)), (char) => char.charCodeAt(0));
+  const original = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return JSON.parse(await new Response(original).text());
+}
+
 export function importMarkup() {
   return (
     '<section class="card progress-import"><h2>Recuperar una copia del progreso</h2>' +
     '<p>Combina tus logros sin borrar los actuales. Se guarda una copia anterior para deshacer. ' +
     'Incluye las entregas comprobadas y la bitácora guardada; los borradores de código quedan fuera.</p>' +
-    '<label for="progress-file">Copia JSON · hasta 2 MB</label>' +
+    '<label for="progress-file">Copia JSON · hasta 6 MB</label>' +
     '<input id="progress-file" type="file" accept=".json,application/json">' +
     '<p id="import-preview" role="status"></p><div class="btns">' +
     '<button id="confirm-import" class="btn small" disabled>Combinar progreso</button>' +
@@ -63,7 +80,7 @@ export function mountProgressImport(
     }
     cancel.disabled = false;
     try {
-      if (file.size > MAX_BACKUP_BYTES) throw Error('El archivo supera el límite de 2 MB.');
+      if (file.size > MAX_BACKUP_BYTES) throw Error('El archivo supera el límite de 6 MB.');
       const imported = parseBackup(await file.text());
       if (!alive || version !== generation) return;
       candidate = mergeProgress(state, imported);
@@ -87,21 +104,33 @@ export function mountProgressImport(
   };
   confirm.onclick = async () => {
     if (!candidate) return;
+    confirm.disabled = true;
     try {
       const next = mergeProgress(state, candidate);
-      storage.setItem(backupKey, JSON.stringify({ before: state, after: next }));
+      const version = generation;
+      const before = evidence(state);
+      const snapshot = await encodeUndo({ before: state, after: next });
+      if (!alive || version !== generation) return;
+      if (evidence(state) !== before) {
+        confirm.disabled = false;
+        message.textContent = 'Tu progreso cambió. Revisa la copia y vuelve a confirmar.';
+        return;
+      }
+      storage.setItem(backupKey, snapshot);
       reset();
       await onApply(next, 'Progreso combinado. Puedes deshacer esta importación.');
       undo.hidden = false;
       message.textContent = 'Progreso combinado. Puedes deshacer esta importación.';
     } catch {
+      confirm.disabled = !candidate;
       message.textContent = 'No pudimos guardar la importación. Se conserva tu progreso actual.';
     }
   };
   undo.onclick = async () => {
     try {
       const snapshot = storage.getItem(backupKey);
-      const record = JSON.parse(snapshot);
+      const record = await decodeUndo(snapshot);
+      if (!alive || storage.getItem(backupKey) !== snapshot) return;
       const previous = parseBackup(JSON.stringify(record.before));
       const imported = parseBackup(JSON.stringify(record.after));
       if (evidence(state) !== evidence(imported)) {

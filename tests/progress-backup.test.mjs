@@ -124,16 +124,20 @@ test('import preview, cancellation, confirmation, persisted undo and failed stor
   select(JSON.stringify(earned('python/second')));
   await until(() => !root.querySelector('#confirm-import').disabled);
   root.querySelector('#confirm-import').click();
+  await until(() => applied.length === 1);
   assert.equal(applied[0].xp, 120);
   root.querySelector('#undo-import').click();
+  await until(() => applied.length === 2);
   assert.deepEqual(applied[1], original);
   root.querySelector('#undo-import').click();
-  assert.match(root.textContent, /No pudimos recuperar/);
+  await until(() => root.textContent.includes('No pudimos recuperar'));
   select(JSON.stringify(earned('python/second')));
   await until(() => !root.querySelector('#confirm-import').disabled);
   root.querySelector('#confirm-import').click();
+  await until(() => applied.length === 3);
   state.bookmarks.push('python/new-bookmark');
   root.querySelector('#undo-import').click();
+  await until(() => root.textContent.includes('progreso cambió'));
   assert.equal(applied.length, 3);
   assert.match(root.textContent, /progreso cambió/);
   assert.ok(state.bookmarks.includes('python/new-bookmark'));
@@ -156,6 +160,50 @@ test('import preview, cancellation, confirmation, persisted undo and failed stor
   select(JSON.stringify(earned('python/second')));
   await until(() => !root.querySelector('#confirm-import').disabled);
   root.querySelector('#confirm-import').click();
-  assert.match(root.textContent, /Se conserva tu progreso/);
+  await until(() => root.textContent.includes('Se conserva tu progreso'));
   blocked();
+});
+
+test('large course backups stay within the undo quota and preserve full project evidence', async (t) => {
+  installDOM(t);
+  const root = document.getElementById('root');
+  root.innerHTML = importMarkup();
+  const state = emptyProgress();
+  const incoming = earned('fundamentos/proyecto');
+  const code = 'console.log("ámbito");\n'.repeat(700);
+  const at = '2026-11-16T16:00:00.000Z';
+  for (let i = 0; i < 12; i++)
+    incoming.projectArtifacts['fundamentos/proyecto/etapa-' + i] = {
+      project: 'plan-practica',
+      code,
+      report: '',
+      notes: 'Explicación guardada',
+      updatedAt: at,
+      verifiedAt: at,
+    };
+  let snapshot;
+  mountProgressImport(root, state, (next) => Object.assign(state, next), {
+    storage: {
+      getItem: () => snapshot,
+      setItem: (_, value) => {
+        if (value.length > 50_000) throw Error('quota');
+        snapshot = value;
+      },
+      removeItem: () => (snapshot = undefined),
+    },
+  });
+  const text = JSON.stringify(incoming);
+  const file = root.querySelector('input');
+  Object.defineProperty(file, 'files', { value: [{ size: text.length, text: async () => text }] });
+  file.dispatchEvent(new window.Event('change'));
+  const confirm = root.querySelector('#confirm-import');
+  const undo = root.querySelector('#undo-import');
+  await until(() => !confirm.disabled);
+  confirm.click();
+  await until(() => !undo.hidden);
+  assert.match(snapshot, /^gzip:/);
+  assert.deepEqual(state.projectArtifacts, incoming.projectArtifacts);
+  undo.click();
+  await until(() => undo.hidden);
+  assert.deepEqual(state, emptyProgress());
 });

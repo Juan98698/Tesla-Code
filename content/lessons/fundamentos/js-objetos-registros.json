@@ -1,0 +1,964 @@
+{
+  "id": "js-objetos-registros",
+  "outcome": "Modelar registros con objetos y copiar cambios",
+  "requiresConcepts": [
+    "js-texto-normalizado-concepto"
+  ],
+  "html": "<h3>Cómo funciona</h3><p>Un objeto literal reúne datos bajo nombres de propiedad. En { tema: &quot;lógica&quot;, minutos: 20 }, los dos campos describen una sesión. registro.minutos consulta una propiedad conocida y registro[clave] usa el valor de clave para decidir qué propiedad leer.</p><p>Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.</p><p>La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales.</p><h3>Ejemplo razonado</h3><p>Problema: Corrige la duración de una cita conservando sus otros campos y el registro recibido. El resultado debe ser un objeto, incluso cuando la nueva duración es cero.</p><p>Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.</p><p>El caso de referencia produce {&quot;tema&quot;:&quot;arranque&quot;,&quot;minutos&quot;:25}. Contrasta después las variantes del contrato, incluidos los bordes indicados.</p><p>Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior.</p><p>La consola del ejemplo llama cambiarDuracion con [{&quot;tema&quot;:&quot;arranque&quot;,&quot;minutos&quot;:10},25] y comprueba su retorno.</p><pre data-language=\"javascript\">function cambiarDuracion(registro, minutos) {\n  const copia = { ...registro };\n  copia.minutos = minutos;\n  return copia;\n}</pre><p>Resultado esperado: {&quot;tema&quot;:&quot;arranque&quot;,&quot;minutos&quot;:25}</p><h3>Otra escritura del mismo contrato</h3><p>Compara los pasos de estos dos programas con la misma entrada y examina qué se conserva.</p><pre data-language=\"javascript\">function cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}</pre>",
+  "examples": [
+    {
+      "id": "js-objetos-registros-e1",
+      "language": "javascript",
+      "code": "function cambiarDuracion(registro, minutos) {\n  const copia = { ...registro };\n  copia.minutos = minutos;\n  return copia;\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          {
+            "tema": "arranque",
+            "minutos": 10
+          },
+          25
+        ],
+        "expected": {
+          "tema": "arranque",
+          "minutos": 25
+        },
+        "preserveArgs": true,
+        "entrypoint": "cambiarDuracion"
+      }
+    },
+    {
+      "id": "js-objetos-registros-e2",
+      "language": "javascript",
+      "code": "function cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}",
+      "stdout": "",
+      "sample": {
+        "name": "Variante 1",
+        "args": [
+          {
+            "tema": "arranque",
+            "minutos": 10
+          },
+          25
+        ],
+        "expected": {
+          "tema": "arranque",
+          "minutos": 25
+        },
+        "preserveArgs": true,
+        "entrypoint": "cambiarDuracion"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "id": "js-objetos-registros-resultado-1",
+      "type": "choice",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Con [{\"tema\":\"arranque\",\"minutos\":10},25], ¿qué retorna cambiarDuracion?",
+      "options": [
+        "{\"tema\":\"arranque\",\"minutos\":25}",
+        "{\"id\":\"0\",\"minutos\":0}",
+        "{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":12}"
+      ],
+      "answer": 0,
+      "explanation": "El contrato para [{\"tema\":\"arranque\",\"minutos\":10},25] exige {\"tema\":\"arranque\",\"minutos\":25}. La propagación de un objeto copia un solo nivel."
+    },
+    {
+      "id": "js-objetos-registros-resultado-2",
+      "type": "choice",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Con [{\"id\":\"0\",\"minutos\":5},0], ¿qué retorna cambiarDuracion?",
+      "options": [
+        "{\"tema\":\"arranque\",\"minutos\":25}",
+        "{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":12}",
+        "{\"id\":\"0\",\"minutos\":0}"
+      ],
+      "answer": 2,
+      "explanation": "El contrato para [{\"id\":\"0\",\"minutos\":5},0] exige {\"id\":\"0\",\"minutos\":0}. La propagación de un objeto copia un solo nivel."
+    },
+    {
+      "id": "js-objetos-registros-resultado-3",
+      "type": "choice",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "¿Qué revisión permite saber si tu reescritura conserva este contrato?",
+      "options": [
+        "Comparar las entradas y resultados completos antes y después, incluidos los casos límite.",
+        "Contar las líneas de las dos versiones y elegir la más corta.",
+        "Comprobar solamente el caso que ya aparece en el primer ejemplo."
+      ],
+      "answer": 0,
+      "explanation": "Incluye una variante que fuerce una rama distinta y comprueba también el reporte y los argumentos conservados."
+    },
+    {
+      "id": "js-objetos-registros-criterio",
+      "type": "choice",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Al copiar { ...registro }, ¿qué ocurre con una lista anidada?",
+      "options": [
+        "La lista interna se vuelve una copia profunda.",
+        "La lista interna sigue siendo la misma referencia."
+      ],
+      "answer": 1,
+      "explanation": "La propagación de un objeto copia un solo nivel."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-plan",
+      "type": "case-study",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Analiza el cambio que necesita tu plan",
+      "brief": "Corrige la duración de una cita conservando sus otros campos y el registro recibido. El resultado debe ser un objeto, incluso cuando la nueva duración es cero.",
+      "evidence": [
+        {
+          "label": "Regla",
+          "text": "Un objeto literal reúne datos bajo nombres de propiedad. En { tema: \"lógica\", minutos: 20 }, los dos campos describen una sesión. registro.minutos consulta una propiedad conocida y registro[clave] usa el valor de clave para decidir qué propiedad leer."
+        },
+        {
+          "label": "Caso de partida",
+          "text": "Entrada [{\"tema\":\"arranque\",\"minutos\":10},25] y salida esperada {\"tema\":\"arranque\",\"minutos\":25}."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué debe ocurrir con el caso [{\"tema\":\"arranque\",\"minutos\":10},25]?",
+          "options": [
+            "{\"tema\":\"arranque\",\"minutos\":25}",
+            "No existe un resultado esperado."
+          ],
+          "answer": 0,
+          "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales.",
+          "id": "decision-1",
+          "errorHint": "Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos."
+        },
+        {
+          "prompt": "¿Cómo compruebas que puedes recuperar la entrega anterior?",
+          "options": [
+            "Conservas sus capacidades y comparas los mismos casos después de la reescritura.",
+            "Eliminas el reporte anterior para distinguir el resultado nuevo."
+          ],
+          "answer": 0,
+          "explanation": "La equivalencia se comprueba ejecutando tu versión anterior, junto con las entradas de frontera.",
+          "id": "decision-2",
+          "errorHint": "Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos."
+        }
+      ],
+      "hint": "Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.",
+      "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales.",
+      "assessment": {
+        "questions": []
+      },
+      "learningStep": {
+        "phase": "entender",
+        "label": "01 · Entender",
+        "project": "plan-practica",
+        "requires": [],
+        "input": "Abre el análisis del caso y consulta la entrega anterior.",
+        "output": "Decisiones y explicación registrada.",
+        "reflection": "Describe datos, resultado, borde y evidencia con tus propias palabras.",
+        "from": "fundamentos/js-texto-normalizado/js-texto-normalizado-a3"
+      },
+      "hints": [
+        "Entrada [{\"tema\":\"arranque\",\"minutos\":10},25] y salida esperada {\"tema\":\"arranque\",\"minutos\":25}.",
+        "Usa este caso para distinguir la decisión nueva de lo que ya hacía tu versión anterior."
+      ],
+      "retryFeedback": "Un objeto literal reúne datos bajo nombres de propiedad. En { tema: \"lógica\", minutos: 20 }, los dos campos describen una sesión. registro.minutos consulta una propiedad conocida y registro[clave] usa el valor de clave para decidir qué propiedad leer."
+    },
+    {
+      "id": "js-objetos-registros-a1",
+      "type": "javascript",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Implementa este incremento. Corrige la duración de una cita conservando sus otros campos y el registro recibido. El resultado debe ser un objeto, incluso cuando la nueva duración es cero.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  const copia = { ...registro };\n  copia.minutos = minutos;\n  return copia;\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [{\"tema\":\"arranque\",\"minutos\":10},25]",
+          "args": [
+            {
+              "tema": "arranque",
+              "minutos": 10
+            },
+            25
+          ],
+          "expected": {
+            "tema": "arranque",
+            "minutos": 25
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [{\"id\":\"0\",\"minutos\":5},0]",
+          "args": [
+            {
+              "id": "0",
+              "minutos": 5
+            },
+            0
+          ],
+          "expected": {
+            "id": "0",
+            "minutos": 0
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":8},12]",
+          "args": [
+            {
+              "tema": "x",
+              "etiquetas": [
+                "a"
+              ],
+              "minutos": 8
+            },
+            12
+          ],
+          "expected": {
+            "tema": "x",
+            "etiquetas": [
+              "a"
+            ],
+            "minutos": 12
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [{\"id\":\"0\",\"minutos\":5},0].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [{\"id\":\"0\",\"minutos\":5},0].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "implementar",
+        "label": "02 · Implementar",
+        "project": "plan-practica",
+        "requires": [
+          "entender-plan"
+        ],
+        "input": "Añade cambiarDuracion según el contrato. Comienza con el enfoque directo del ejemplo y ajusta los nombres en tu entrega anterior.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Predice el resultado. Identifica el fragmento nuevo y una condición que conserve tu contrato anterior.",
+        "from": "fundamentos/js-texto-normalizado/js-texto-normalizado-a3"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [{\"tema\":\"arranque\",\"minutos\":10},25]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "{\"tema\":\"arranque\",\"minutos\":25}"
+            ],
+            "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales."
+          }
+        ]
+      },
+      "entrypoint": "cambiarDuracion"
+    },
+    {
+      "id": "js-objetos-registros-a2",
+      "type": "javascript",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Reescribe cambiarDuracion con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  const copia = { ...registro };\n  copia.minutos = minutos;\n  return copia;\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [{\"tema\":\"arranque\",\"minutos\":10},25]",
+          "args": [
+            {
+              "tema": "arranque",
+              "minutos": 10
+            },
+            25
+          ],
+          "expected": {
+            "tema": "arranque",
+            "minutos": 25
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [{\"id\":\"0\",\"minutos\":5},0]",
+          "args": [
+            {
+              "id": "0",
+              "minutos": 5
+            },
+            0
+          ],
+          "expected": {
+            "id": "0",
+            "minutos": 0
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":8},12]",
+          "args": [
+            {
+              "tema": "x",
+              "etiquetas": [
+                "a"
+              ],
+              "minutos": 8
+            },
+            12
+          ],
+          "expected": {
+            "tema": "x",
+            "etiquetas": [
+              "a"
+            ],
+            "minutos": 12
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [{\"id\":\"0\",\"minutos\":5},0].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [{\"id\":\"0\",\"minutos\":5},0].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "reescribir",
+        "label": "03 · Reescribir y comprobar",
+        "project": "plan-practica",
+        "requires": [
+          "js-objetos-registros-a1"
+        ],
+        "input": "Reescribe cambiarDuracion con el enfoque alternativo presentado en Aprender. Compara la salida y los resultados con el mismo conjunto de datos.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Traduce la decisión a la nueva escritura. Explica por qué los mismos casos y valores de frontera producen los mismos resultados.",
+        "from": "fundamentos/js-objetos-registros/js-objetos-registros-a1"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [{\"id\":\"0\",\"minutos\":5},0]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "{\"id\":\"0\",\"minutos\":0}"
+            ],
+            "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales."
+          }
+        ],
+        "rewrite": true
+      },
+      "entrypoint": "cambiarDuracion"
+    },
+    {
+      "id": "js-objetos-registros-a3",
+      "type": "javascript",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Integra la decisión y reproduce la incidencia de modelar registros con objetos y copiar cambios.",
+      "starter": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}",
+      "solution": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  return { ...registro, minutos };\n}",
+      "cases": [
+        {
+          "name": "Contrato 1 · [{\"tema\":\"arranque\",\"minutos\":10},25]",
+          "args": [
+            {
+              "tema": "arranque",
+              "minutos": 10
+            },
+            25
+          ],
+          "expected": {
+            "tema": "arranque",
+            "minutos": 25
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "5",
+            "3",
+            "10",
+            "30",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 2 · [{\"id\":\"0\",\"minutos\":5},0]",
+          "args": [
+            {
+              "id": "0",
+              "minutos": 5
+            },
+            0
+          ],
+          "expected": {
+            "id": "0",
+            "minutos": 0
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "name": "Contrato 3 · [{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":8},12]",
+          "args": [
+            {
+              "tema": "x",
+              "etiquetas": [
+                "a"
+              ],
+              "minutos": 8
+            },
+            12
+          ],
+          "expected": {
+            "tema": "x",
+            "etiquetas": [
+              "a"
+            ],
+            "minutos": 12
+          },
+          "preserveArgs": true,
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "29",
+            "1",
+            "2",
+            "0",
+            "29"
+          ]
+        },
+        {
+          "name": "maximo[[5]] · reporte ['Luis', 'crear juegos', '0', '0']",
+          "stdin": [
+            "Luis",
+            "crear juegos",
+            "0",
+            "0",
+            "0"
+          ],
+          "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+          "entrypoint": "maximo",
+          "args": [
+            [
+              5
+            ]
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "calcularTotal[125, 7] · reporte ['Ana', 'aprender lógica', '30', '8']",
+          "stdin": [
+            "Ana",
+            "aprender lógica",
+            "30",
+            "8",
+            "3",
+            "10",
+            "30",
+            "0"
+          ],
+          "stdout": "Entrada inválida\n",
+          "rejected": true,
+          "entrypoint": "calcularTotal",
+          "args": [
+            125,
+            7
+          ],
+          "expected": 875,
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.",
+      "hints": [
+        "Compara tus resultados con las entradas y salidas declaradas, especialmente [{\"id\":\"0\",\"minutos\":5},0].",
+        "Compara el caso exacto de frontera y conserva las capacidades del reporte anterior."
+      ],
+      "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales.",
+      "retryFeedback": "Compara tus resultados con las entradas y salidas declaradas, especialmente [{\"id\":\"0\",\"minutos\":5},0].",
+      "stdin": [
+        "Ana",
+        "aprender lógica",
+        "30",
+        "5",
+        "3",
+        "10",
+        "30",
+        "0"
+      ],
+      "usesInput": true,
+      "learningStep": {
+        "phase": "integrar",
+        "label": "04 · Integrar y depurar",
+        "project": "plan-practica",
+        "requires": [
+          "js-objetos-registros-a2"
+        ],
+        "input": "Reproduce la incidencia, registra la hipótesis y comprueba tu entrega.",
+        "output": "Versión verificable con código, resultados y bitácora.",
+        "reflection": "Describe síntoma, dato que lo reproduce, hipótesis, corrección y una prueba adicional. Explica dónde llamaría esta regla el proyecto.",
+        "from": "fundamentos/js-objetos-registros/js-objetos-registros-a2"
+      },
+      "assessment": {
+        "questions": [
+          {
+            "id": "prediccion",
+            "type": "text",
+            "prompt": "Antes de ejecutar, escribe el resultado que debe producir el caso [{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":8},12]. Usa JSON compacto para la lista o el objeto.",
+            "answers": [
+              "{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":12}"
+            ],
+            "explanation": "La propagación es superficial. Si registro contiene otra lista u objeto, ambas copias todavía comparten ese dato interno. En este reto cambias una cantidad en el nivel superior. Prueba que el registro devuelto cambia y el argumento de entrada conserva los campos originales."
+          },
+          {
+            "id": "diagnostico",
+            "type": "choice",
+            "prompt": "¿Qué debes comprobar para explicar la incidencia?",
+            "options": [
+              "La primera diferencia observable entre caso, regla y resultado.",
+              "Solo el número de líneas de la solución."
+            ],
+            "answer": 0,
+            "explanation": "Contrasta el caso y la regla antes de cambiar el código."
+          }
+        ],
+        "debug": {
+          "id": "js-objetos-registros-incidencia",
+          "context": "Esta copia contiene una decisión incorrecta. Busca qué caso contradice el contrato y reproduce el fallo antes de reparar.",
+          "code": "function crearPar(primero, segundo) {\n  return [primero, segundo];\n}\n\nfunction calcularTotal(minutosPorDia, cantidadDias) {\n  return minutosPorDia * cantidadDias;\n}\n\nfunction ampliarCinco(cantidad) {\n  return cantidad + 5;\n}\n\nfunction minutosValidos(texto) {\n  const valor = Number(texto);\n  return texto.trim() !== \"\" && Number.isInteger(valor) && valor >= 0 && valor <= 120;\n}\n\nfunction recomendar(cantidad) {\n  if (cantidad >= 60) { return \"Intensivo\"; }\n  if (cantidad >= 30) { return \"Constante\"; }\n  return \"Inicio\";\n}\n\nfunction sumarSesiones(datos) {\n  let total = 0;\n  let i = 0;\n  while (i < datos.length) {\n    total = total + datos[i];\n    i = i + 1;\n  }\n  return total;\n}\n\nfunction contarSesiones(datos, objetivo) {\n  let cantidad = 0;\n  for (let i = 0; i < datos.length; i = i + 1) {\n    if (datos[i] >= objetivo) { cantidad = cantidad + 1; }\n  }\n  return cantidad;\n}\n\nfunction maximo(datos) {\n  if (datos.length === 0) { return \"Sin datos\"; }\n  let mayor = datos[0];\n  let i = 1;\n  while (i < datos.length) {\n    if (datos[i] > mayor) { mayor = datos[i]; }\n    i = i + 1;\n  }\n  return mayor;\n}\n\nfunction resumir(datos, objetivo) {\n  return crearPar(sumarSesiones(datos), contarSesiones(datos, objetivo));\n}\n\nconst nombre = prompt(\"Tu nombre\");\nconst meta = prompt(\"Tu meta\");\nconst textoMinutos = prompt(\"Minutos diarios\");\nconst minutos = Number(textoMinutos);\nconst textoDias = prompt(\"Días del plan\");\nconst dias = Number(textoDias);\nconst referencia = 20;\nif (minutosValidos(textoMinutos) && textoDias.trim() !== \"\" && Number.isInteger(dias) && dias >= 0 && dias <= 7) {\n  const textoCantidad = prompt(\"Cantidad de sesiones realizadas\");\n  const cantidadRegistros = Number(textoCantidad);\n  const registros = [];\n  if (textoCantidad.trim() !== \"\" && Number.isInteger(cantidadRegistros) && cantidadRegistros >= 0 && cantidadRegistros <= 10) {\n    let registrosValidos = true;\n    for (let i = 0; i < cantidadRegistros; i = i + 1) {\n      const textoRegistro = prompt(\"Minutos realizados\");\n      if (minutosValidos(textoRegistro)) {\n        registros.push(Number(textoRegistro));\n      } else { registrosValidos = false; }\n    }\n    if (registrosValidos) {\n      const total = calcularTotal(minutos, dias);\n      const minutosAmpliados = ampliarCinco(minutos);\n      const totalAmpliado = calcularTotal(ampliarCinco(minutos), dias);\n      const tipoMinutos = typeof minutos;\n      const horas = total / 60;\n      const restoDiez = minutos % 10;\n      const recomendacion = recomendar(minutos);\n      console.log(\"Hola TeslaCode\");\n      console.log(\"Mi plan de práctica\");\n      console.log(\"Estado: listo\");\n      console.log(\"Sesión: JavaScript\");\n      console.log(\"Minutos diarios:\", minutos);\n      console.log(\"Días:\", dias);\n      console.log(\"Meta:\", meta);\n      console.log(\"Recordatorio:\", meta);\n      console.log(\"Referencia diaria:\", referencia);\n      console.log(\"Total:\", total);\n      console.log(\"Nombre:\", nombre);\n      console.log(\"Plan con 5 más:\", totalAmpliado);\n      console.log(\"Tipo de minutos:\", tipoMinutos);\n      console.log(\"Horas previstas:\", horas);\n      console.log(\"Resto de 10:\", restoDiez);\n      console.log(\"Disponible hasta 120:\", 120 - minutos);\n      console.log(\"Alcanza 30:\", 30 <= minutos);\n      console.log(\"Igual a referencia:\", referencia === minutos);\n      console.log(\"Distinto de referencia:\", referencia !== minutos);\n      console.log(\"Recomendación:\", recomendacion);\n      console.log(\"Sesiones programadas:\", dias);\n      let programados = 0;\n      let pares = 0;\n      for (let i = 0; i < dias; i = i + 1) {\n        const dia = i + 1;\n        console.log(\"Día:\", dia);\n        programados = programados + minutos;\n        if (dia % 2 === 0) { pares = pares + 1; }\n      }\n      console.log(\"Minutos programados:\", programados);\n      console.log(\"Días pares:\", pares);\n      console.log(\"Sesiones realizadas:\", registros.length);\n      console.log(\"Registros:\", registros);\n      const resumen = resumir(registros, minutos);\n      console.log(\"Minutos realizados:\", resumen[0]);\n      console.log(\"Sesiones con meta:\", resumen[1]);\n      console.log(\"Máximo realizado:\", maximo(registros));\n    } else { console.log(\"Entrada inválida\"); }\n  } else { console.log(\"Entrada inválida\"); }\n} else { console.log(\"Entrada inválida\"); }\n\nfunction primeraSesion(datos, meta) {\n  let resultado = \"Sin coincidencia\";\n  for (const valor of datos) {\n    if (valor >= meta) { resultado = valor; break; }\n  }\n  return resultado;\n}\n\nfunction totalAjustado(uno, dos, extra) {\n  function aplicar(a, b, regla) { return regla(a) + regla(b); }\n  return aplicar(uno, dos, valor => valor + extra);\n}\n\nfunction segundosPorSesion(datos) {\n  return datos.map(minutos => minutos * 60);\n}\n\nfunction diagnosticoMeta(datos, meta) {\n  const cumple = valor => valor >= meta;\n  const primera = datos.find(cumple);\n  return [datos.filter(cumple), primera === undefined ? null : primera, datos.some(cumple), datos.every(cumple)];\n}\n\nfunction excedenteTotal(datos, meta) {\n  return datos.reduce((total, valor) => total + (valor > meta ? valor - meta : 0), 0);\n}\n\nfunction rotuloTema(texto) {\n  const tema = texto.trim().normalize(\"NFC\").toLowerCase();\n  const visible = tema === \"\" ? \"Sin tema\" : tema;\n  return `Tema: ${visible}`;\n}\n\nfunction cambiarDuracion(registro, minutos) {\n  registro.minutos = minutos; return registro;\n}",
+          "cases": [
+            {
+              "name": "Contrato 1 · [{\"tema\":\"arranque\",\"minutos\":10},25]",
+              "args": [
+                {
+                  "tema": "arranque",
+                  "minutos": 10
+                },
+                25
+              ],
+              "expected": {
+                "tema": "arranque",
+                "minutos": 25
+              },
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 30\nDías: 5\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 150\nNombre: Ana\nPlan con 5 más: 175\nTipo de minutos: number\nHoras previstas: 2.5\nResto de 10: 0\nDisponible hasta 120: 90\nAlcanza 30: true\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Constante\nSesiones programadas: 5\nDía: 1\nDía: 2\nDía: 3\nDía: 4\nDía: 5\nMinutos programados: 150\nDías pares: 2\nSesiones realizadas: 3\nRegistros: [10,30,0]\nMinutos realizados: 40\nSesiones con meta: 1\nMáximo realizado: 30\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "30",
+                "5",
+                "3",
+                "10",
+                "30",
+                "0"
+              ]
+            },
+            {
+              "name": "Contrato 2 · [{\"id\":\"0\",\"minutos\":5},0]",
+              "args": [
+                {
+                  "id": "0",
+                  "minutos": 5
+                },
+                0
+              ],
+              "expected": {
+                "id": "0",
+                "minutos": 0
+              },
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 0\nDías: 0\nMeta: crear juegos\nRecordatorio: crear juegos\nReferencia diaria: 20\nTotal: 0\nNombre: Luis\nPlan con 5 más: 0\nTipo de minutos: number\nHoras previstas: 0\nResto de 10: 0\nDisponible hasta 120: 120\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 0\nMinutos programados: 0\nDías pares: 0\nSesiones realizadas: 0\nRegistros: []\nMinutos realizados: 0\nSesiones con meta: 0\nMáximo realizado: Sin datos\n",
+              "stdin": [
+                "Luis",
+                "crear juegos",
+                "0",
+                "0",
+                "0"
+              ]
+            },
+            {
+              "name": "Contrato 3 · [{\"tema\":\"x\",\"etiquetas\":[\"a\"],\"minutos\":8},12]",
+              "args": [
+                {
+                  "tema": "x",
+                  "etiquetas": [
+                    "a"
+                  ],
+                  "minutos": 8
+                },
+                12
+              ],
+              "expected": {
+                "tema": "x",
+                "etiquetas": [
+                  "a"
+                ],
+                "minutos": 12
+              },
+              "preserveArgs": true,
+              "stdout": "Hola TeslaCode\nMi plan de práctica\nEstado: listo\nSesión: JavaScript\nMinutos diarios: 29\nDías: 1\nMeta: aprender lógica\nRecordatorio: aprender lógica\nReferencia diaria: 20\nTotal: 29\nNombre: Ana\nPlan con 5 más: 34\nTipo de minutos: number\nHoras previstas: 0.48333333333333334\nResto de 10: 9\nDisponible hasta 120: 91\nAlcanza 30: false\nIgual a referencia: false\nDistinto de referencia: true\nRecomendación: Inicio\nSesiones programadas: 1\nDía: 1\nMinutos programados: 29\nDías pares: 0\nSesiones realizadas: 2\nRegistros: [0,29]\nMinutos realizados: 29\nSesiones con meta: 1\nMáximo realizado: 29\n",
+              "stdin": [
+                "Ana",
+                "aprender lógica",
+                "29",
+                "1",
+                "2",
+                "0",
+                "29"
+              ]
+            }
+          ],
+          "entrypoint": "cambiarDuracion"
+        }
+      },
+      "entrypoint": "cambiarDuracion"
+    },
+    {
+      "id": "js-objetos-registros-aplicar",
+      "type": "javascript",
+      "concept": "js-objetos-registros-concepto",
+      "prompt": "Una mediateca quiere marcar un libro como devuelto con el nombre de la persona que lo recibe. Recibe un registro y devuelve una copia con prestado en false y recibe igual al nombre indicado. Conserva las demás propiedades. Implementa resolverCaso.",
+      "starter": "function resolverCaso(libro, nombre) {\n  // Escribe tu solución.\n}",
+      "solution": "function resolverCaso(libro, nombre) {\n  return { ...libro, prestado: false, recibe: nombre };\n}",
+      "entrypoint": "resolverCaso",
+      "cases": [
+        {
+          "name": "Caso 1 · [{\"id\":2,\"prestado\":true},\"Luz\"]",
+          "args": [
+            {
+              "id": 2,
+              "prestado": true
+            },
+            "Luz"
+          ],
+          "expected": {
+            "id": 2,
+            "prestado": false,
+            "recibe": "Luz"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 2 · [{\"recibe\":\"Ana\",\"tema\":\"x\"},\"\"]",
+          "args": [
+            {
+              "recibe": "Ana",
+              "tema": "x"
+            },
+            ""
+          ],
+          "expected": {
+            "tema": "x",
+            "prestado": false,
+            "recibe": ""
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 3 · [{},\"Nora\"]",
+          "args": [
+            {},
+            "Nora"
+          ],
+          "expected": {
+            "prestado": false,
+            "recibe": "Nora"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Caso 4 · [{\"etiquetas\":[\"a\"]},\"Z\"]",
+          "args": [
+            {
+              "etiquetas": [
+                "a"
+              ]
+            },
+            "Z"
+          ],
+          "expected": {
+            "etiquetas": [
+              "a"
+            ],
+            "prestado": false,
+            "recibe": "Z"
+          },
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Decide qué propiedades de la copia reemplazan datos anteriores.",
+      "hints": [
+        "Escribe una salida esperada antes de ejecutar. Usa el caso más corto que cambie al omitir la regla nueva."
+      ],
+      "explanation": "La expansión copia el registro. Coloca los cambios después de la copia para que no se pierdan.",
+      "retryFeedback": "La expansión copia el registro. Coloca los cambios después de la copia para que no se pierdan.",
+      "followUp": {
+        "requires": [
+          "js-objetos-registros-a3"
+        ],
+        "reason": "Resuelve esta situación nueva y prueba el borde antes de cerrar la lección."
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "Referencia técnica oficial",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Las funciones se llaman con los argumentos de prueba. El reporte de consola conserva las mismas entradas y salidas que la entrega anterior."
+    ],
+    "workedExample": {
+      "problem": "Problema: Corrige la duración de una cita conservando sus otros campos y el registro recibido. El resultado debe ser un objeto, incluso cuando la nueva duración es cero.",
+      "reasoning": "Sigue los valores del primer ejemplo y marca qué cambia en cada paso. Una variable puede apuntar al mismo objeto que otra. const protege la reasignación del nombre, pero registro.minutos = 40 todavía modifica el objeto compartido. { ...registro, minutos } copia las propiedades propias al primer nivel y reemplaza minutos. La abreviatura minutos equivale a minutos: minutos.",
+      "result": "El caso de referencia produce {\"tema\":\"arranque\",\"minutos\":25}. Contrasta después las variantes del contrato, incluidos los bordes indicados."
+    },
+    "transferActivityIds": [
+      "js-objetos-registros-aplicar"
+    ]
+  },
+  "coverage": {
+    "js-objetos-registros-concepto": {
+      "explanationExcerpt": "Un objeto literal reúne datos bajo nombres de propiedad. En { tema: \"lógica\", minutos: 20 }, los dos campos describen una sesión. registro.minutos consulta una propiedad conocida y registro[clave] usa el valor de clave para decidir qué propiedad leer.",
+      "assessmentIds": [
+        "js-objetos-registros-resultado-1",
+        "js-objetos-registros-resultado-2",
+        "js-objetos-registros-resultado-3",
+        "js-objetos-registros-criterio"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-17",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Referencia oficial y casos del curso contrastados en el motor JavaScript. Los ejercicios de archivos y APIs de página se practican sobre el laboratorio HTTP de la ruta.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "plan-practica",
+    "name": "Mi plan de práctica",
+    "version": 2,
+    "increment": "Corrige la duración de una cita conservando sus otros campos y el registro recibido. El resultado debe ser un objeto, incluso cuando la nueva duración es cero.",
+    "changeReason": "Añade una decisión comprobada al proyecto: modelar registros con objetos y copiar cambios.",
+    "previous": "fundamentos/js-texto-normalizado/js-texto-normalizado-a3",
+    "capabilities": [
+      "Hola TeslaCode",
+      "Mi plan de práctica",
+      "Estado:",
+      "Sesión:",
+      "Minutos diarios:",
+      "Días:",
+      "Meta:",
+      "Recordatorio:",
+      "Referencia diaria:",
+      "Total:",
+      "Nombre:",
+      "Plan con 5 más:",
+      "Tipo de minutos:",
+      "Horas previstas:",
+      "Resto de 10:",
+      "Disponible hasta 120:",
+      "Alcanza 30:",
+      "Igual a referencia:",
+      "Distinto de referencia:",
+      "Recomendación:",
+      "Sesiones programadas:",
+      "Minutos programados:",
+      "Días pares:",
+      "Sesiones realizadas:",
+      "Minutos realizados:",
+      "Sesiones con meta:",
+      "Máximo realizado:",
+      "Registros:"
+    ],
+    "rejection": "Entrada inválida\n",
+    "followUpIds": [
+      "js-objetos-registros-aplicar"
+    ]
+  }
+}

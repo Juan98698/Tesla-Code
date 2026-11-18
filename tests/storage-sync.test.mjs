@@ -87,6 +87,47 @@ test('failed writes preserve the in-memory state and a later save can recover', 
   assert.deepEqual(local.completed, ['python/first']);
 });
 
+test('local storage shares exact copies of verified code and restores legacy project records', () => {
+  const state = emptyProgress();
+  const project = 'fundamentos/proyecto/';
+  const code = 'console.log("ámbito");\n'.repeat(700);
+  const at = '2026-11-16T16:00:00.000Z';
+  const artifact = {
+    project: 'plan-practica',
+    code,
+    report: '',
+    notes: 'Explicación guardada',
+    updatedAt: at,
+    verifiedAt: at,
+    assessment: {
+      version: 2,
+      responses: {},
+      reflection: 'Traza completa',
+      testedCode: code,
+      reviewStatus: 'pending',
+      technical: { passed: true, cases: 4 },
+    },
+  };
+  state.projectArtifacts[project + 'uno'] = artifact;
+  state.projectArtifacts[project + 'dos'] = {
+    ...artifact,
+    assessment: { ...artifact.assessment, testedCode: 'Otro código' },
+  };
+  let raw = JSON.stringify(state);
+  const repository = createProgressRepository({
+    getItem: () => raw,
+    setItem: (_, value) => (raw = value),
+  });
+  assert.deepEqual(repository.load(), state);
+  assert.equal(repository.save(state), true);
+  assert.equal(JSON.parse(raw).projectArtifacts[project + 'uno'].assessment.testedCode, null);
+  assert.equal(
+    JSON.parse(raw).projectArtifacts[project + 'dos'].assessment.testedCode,
+    'Otro código',
+  );
+  assert.deepEqual(repository.load(), state);
+});
+
 test('malformed storage can be replaced and empty bookmark changes preserve remote removals', () => {
   let raw = 'broken';
   const repo = createProgressRepository({

@@ -41,16 +41,9 @@ versión no concede XP ni completa el nuevo contrato.
 
 ## Implementación incremental
 
-Las treinta lecciones publicadas construyen el mismo proyecto con las cuatro
-etapas. El primer módulo conserva ocho lecciones. Los cuatro bloques siguientes
-tienen cuatro lecciones cada uno: valores y operaciones, decisiones y validación,
-repeticiones y funciones. Listas tiene seis lecciones. La distribución separa
-habilidades que antes se exigían simultáneamente. Conserva los tres repasos
-anteriores y sus identificadores. La edición tiene 29 retos posteriores a la
-integración. Sus casos y pistas plantean problemas con decisiones propias. Los
-doce bloques posteriores continúan en preparación.
+Las 72 lecciones publicadas construyen el mismo planificador. Las cuatro etapas se conservan en cada entrega. La edición tiene 72 aplicaciones independientes posteriores a la integración. En ocho lecciones, un juego de traza invita a tomar decisiones, revisar la explicación y volver a intentarlo. Los juegos son optativos y el progreso depende de las prácticas y las comprobaciones.
 
-| Siguiente tramo                | Conocimientos que debe preparar                                                     | Incremento del proyecto             |
+| Tramo                          | Conocimientos que debe preparar                                                     | Incremento del proyecto             |
 | ------------------------------ | ----------------------------------------------------------------------------------- | ----------------------------------- |
 | Tipos y decisiones             | Tipos, comparación, booleanos, ramas y validación                                   | Admitir datos y recomendar un plan  |
 | Ciclos y funciones             | Traza, parada, acumulación, parámetros y retorno                                    | Procesar sesiones y separar reglas  |
@@ -60,6 +53,12 @@ doce bloques posteriores continúan en preparación.
 | Lenguaje y herramientas        | Alcance, errores, módulos, archivos, terminal y depuración                          | Organizar el producto y sus pruebas |
 | Web y asincronía               | HTML/CSS antes de DOM; eventos antes de persistencia; promesas antes de await/fetch | Interfaz y datos externos           |
 | Calidad y proyecto final       | Accesibilidad, errores, pruebas y entrega reproducible                              | Aplicación integrada comprobable    |
+
+## Del editor de la lección al planificador web
+
+Hasta los módulos, el estudiante recupera su entrega aprobada y sigue conservando el reporte de consola. El laboratorio ofrece una plantilla descargable y una referencia ejecutable. El estudiante extrae las funciones aprobadas a módulos ES de su copia, conecta formulario, eventos, estado y persistencia, integra las sugerencias de práctica y entrega instrucciones para reproducir el resultado.
+
+El editor comprueba retornos y resultados de consola para los contratos, incluidos los asíncronos. Las instrucciones de la interfaz tienen una comprobación observable, como recargar después de guardar, recorrer por teclado o verificar que una respuesta antigua no reemplaza a la actual. La bitácora conserva esa evidencia y las pruebas del laboratorio publicado automatizan el recorrido de referencia.
 
 ## Condiciones de cierre de un módulo
 
@@ -173,7 +172,7 @@ incluye revisar la granularidad y la continuidad teórica, además de ejecutar c
 El usuario exige entregar coherencia antes del piloto: el contenido y la práctica
 determinan la cantidad de lecciones, sin una cuota común ni relleno. La
 [revisión de alcance y carga](fundamentos-alcance-y-carga.md) registra las
-habilidades, sus usos y las introducciones pendientes del lenguaje actual. Listas
+habilidades, sus usos y su lugar en la ruta. Listas
 separa construcción, lectura validada, suma, conteo, resumen y máximo. En valores,
 decisiones, ciclos y funciones se añaden transferencias que comprueban límites,
 aportes variables y composición en problemas distintos. Cada etapa conserva el

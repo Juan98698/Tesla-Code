@@ -362,6 +362,8 @@ export function learningDesignErrors(meta, data, { entry = false, entryLanguage 
     'sql',
     'javascript',
     'json',
+    'html',
+    'css',
   ]);
   for (const block of (data.html ?? '').matchAll(/<pre\b([^>]*)>([\s\S]*?)<\/pre>/g)) {
     const language = block[1].match(/\bdata-language="([^"]+)"/)?.[1];

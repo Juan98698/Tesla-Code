@@ -28,8 +28,11 @@ export function prepareBindingCases(code, cases, bindings = {}, syntax = {}) {
                 ({
                   IfStatement: 'if',
                   WhileStatement: 'while',
+                  DoWhileStatement: 'do...while',
                   ForStatement: 'for',
                   FunctionDeclaration: 'function',
+                  BreakStatement: 'break',
+                  ContinueStatement: 'continue',
                 })[name] ?? name,
             )
             .join(', ') +

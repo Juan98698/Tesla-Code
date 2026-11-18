@@ -28,11 +28,8 @@ test('array construction, input validation, sum, count, summary and maximum have
         assert.ok(text.includes(i + 1 + ': ' + JSON.stringify(line)), c.name);
     assert.ok([...root.querySelectorAll('pre')].every((pre) => pre.tabIndex === 0));
   });
-  assert.deepEqual(
-    blocks.map((b) => b.lessons.length),
-    [8, 4, 4, 4, 4, 6],
-  );
-  const ids = blocks.at(-1).lessons.map((l) => l.id);
+  assert.deepEqual(blocks.map((b) => b.lessons.length).slice(0, 6), [8, 4, 4, 5, 4, 6]);
+  const ids = blocks.find((block) => block.id === 'js-bloque-06').lessons.map((l) => l.id);
   assert.deepEqual(ids, [
     'js-crear-listas',
     'js-leer-registros',

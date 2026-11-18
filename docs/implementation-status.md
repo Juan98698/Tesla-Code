@@ -562,3 +562,33 @@ El navegador completó las 30 lecciones desde cero en escritorio y móvil. La
 suite general recorrió 136 lecciones y 338 actividades. También pasaron las
 comprobaciones automatizadas de accesibilidad, lectura de teoría, migración
 de caché y conservación del progreso anterior.
+
+## Ruta de Fundamentos JavaScript completa
+
+La edición actual tiene 72 lecciones publicadas en 18 bloques. Se añadieron
+42 lecciones, incluida una de control de recorridos antes de funciones, y se
+conservaron las publicaciones, los logros y los enlaces de la edición anterior.
+El mapa ya ofrece un recorrido desde el primer programa hasta una aplicación
+web modular con almacenamiento, consultas y publicación reproducible.
+
+El planificador conserva las entregas y las capacidades aprobadas. Las
+reescrituras comparan salidas y retornos. Las integraciones reproducen una
+incidencia y guardan evidencia técnica y una explicación para revisión.
+Las 72 aplicaciones independientes cambian los datos, el contrato o la
+decisión del caso guiado. Ocho juegos de traza permiten probar decisiones y
+recibir retroalimentación sin modificar el progreso.
+
+La [distribución por tema](fundamentos-alcance-y-carga.md) justifica el número de
+lecciones. La [matriz editorial](fundamentos-correspondencia-editorial.md)
+registra explicaciones, ejemplos, práctica guiada y transferencias. El proyecto
+ofrece una referencia web ejecutable y una plantilla para desarrollar, probar
+y publicar una versión propia. La consola evalúa las reglas JavaScript de esa
+versión; la evidencia de interfaz y publicación se documenta en la bitácora.
+
+La verificación incluye 134 ejemplos ejecutables, 2.055 casos de código,
+reescrituras e incidencias reproducibles. Se probaron en Chromium las 72
+lecciones desde cero en escritorio y móvil, las transferencias nuevas y el
+laboratorio web. La copia de progreso completa conservó 288 entregas al
+importar, exportar y deshacer. La auditoría automática del laboratorio incluye
+320 y 1440 px. La revisión docente independiente y un piloto con principiantes
+quedan pendientes para medir comprensión, ritmo y retención.
