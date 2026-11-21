@@ -1,0 +1,438 @@
+{
+  "id": "tm-medir",
+  "outcome": "Medir un algoritmo contando operaciones y cronometrando con calentamiento, repeticiones y un resumen honesto",
+  "requiresConcepts": [
+    "algoritmia.tm-pruebas.oraculo-de-fuerza-bruta",
+    "algoritmia.tm-pruebas.prueba-de-propiedades",
+    "algoritmia.tm-pruebas.aleatoriedad-reproducible"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Para comparar dos algoritmos hay dos formas de medir: contar cuántos pasos dan o cronometrar cuánto tardan. Cada una responde una pregunta distinta, y mezclarlas lleva a conclusiones falsas.</p>\n<p>Un <strong>contador de operaciones</strong> es una variable que suma 1 cada vez que el algoritmo hace el paso que nos interesa, por ejemplo, comparar dos valores. Su resultado no cambia de una computadora a otra, así que sirve para razonar. El operador ++ suma 1 a una variable, y === compara si dos valores son iguales. Esta función cuenta cuántas comparaciones hace una búsqueda de una estación por nombre:</p>\n<pre data-language=\"javascript\"><code>function buscarContando(lista, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i &lt; lista.length; i++) {\n    comparaciones++;\n    if (lista[i] === objetivo) {\n      return comparaciones;\n    }\n  }\n  return comparaciones;\n}\nconsole.log(buscarContando([5, 8, 2, 9], 2));\nconsole.log(buscarContando([5, 8, 2, 9], 7));</code></pre>\n<p>El contador dice cuántos pasos da el algoritmo, pero no cuánto tarda en tu equipo. Para eso hay que cronometrar con performance.now, que devuelve milisegundos como número decimal. Cronometrar tiene trampas. La primera es el calentamiento: el motor de JavaScript optimiza el código después de ejecutarlo varias veces, así que las primeras ejecuciones suelen ser más lentas y no representan el comportamiento normal. Por eso se ejecuta el código algunas veces antes de empezar a medir.</p>\n<pre data-language=\"text\"><code>function medirUnaVez(algoritmo, entrada) {\n  const inicio = performance.now();\n  algoritmo(entrada);\n  return performance.now() - inicio;\n}\n// Se llama varias veces y se guardan todos los tiempos.</code></pre>\n<p>Ese código no se ejecuta aquí porque el tiempo cambia en cada ejecución y no habría una salida fija que comprobar. La segunda trampa es el ruido: dos ejecuciones idénticas dan tiempos distintos porque la computadora hace otras tareas al mismo tiempo. La <strong>varianza</strong> describe cuánto se alejan entre sí las mediciones repetidas. Por eso no se mide una sola vez: se mide muchas veces y se resume con la mediana, que es el valor del medio al ordenar los tiempos y casi no se afecta por un tiempo atípico, junto con el rango, que va de la menor a la mayor medición.</p>\n<p>En la función siguiente, [...valores] hace una copia para no alterar la lista original, sort ordena con la regla (a, b) =&gt; a - b que compara números de menor a mayor, y % devuelve el resto de una división, que sirve para saber si la cantidad de valores es impar.</p>\n<pre data-language=\"javascript\"><code>function mediana(valores) {\n  const orden = [...valores].sort((a, b) =&gt; a - b);\n  const medio = Math.floor(orden.length / 2);\n  if (orden.length % 2 === 1) {\n    return orden[medio];\n  }\n  return (orden[medio - 1] + orden[medio]) / 2;\n}\nconsole.log(mediana([12, 9, 40, 10, 11]));\nconsole.log(mediana([8, 10, 9, 11]));</code></pre>\n<p>Un <strong>benchmark honesto</strong> es una medición que otra persona puede repetir y que no favorece a ningún algoritmo: ambos reciben la misma entrada, se calientan antes de medir, se repiten muchas veces, se verifica que devuelvan el mismo resultado y se informa la mediana junto con el rango.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: midieron cinco veces un algoritmo y obtuvieron 12, 9, 40, 10 y 11 milisegundos. En este ejemplo los cinco tiempos corresponden a la misma entrada.</p>\n<p>Razonamiento: al ordenar los tiempos queda 9, 10, 11, 12 y 40; la mediana es el valor del medio y el 40 es un valor atípico que no representa el comportamiento normal.</p>\n<p>Resultado: la mediana es 11 ms y el rango va de 9 a 40 ms; informar solo el 40 habría exagerado el tiempo del algoritmo.</p>",
+  "examples": [
+    {
+      "id": "tm-medir-e1",
+      "language": "javascript",
+      "code": "function buscarContando(lista, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < lista.length; i++) {\n    comparaciones++;\n    if (lista[i] === objetivo) {\n      return comparaciones;\n    }\n  }\n  return comparaciones;\n}\nconsole.log(buscarContando([5, 8, 2, 9], 2));\nconsole.log(buscarContando([5, 8, 2, 9], 7));",
+      "stdout": "3\n4\n"
+    },
+    {
+      "id": "tm-medir-e2",
+      "language": "javascript",
+      "code": "function mediana(valores) {\n  const orden = [...valores].sort((a, b) => a - b);\n  const medio = Math.floor(orden.length / 2);\n  if (orden.length % 2 === 1) {\n    return orden[medio];\n  }\n  return (orden[medio - 1] + orden[medio]) / 2;\n}\nconsole.log(mediana([12, 9, 40, 10, 11]));\nconsole.log(mediana([8, 10, 9, 11]));",
+      "stdout": "11\n9.5\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "contador-que-es",
+      "type": "choice",
+      "concept": "algoritmia.tm-medir.contador-de-operaciones",
+      "prompt": "¿Qué cuenta un contador de operaciones?",
+      "options": [
+        "Cuántas veces ocurre el paso que nos interesa",
+        "Cuántos milisegundos tarda el código",
+        "Cuántas líneas tiene el programa",
+        "Cuántas variables existen"
+      ],
+      "answer": 0,
+      "explanation": "El contador suma 1 en cada paso relevante, y por eso no depende de la velocidad de la computadora."
+    },
+    {
+      "id": "contador-valor",
+      "type": "choice",
+      "concept": "algoritmia.tm-medir.contador-de-operaciones",
+      "prompt": "Con la función buscarContando del ejemplo, ¿qué devuelve buscarContando([5, 8, 2, 9], 8)?",
+      "options": [
+        "2",
+        "1",
+        "4",
+        "8"
+      ],
+      "answer": 0,
+      "explanation": "El 8 está en la segunda posición: se hacen dos comparaciones antes de encontrarlo."
+    },
+    {
+      "id": "calentamiento",
+      "type": "choice",
+      "concept": "algoritmia.tm-medir.calentamiento",
+      "prompt": "¿Por qué se ejecuta el código algunas veces antes de medir?",
+      "options": [
+        "Porque el motor lo optimiza tras varias ejecuciones y las primeras no representan el uso normal",
+        "Para gastar memoria",
+        "Para que el contador sea mayor",
+        "Porque JavaScript lo exige"
+      ],
+      "answer": 0,
+      "explanation": "Las primeras ejecuciones suelen ser más lentas, y medirlas daría una imagen falsa."
+    },
+    {
+      "id": "varianza",
+      "type": "choice",
+      "concept": "algoritmia.tm-medir.varianza",
+      "prompt": "Mides un algoritmo cinco veces y obtienes 12, 9, 40, 10 y 11 ms. ¿Qué resume mejor el resultado?",
+      "options": [
+        "La mediana, 11 ms, junto con el rango de 9 a 40",
+        "Solo el mayor valor, 40 ms",
+        "Solo el primer valor, 12 ms",
+        "La suma de los tiempos, 82 ms"
+      ],
+      "answer": 0,
+      "explanation": "La mediana casi no se afecta por el 40 atípico, y el rango muestra cuánto varían las mediciones."
+    },
+    {
+      "id": "benchmark-honesto",
+      "type": "choice",
+      "concept": "algoritmia.tm-medir.benchmark-honesto",
+      "prompt": "¿Qué práctica vuelve deshonesto un benchmark?",
+      "options": [
+        "Darle a cada algoritmo una entrada distinta",
+        "Repetir las mediciones muchas veces",
+        "Calentar antes de medir",
+        "Informar el rango además de la mediana"
+      ],
+      "answer": 0,
+      "explanation": "Si las entradas son distintas, la diferencia de tiempo puede venir de los datos y no del algoritmo."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-medicion",
+      "type": "case-study",
+      "concept": "algoritmia.tm-medir.benchmark-honesto",
+      "prompt": "Compara dos mediciones",
+      "brief": "Ana y Beto comparan dos algoritmos de búsqueda de estaciones, buscarA y buscarB, y llegan a conclusiones distintas.",
+      "evidence": [
+        {
+          "label": "Medición de Ana",
+          "text": "Una sola ejecución de cada algoritmo, sin calentar y con listas distintas: buscarA 8 ms, buscarB 5 ms."
+        },
+        {
+          "label": "Medición de Beto",
+          "text": "Veinte ejecuciones con la misma lista, después de calentar: buscarA mediana 4 ms (de 3 a 9), buscarB mediana 5 ms (de 4 a 6)."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Qué medición es más confiable?",
+          "options": [
+            "La de Beto, porque repite, calienta y usa la misma entrada",
+            "La de Ana, porque es más rápida de hacer",
+            "Las dos por igual"
+          ],
+          "answer": 0,
+          "explanation": "La medición de Beto cumple las condiciones de un benchmark honesto.",
+          "errorHint": "Compara qué hizo cada persona frente a la lista de buenas prácticas."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "¿Qué le faltó a la medición de Ana?",
+          "options": [
+            "Repeticiones, calentamiento y la misma entrada",
+            "Más comentarios en el código",
+            "Un contador de líneas"
+          ],
+          "answer": 0,
+          "explanation": "Con una sola ejecución, sin calentar y con listas distintas, el resultado no se puede comparar.",
+          "errorHint": "Piensa qué debe mantenerse igual y qué debe repetirse."
+        }
+      ],
+      "hint": "Una medición vale tanto como su método.",
+      "explanation": "Un benchmark honesto exige misma entrada, calentamiento, repeticiones y un resumen que muestre la variación.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Medición",
+        "input": "Dos informes de medición",
+        "output": "La elección razonada de la medición confiable",
+        "reflection": "Explica qué cambiarías en la medición de Ana.",
+        "requires": [],
+        "from": "algoritmia/tm-pruebas/integrar-contraejemplo"
+      }
+    },
+    {
+      "id": "implementar-revisadas",
+      "type": "javascript",
+      "concept": "algoritmia.tm-medir.contador-de-operaciones",
+      "prompt": "Implementa estacionesRevisadas: recibe una lista de nombres y el nombre buscado, y devuelve cuántos nombres se revisan hasta encontrarlo (si no está, se revisan todos).",
+      "starter": "function estacionesRevisadas(nombres, buscada) {\n  // Cuenta cuántos nombres se revisan.\n}\n",
+      "solution": "function estacionesRevisadas(nombres, buscada) {\n  let revisadas = 0;\n  for (let i = 0; i < nombres.length; i++) {\n    revisadas++;\n    if (nombres[i] === buscada) {\n      return revisadas;\n    }\n  }\n  return revisadas;\n}\n",
+      "entrypoint": "estacionesRevisadas",
+      "cases": [
+        {
+          "name": "Está en medio",
+          "args": [
+            [
+              "Central",
+              "Museo",
+              "Puerto"
+            ],
+            "Museo"
+          ],
+          "expected": 2
+        },
+        {
+          "name": "Está primero",
+          "args": [
+            [
+              "Central",
+              "Museo",
+              "Puerto"
+            ],
+            "Central"
+          ],
+          "expected": 1
+        },
+        {
+          "name": "No está",
+          "args": [
+            [
+              "Central",
+              "Museo",
+              "Puerto"
+            ],
+            "Faro"
+          ],
+          "expected": 3
+        },
+        {
+          "name": "Lista vacía",
+          "args": [
+            [],
+            "Central"
+          ],
+          "expected": 0
+        }
+      ],
+      "hint": "Crea una variable revisadas que empiece en 0 y súmale 1 en cada vuelta.",
+      "hints": [
+        "Crea una variable revisadas que empiece en 0 y súmale 1 en cada vuelta.",
+        "Devuelve revisadas en cuanto encuentres el nombre y también al terminar el ciclo."
+      ],
+      "explanation": "El contador mide el trabajo real del algoritmo sin depender de la computadora.",
+      "retryFeedback": "Prueba con un nombre que no existe: debe devolver la cantidad total de nombres.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Contador",
+        "input": "El problema de búsqueda de estaciones",
+        "output": "estacionesRevisadas contando comparaciones",
+        "reflection": "Anota en qué línea suma el contador y por qué.",
+        "requires": [
+          "entender-medicion"
+        ],
+        "from": "algoritmia/tm-pruebas/integrar-contraejemplo"
+      }
+    },
+    {
+      "id": "reescribir-mediana",
+      "type": "javascript",
+      "concept": "algoritmia.tm-medir.varianza",
+      "prompt": "Reescribe el resumen de tiempos: medianaDeTiempos recibe una lista de tiempos y devuelve su mediana, sin alterar la lista original.",
+      "starter": "function medianaDeTiempos(tiempos) {\n  // Devuelve el valor del medio de los tiempos ordenados.\n}\n",
+      "solution": "function medianaDeTiempos(valores) {\n  const orden = [...valores].sort((a, b) => a - b);\n  const medio = Math.floor(orden.length / 2);\n  if (orden.length % 2 === 1) {\n    return orden[medio];\n  }\n  return (orden[medio - 1] + orden[medio]) / 2;\n}\n",
+      "entrypoint": "medianaDeTiempos",
+      "cases": [
+        {
+          "name": "Cantidad impar",
+          "args": [
+            [
+              12,
+              9,
+              40,
+              10,
+              11
+            ]
+          ],
+          "expected": 11
+        },
+        {
+          "name": "Cantidad par",
+          "args": [
+            [
+              8,
+              10,
+              9,
+              11
+            ]
+          ],
+          "expected": 9.5
+        },
+        {
+          "name": "Un solo tiempo",
+          "args": [
+            [
+              7
+            ]
+          ],
+          "expected": 7
+        },
+        {
+          "name": "Ya ordenada",
+          "args": [
+            [
+              1,
+              2,
+              3
+            ]
+          ],
+          "expected": 2
+        }
+      ],
+      "hint": "Haz una copia con [...tiempos] antes de ordenar.",
+      "hints": [
+        "Haz una copia con [...tiempos] antes de ordenar.",
+        "Si la cantidad es impar devuelve el del medio; si es par, el promedio de los dos centrales."
+      ],
+      "explanation": "La mediana resume el valor típico sin dejarse arrastrar por un tiempo atípico.",
+      "retryFeedback": "Revisa el caso par: debes promediar los dos valores centrales.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Mediana",
+        "input": "La medición de Beto",
+        "output": "medianaDeTiempos como resumen robusto",
+        "reflection": "Explica por qué la mediana resiste mejor un tiempo atípico que el promedio.",
+        "requires": [
+          "implementar-revisadas"
+        ],
+        "from": "algoritmia/tm-medir/implementar-revisadas"
+      }
+    },
+    {
+      "id": "integrar-resumen",
+      "type": "javascript",
+      "concept": "algoritmia.tm-medir.benchmark-honesto",
+      "prompt": "Integra el informe: resumenMedicion recibe una lista de tiempos y devuelve un texto con el formato \"11 ms (de 9 a 40)\": la mediana, el menor y el mayor tiempo. Reutiliza mediana.",
+      "starter": "function mediana(valores) {\n  const orden = [...valores].sort((a, b) => a - b);\n  const medio = Math.floor(orden.length / 2);\n  if (orden.length % 2 === 1) {\n    return orden[medio];\n  }\n  return (orden[medio - 1] + orden[medio]) / 2;\n}\n\nfunction resumenMedicion(tiempos) {\n  // Une la mediana, el menor y el mayor en un texto.\n}\n",
+      "solution": "function mediana(valores) {\n  const orden = [...valores].sort((a, b) => a - b);\n  const medio = Math.floor(orden.length / 2);\n  if (orden.length % 2 === 1) {\n    return orden[medio];\n  }\n  return (orden[medio - 1] + orden[medio]) / 2;\n}\n\nfunction resumenMedicion(tiempos) {\n  const minimo = Math.min(...tiempos);\n  const maximo = Math.max(...tiempos);\n  return mediana(tiempos) + \" ms (de \" + minimo + \" a \" + maximo + \")\";\n}\n",
+      "entrypoint": "resumenMedicion",
+      "cases": [
+        {
+          "name": "Con un valor atípico",
+          "args": [
+            [
+              12,
+              9,
+              40,
+              10,
+              11
+            ]
+          ],
+          "expected": "11 ms (de 9 a 40)"
+        },
+        {
+          "name": "Cantidad par",
+          "args": [
+            [
+              8,
+              10,
+              9,
+              11
+            ]
+          ],
+          "expected": "9.5 ms (de 8 a 11)"
+        },
+        {
+          "name": "Un solo tiempo",
+          "args": [
+            [
+              7
+            ]
+          ],
+          "expected": "7 ms (de 7 a 7)"
+        }
+      ],
+      "hint": "Calcula el menor con Math.min(...tiempos) y el mayor con Math.max(...tiempos).",
+      "hints": [
+        "Calcula el menor con Math.min(...tiempos) y el mayor con Math.max(...tiempos).",
+        "El operador + une textos: mediana(tiempos) + \" ms (de \" + minimo + \" a \" + maximo + \")\"."
+      ],
+      "explanation": "El informe resume la medición con su centro y su variación, como pide un benchmark honesto.",
+      "retryFeedback": "Comprueba que los espacios y paréntesis del texto coincidan con el formato.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Informe",
+        "input": "Las funciones de medición anteriores",
+        "output": "resumenMedicion con mediana y rango",
+        "reflection": "Describe qué dos datos debe incluir todo informe de medición.",
+        "requires": [
+          "reescribir-mediana"
+        ],
+        "from": "algoritmia/tm-medir/reescribir-mediana"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: Performance.now()",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Performance/now"
+    },
+    {
+      "title": "MDN: Array.prototype.sort",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort"
+    },
+    {
+      "title": "MDN: Math.max",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "los cinco tiempos corresponden a la misma entrada"
+    ],
+    "workedExample": {
+      "problem": "Problema: midieron cinco veces un algoritmo y obtuvieron 12, 9, 40, 10 y 11 milisegundos",
+      "reasoning": "al ordenar los tiempos queda 9, 10, 11, 12 y 40; la mediana es el valor del medio",
+      "result": "la mediana es 11 ms y el rango va de 9 a 40 ms"
+    },
+    "transferActivityIds": [
+      "integrar-resumen"
+    ]
+  },
+  "coverage": {
+    "algoritmia.tm-medir.contador-de-operaciones": {
+      "explanationExcerpt": "es una variable que suma 1 cada vez que el algoritmo hace el paso que nos interesa",
+      "assessmentIds": [
+        "contador-que-es",
+        "contador-valor"
+      ]
+    },
+    "algoritmia.tm-medir.calentamiento": {
+      "explanationExcerpt": "el motor de JavaScript optimiza el código después de ejecutarlo varias veces",
+      "assessmentIds": [
+        "calentamiento"
+      ]
+    },
+    "algoritmia.tm-medir.varianza": {
+      "explanationExcerpt": "describe cuánto se alejan entre sí las mediciones repetidas",
+      "assessmentIds": [
+        "varianza"
+      ]
+    },
+    "algoritmia.tm-medir.benchmark-honesto": {
+      "explanationExcerpt": "una medición que otra persona puede repetir y que no favorece a ningún algoritmo",
+      "assessmentIds": [
+        "benchmark-honesto"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Medir los algoritmos del proyecto con un contador de operaciones y un resumen de tiempos con mediana y rango.",
+    "previous": "algoritmia/tm-pruebas/integrar-contraejemplo"
+  }
+}

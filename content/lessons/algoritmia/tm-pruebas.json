@@ -1,0 +1,437 @@
+{
+  "id": "tm-pruebas",
+  "outcome": "Probar un algoritmo con un oráculo, propiedades y casos generados que se pueden repetir",
+  "requiresConcepts": [
+    "algoritmia.tm-datos.modelo-de-datos",
+    "algoritmia.tm-datos.json-del-mapa",
+    "algoritmia.tm-datos.copia-profunda"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Un algoritmo que pasa tres ejemplos puede seguir estando mal. Los ejemplos que elegimos a mano suelen coincidir con lo que ya imaginamos, y los errores aparecen justo en los casos que no imaginamos. Para probar de verdad hacen falta dos ideas: una referencia confiable y muchos casos distintos.</p>\n<p>Un <strong>oráculo de fuerza bruta</strong> es una solución tan simple que resulta evidente que es correcta, aunque sea lenta, y se usa como referencia para comparar. Para hallar la menor espera entre trenes, el oráculo puede ser Math.min, que ya existe en JavaScript. La función siguiente tiene un error clásico: la variable menor empieza en 0 y, con esperas positivas, ningún valor es menor que 0.</p>\n<p>El ciclo for repite su bloque mientras la condición sea verdadera: let i = 0 crea el contador, i &lt; lista.length decide si continúa e i++ suma 1 al terminar cada vuelta. Los tres puntos antes de lista reparten sus elementos como valores separados, que es lo que Math.min espera.</p>\n<pre data-language=\"javascript\"><code>function menorEsperaConError(lista) {\n  let menor = 0;\n  for (let i = 0; i &lt; lista.length; i++) {\n    if (lista[i] &lt; menor) {\n      menor = lista[i];\n    }\n  }\n  return menor;\n}\nfunction oraculo(lista) {\n  return Math.min(...lista);\n}\nconsole.log(menorEsperaConError([4, 2, 7]));\nconsole.log(oraculo([4, 2, 7]));</code></pre>\n<p>El oráculo devuelve 2 y la función devuelve 0: el error queda a la vista sin necesidad de razonar el código.</p>\n<p>Una <strong>prueba de propiedades</strong> no compara contra una respuesta fija, sino que comprueba una propiedad que el resultado debe cumplir siempre. Para la menor espera la propiedad tiene dos partes: el resultado aparece en la lista y ningún elemento es menor que él. La expresión lista.includes(x) vale true si x está en la lista, y el signo ! invierte un valor verdadero o falso.</p>\n<pre data-language=\"javascript\"><code>function cumplePropiedad(lista, resultado) {\n  if (!lista.includes(resultado)) {\n    return false;\n  }\n  for (let i = 0; i &lt; lista.length; i++) {\n    if (lista[i] &lt; resultado) {\n      return false;\n    }\n  }\n  return true;\n}\nconsole.log(cumplePropiedad([4, 2, 7], 2));\nconsole.log(cumplePropiedad([4, 2, 7], 0));</code></pre>\n<p>Para probar muchos casos hay que generar listas distintas, pero si el generador usa azar de verdad, un fallo no se puede repetir. La <strong>aleatoriedad reproducible</strong> usa una semilla: una cuenta que, a partir del mismo número inicial, produce siempre la misma secuencia aparentemente aleatoria. Así, un caso que falla hoy puede volver a ejecutarse mañana. En el código siguiente, lista.push(x) añade x al final y Math.floor redondea hacia abajo.</p>\n<pre data-language=\"javascript\"><code>function siguiente(estado) {\n  return (estado * 1664525 + 1013904223) % 4294967296;\n}\nfunction listaAleatoria(estado, tamano) {\n  const lista = [];\n  for (let i = 0; i &lt; tamano; i++) {\n    estado = siguiente(estado);\n    lista.push(1 + Math.floor((estado / 4294967296) * 20));\n  }\n  return lista;\n}\nconsole.log(listaAleatoria(42, 5).join(\",\"));\nconsole.log(listaAleatoria(42, 5).join(\",\"));</code></pre>\n<p>Las dos llamadas con la semilla 42 producen exactamente la misma lista, y otra semilla produciría otra distinta pero igual de repetible.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: queremos saber si menorEsperaConError falla con listas generadas a partir de la semilla 42. En este ejemplo las esperas generadas son enteros positivos de 1 a 20.</p>\n<p>Razonamiento: generamos una lista con la semilla, calculamos su resultado y comprobamos la propiedad; como la función empieza en 0 y todas las esperas son positivas, la propiedad falla en cuanto la lista no contiene el 0.</p>\n<p>Resultado: el primer intento ya produce un contraejemplo, y como la semilla es la misma, cualquiera puede repetirlo.</p>",
+  "examples": [
+    {
+      "id": "tm-pruebas-e1",
+      "language": "javascript",
+      "code": "function menorEsperaConError(lista) {\n  let menor = 0;\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < menor) {\n      menor = lista[i];\n    }\n  }\n  return menor;\n}\nfunction oraculo(lista) {\n  return Math.min(...lista);\n}\nconsole.log(menorEsperaConError([4, 2, 7]));\nconsole.log(oraculo([4, 2, 7]));",
+      "stdout": "0\n2\n"
+    },
+    {
+      "id": "tm-pruebas-e2",
+      "language": "javascript",
+      "code": "function cumplePropiedad(lista, resultado) {\n  if (!lista.includes(resultado)) {\n    return false;\n  }\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < resultado) {\n      return false;\n    }\n  }\n  return true;\n}\nconsole.log(cumplePropiedad([4, 2, 7], 2));\nconsole.log(cumplePropiedad([4, 2, 7], 0));",
+      "stdout": "true\nfalse\n"
+    },
+    {
+      "id": "tm-pruebas-e3",
+      "language": "javascript",
+      "code": "function siguiente(estado) {\n  return (estado * 1664525 + 1013904223) % 4294967296;\n}\nfunction listaAleatoria(estado, tamano) {\n  const lista = [];\n  for (let i = 0; i < tamano; i++) {\n    estado = siguiente(estado);\n    lista.push(1 + Math.floor((estado / 4294967296) * 20));\n  }\n  return lista;\n}\nconsole.log(listaAleatoria(42, 5).join(\",\"));\nconsole.log(listaAleatoria(42, 5).join(\",\"));",
+      "stdout": "6,2,12,5,8\n6,2,12,5,8\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "oraculo-que-es",
+      "type": "choice",
+      "concept": "algoritmia.tm-pruebas.oraculo-de-fuerza-bruta",
+      "prompt": "¿Qué es un oráculo de fuerza bruta?",
+      "options": [
+        "Una solución simple y evidentemente correcta usada como referencia",
+        "La solución más rápida posible",
+        "Un generador de números al azar",
+        "Un error que se repite siempre"
+      ],
+      "answer": 0,
+      "explanation": "El oráculo puede ser lento: lo importante es que sea tan simple que no deje dudas sobre su corrección."
+    },
+    {
+      "id": "oraculo-usar",
+      "type": "choice",
+      "concept": "algoritmia.tm-pruebas.oraculo-de-fuerza-bruta",
+      "prompt": "Tu función devuelve 0 y el oráculo devuelve 2 para la misma lista. ¿Qué indica?",
+      "options": [
+        "Que tu función tiene un error que hay que corregir",
+        "Que el oráculo está mal siempre",
+        "Que ambos son correctos",
+        "Que hay que borrar la lista"
+      ],
+      "answer": 0,
+      "explanation": "Cuando la función y el oráculo discrepan, se investiga el caso: casi siempre el error está en la función nueva."
+    },
+    {
+      "id": "propiedad-que-es",
+      "type": "choice",
+      "concept": "algoritmia.tm-pruebas.prueba-de-propiedades",
+      "prompt": "¿Qué comprueba una prueba de propiedades?",
+      "options": [
+        "Una condición que el resultado debe cumplir para muchas entradas",
+        "Solo un ejemplo escrito a mano",
+        "El tiempo que tarda el programa",
+        "El nombre de la función"
+      ],
+      "answer": 0,
+      "explanation": "En lugar de una respuesta fija, se comprueba una condición que debe cumplirse con cualquier entrada válida."
+    },
+    {
+      "id": "propiedad-menor",
+      "type": "choice",
+      "concept": "algoritmia.tm-pruebas.prueba-de-propiedades",
+      "prompt": "Para la menor espera, ¿qué propiedad cumple siempre el resultado?",
+      "options": [
+        "Aparece en la lista y ningún elemento es menor",
+        "Es el primer elemento de la lista",
+        "Es la suma de todos los elementos",
+        "Es siempre cero"
+      ],
+      "answer": 0,
+      "explanation": "El mínimo pertenece a la lista y nadie es menor que él."
+    },
+    {
+      "id": "semilla",
+      "type": "choice",
+      "concept": "algoritmia.tm-pruebas.aleatoriedad-reproducible",
+      "prompt": "¿Para qué sirve una semilla en un generador de azar reproducible?",
+      "options": [
+        "Para repetir la misma secuencia y reproducir un fallo",
+        "Para hacer la secuencia más lenta",
+        "Para evitar que existan fallos",
+        "Para ordenar la lista generada"
+      ],
+      "answer": 0,
+      "explanation": "Con la misma semilla se obtienen los mismos casos, así que un fallo puede repetirse y estudiarse."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-oraculo",
+      "type": "case-study",
+      "concept": "algoritmia.tm-pruebas.oraculo-de-fuerza-bruta",
+      "prompt": "Descubre por qué las pruebas no vieron el error",
+      "brief": "El equipo probó menorEsperaConError con tres listas y todas pasaron, pero el despacho recibe esperas incorrectas.",
+      "evidence": [
+        {
+          "label": "Casos escritos a mano",
+          "text": "[0, 3] devuelve 0 (correcto) y [-2, 4] devuelve -2 (correcto)."
+        },
+        {
+          "label": "Caso real del despacho",
+          "text": "[4, 2, 7] devuelve 0, pero la menor espera es 2."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Por qué los casos escritos a mano no detectaron el error?",
+          "options": [
+            "Porque todos contenían 0 o negativos, justo donde el error no se nota",
+            "Porque el oráculo estaba mal",
+            "Porque eran demasiados casos"
+          ],
+          "answer": 0,
+          "explanation": "La función empieza en 0, así que solo coincide con la respuesta correcta cuando la lista tiene un 0 o negativos.",
+          "errorHint": "Mira qué valores tienen en común los dos casos escritos a mano."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "¿Qué habría detectado el error automáticamente?",
+          "options": [
+            "Comparar con un oráculo sobre listas generadas",
+            "Ejecutar el mismo caso dos veces",
+            "Escribir más comentarios en el código"
+          ],
+          "answer": 0,
+          "explanation": "Un oráculo y muchas listas generadas habrían encontrado pronto una lista de esperas positivas.",
+          "errorHint": "Piensa qué técnica compara contra una referencia en muchos casos."
+        }
+      ],
+      "hint": "Los errores se esconden justo donde no probamos.",
+      "explanation": "Probar con casos variados contra una referencia confiable descubre errores que los ejemplos a mano esconden.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Oráculo",
+        "input": "Los casos a mano y el caso real",
+        "output": "La explicación de por qué fallaron las pruebas",
+        "reflection": "Explica qué tipo de lista habría encontrado el error.",
+        "requires": [],
+        "from": "algoritmia/tm-datos/integrar-ajuste"
+      }
+    },
+    {
+      "id": "implementar-menor",
+      "type": "javascript",
+      "concept": "algoritmia.tm-pruebas.oraculo-de-fuerza-bruta",
+      "prompt": "Implementa menorEspera: recibe una lista de esperas (números) y devuelve la menor. Empieza con el primer elemento de la lista y recorre el resto con un ciclo for.",
+      "starter": "function menorEspera(lista) {\n  // Devuelve la menor espera de la lista.\n}\n",
+      "solution": "function menorEspera(lista) {\n  let menor = lista[0];\n  for (let i = 1; i < lista.length; i++) {\n    if (lista[i] < menor) {\n      menor = lista[i];\n    }\n  }\n  return menor;\n}\n",
+      "entrypoint": "menorEspera",
+      "cases": [
+        {
+          "name": "Lista mezclada",
+          "args": [
+            [
+              4,
+              2,
+              7
+            ]
+          ],
+          "expected": 2
+        },
+        {
+          "name": "Valores repetidos",
+          "args": [
+            [
+              5,
+              5
+            ]
+          ],
+          "expected": 5
+        },
+        {
+          "name": "Un solo valor",
+          "args": [
+            [
+              9
+            ]
+          ],
+          "expected": 9
+        },
+        {
+          "name": "Menor al final",
+          "args": [
+            [
+              10,
+              4,
+              4,
+              12,
+              3
+            ]
+          ],
+          "expected": 3
+        }
+      ],
+      "hint": "Empieza con menor = lista[0] y no con 0.",
+      "hints": [
+        "Empieza con menor = lista[0] y no con 0.",
+        "Dentro del ciclo, si lista[i] es menor que menor, actualiza menor."
+      ],
+      "explanation": "Empezar con el primer elemento evita el error de suponer un valor inicial que no pertenece a la lista.",
+      "retryFeedback": "Prueba con una lista de valores positivos: el resultado debe pertenecer a la lista.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Menor espera",
+        "input": "El contrato del problema",
+        "output": "menorEspera sin error de valor inicial",
+        "reflection": "Anota por qué menor no puede empezar en 0.",
+        "requires": [
+          "entender-oraculo"
+        ],
+        "from": "algoritmia/tm-datos/integrar-ajuste"
+      }
+    },
+    {
+      "id": "reescribir-propiedad",
+      "type": "javascript",
+      "concept": "algoritmia.tm-pruebas.prueba-de-propiedades",
+      "prompt": "Reescribe la comprobación como propiedad: cumplePropiedad recibe una lista y un resultado, y devuelve true solo si el resultado está en la lista y ningún elemento es menor que él.",
+      "starter": "function cumplePropiedad(lista, resultado) {\n  // Comprueba las dos partes de la propiedad.\n}\n",
+      "solution": "function cumplePropiedad(lista, resultado) {\n  if (!lista.includes(resultado)) {\n    return false;\n  }\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < resultado) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+      "entrypoint": "cumplePropiedad",
+      "cases": [
+        {
+          "name": "Resultado correcto",
+          "args": [
+            [
+              4,
+              2,
+              7
+            ],
+            2
+          ],
+          "expected": true
+        },
+        {
+          "name": "Resultado ausente",
+          "args": [
+            [
+              4,
+              2,
+              7
+            ],
+            0
+          ],
+          "expected": false
+        },
+        {
+          "name": "Hay un menor",
+          "args": [
+            [
+              4,
+              2,
+              7
+            ],
+            4
+          ],
+          "expected": false
+        },
+        {
+          "name": "Un solo valor",
+          "args": [
+            [
+              5
+            ],
+            5
+          ],
+          "expected": true
+        }
+      ],
+      "hint": "Primero comprueba que lista.includes(resultado) sea verdadero.",
+      "hints": [
+        "Primero comprueba que lista.includes(resultado) sea verdadero.",
+        "Después recorre la lista y devuelve false si encuentras un valor menor."
+      ],
+      "explanation": "La propiedad no necesita conocer la respuesta correcta: solo comprueba lo que toda respuesta correcta cumple.",
+      "retryFeedback": "Revisa las dos partes: pertenece a la lista y nadie es menor.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Propiedad",
+        "input": "La función anterior y el oráculo",
+        "output": "cumplePropiedad como comprobación general",
+        "reflection": "Explica por qué la propiedad sirve con listas que nunca viste.",
+        "requires": [
+          "implementar-menor"
+        ],
+        "from": "algoritmia/tm-pruebas/implementar-menor"
+      }
+    },
+    {
+      "id": "integrar-contraejemplo",
+      "type": "javascript",
+      "concept": "algoritmia.tm-pruebas.aleatoriedad-reproducible",
+      "prompt": "Integra todo: buscarContraejemplo recibe una semilla y un número de intentos. En cada intento avanza el estado con siguiente, genera una lista de 5 esperas con listaAleatoria y, si cumplePropiedad falla con menorEsperaConError, devuelve esa lista como texto con join(\",\"). Si ninguna falla, devuelve \"ninguno\".",
+      "starter": "function siguiente(estado) {\n  return (estado * 1664525 + 1013904223) % 4294967296;\n}\nfunction listaAleatoria(estado, tamano) {\n  const lista = [];\n  for (let i = 0; i < tamano; i++) {\n    estado = siguiente(estado);\n    lista.push(1 + Math.floor((estado / 4294967296) * 20));\n  }\n  return lista;\n}\nfunction menorEsperaConError(lista) {\n  let menor = 0;\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < menor) {\n      menor = lista[i];\n    }\n  }\n  return menor;\n}\nfunction cumplePropiedad(lista, resultado) {\n  if (!lista.includes(resultado)) {\n    return false;\n  }\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < resultado) {\n      return false;\n    }\n  }\n  return true;\n}\n\nfunction buscarContraejemplo(semilla, intentos) {\n  // Genera listas con la semilla y devuelve la primera que rompa la propiedad.\n}\n",
+      "solution": "function siguiente(estado) {\n  return (estado * 1664525 + 1013904223) % 4294967296;\n}\nfunction listaAleatoria(estado, tamano) {\n  const lista = [];\n  for (let i = 0; i < tamano; i++) {\n    estado = siguiente(estado);\n    lista.push(1 + Math.floor((estado / 4294967296) * 20));\n  }\n  return lista;\n}\nfunction menorEsperaConError(lista) {\n  let menor = 0;\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < menor) {\n      menor = lista[i];\n    }\n  }\n  return menor;\n}\nfunction cumplePropiedad(lista, resultado) {\n  if (!lista.includes(resultado)) {\n    return false;\n  }\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] < resultado) {\n      return false;\n    }\n  }\n  return true;\n}\n\nfunction buscarContraejemplo(semilla, intentos) {\n  let estado = semilla;\n  for (let i = 0; i < intentos; i++) {\n    estado = siguiente(estado);\n    const lista = listaAleatoria(estado, 5);\n    if (!cumplePropiedad(lista, menorEsperaConError(lista))) {\n      return lista.join(\",\");\n    }\n  }\n  return \"ninguno\";\n}\n",
+      "entrypoint": "buscarContraejemplo",
+      "cases": [
+        {
+          "name": "Semilla 42",
+          "args": [
+            42,
+            10
+          ],
+          "expected": "2,12,5,8,1"
+        },
+        {
+          "name": "Semilla 7",
+          "args": [
+            7,
+            3
+          ],
+          "expected": "19,13,19,1,18"
+        },
+        {
+          "name": "Sin intentos",
+          "args": [
+            42,
+            0
+          ],
+          "expected": "ninguno"
+        },
+        {
+          "name": "Semilla 2026",
+          "args": [
+            2026,
+            5
+          ],
+          "expected": "1,1,14,13,10"
+        }
+      ],
+      "hint": "Avanza el estado antes de generar cada lista: estado = siguiente(estado).",
+      "hints": [
+        "Avanza el estado antes de generar cada lista: estado = siguiente(estado).",
+        "Devuelve lista.join(\",\") en cuanto la propiedad falle, y \"ninguno\" después del ciclo."
+      ],
+      "explanation": "El generador con semilla y la propiedad encuentran un contraejemplo que cualquiera puede repetir.",
+      "retryFeedback": "Con intentos igual a 0 el ciclo no se ejecuta y debes devolver \"ninguno\".",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Contraejemplo",
+        "input": "Las funciones comprobadas en las etapas anteriores",
+        "output": "buscarContraejemplo con semilla reproducible",
+        "reflection": "Describe cómo reproducirías el fallo mañana con la misma semilla.",
+        "requires": [
+          "reescribir-propiedad"
+        ],
+        "from": "algoritmia/tm-pruebas/reescribir-propiedad"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: Math.min",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min"
+    },
+    {
+      "title": "MDN: Array.prototype.includes",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes"
+    },
+    {
+      "title": "MDN: bucles e iteración",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Loops_and_iteration"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "las esperas generadas son enteros positivos"
+    ],
+    "workedExample": {
+      "problem": "Problema: queremos saber si menorEsperaConError falla con listas generadas a partir de la semilla 42",
+      "reasoning": "generamos una lista con la semilla, calculamos su resultado y comprobamos la propiedad",
+      "result": "el primer intento ya produce un contraejemplo, y como la semilla es la misma, cualquiera puede repetirlo"
+    },
+    "transferActivityIds": [
+      "integrar-contraejemplo"
+    ]
+  },
+  "coverage": {
+    "algoritmia.tm-pruebas.oraculo-de-fuerza-bruta": {
+      "explanationExcerpt": "una solución tan simple que resulta evidente que es correcta",
+      "assessmentIds": [
+        "oraculo-que-es",
+        "oraculo-usar"
+      ]
+    },
+    "algoritmia.tm-pruebas.prueba-de-propiedades": {
+      "explanationExcerpt": "comprueba una propiedad que el resultado debe cumplir siempre",
+      "assessmentIds": [
+        "propiedad-que-es",
+        "propiedad-menor"
+      ]
+    },
+    "algoritmia.tm-pruebas.aleatoriedad-reproducible": {
+      "explanationExcerpt": "una cuenta que, a partir del mismo número inicial, produce siempre la misma secuencia",
+      "assessmentIds": [
+        "semilla"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Probar los algoritmos del proyecto con un oráculo, una propiedad y casos generados con semilla.",
+    "previous": "algoritmia/tm-datos/integrar-ajuste"
+  }
+}

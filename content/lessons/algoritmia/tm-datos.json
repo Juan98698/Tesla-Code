@@ -1,0 +1,407 @@
+{
+  "id": "tm-datos",
+  "outcome": "Modelar estaciones con objetos y arreglos, guardarlas como JSON y copiarlas sin alterar el original",
+  "requiresConcepts": [
+    "algoritmia.tm-contrato.contrato-del-problema",
+    "algoritmia.tm-contrato.entradas-y-salidas",
+    "algoritmia.tm-contrato.estructura-del-proyecto"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Un algoritmo trabaja sobre datos, y la forma en que se guardan decide qué tan fácil resulta escribirlo. Un <strong>modelo de datos</strong> es la decisión sobre qué información se guarda y con qué forma. Para una estación de Tesla Metro necesitamos su nombre, su línea y los minutos que tarda el tren hasta la siguiente estación.</p>\n<p>En JavaScript una estación se representa con un objeto: un conjunto de campos con nombre escritos entre llaves. El punto lee un campo: estacion.nombre devuelve el nombre. Una línea completa es un arreglo, una lista ordenada entre corchetes cuyos elementos se leen por su posición, empezando en 0: linea[0] es la primera estación y linea.length es cuántas hay.</p>\n<pre data-language=\"javascript\"><code>const estacion = { nombre: \"Central\", linea: \"Roja\", minutosAlSiguiente: 3 };\nconst linea = [estacion, { nombre: \"Museo\", linea: \"Roja\", minutosAlSiguiente: 4 }];\nconsole.log(estacion.nombre);\nconsole.log(linea[1].nombre);\nconsole.log(linea.length);</code></pre>\n<p>Elegir bien el modelo evita cortar textos a mano. Guardar la estación como el texto \"Central-Roja-3\" obligaría a separarlo cada vez que se consulta, mientras que con un objeto cada dato tiene su nombre.</p>\n<p>El mapa de la ciudad también debe guardarse en un archivo y enviarse entre programas. Para eso existe el <strong>JSON del mapa</strong>: un texto con un formato estándar que describe objetos y arreglos. JSON.stringify convierte un objeto en ese texto y JSON.parse reconstruye el objeto a partir de él.</p>\n<pre data-language=\"javascript\"><code>const estacion = { nombre: \"Central\", linea: \"Roja\", minutosAlSiguiente: 3 };\nconst texto = JSON.stringify(estacion);\nconsole.log(texto);\nconst lectura = JSON.parse(texto);\nconsole.log(lectura.minutosAlSiguiente);</code></pre>\n<p>Hay un detalle que causa errores sutiles. Escribir const otra = estacion no crea una estación nueva, sino un segundo nombre para el mismo objeto, y un cambio hecho desde uno se ve desde el otro. Una <strong>copia profunda</strong> crea un objeto independiente con los mismos datos, y structuredClone la hace.</p>\n<pre data-language=\"javascript\"><code>const original = { nombre: \"Central\", minutosAlSiguiente: 3 };\nconst mismoObjeto = original;\nconst copia = structuredClone(original);\nmismoObjeto.minutosAlSiguiente = 5;\nconsole.log(original.minutosAlSiguiente);\nconsole.log(copia.minutosAlSiguiente);</code></pre>\n<p>Por eso, cuando un algoritmo necesita probar una modificación sin arruinar los datos de la ciudad, trabaja sobre una copia profunda.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: queremos leer el nombre de la segunda estación de una línea con tres estaciones. En este ejemplo la línea ya está guardada en un arreglo.</p>\n<p>Razonamiento: las posiciones empiezan en 0, así que la segunda estación está en la posición 1 y su nombre se lee con un punto después de linea[1].</p>\n<p>Resultado: linea[1].nombre devuelve el nombre de la segunda estación.</p>",
+  "examples": [
+    {
+      "id": "tm-datos-e1",
+      "language": "javascript",
+      "code": "const estacion = { nombre: \"Central\", linea: \"Roja\", minutosAlSiguiente: 3 };\nconst linea = [estacion, { nombre: \"Museo\", linea: \"Roja\", minutosAlSiguiente: 4 }];\nconsole.log(estacion.nombre);\nconsole.log(linea[1].nombre);\nconsole.log(linea.length);",
+      "stdout": "Central\nMuseo\n2\n"
+    },
+    {
+      "id": "tm-datos-e2",
+      "language": "javascript",
+      "code": "const estacion = { nombre: \"Central\", linea: \"Roja\", minutosAlSiguiente: 3 };\nconst texto = JSON.stringify(estacion);\nconsole.log(texto);\nconst lectura = JSON.parse(texto);\nconsole.log(lectura.minutosAlSiguiente);",
+      "stdout": "{\"nombre\":\"Central\",\"linea\":\"Roja\",\"minutosAlSiguiente\":3}\n3\n"
+    },
+    {
+      "id": "tm-datos-e3",
+      "language": "javascript",
+      "code": "const original = { nombre: \"Central\", minutosAlSiguiente: 3 };\nconst mismoObjeto = original;\nconst copia = structuredClone(original);\nmismoObjeto.minutosAlSiguiente = 5;\nconsole.log(original.minutosAlSiguiente);\nconsole.log(copia.minutosAlSiguiente);",
+      "stdout": "5\n3\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "modelo-objeto",
+      "type": "choice",
+      "concept": "algoritmia.tm-datos.modelo-de-datos",
+      "prompt": "¿Por qué conviene modelar una estación como un objeto con campos?",
+      "options": [
+        "Cada dato tiene un nombre y se lee directamente",
+        "Porque los objetos son siempre más rápidos que los números",
+        "Porque así no hace falta guardar el nombre",
+        "Porque JSON lo exige"
+      ],
+      "answer": 0,
+      "explanation": "Con un objeto no hay que cortar textos: cada dato se lee por el nombre de su campo."
+    },
+    {
+      "id": "modelo-posicion",
+      "type": "choice",
+      "concept": "algoritmia.tm-datos.modelo-de-datos",
+      "prompt": "Si linea es un arreglo con tres estaciones, ¿en qué posición está la segunda?",
+      "options": [
+        "En la posición 1",
+        "En la posición 2",
+        "En la posición 0",
+        "En la posición 3"
+      ],
+      "answer": 0,
+      "explanation": "Las posiciones de un arreglo empiezan en 0: la primera es 0 y la segunda es 1."
+    },
+    {
+      "id": "json-stringify",
+      "type": "choice",
+      "concept": "algoritmia.tm-datos.json-del-mapa",
+      "prompt": "¿Qué hace JSON.stringify?",
+      "options": [
+        "Convierte un objeto en un texto JSON",
+        "Convierte un texto JSON en un objeto",
+        "Copia un objeto sin usar texto",
+        "Ordena un arreglo"
+      ],
+      "answer": 0,
+      "explanation": "stringify produce el texto; parse hace el camino contrario."
+    },
+    {
+      "id": "json-parse",
+      "type": "choice",
+      "concept": "algoritmia.tm-datos.json-del-mapa",
+      "prompt": "Si texto vale {\"minutos\":4}, ¿qué devuelve JSON.parse(texto).minutos?",
+      "options": [
+        "El número 4",
+        "El texto {\"minutos\":4}",
+        "undefined",
+        "Un error"
+      ],
+      "answer": 0,
+      "explanation": "parse reconstruye el objeto y .minutos lee su campo: el número 4."
+    },
+    {
+      "id": "copia-referencia",
+      "type": "choice",
+      "concept": "algoritmia.tm-datos.copia-profunda",
+      "prompt": "Después de const otra = estacion y otra.minutosAlSiguiente = 9, ¿cuánto vale estacion.minutosAlSiguiente?",
+      "options": [
+        "9",
+        "El valor que tenía antes",
+        "undefined",
+        "0"
+      ],
+      "answer": 0,
+      "explanation": "otra y estacion son dos nombres del mismo objeto, así que el cambio se ve desde ambos."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.tm-datos.modelo-de-datos",
+      "prompt": "Elige cómo guardar las estaciones",
+      "brief": "El planificador de Tesla Metro debe consultar el nombre y los minutos al siguiente de cada estación, y probar un cambio de tiempos sin alterar el mapa original.",
+      "evidence": [
+        {
+          "label": "Opción A",
+          "text": "El texto \"Central-Roja-3\" para cada estación."
+        },
+        {
+          "label": "Opción B",
+          "text": "Un objeto { nombre: \"Central\", linea: \"Roja\", minutosAlSiguiente: 3 } para cada estación."
+        },
+        {
+          "label": "Opción C",
+          "text": "Dos arreglos paralelos: los nombres [\"Central\", \"Museo\"] y los minutos [3, 4]."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Qué modelo permite leer los minutos sin cortar texto y mantiene juntos los datos de cada estación?",
+          "options": [
+            "Opción A",
+            "Opción B",
+            "Opción C"
+          ],
+          "answer": 1,
+          "explanation": "El objeto agrupa los datos de la estación y cada uno se lee por su nombre.",
+          "errorHint": "Piensa qué opción no obliga a separar texto ni a mantener dos listas sincronizadas."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "Para probar un cambio de tiempos sin alterar el mapa original, ¿qué conviene hacer?",
+          "options": [
+            "Modificar el mismo objeto y deshacer el cambio después",
+            "Trabajar sobre una copia profunda",
+            "Convertirlo a texto y no volver a leerlo"
+          ],
+          "answer": 1,
+          "explanation": "Una copia profunda es independiente: cambiarla no toca el mapa original.",
+          "errorHint": "Recuerda qué pasa cuando dos nombres apuntan al mismo objeto."
+        }
+      ],
+      "hint": "Cada decisión se resuelve pensando qué pasa cuando un dato se consulta o se cambia.",
+      "explanation": "El modelo elegido determina qué tan fácil es consultar y cambiar los datos sin dañarlos.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Modelo",
+        "input": "Tres formas de guardar una estación",
+        "output": "La elección del modelo y de la copia, justificada",
+        "reflection": "Explica qué problema evita el objeto frente al texto suelto.",
+        "requires": [],
+        "from": "algoritmia/tm-contrato/integrar-costo"
+      }
+    },
+    {
+      "id": "implementar-segundos",
+      "type": "javascript",
+      "concept": "algoritmia.tm-datos.modelo-de-datos",
+      "prompt": "Implementa segundosAlSiguiente: recibe una estación (un objeto con minutosAlSiguiente) y devuelve cuántos segundos tarda el tren hasta la siguiente estación.",
+      "starter": "function segundosAlSiguiente(estacion) {\n  // Devuelve los segundos hasta la siguiente estación.\n}\n",
+      "solution": "function segundosAlSiguiente(estacion) {\n  return estacion.minutosAlSiguiente * 60;\n}\n",
+      "entrypoint": "segundosAlSiguiente",
+      "cases": [
+        {
+          "name": "Tres minutos",
+          "args": [
+            {
+              "nombre": "Central",
+              "linea": "Roja",
+              "minutosAlSiguiente": 3
+            }
+          ],
+          "expected": 180
+        },
+        {
+          "name": "Sin tiempo",
+          "args": [
+            {
+              "nombre": "Fin",
+              "linea": "Roja",
+              "minutosAlSiguiente": 0
+            }
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Minutos con decimales",
+          "args": [
+            {
+              "nombre": "Museo",
+              "linea": "Roja",
+              "minutosAlSiguiente": 4.5
+            }
+          ],
+          "expected": 270
+        }
+      ],
+      "hint": "Lee el campo con un punto: estacion.minutosAlSiguiente.",
+      "hints": [
+        "Lee el campo con un punto: estacion.minutosAlSiguiente.",
+        "Multiplica los minutos por 60 y devuélvelos con return."
+      ],
+      "explanation": "La función lee un campo del objeto y lo convierte de minutos a segundos.",
+      "retryFeedback": "Comprueba que usas return y que lees el campo con el nombre exacto.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Segundos",
+        "input": "El modelo de estación",
+        "output": "segundosAlSiguiente leyendo el campo del objeto",
+        "reflection": "Anota qué campo usa la función y qué unidad devuelve.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/tm-contrato/integrar-costo"
+      }
+    },
+    {
+      "id": "reescribir-json",
+      "type": "javascript",
+      "concept": "algoritmia.tm-datos.json-del-mapa",
+      "prompt": "Reescribe el acceso a los datos: minutosDesdeJson recibe el texto JSON de una estación y devuelve su minutosAlSiguiente.",
+      "starter": "function minutosDesdeJson(texto) {\n  // Convierte el texto en un objeto y lee sus minutos.\n}\n",
+      "solution": "function minutosDesdeJson(texto) {\n  const estacion = JSON.parse(texto);\n  return estacion.minutosAlSiguiente;\n}\n",
+      "entrypoint": "minutosDesdeJson",
+      "cases": [
+        {
+          "name": "Tres minutos",
+          "args": [
+            "{\"nombre\":\"Central\",\"linea\":\"Roja\",\"minutosAlSiguiente\":3}"
+          ],
+          "expected": 3
+        },
+        {
+          "name": "Siete minutos",
+          "args": [
+            "{\"nombre\":\"Puerto\",\"linea\":\"Azul\",\"minutosAlSiguiente\":7}"
+          ],
+          "expected": 7
+        },
+        {
+          "name": "Cero minutos",
+          "args": [
+            "{\"nombre\":\"Fin\",\"linea\":\"Roja\",\"minutosAlSiguiente\":0}"
+          ],
+          "expected": 0
+        }
+      ],
+      "hint": "Primero reconstruye el objeto con JSON.parse.",
+      "hints": [
+        "Primero reconstruye el objeto con JSON.parse.",
+        "Luego lee el campo con un punto y devuélvelo."
+      ],
+      "explanation": "JSON.parse convierte el texto en un objeto sobre el que ya sabes leer campos.",
+      "retryFeedback": "El texto debe pasar por JSON.parse antes de leer el campo.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "JSON",
+        "input": "La función anterior y el formato del mapa",
+        "output": "minutosDesdeJson leyendo desde texto JSON",
+        "reflection": "Explica qué cambia entre leer un objeto y leer un texto JSON.",
+        "requires": [
+          "implementar-segundos"
+        ],
+        "from": "algoritmia/tm-datos/implementar-segundos"
+      }
+    },
+    {
+      "id": "integrar-ajuste",
+      "type": "javascript",
+      "concept": "algoritmia.tm-datos.copia-profunda",
+      "prompt": "Integra una prueba segura: diferenciaTrasAjuste recibe una estación y unos minutos nuevos, cambia los minutos en una copia profunda sin tocar la original y devuelve los minutos originales menos los nuevos.",
+      "starter": "function diferenciaTrasAjuste(estacion, nuevosMinutos) {\n  // Cambia los minutos solo en una copia.\n}\n",
+      "solution": "function diferenciaTrasAjuste(estacion, nuevosMinutos) {\n  const copia = structuredClone(estacion);\n  copia.minutosAlSiguiente = nuevosMinutos;\n  return estacion.minutosAlSiguiente - copia.minutosAlSiguiente;\n}\n",
+      "entrypoint": "diferenciaTrasAjuste",
+      "cases": [
+        {
+          "name": "Más minutos",
+          "args": [
+            {
+              "nombre": "Central",
+              "minutosAlSiguiente": 3
+            },
+            5
+          ],
+          "expected": -2
+        },
+        {
+          "name": "Mismo tiempo",
+          "args": [
+            {
+              "nombre": "Museo",
+              "minutosAlSiguiente": 4
+            },
+            4
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Menos minutos",
+          "args": [
+            {
+              "nombre": "Puerto",
+              "minutosAlSiguiente": 10
+            },
+            7
+          ],
+          "expected": 3
+        }
+      ],
+      "hint": "Crea la copia con structuredClone antes de cambiar nada.",
+      "hints": [
+        "Crea la copia con structuredClone antes de cambiar nada.",
+        "Modifica copia.minutosAlSiguiente y calcula la resta con la estación original."
+      ],
+      "explanation": "La copia profunda permite probar un cambio y comparar con el original, que sigue intacto.",
+      "retryFeedback": "Si cambias la estación original, la diferencia siempre sería 0.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Ajuste seguro",
+        "input": "Las funciones anteriores y el mapa original",
+        "output": "diferenciaTrasAjuste probando un cambio sin tocar el original",
+        "reflection": "Describe por qué la copia protege el mapa de la ciudad.",
+        "requires": [
+          "reescribir-json"
+        ],
+        "from": "algoritmia/tm-datos/reescribir-json"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: inicializador de objetos",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer"
+    },
+    {
+      "title": "MDN: JSON",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON"
+    },
+    {
+      "title": "MDN: structuredClone",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "la línea ya está guardada en un arreglo"
+    ],
+    "workedExample": {
+      "problem": "Problema: queremos leer el nombre de la segunda estación de una línea con tres estaciones",
+      "reasoning": "las posiciones empiezan en 0, así que la segunda estación está en la posición 1",
+      "result": "linea[1].nombre devuelve el nombre de la segunda estación"
+    },
+    "transferActivityIds": [
+      "integrar-ajuste"
+    ]
+  },
+  "coverage": {
+    "algoritmia.tm-datos.modelo-de-datos": {
+      "explanationExcerpt": "es la decisión sobre qué información se guarda y con qué forma",
+      "assessmentIds": [
+        "modelo-objeto",
+        "modelo-posicion"
+      ]
+    },
+    "algoritmia.tm-datos.json-del-mapa": {
+      "explanationExcerpt": "un texto con un formato estándar que describe objetos y arreglos",
+      "assessmentIds": [
+        "json-stringify",
+        "json-parse"
+      ]
+    },
+    "algoritmia.tm-datos.copia-profunda": {
+      "explanationExcerpt": "crea un objeto independiente con los mismos datos",
+      "assessmentIds": [
+        "copia-referencia"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Representar estaciones con objetos, guardarlas como JSON y probar cambios sobre copias independientes.",
+    "previous": "algoritmia/tm-contrato/integrar-costo"
+  }
+}

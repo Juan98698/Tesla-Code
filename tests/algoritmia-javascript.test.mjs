@@ -6,6 +6,7 @@ import { indexRoute, isPublished } from '../js/domain/curriculum.js';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const source = read('content/curriculum/algoritmia.json');
 const route = indexRoute(source);
+const PUBLISHED = ['tm-contrato', 'tm-datos', 'tm-pruebas', 'tm-medir', 'an-escala'];
 
 test('Algoritmia publica la edición de JavaScript y conserva la anterior como archivo', () => {
   assert.equal(source.currentEdition, 'javascript-1');
@@ -48,7 +49,7 @@ test('el tronco principal nunca depende de una práctica opcional y cada lecció
   }
 });
 
-test('cada concepto de la edición nueva tiene su registro y solo la primera lección está publicada', () => {
+test('cada concepto de la edición nueva tiene su registro y están publicadas las cinco primeras lecciones', () => {
   const registry = new Map(read('content/concepts.json').concepts.map((c) => [c.id, c]));
   for (const lesson of route.lessons) {
     assert.equal(lesson.teaches.length, lesson.concepts.length, lesson.id);
@@ -59,20 +60,31 @@ test('cada concepto de la edición nueva tiene su registro y solo la primera lec
   }
   assert.deepEqual(
     route.lessons.filter(isPublished).map((l) => l.id),
-    ['tm-contrato'],
+    PUBLISHED,
   );
 });
 
-test('las soluciones de tm-contrato superan sus casos y el código inicial no los supera', () => {
-  const lesson = read('content/lessons/algoritmia/tm-contrato.json');
-  const load = (code, name) => new Function(`${code}\nreturn ${name};`)();
-  for (const activity of lesson.activities.filter((a) => a.type === 'javascript')) {
-    const passes = (code) =>
-      activity.cases.every((c) => {
-        const result = load(code, activity.entrypoint)(...c.args);
-        return JSON.stringify(result) === JSON.stringify(c.expected);
-      });
-    assert.equal(passes(activity.solution), true, `${activity.id}: la solución debe pasar`);
-    assert.equal(passes(activity.starter), false, `${activity.id}: el inicio no debe pasar`);
+test('el proyecto Tesla Metro se encadena y cada solución supera sus casos mientras el código inicial no', () => {
+  let previous = null;
+  for (const id of PUBLISHED) {
+    const lesson = read(`content/lessons/algoritmia/${id}.json`);
+    assert.equal(lesson.learningProject.id, 'tesla-metro', id);
+    assert.equal(lesson.learningProject.previous, previous, id);
+    assert.equal(lesson.activities.length, 4, id);
+    previous = `algoritmia/${id}/${lesson.activities.at(-1).id}`;
+    const load = (code, name) => new Function(`${code}\nreturn ${name};`)();
+    for (const activity of lesson.activities.filter((a) => a.type === 'javascript')) {
+      const passes = (code) =>
+        activity.cases.every((c) => {
+          const result = load(code, activity.entrypoint)(...structuredClone(c.args));
+          return JSON.stringify(result) === JSON.stringify(c.expected);
+        });
+      assert.equal(passes(activity.solution), true, `${id}/${activity.id}: la solución debe pasar`);
+      assert.equal(
+        passes(activity.starter),
+        false,
+        `${id}/${activity.id}: el inicio no debe pasar`,
+      );
+    }
   }
 });

@@ -1,0 +1,395 @@
+{
+  "id": "an-escala",
+  "outcome": "Explicar cómo crece el trabajo de un algoritmo con el tamaño de la entrada y decidir si sigue siendo utilizable",
+  "requiresConcepts": [
+    "algoritmia.tm-medir.contador-de-operaciones",
+    "algoritmia.tm-medir.calentamiento",
+    "algoritmia.tm-medir.varianza",
+    "algoritmia.tm-medir.benchmark-honesto"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Buscar una estación en una lista de diez es instantáneo con cualquier método. Con diez millones, el mismo método puede tardar horas. Los algoritmos no se comparan con diez datos sino con los que llegarán cuando la ciudad crezca, y por eso hay que estudiar cómo cambia el trabajo cuando los datos aumentan.</p>\n<p>El <strong>tamaño de entrada</strong>, que se representa con la letra n, es la cantidad de datos que recibe el algoritmo: las estaciones de una lista, los pasajeros de una cola o los nombres de un índice. Cuando n cambia, el trabajo del algoritmo cambia, y esa relación es lo que se estudia.</p>\n<p>Un ciclo dentro de otro se llama ciclo anidado: por cada vuelta del ciclo de afuera, el de adentro hace todas sus vueltas. El código siguiente cuenta los pasos de un ciclo simple y de dos ciclos anidados para distintos valores de n, y al final compara qué pasa al duplicar n de 100 a 200.</p>\n<pre data-language=\"javascript\"><code>function contarLineal(n) {\n  let pasos = 0;\n  for (let i = 0; i &lt; n; i++) {\n    pasos++;\n  }\n  return pasos;\n}\nfunction contarCuadratico(n) {\n  let pasos = 0;\n  for (let i = 0; i &lt; n; i++) {\n    for (let j = 0; j &lt; n; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\nconsole.log(contarLineal(10), contarCuadratico(10));\nconsole.log(contarLineal(100), contarCuadratico(100));\nconsole.log(contarLineal(1000), contarCuadratico(1000));\nconsole.log(contarLineal(200) / contarLineal(100));\nconsole.log(contarCuadratico(200) / contarCuadratico(100));</code></pre>\n<p>El <strong>crecimiento</strong> describe cómo aumenta el número de pasos cuando aumenta n. Al pasar de 10 a 100 datos, el ciclo simple da 10 veces más pasos, pero los ciclos anidados dan 100 veces más. Si n se duplica, el trabajo del ciclo simple se duplica y el de los ciclos anidados se multiplica por 4, como muestran las dos últimas líneas.</p>\n<p>Un algoritmo llega a su <strong>límite práctico</strong> cuando, con los datos que se esperan, tardaría demasiado para que alguien lo use. Como regla de planificación sirve suponer unas cien millones de operaciones simples por segundo; es un orden de magnitud que varía entre equipos y siempre debe confirmarse midiendo. Con esa regla, la función siguiente estima cuántos segundos requieren cierta cantidad de pasos.</p>\n<pre data-language=\"javascript\"><code>function segundosEstimados(pasos) {\n  return pasos / 100000000;\n}\nconsole.log(segundosEstimados(1000000));\nconsole.log(segundosEstimados(10000000000));</code></pre>\n<p>Un millón de pasos cuesta una centésima de segundo, pero diez mil millones de pasos cuestan unos 100 segundos, demasiado para responder una consulta.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: Tesla Metro pasa de 1000 a 100000 estaciones registradas y un algoritmo da n por n pasos. En este ejemplo cada paso es una operación simple.</p>\n<p>Razonamiento: con n igual a 1000 son un millón de pasos y con n igual a 100000 son diez mil millones; el trabajo creció 10000 veces aunque los datos solo crecieron 100 veces.</p>\n<p>Resultado: diez mil millones de pasos son unos 100 segundos con la regla de cien millones por segundo, un tiempo inaceptable para una consulta.</p>",
+  "examples": [
+    {
+      "id": "an-escala-e1",
+      "language": "javascript",
+      "code": "function contarLineal(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    pasos++;\n  }\n  return pasos;\n}\nfunction contarCuadratico(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    for (let j = 0; j < n; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\nconsole.log(contarLineal(10), contarCuadratico(10));\nconsole.log(contarLineal(100), contarCuadratico(100));\nconsole.log(contarLineal(1000), contarCuadratico(1000));\nconsole.log(contarLineal(200) / contarLineal(100));\nconsole.log(contarCuadratico(200) / contarCuadratico(100));",
+      "stdout": "10 100\n100 10000\n1000 1000000\n2\n4\n"
+    },
+    {
+      "id": "an-escala-e2",
+      "language": "javascript",
+      "code": "function segundosEstimados(pasos) {\n  return pasos / 100000000;\n}\nconsole.log(segundosEstimados(1000000));\nconsole.log(segundosEstimados(10000000000));",
+      "stdout": "0.01\n100\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "n-que-es",
+      "type": "choice",
+      "concept": "algoritmia.an-escala.tamano-de-entrada",
+      "prompt": "¿Qué representa n al analizar un algoritmo?",
+      "options": [
+        "La cantidad de datos que recibe",
+        "El número de líneas del programa",
+        "El tiempo en milisegundos",
+        "El número de funciones"
+      ],
+      "answer": 0,
+      "explanation": "n es el tamaño de entrada: cuántos datos debe procesar el algoritmo."
+    },
+    {
+      "id": "n-ejemplo",
+      "type": "choice",
+      "concept": "algoritmia.an-escala.tamano-de-entrada",
+      "prompt": "Un algoritmo recibe una lista de 500 estaciones. ¿Cuánto vale n?",
+      "options": [
+        "500",
+        "1",
+        "5",
+        "Depende del equipo"
+      ],
+      "answer": 0,
+      "explanation": "n cuenta los datos de entrada: son 500 estaciones."
+    },
+    {
+      "id": "crecimiento-lineal",
+      "type": "choice",
+      "concept": "algoritmia.an-escala.crecimiento",
+      "prompt": "Un algoritmo lineal da 1000 pasos con 1000 datos. ¿Cuántos pasos dará con 2000 datos?",
+      "options": [
+        "2000",
+        "4000",
+        "1000",
+        "3000"
+      ],
+      "answer": 0,
+      "explanation": "En un algoritmo lineal el trabajo crece igual que n: al duplicar los datos se duplican los pasos."
+    },
+    {
+      "id": "crecimiento-cuadratico",
+      "type": "choice",
+      "concept": "algoritmia.an-escala.crecimiento",
+      "prompt": "Un algoritmo de ciclos anidados da 10000 pasos con 100 datos. ¿Cuántos dará con 200 datos?",
+      "options": [
+        "40000",
+        "20000",
+        "10000",
+        "100000"
+      ],
+      "answer": 0,
+      "explanation": "En ciclos anidados el trabajo crece como n por n: duplicar los datos multiplica los pasos por 4."
+    },
+    {
+      "id": "limite-segundos",
+      "type": "choice",
+      "concept": "algoritmia.an-escala.limite-practico",
+      "prompt": "Con cien millones de pasos por segundo, ¿cuánto tardan diez mil millones de pasos?",
+      "options": [
+        "Unos 100 segundos",
+        "Unos 10 segundos",
+        "Unos 1000 segundos",
+        "Menos de un segundo"
+      ],
+      "answer": 0,
+      "explanation": "Diez mil millones dividido entre cien millones es 100 segundos."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-escala",
+      "type": "case-study",
+      "concept": "algoritmia.an-escala.crecimiento",
+      "prompt": "Anticipa el crecimiento de la ciudad",
+      "brief": "Tesla Metro pasará de 1000 a 100000 estaciones registradas y el equipo debe elegir entre un algoritmo lineal y uno cuadrático.",
+      "evidence": [
+        {
+          "label": "Tabla de pasos",
+          "text": "Con n = 1000: lineal 1000 pasos y cuadrático 1000000 pasos. Con n = 100000: lineal 100000 pasos y cuadrático 10000000000 pasos."
+        },
+        {
+          "label": "Regla de planificación",
+          "text": "Unas cien millones de operaciones simples por segundo."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "Al pasar de 1000 a 100000 datos, ¿cuántas veces más pasos da el algoritmo cuadrático?",
+          "options": [
+            "10000 veces",
+            "100 veces",
+            "1000 veces"
+          ],
+          "answer": 0,
+          "explanation": "De un millón a diez mil millones de pasos hay 10000 veces más, aunque los datos solo crecieron 100 veces.",
+          "errorHint": "Divide los pasos finales entre los iniciales."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "Con 100000 datos y la regla de cien millones por segundo, ¿qué algoritmo permite responder en menos de un segundo?",
+          "options": [
+            "El lineal",
+            "El cuadrático",
+            "Ninguno de los dos"
+          ],
+          "answer": 0,
+          "explanation": "El lineal necesita 0.001 segundos; el cuadrático necesitaría unos 100 segundos.",
+          "errorHint": "Calcula los segundos de cada uno con la regla."
+        }
+      ],
+      "hint": "La escala cambia qué algoritmos sirven.",
+      "explanation": "Comparar cómo crece el trabajo con n permite elegir antes de que la ciudad crezca.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Escala",
+        "input": "La tabla de pasos y la regla de planificación",
+        "output": "La elección del algoritmo según su crecimiento",
+        "reflection": "Explica por qué no basta probar con pocos datos.",
+        "requires": [],
+        "from": "algoritmia/tm-medir/integrar-resumen"
+      }
+    },
+    {
+      "id": "implementar-pasos",
+      "type": "javascript",
+      "concept": "algoritmia.an-escala.crecimiento",
+      "prompt": "Implementa pasosCuadraticos: recibe n y devuelve cuántos pasos da un ciclo anidado que repite n veces otro ciclo de n vueltas, contando un paso en cada vuelta de adentro.",
+      "starter": "function pasosCuadraticos(n) {\n  // Cuenta los pasos de dos ciclos anidados.\n}\n",
+      "solution": "function pasosCuadraticos(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    for (let j = 0; j < n; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\n",
+      "entrypoint": "pasosCuadraticos",
+      "cases": [
+        {
+          "name": "Sin datos",
+          "args": [
+            0
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Tres datos",
+          "args": [
+            3
+          ],
+          "expected": 9
+        },
+        {
+          "name": "Diez datos",
+          "args": [
+            10
+          ],
+          "expected": 100
+        },
+        {
+          "name": "Veinticinco datos",
+          "args": [
+            25
+          ],
+          "expected": 625
+        }
+      ],
+      "hint": "Usa dos ciclos for, uno dentro del otro, y suma 1 a pasos en el de adentro.",
+      "hints": [
+        "Usa dos ciclos for, uno dentro del otro, y suma 1 a pasos en el de adentro.",
+        "Devuelve pasos después de terminar ambos ciclos."
+      ],
+      "explanation": "El contador confirma que dos ciclos anidados dan n por n pasos.",
+      "retryFeedback": "Para n igual a 3 debe devolver 9.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Pasos",
+        "input": "La tabla de crecimiento",
+        "output": "pasosCuadraticos contando los pasos reales",
+        "reflection": "Anota cuántos pasos da cada vuelta del ciclo de afuera.",
+        "requires": [
+          "entender-escala"
+        ],
+        "from": "algoritmia/tm-medir/integrar-resumen"
+      }
+    },
+    {
+      "id": "reescribir-segundos",
+      "type": "javascript",
+      "concept": "algoritmia.an-escala.limite-practico",
+      "prompt": "Reescribe la estimación con la regla de planificación: segundosEstimados recibe una cantidad de pasos y devuelve cuántos segundos requiere a cien millones de pasos por segundo.",
+      "starter": "function segundosEstimados(pasos) {\n  // Devuelve los segundos estimados.\n}\n",
+      "solution": "function segundosEstimados(pasos) {\n  return pasos / 100000000;\n}\n",
+      "entrypoint": "segundosEstimados",
+      "cases": [
+        {
+          "name": "Un segundo",
+          "args": [
+            100000000
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Un millón de pasos",
+          "args": [
+            1000000
+          ],
+          "expected": 0.01
+        },
+        {
+          "name": "Medio segundo",
+          "args": [
+            50000000
+          ],
+          "expected": 0.5
+        },
+        {
+          "name": "Sin pasos",
+          "args": [
+            0
+          ],
+          "expected": 0
+        }
+      ],
+      "hint": "Divide los pasos entre cien millones.",
+      "hints": [
+        "Divide los pasos entre cien millones.",
+        "Devuelve el resultado con return."
+      ],
+      "explanation": "La regla convierte pasos en segundos para decidir si un algoritmo es utilizable.",
+      "retryFeedback": "Comprueba que divides entre 100000000 y no entre otro valor.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Segundos",
+        "input": "El conteo de pasos",
+        "output": "segundosEstimados con la regla de planificación",
+        "reflection": "Explica por qué la estimación es un orden de magnitud y no una medida exacta.",
+        "requires": [
+          "implementar-pasos"
+        ],
+        "from": "algoritmia/an-escala/implementar-pasos"
+      }
+    },
+    {
+      "id": "integrar-aguanta",
+      "type": "javascript",
+      "concept": "algoritmia.an-escala.limite-practico",
+      "prompt": "Integra la decisión: ciudadAguanta recibe n y el máximo de segundos permitido, y devuelve true si un algoritmo cuadrático (n por n pasos, calculado con la multiplicación y sin ciclos) cabe en ese tiempo según segundosEstimados.",
+      "starter": "function segundosEstimados(pasos) {\n  return pasos / 100000000;\n}\n\nfunction ciudadAguanta(n, segundosMaximos) {\n  // Decide si el algoritmo cuadrático cabe en el tiempo permitido.\n}\n",
+      "solution": "function segundosEstimados(pasos) {\n  return pasos / 100000000;\n}\n\nfunction ciudadAguanta(n, segundosMaximos) {\n  return segundosEstimados(n * n) <= segundosMaximos;\n}\n",
+      "entrypoint": "ciudadAguanta",
+      "cases": [
+        {
+          "name": "Mil estaciones",
+          "args": [
+            1000,
+            1
+          ],
+          "expected": true
+        },
+        {
+          "name": "Cien mil estaciones",
+          "args": [
+            100000,
+            1
+          ],
+          "expected": false
+        },
+        {
+          "name": "Justo en el límite",
+          "args": [
+            10000,
+            1
+          ],
+          "expected": true
+        },
+        {
+          "name": "Un poco más del límite",
+          "args": [
+            10001,
+            1
+          ],
+          "expected": false
+        }
+      ],
+      "hint": "Calcula los pasos con n * n, sin ciclos.",
+      "hints": [
+        "Calcula los pasos con n * n, sin ciclos.",
+        "Compara segundosEstimados(n * n) con segundosMaximos usando <=."
+      ],
+      "explanation": "La función decide con una cuenta y no con una ejecución de n por n pasos, que sería demasiado lenta.",
+      "retryFeedback": "Revisa el caso límite de 10000 datos: son 100000000 pasos y exactamente un segundo.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Decisión",
+        "input": "Las estimaciones anteriores",
+        "output": "ciudadAguanta decidiendo si el algoritmo es viable",
+        "reflection": "Describe qué cambiarías si la ciudad llegara a un millón de estaciones.",
+        "requires": [
+          "reescribir-segundos"
+        ],
+        "from": "algoritmia/an-escala/reescribir-segundos"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: bucle for",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for"
+    },
+    {
+      "title": "MDN: división (/)",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Division"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "cada paso es una operación simple"
+    ],
+    "workedExample": {
+      "problem": "Problema: Tesla Metro pasa de 1000 a 100000 estaciones registradas y un algoritmo da n por n pasos",
+      "reasoning": "con n igual a 1000 son un millón de pasos y con n igual a 100000 son diez mil millones",
+      "result": "diez mil millones de pasos son unos 100 segundos con la regla de cien millones por segundo"
+    },
+    "transferActivityIds": [
+      "integrar-aguanta"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-escala.tamano-de-entrada": {
+      "explanationExcerpt": "es la cantidad de datos que recibe el algoritmo",
+      "assessmentIds": [
+        "n-que-es",
+        "n-ejemplo"
+      ]
+    },
+    "algoritmia.an-escala.crecimiento": {
+      "explanationExcerpt": "describe cómo aumenta el número de pasos cuando aumenta n",
+      "assessmentIds": [
+        "crecimiento-lineal",
+        "crecimiento-cuadratico"
+      ]
+    },
+    "algoritmia.an-escala.limite-practico": {
+      "explanationExcerpt": "cuando, con los datos que se esperan, tardaría demasiado para que alguien lo use",
+      "assessmentIds": [
+        "limite-segundos"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Anticipar el crecimiento de la ciudad: contar pasos, estimar segundos y decidir si un algoritmo cabe en el tiempo permitido.",
+    "previous": "algoritmia/tm-medir/integrar-resumen"
+  }
+}
