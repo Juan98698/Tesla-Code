@@ -7,7 +7,7 @@ const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const route = (id) => indexRoute(read('content/curriculum/' + id + '.json'));
 
 test('algorithm entry builds a solution before introducing Python and recursion before analysis', () => {
-  const r = route('algoritmia');
+  const r = route('algoritmia').archive;
   assert.deepEqual(
     r.lessons.slice(0, 7).map((l) => l.id),
     [
@@ -30,7 +30,7 @@ test('algorithm entry builds a solution before introducing Python and recursion 
 });
 
 test('new algorithm stages retain earlier completions without granting the inserted lessons', () => {
-  const r = route('algoritmia');
+  const r = route('algoritmia').archive;
   const state = normalizeProgress({
     version: 2,
     xp: 180,

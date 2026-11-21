@@ -1,0 +1,394 @@
+{
+  "id": "tm-contrato",
+  "outcome": "Escribir el contrato de un problema de Tesla Metro y comprobarlo con una función",
+  "requiresConcepts": [],
+  "html": "<h3>Cómo funciona</h3>\n<p>Tesla Metro es una ciudad ficticia con estaciones, líneas y trenes. A lo largo de esta ruta construirás su motor de rutas, un algoritmo a la vez: primero medirás y ordenarás, después buscarás caminos y al final optimizarás la red. Cada algoritmo responde a una necesidad concreta de la ciudad, y lo que programes hoy se reutilizará más adelante.</p>\n<p>Antes de escribir código se escribe un <strong>contrato del problema</strong>: un texto corto que dice qué recibe el algoritmo, qué debe devolver, qué límites tienen los datos y qué resultados se esperan en casos concretos. El contrato evita programar algo que parece correcto pero resuelve otro problema.</p>\n<p>Las entradas son los datos que el algoritmo recibe; la salida es el resultado que entrega. Una restricción limita las entradas válidas, por ejemplo, que un número no pueda ser negativo. Los ejemplos son pares de entradas y salida esperada que cualquiera puede comprobar. Estas son las <strong>entradas y salidas</strong> del problema pequeño que usaremos hoy:</p>\n<pre data-language=\"text\"><code>Problema: tiempo total de un viaje\nEntradas: paradas (entero mayor o igual que 0) y minutosPorParada (número mayor o igual que 0)\nSalida: minutos totales del viaje\nRestricción: no se aceptan valores negativos\nEjemplos: (5, 2) devuelve 10; (0, 3) devuelve 0</code></pre>\n<p>Un contrato se convierte en código con una función: un bloque con nombre que recibe parámetros, los datos de entrada, y devuelve un resultado con la palabra return. El programa siguiente define la función minutosDeViaje y la llama con los dos ejemplos del contrato; console.log escribe cada resultado en la consola.</p>\n<pre data-language=\"javascript\"><code>function minutosDeViaje(paradas, minutosPorParada) {\n  return paradas * minutosPorParada;\n}\nconsole.log(minutosDeViaje(5, 2));\nconsole.log(minutosDeViaje(0, 3));</code></pre>\n<p>Al ejecutarlo aparecen 10 y 0, los resultados que promete el contrato. Si una entrada rompe una restricción, la función debe decirlo. La instrucción if ejecuta su bloque solo cuando la condición es verdadera; el símbolo &lt; compara si el valor de la izquierda es menor que el de la derecha, y || significa «o». Una función también puede llamar a otra, y así se reutiliza lo que ya funciona.</p>\n<pre data-language=\"javascript\"><code>function minutosValidos(paradas, minutosPorParada) {\n  if (paradas &lt; 0 || minutosPorParada &lt; 0) {\n    return \"Entrada inválida\";\n  }\n  return paradas * minutosPorParada;\n}\nconsole.log(minutosValidos(5, 2));\nconsole.log(minutosValidos(-1, 2));</code></pre>\n<p>Con -1 paradas la condición se cumple y la función devuelve el texto Entrada inválida en lugar de un cálculo sin sentido.</p>\n<p>Por último, el proyecto necesita orden. Cada pieza vive en un lugar fijo, y esa estructura se conserva durante toda la ruta:</p>\n<pre data-language=\"text\"><code>tesla-metro/\n  src/       los algoritmos, una función por archivo\n  datos/     el mapa de la ciudad en JSON\n  pruebas/   los casos que comprueban cada algoritmo</code></pre>\n<p>En esta plataforma escribes las funciones en el editor y la comprobación las llama con los casos del contrato; en tu computadora, cada función iría en su archivo dentro de src.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: un pasajero recorre 4 paradas y cada parada tarda 3 minutos; queremos saber cuánto dura el viaje. En este ejemplo todas las paradas tardan lo mismo.</p>\n<p>Razonamiento: las entradas son 4 paradas y 3 minutos por parada, ninguna es negativa y el contrato dice que la salida es el producto de ambas, así que la función multiplica paradas por minutosPorParada.</p>\n<p>Resultado: minutosDeViaje(4, 3) devuelve 12, es decir, el viaje dura 12 minutos.</p>",
+  "examples": [
+    {
+      "id": "tm-contrato-e1",
+      "language": "javascript",
+      "code": "function minutosDeViaje(paradas, minutosPorParada) {\n  return paradas * minutosPorParada;\n}\nconsole.log(minutosDeViaje(5, 2));\nconsole.log(minutosDeViaje(0, 3));",
+      "stdout": "10\n0\n"
+    },
+    {
+      "id": "tm-contrato-e2",
+      "language": "javascript",
+      "code": "function minutosValidos(paradas, minutosPorParada) {\n  if (paradas < 0 || minutosPorParada < 0) {\n    return \"Entrada inválida\";\n  }\n  return paradas * minutosPorParada;\n}\nconsole.log(minutosValidos(5, 2));\nconsole.log(minutosValidos(-1, 2));",
+      "stdout": "10\nEntrada inválida\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "contrato-contenido",
+      "type": "choice",
+      "concept": "algoritmia.tm-contrato.contrato-del-problema",
+      "prompt": "¿Qué debe incluir un contrato del problema?",
+      "options": [
+        "Entradas, salida, restricciones y ejemplos",
+        "Solo el código final",
+        "El nombre de quien programa",
+        "El tiempo que tarda en tu computadora"
+      ],
+      "answer": 0,
+      "explanation": "El contrato fija qué recibe el algoritmo, qué devuelve, qué límites tienen los datos y qué resultados se esperan. El código viene después."
+    },
+    {
+      "id": "contrato-restriccion",
+      "type": "choice",
+      "concept": "algoritmia.tm-contrato.contrato-del-problema",
+      "prompt": "Una restricción del contrato dice que minutosPorParada no puede ser negativo. ¿Qué significa?",
+      "options": [
+        "Los valores negativos no son entradas válidas",
+        "La función siempre devuelve un número negativo",
+        "La función debe ordenar los datos",
+        "Es un comentario sin efecto"
+      ],
+      "answer": 0,
+      "explanation": "Una restricción limita las entradas válidas. Con un valor negativo la función debe rechazar la entrada."
+    },
+    {
+      "id": "entradas-cuales",
+      "type": "choice",
+      "concept": "algoritmia.tm-contrato.entradas-y-salidas",
+      "prompt": "En minutosDeViaje(5, 2), ¿cuáles son las entradas?",
+      "options": [
+        "5 y 2",
+        "10",
+        "minutosDeViaje",
+        "console.log"
+      ],
+      "answer": 0,
+      "explanation": "Las entradas son los datos que recibe la función: 5 paradas y 2 minutos por parada. 10 es la salida."
+    },
+    {
+      "id": "salida-cero",
+      "type": "choice",
+      "concept": "algoritmia.tm-contrato.entradas-y-salidas",
+      "prompt": "Según el contrato, ¿qué devuelve minutosDeViaje(0, 3)?",
+      "options": [
+        "0",
+        "3",
+        "Nada, no tiene resultado",
+        "-3"
+      ],
+      "answer": 0,
+      "explanation": "Con 0 paradas el producto es 0. El contrato lo incluye como ejemplo."
+    },
+    {
+      "id": "estructura-pruebas",
+      "type": "choice",
+      "concept": "algoritmia.tm-contrato.estructura-del-proyecto",
+      "prompt": "En la estructura del proyecto, ¿dónde viven los casos que comprueban un algoritmo?",
+      "options": [
+        "En pruebas/",
+        "En src/",
+        "En datos/",
+        "En ningún lugar"
+      ],
+      "answer": 0,
+      "explanation": "src guarda los algoritmos, datos guarda el mapa de la ciudad y pruebas guarda los casos que los comprueban."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-contrato",
+      "type": "case-study",
+      "concept": "algoritmia.tm-contrato.contrato-del-problema",
+      "prompt": "Analiza el contrato de un viaje",
+      "brief": "Un pasajero quiere saber cuánto dura un viaje de 6 paradas si cada parada tarda 2 minutos. Antes de programar, revisa el contrato.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Problema: tiempo total de un viaje\nEntradas: paradas (entero mayor o igual que 0) y minutosPorParada (número mayor o igual que 0)\nSalida: minutos totales del viaje\nRestricción: no se aceptan valores negativos\nEjemplos: (5, 2) devuelve 10; (0, 3) devuelve 0"
+        },
+        {
+          "label": "Caso de partida",
+          "text": "Entradas (6, 2) y salida esperada 12."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Qué debe devolver la función con las entradas (6, 2)?",
+          "options": [
+            "12",
+            "8",
+            "2"
+          ],
+          "answer": 0,
+          "explanation": "El contrato define la salida como minutos totales: 6 paradas por 2 minutos son 12.",
+          "errorHint": "Relee la línea Salida del contrato y calcula con los ejemplos."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "¿Qué debería hacer la función si recibe -4 paradas?",
+          "options": [
+            "Rechazar la entrada porque rompe la restricción",
+            "Calcular -8 minutos",
+            "Devolver 0 sin avisar"
+          ],
+          "answer": 0,
+          "explanation": "La restricción dice que no se aceptan valores negativos, así que una entrada negativa debe rechazarse de forma explícita.",
+          "errorHint": "Busca la línea Restricción del contrato."
+        }
+      ],
+      "hint": "Cada decisión se resuelve leyendo una línea del contrato.",
+      "explanation": "El contrato te dice qué esperar antes de escribir una sola línea de código.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Contrato",
+        "input": "Entradas, salida y restricción del viaje",
+        "output": "La decisión comprobada sobre el caso (6, 2) y sobre una entrada negativa",
+        "reflection": "Explica con tus palabras qué línea del contrato justifica cada decisión.",
+        "requires": [],
+        "from": null
+      }
+    },
+    {
+      "id": "implementar-tiempo",
+      "type": "javascript",
+      "concept": "algoritmia.tm-contrato.entradas-y-salidas",
+      "prompt": "Implementa minutosDeViaje según el contrato: recibe paradas y minutosPorParada y devuelve los minutos totales.",
+      "starter": "function minutosDeViaje(paradas, minutosPorParada) {\n  // Devuelve los minutos totales del viaje.\n}\n",
+      "solution": "function minutosDeViaje(paradas, minutosPorParada) {\n  return paradas * minutosPorParada;\n}\n",
+      "entrypoint": "minutosDeViaje",
+      "cases": [
+        {
+          "name": "Cinco paradas",
+          "args": [
+            5,
+            2
+          ],
+          "expected": 10
+        },
+        {
+          "name": "Sin paradas",
+          "args": [
+            0,
+            3
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Minutos con decimales",
+          "args": [
+            4,
+            1.5
+          ],
+          "expected": 6
+        }
+      ],
+      "hint": "La función debe devolver el producto de sus dos parámetros con return.",
+      "hints": [
+        "Si no usas return, la función no entrega resultado.",
+        "Escribe return paradas * minutosPorParada;"
+      ],
+      "explanation": "La función cumple los ejemplos del contrato: 5 por 2 son 10, 0 por 3 son 0 y 4 por 1.5 son 6.",
+      "retryFeedback": "Compara tu resultado con el ejemplo del contrato y revisa que uses return.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Tiempo de viaje",
+        "input": "Los ejemplos del contrato",
+        "output": "minutosDeViaje devolviendo los minutos totales",
+        "reflection": "Anota qué parámetro corresponde a cada entrada del contrato.",
+        "requires": [
+          "entender-contrato"
+        ],
+        "from": null
+      }
+    },
+    {
+      "id": "reescribir-validacion",
+      "type": "javascript",
+      "concept": "algoritmia.tm-contrato.contrato-del-problema",
+      "prompt": "Reescribe minutosDeViaje para respetar la restricción: si paradas o minutosPorParada son negativos, devuelve el texto \"Entrada inválida\".",
+      "starter": "function minutosDeViaje(paradas, minutosPorParada) {\n  return paradas * minutosPorParada;\n}\n",
+      "solution": "function minutosDeViaje(paradas, minutosPorParada) {\n  if (paradas < 0 || minutosPorParada < 0) {\n    return \"Entrada inválida\";\n  }\n  return paradas * minutosPorParada;\n}\n",
+      "entrypoint": "minutosDeViaje",
+      "cases": [
+        {
+          "name": "Entrada válida",
+          "args": [
+            5,
+            2
+          ],
+          "expected": 10
+        },
+        {
+          "name": "Paradas negativas",
+          "args": [
+            -1,
+            2
+          ],
+          "expected": "Entrada inválida"
+        },
+        {
+          "name": "Minutos negativos",
+          "args": [
+            3,
+            -2
+          ],
+          "expected": "Entrada inválida"
+        },
+        {
+          "name": "Sin paradas",
+          "args": [
+            0,
+            3
+          ],
+          "expected": 0
+        }
+      ],
+      "hint": "Revisa las restricciones con if antes de calcular.",
+      "hints": [
+        "Usa una sola condición con || para cubrir ambos parámetros.",
+        "El texto devuelto debe ser exactamente Entrada inválida."
+      ],
+      "explanation": "La función rechaza primero las entradas que rompen el contrato y calcula solo cuando son válidas.",
+      "retryFeedback": "Comprueba el caso con un valor negativo: debe devolver el texto exacto y no un cálculo.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Validación",
+        "input": "La función anterior y la restricción del contrato",
+        "output": "minutosDeViaje que rechaza valores negativos",
+        "reflection": "Explica por qué la restricción se revisa antes del cálculo.",
+        "requires": [
+          "implementar-tiempo"
+        ],
+        "from": "algoritmia/tm-contrato/implementar-tiempo"
+      }
+    },
+    {
+      "id": "integrar-costo",
+      "type": "javascript",
+      "concept": "algoritmia.tm-contrato.estructura-del-proyecto",
+      "prompt": "Integra el cálculo en una nueva función costoDelViaje: recibe paradas, minutosPorParada y tarifaPorMinuto, rechaza valores negativos con \"Entrada inválida\" y devuelve el costo multiplicando los minutos del viaje por la tarifa.",
+      "starter": "function minutosDeViaje(paradas, minutosPorParada) {\n  if (paradas < 0 || minutosPorParada < 0) {\n    return \"Entrada inválida\";\n  }\n  return paradas * minutosPorParada;\n}\n\nfunction costoDelViaje(paradas, minutosPorParada, tarifaPorMinuto) {\n  // Reutiliza minutosDeViaje.\n}\n",
+      "solution": "function minutosDeViaje(paradas, minutosPorParada) {\n  if (paradas < 0 || minutosPorParada < 0) {\n    return \"Entrada inválida\";\n  }\n  return paradas * minutosPorParada;\n}\n\nfunction costoDelViaje(paradas, minutosPorParada, tarifaPorMinuto) {\n  if (paradas < 0 || minutosPorParada < 0 || tarifaPorMinuto < 0) {\n    return \"Entrada inválida\";\n  }\n  return minutosDeViaje(paradas, minutosPorParada) * tarifaPorMinuto;\n}\n",
+      "entrypoint": "costoDelViaje",
+      "cases": [
+        {
+          "name": "Viaje con tarifa",
+          "args": [
+            5,
+            2,
+            3
+          ],
+          "expected": 30
+        },
+        {
+          "name": "Sin paradas",
+          "args": [
+            0,
+            4,
+            3
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Tarifa negativa",
+          "args": [
+            5,
+            2,
+            -1
+          ],
+          "expected": "Entrada inválida"
+        },
+        {
+          "name": "Paradas negativas",
+          "args": [
+            -5,
+            2,
+            3
+          ],
+          "expected": "Entrada inválida"
+        }
+      ],
+      "hint": "Valida los tres parámetros y llama a minutosDeViaje para reutilizar el cálculo.",
+      "hints": [
+        "Una función puede llamar a otra dentro de su bloque.",
+        "Multiplica el resultado de minutosDeViaje por tarifaPorMinuto."
+      ],
+      "explanation": "costoDelViaje reutiliza la función anterior en lugar de repetir el cálculo, y respeta el mismo estilo de rechazo del contrato.",
+      "retryFeedback": "Prueba (5, 2, 3): los minutos son 10 y el costo es 30.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Costo del viaje",
+        "input": "Las funciones ya comprobadas",
+        "output": "costoDelViaje reutilizando minutosDeViaje",
+        "reflection": "Describe qué función vive en src y qué casos viven en pruebas.",
+        "requires": [
+          "reescribir-validacion"
+        ],
+        "from": "algoritmia/tm-contrato/reescribir-validacion"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: funciones en JavaScript",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions"
+    },
+    {
+      "title": "MDN: console.log",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/console/log_static"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "todas las paradas tardan lo mismo"
+    ],
+    "workedExample": {
+      "problem": "Problema: un pasajero recorre 4 paradas y cada parada tarda 3 minutos",
+      "reasoning": "las entradas son 4 paradas y 3 minutos por parada, ninguna es negativa",
+      "result": "minutosDeViaje(4, 3) devuelve 12, es decir, el viaje dura 12 minutos"
+    },
+    "transferActivityIds": [
+      "integrar-costo"
+    ]
+  },
+  "coverage": {
+    "algoritmia.tm-contrato.contrato-del-problema": {
+      "explanationExcerpt": "un texto corto que dice qué recibe el algoritmo, qué debe devolver",
+      "assessmentIds": [
+        "contrato-contenido",
+        "contrato-restriccion"
+      ]
+    },
+    "algoritmia.tm-contrato.entradas-y-salidas": {
+      "explanationExcerpt": "Las entradas son los datos que el algoritmo recibe; la salida es el resultado que entrega.",
+      "assessmentIds": [
+        "entradas-cuales",
+        "salida-cero"
+      ]
+    },
+    "algoritmia.tm-contrato.estructura-del-proyecto": {
+      "explanationExcerpt": "Cada pieza vive en un lugar fijo, y esa estructura se conserva durante toda la ruta",
+      "assessmentIds": [
+        "estructura-pruebas"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Calcular el tiempo y el costo de un viaje a partir de un contrato con restricciones.",
+    "previous": null
+  }
+}

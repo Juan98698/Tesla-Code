@@ -171,21 +171,17 @@ test('worked examples require visible reasoning, conditions and a real transfer 
 });
 
 test('a conceptual entry rejects executable code even when an example has expected output', (t) => {
-  const output = invalidContent(
-    t,
-    'content/lessons/algoritmia/que-hace-bueno-a-un-algoritmo.json',
-    (d) => {
-      d.html += '<pre data-language="python">for n in [1]:\n    print(n)</pre>';
-      d.examples = [
-        {
-          id: 'sudden-code',
-          language: 'python',
-          code: 'for n in [1]:\n    print(n)',
-          stdout: '1\n',
-        },
-      ];
-    },
-  );
+  const output = invalidContent(t, 'content/lessons/frontend/como-funciona-internet.json', (d) => {
+    d.html += '<pre data-language="python">for n in [1]:\n    print(n)</pre>';
+    d.examples = [
+      {
+        id: 'sudden-code',
+        language: 'python',
+        code: 'for n in [1]:\n    print(n)',
+        stdout: '1\n',
+      },
+    ];
+  });
   assert.match(output, /entrada conceptual introduce código/);
 });
 

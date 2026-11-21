@@ -148,7 +148,7 @@ test('publication rejects skipped, external, future, unavailable or optional pro
   assert.ok(curriculumSequenceErrors(gated).some((e) => e.includes('entrada')));
 });
 test('algorithm prerequisites explicitly connect queues, stacks and heaps to the techniques that use them', () => {
-  const route = indexRoute(read('content/curriculum/algoritmia.json'));
+  const route = indexRoute(read('content/curriculum/algoritmia.json')).archive;
   const lesson = (id) => route.lessons[route.pos[id]];
   assert.ok(lesson('recorridos-de-grafos').requiresConcepts.includes('algoritmia.fifo'));
   assert.ok(lesson('recorridos-de-grafos').requiresConcepts.includes('algoritmia.lifo'));
