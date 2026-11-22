@@ -1,0 +1,400 @@
+{
+  "id": "an-ciclos",
+  "outcome": "Contar los pasos de ciclos simples, anidados y que duplican su contador, y deducir su familia de crecimiento",
+  "requiresConcepts": [
+    "algoritmia.an-bigo.cota-superior",
+    "algoritmia.an-bigo.cota-inferior",
+    "algoritmia.an-bigo.cota-ajustada",
+    "algoritmia.an-bigo.constantes-ignoradas"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Analizar un ciclo significa responder cuántas veces se ejecuta su paso más repetido en función de n. Con tres patrones basta para analizar la mayoría de los algoritmos que vas a escribir en esta ruta.</p>\n<p>El <strong>conteo de operaciones</strong> consiste en elegir el paso que se repite más, por ejemplo, una comparación, y contar cuántas veces ocurre. Si dos ciclos van uno después de otro, sus pasos se suman: n más n son 2n, que sigue siendo lineal. Si un ciclo está dentro de otro, los pasos se multiplican, como ya viste con los <strong>ciclos anidados</strong> de n por n pasos.</p>\n<p>Hay una variante de ciclo anidado muy frecuente: cuando el ciclo interno depende del externo. Si por cada i el ciclo de adentro repite i veces, los pasos son 0 + 1 + 2 + … + (n − 1), que suman n por (n − 1) entre 2. Se llama triangular porque dibuja medio cuadrado, y sigue siendo cuadrático.</p>\n<p>Los <strong>ciclos logarítmicos</strong> son aquellos cuyo contador no avanza de uno en uno sino que se multiplica o se divide en cada vuelta. En i *= 2 la variable i se multiplica por 2 en cada vuelta: 1, 2, 4, 8… y llega a n en log2 de n pasos.</p>\n<pre data-language=\"javascript\"><code>function pasosSecuenciales(n) {\n  let pasos = 0;\n  for (let i = 0; i &lt; n; i++) {\n    pasos++;\n  }\n  for (let j = 0; j &lt; n; j++) {\n    pasos++;\n  }\n  return pasos;\n}\nfunction pasosTriangulares(n) {\n  let pasos = 0;\n  for (let i = 0; i &lt; n; i++) {\n    for (let j = 0; j &lt; i; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\nfunction pasosDuplicando(n) {\n  let pasos = 0;\n  for (let i = 1; i &lt; n; i *= 2) {\n    pasos++;\n  }\n  return pasos;\n}\nconsole.log(pasosSecuenciales(10));\nconsole.log(pasosTriangulares(10));\nconsole.log(pasosDuplicando(16));\nconsole.log(pasosDuplicando(1000));</code></pre>\n<p>Los resultados son 20 para los dos ciclos seguidos con n = 10, 45 para el ciclo triangular, y 4 y 10 pasos para el ciclo que duplica con 16 y con 1000 datos. Para analizar un programa se aplica una regla: lo que va en secuencia se suma y se conserva el término mayor, lo que está anidado se multiplica, y un contador que se duplica o se divide a la mitad aporta un logaritmo.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: queremos saber cuántas comparaciones hace un ciclo que compara cada par de 4 estaciones una sola vez. En este ejemplo no se compara una estación consigo misma.</p>\n<p>Razonamiento: la primera estación se compara con las 3 siguientes, la segunda con las 2 siguientes, la tercera con 1 y la cuarta con ninguna, es decir, 3 + 2 + 1 + 0 comparaciones.</p>\n<p>Resultado: son 6 comparaciones, que coincide con 4 por 3 entre 2, la fórmula del ciclo triangular.</p>",
+  "examples": [
+    {
+      "id": "an-ciclos-e1",
+      "language": "javascript",
+      "code": "function pasosSecuenciales(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    pasos++;\n  }\n  for (let j = 0; j < n; j++) {\n    pasos++;\n  }\n  return pasos;\n}\nfunction pasosTriangulares(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    for (let j = 0; j < i; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\nfunction pasosDuplicando(n) {\n  let pasos = 0;\n  for (let i = 1; i < n; i *= 2) {\n    pasos++;\n  }\n  return pasos;\n}\nconsole.log(pasosSecuenciales(10));\nconsole.log(pasosTriangulares(10));\nconsole.log(pasosDuplicando(16));\nconsole.log(pasosDuplicando(1000));",
+      "stdout": "20\n45\n4\n10\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "conteo-que",
+      "type": "choice",
+      "concept": "algoritmia.an-ciclos.conteo-de-operaciones",
+      "prompt": "¿Qué se cuenta al analizar un ciclo?",
+      "options": [
+        "Cuántas veces se ejecuta su paso más repetido, en función de n",
+        "Cuántas líneas tiene el ciclo",
+        "Cuántos milisegundos tarda",
+        "Cuántas variables usa"
+      ],
+      "answer": 0,
+      "explanation": "El conteo de operaciones se centra en el paso que más se repite."
+    },
+    {
+      "id": "conteo-secuencia",
+      "type": "choice",
+      "concept": "algoritmia.an-ciclos.conteo-de-operaciones",
+      "prompt": "Un ciclo de n pasos seguido por otro ciclo de n pasos, ¿cuántos pasos da en total?",
+      "options": [
+        "2n, que sigue siendo lineal",
+        "n por n",
+        "n elevado a n",
+        "Solo n"
+      ],
+      "answer": 0,
+      "explanation": "Lo que va en secuencia se suma: n más n es 2n, de la misma familia que n."
+    },
+    {
+      "id": "anidados-triangular",
+      "type": "choice",
+      "concept": "algoritmia.an-ciclos.ciclos-anidados",
+      "prompt": "Si por cada i el ciclo de adentro repite i veces, ¿cuántos pasos da con n = 10?",
+      "options": [
+        "45",
+        "100",
+        "10",
+        "55"
+      ],
+      "answer": 0,
+      "explanation": "0 + 1 + 2 + … + 9 suman 45, que es 10 por 9 entre 2."
+    },
+    {
+      "id": "anidados-familia",
+      "type": "choice",
+      "concept": "algoritmia.an-ciclos.ciclos-anidados",
+      "prompt": "¿A qué familia pertenece un ciclo triangular?",
+      "options": [
+        "Cuadrática",
+        "Lineal",
+        "Logarítmica",
+        "Constante"
+      ],
+      "answer": 0,
+      "explanation": "n por (n − 1) entre 2 crece como n por n, así que es cuadrático."
+    },
+    {
+      "id": "log-duplicar",
+      "type": "choice",
+      "concept": "algoritmia.an-ciclos.ciclos-logaritmicos",
+      "prompt": "Un ciclo con i *= 2 que empieza en 1 y llega hasta n, ¿cuántas vueltas da con n = 16?",
+      "options": [
+        "4",
+        "16",
+        "8",
+        "2"
+      ],
+      "answer": 0,
+      "explanation": "i vale 1, 2, 4 y 8: son 4 vueltas antes de llegar a 16."
+    },
+    {
+      "id": "log-familia",
+      "type": "choice",
+      "concept": "algoritmia.an-ciclos.ciclos-logaritmicos",
+      "prompt": "¿Qué familia aporta un contador que se multiplica por 2 en cada vuelta?",
+      "options": [
+        "Logarítmica",
+        "Lineal",
+        "Cuadrática",
+        "Exponencial"
+      ],
+      "answer": 0,
+      "explanation": "Duplicar el contador llega a n en log2 de n vueltas."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-ciclos",
+      "type": "case-study",
+      "concept": "algoritmia.an-ciclos.ciclos-anidados",
+      "prompt": "Cuenta las comparaciones de Tesla Metro",
+      "brief": "El equipo quiere detectar estaciones duplicadas comparando cada par una sola vez y debe estimar el trabajo antes de programarlo.",
+      "evidence": [
+        {
+          "label": "Con 5 estaciones",
+          "text": "La primera se compara con 4, la segunda con 3, la tercera con 2, la cuarta con 1 y la quinta con ninguna."
+        },
+        {
+          "label": "Código previsto",
+          "text": "Un ciclo externo con i y un ciclo interno que va desde 0 hasta i."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Cuántas comparaciones hace con 5 estaciones?",
+          "options": [
+            "10",
+            "25",
+            "5"
+          ],
+          "answer": 0,
+          "explanation": "4 + 3 + 2 + 1 + 0 suman 10, que es 5 por 4 entre 2.",
+          "errorHint": "Suma los pasos de cada vuelta del ciclo externo."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "¿Qué familia de crecimiento tiene?",
+          "options": [
+            "Cuadrática",
+            "Lineal",
+            "Logarítmica"
+          ],
+          "answer": 0,
+          "explanation": "n por (n − 1) entre 2 crece como n por n.",
+          "errorHint": "Mira cómo se comporta la fórmula al duplicar n."
+        }
+      ],
+      "hint": "Cada vuelta externa aporta un paso menos que la anterior.",
+      "explanation": "Un ciclo triangular suma n por (n − 1) entre 2 pasos y es cuadrático.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Ciclos",
+        "input": "El plan del ciclo de comparaciones",
+        "output": "El conteo y la familia justificados",
+        "reflection": "Explica por qué el término más grande decide la familia.",
+        "requires": [],
+        "from": "algoritmia/an-bigo/integrar-ajustada"
+      }
+    },
+    {
+      "id": "implementar-triangular",
+      "type": "javascript",
+      "concept": "algoritmia.an-ciclos.ciclos-anidados",
+      "prompt": "Implementa pasosTriangulares: recibe n y devuelve cuántos pasos da un ciclo externo de n vueltas cuyo ciclo interno repite i veces en la vuelta i.",
+      "starter": "function pasosTriangulares(n) {\n  // Cuenta los pasos de los ciclos.\n}\n",
+      "solution": "function pasosTriangulares(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    for (let j = 0; j < i; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\n",
+      "entrypoint": "pasosTriangulares",
+      "cases": [
+        {
+          "name": "Sin datos",
+          "args": [
+            0
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Un dato",
+          "args": [
+            1
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Cuatro datos",
+          "args": [
+            4
+          ],
+          "expected": 6
+        },
+        {
+          "name": "Diez datos",
+          "args": [
+            10
+          ],
+          "expected": 45
+        }
+      ],
+      "hint": "El ciclo interno va desde 0 hasta i, no hasta n.",
+      "hints": [
+        "El ciclo interno va desde 0 hasta i, no hasta n.",
+        "Suma 1 a pasos en cada vuelta del ciclo interno."
+      ],
+      "explanation": "El contador confirma que la vuelta i del ciclo externo aporta i pasos.",
+      "retryFeedback": "Con 4 datos debes obtener 0 + 1 + 2 + 3 = 6.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Triangular",
+        "input": "El plan de comparaciones",
+        "output": "pasosTriangulares contando los pasos reales",
+        "reflection": "Anota cuántos pasos aporta cada vuelta externa.",
+        "requires": [
+          "entender-ciclos"
+        ],
+        "from": "algoritmia/an-bigo/integrar-ajustada"
+      }
+    },
+    {
+      "id": "reescribir-formula",
+      "type": "javascript",
+      "concept": "algoritmia.an-ciclos.conteo-de-operaciones",
+      "prompt": "Reescribe el conteo como una fórmula: pasosTriangularesFormula recibe n y devuelve n por (n − 1) entre 2 sin usar ciclos.",
+      "starter": "function pasosTriangularesFormula(n) {\n  // Devuelve los pasos con una fórmula.\n}\n",
+      "solution": "function pasosTriangularesFormula(n) {\n  return (n * (n - 1)) / 2;\n}\n",
+      "entrypoint": "pasosTriangularesFormula",
+      "cases": [
+        {
+          "name": "Sin datos",
+          "args": [
+            0
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Cuatro datos",
+          "args": [
+            4
+          ],
+          "expected": 6
+        },
+        {
+          "name": "Diez datos",
+          "args": [
+            10
+          ],
+          "expected": 45
+        },
+        {
+          "name": "Mil datos",
+          "args": [
+            1000
+          ],
+          "expected": 499500
+        }
+      ],
+      "hint": "La fórmula es n * (n - 1) / 2.",
+      "hints": [
+        "La fórmula es n * (n - 1) / 2.",
+        "Devuélvela con return, sin ciclos."
+      ],
+      "explanation": "La fórmula da el mismo resultado que el ciclo sin necesidad de ejecutarlo n por n veces.",
+      "retryFeedback": "Con 1000 datos debe devolver 499500.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Fórmula",
+        "input": "El conteo por ciclos",
+        "output": "pasosTriangularesFormula con una expresión directa",
+        "reflection": "Explica por qué la fórmula es mejor para n muy grande.",
+        "requires": [
+          "implementar-triangular"
+        ],
+        "from": "algoritmia/an-ciclos/implementar-triangular"
+      }
+    },
+    {
+      "id": "integrar-total",
+      "type": "javascript",
+      "concept": "algoritmia.an-ciclos.ciclos-logaritmicos",
+      "prompt": "Integra los tres patrones: pasosTotales recibe n y devuelve la suma de los pasos de un ciclo simple de n vueltas (que debes escribir), de pasosTriangulares y de pasosDuplicando, ambas ya incluidas en el código inicial.",
+      "starter": "function pasosTriangulares(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    for (let j = 0; j < i; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\nfunction pasosDuplicando(n) {\n  let pasos = 0;\n  for (let i = 1; i < n; i *= 2) {\n    pasos++;\n  }\n  return pasos;\n}\n\nfunction pasosTotales(n) {\n  // Suma un ciclo simple, el triangular y el que duplica.\n}\n",
+      "solution": "function pasosTriangulares(n) {\n  let pasos = 0;\n  for (let i = 0; i < n; i++) {\n    for (let j = 0; j < i; j++) {\n      pasos++;\n    }\n  }\n  return pasos;\n}\nfunction pasosDuplicando(n) {\n  let pasos = 0;\n  for (let i = 1; i < n; i *= 2) {\n    pasos++;\n  }\n  return pasos;\n}\n\nfunction pasosTotales(n) {\n  let lineal = 0;\n  for (let i = 0; i < n; i++) {\n    lineal++;\n  }\n  return lineal + pasosTriangulares(n) + pasosDuplicando(n);\n}\n",
+      "entrypoint": "pasosTotales",
+      "cases": [
+        {
+          "name": "Diez datos",
+          "args": [
+            10
+          ],
+          "expected": 59
+        },
+        {
+          "name": "Dieciséis datos",
+          "args": [
+            16
+          ],
+          "expected": 140
+        },
+        {
+          "name": "Un dato",
+          "args": [
+            1
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Sin datos",
+          "args": [
+            0
+          ],
+          "expected": 0
+        }
+      ],
+      "hint": "Escribe un ciclo for que cuente n pasos en una variable.",
+      "hints": [
+        "Escribe un ciclo for que cuente n pasos en una variable.",
+        "Suma esa variable con pasosTriangulares(n) y pasosDuplicando(n)."
+      ],
+      "explanation": "Los bloques en secuencia se suman, y el término cuadrático es el que domina cuando n crece.",
+      "retryFeedback": "Con 10 datos: 10 + 45 + 4 = 59.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Total",
+        "input": "Los conteos de las etapas anteriores",
+        "output": "pasosTotales sumando los tres patrones",
+        "reflection": "Describe qué término domina cuando n llega a un millón.",
+        "requires": [
+          "reescribir-formula"
+        ],
+        "from": "algoritmia/an-ciclos/reescribir-formula"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: bucle for",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for"
+    },
+    {
+      "title": "MDN: asignación con multiplicación",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Multiplication_assignment"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "no se compara una estación consigo misma"
+    ],
+    "workedExample": {
+      "problem": "Problema: queremos saber cuántas comparaciones hace un ciclo que compara cada par de 4 estaciones una sola vez",
+      "reasoning": "la primera estación se compara con las 3 siguientes, la segunda con las 2 siguientes, la tercera con 1 y la cuarta con ninguna",
+      "result": "son 6 comparaciones, que coincide con 4 por 3 entre 2"
+    },
+    "transferActivityIds": [
+      "integrar-total"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-ciclos.conteo-de-operaciones": {
+      "explanationExcerpt": "elegir el paso que se repite más, por ejemplo, una comparación, y contar cuántas veces ocurre",
+      "assessmentIds": [
+        "conteo-que",
+        "conteo-secuencia"
+      ]
+    },
+    "algoritmia.an-ciclos.ciclos-anidados": {
+      "explanationExcerpt": "cuando el ciclo interno depende del externo",
+      "assessmentIds": [
+        "anidados-triangular",
+        "anidados-familia"
+      ]
+    },
+    "algoritmia.an-ciclos.ciclos-logaritmicos": {
+      "explanationExcerpt": "son aquellos cuyo contador no avanza de uno en uno sino que se multiplica o se divide en cada vuelta",
+      "assessmentIds": [
+        "log-duplicar",
+        "log-familia"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Estimar con fórmulas y contadores el trabajo de los ciclos de los algoritmos del proyecto.",
+    "previous": "algoritmia/an-bigo/integrar-ajustada"
+  }
+}

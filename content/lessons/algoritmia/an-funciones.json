@@ -1,0 +1,449 @@
+{
+  "id": "an-funciones",
+  "outcome": "Reconocer las seis familias de crecimiento más comunes y clasificar un algoritmo por cómo cambian sus pasos",
+  "requiresConcepts": [
+    "algoritmia.an-escala.tamano-de-entrada",
+    "algoritmia.an-escala.crecimiento",
+    "algoritmia.an-escala.limite-practico"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Casi todos los algoritmos caen en unas pocas familias según cómo crece su número de pasos con el tamaño de entrada n. Conocerlas permite predecir de un vistazo si un algoritmo aguantará el crecimiento de la ciudad. Estas son las seis que más se usan, ordenadas de la que menos crece a la que más.</p>\n<p>Un crecimiento <strong>constante</strong> significa que el número de pasos no cambia aunque n aumente. Leer la estación que está en la posición 5 de una lista cuesta lo mismo con diez estaciones que con diez millones.</p>\n<p>Un crecimiento <strong>logarítmico</strong> aparece cuando cada paso descarta la mitad de los datos. Buscar en una lista ordenada mirando siempre el elemento del medio necesita pocos pasos: el número de veces que se puede dividir n entre 2 hasta llegar a 1. Con 1024 datos son apenas 10 pasos.</p>\n<p>Un crecimiento <strong>lineal</strong> significa que los pasos crecen igual que n: recorrer una vez todas las estaciones. Un crecimiento <strong>n log n</strong> aparece cuando se hace un trabajo logarítmico para cada uno de los n datos, que es lo que cuesta ordenar con los métodos eficientes. Un crecimiento <strong>cuadrático</strong> da n por n pasos, típico de dos ciclos anidados, y uno <strong>exponencial</strong> duplica los pasos con cada dato nuevo: 2 elevado a n. En el código siguiente, while repite su bloque mientras la condición sea verdadera, y ** eleva un número a una potencia.</p>\n<pre data-language=\"javascript\"><code>function pasosLogaritmicos(n) {\n  let pasos = 0;\n  while (n &gt; 1) {\n    n = Math.floor(n / 2);\n    pasos++;\n  }\n  return pasos;\n}\nfunction mostrarFila(n) {\n  const logaritmico = pasosLogaritmicos(n);\n  console.log(n, 1, logaritmico, n, n * logaritmico, n * n, 2 ** n);\n}\nmostrarFila(16);\nmostrarFila(32);</code></pre>\n<p>Cada fila muestra n, los pasos constantes, logarítmicos, lineales, n log n, cuadráticos y exponenciales. Con 32 datos el crecimiento exponencial ya supera los cuatro mil millones de pasos, mientras el logarítmico solo da 5.</p>\n<p>Para reconocer una familia sin ver el código se duplica n y se mira cuántas veces crecen los pasos: si no cambian es constante, si se duplican es lineal y si se multiplican por 4 es cuadrático.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: queremos saber cuántos pasos necesita buscar una estación entre 1024 ordenadas descartando la mitad en cada paso. En este ejemplo la lista está ordenada.</p>\n<p>Razonamiento: 1024 se divide entre 2 diez veces hasta llegar a 1, así que cada paso reduce el trabajo a la mitad y el total es logarítmico.</p>\n<p>Resultado: bastan 10 pasos como máximo, mientras que recorrer toda la lista daría 1024 pasos.</p>",
+  "examples": [
+    {
+      "id": "an-funciones-e1",
+      "language": "javascript",
+      "code": "function pasosLogaritmicos(n) {\n  let pasos = 0;\n  while (n > 1) {\n    n = Math.floor(n / 2);\n    pasos++;\n  }\n  return pasos;\n}\nfunction mostrarFila(n) {\n  const logaritmico = pasosLogaritmicos(n);\n  console.log(n, 1, logaritmico, n, n * logaritmico, n * n, 2 ** n);\n}\nmostrarFila(16);\nmostrarFila(32);",
+      "stdout": "16 1 4 16 64 256 65536\n32 1 5 32 160 1024 4294967296\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "familia-constante",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.constante",
+      "prompt": "Leer la estación de la posición 5 de una lista cuesta lo mismo con 10 que con 10 millones de estaciones. ¿Qué crecimiento es?",
+      "options": [
+        "Constante",
+        "Lineal",
+        "Cuadrático",
+        "Logarítmico"
+      ],
+      "answer": 0,
+      "explanation": "Si los pasos no cambian aunque n crezca, el crecimiento es constante."
+    },
+    {
+      "id": "familia-log-que",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.logaritmico",
+      "prompt": "¿Qué ocurre en cada paso de un algoritmo logarítmico?",
+      "options": [
+        "Se descarta la mitad de los datos",
+        "Se recorren todos los datos",
+        "Se duplican los pasos",
+        "Se repite el paso anterior n veces"
+      ],
+      "answer": 0,
+      "explanation": "Dividir los datos entre 2 en cada paso da pocos pasos aunque n sea enorme."
+    },
+    {
+      "id": "familia-log-valor",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.logaritmico",
+      "prompt": "Aproximadamente, ¿cuántos pasos logarítmicos necesita una lista de 1024 datos?",
+      "options": [
+        "10",
+        "1024",
+        "512",
+        "1"
+      ],
+      "answer": 0,
+      "explanation": "1024 se puede dividir entre 2 diez veces hasta llegar a 1."
+    },
+    {
+      "id": "familia-lineal",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.lineal",
+      "prompt": "Recorrer una vez las n estaciones de una lista da un crecimiento…",
+      "options": [
+        "Lineal",
+        "Constante",
+        "Cuadrático",
+        "Exponencial"
+      ],
+      "answer": 0,
+      "explanation": "Cada estación se visita una vez: los pasos crecen igual que n."
+    },
+    {
+      "id": "familia-nlogn",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.n-log-n",
+      "prompt": "Con n = 32, ¿cuántos pasos da un algoritmo n log n según el ejemplo?",
+      "options": [
+        "160",
+        "32",
+        "1024",
+        "5"
+      ],
+      "answer": 0,
+      "explanation": "Es n por el logaritmo: 32 por 5 son 160 pasos."
+    },
+    {
+      "id": "familia-cuadratica",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.cuadratico",
+      "prompt": "Con 100 datos un algoritmo cuadrático da 10000 pasos. ¿Cuántos dará con 200 datos?",
+      "options": [
+        "40000",
+        "20000",
+        "10000",
+        "200"
+      ],
+      "answer": 0,
+      "explanation": "Al duplicar n, los pasos de un algoritmo cuadrático se multiplican por 4."
+    },
+    {
+      "id": "familia-exponencial",
+      "type": "choice",
+      "concept": "algoritmia.an-funciones.exponencial",
+      "prompt": "¿Qué ocurre con los pasos de un algoritmo exponencial 2 elevado a n al añadir un dato más?",
+      "options": [
+        "Se duplican",
+        "Aumentan en uno",
+        "No cambian",
+        "Se reducen a la mitad"
+      ],
+      "answer": 0,
+      "explanation": "Pasar de n a n más 1 multiplica 2 elevado a n por 2."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-familias",
+      "type": "case-study",
+      "concept": "algoritmia.an-funciones.exponencial",
+      "prompt": "Identifica cada familia de crecimiento",
+      "brief": "El equipo midió los pasos de cuatro algoritmos con 16 y con 32 datos y debe clasificarlos.",
+      "evidence": [
+        {
+          "label": "Algoritmo A",
+          "text": "16 datos: 16 pasos. 32 datos: 32 pasos."
+        },
+        {
+          "label": "Algoritmo B",
+          "text": "16 datos: 256 pasos. 32 datos: 1024 pasos."
+        },
+        {
+          "label": "Algoritmo C",
+          "text": "16 datos: 4 pasos. 32 datos: 5 pasos."
+        },
+        {
+          "label": "Algoritmo D",
+          "text": "16 datos: 65536 pasos. 32 datos: 4294967296 pasos."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Cuál es lineal?",
+          "options": [
+            "Algoritmo A",
+            "Algoritmo B",
+            "Algoritmo C"
+          ],
+          "answer": 0,
+          "explanation": "Sus pasos crecen igual que n: al duplicar los datos se duplican los pasos.",
+          "errorHint": "Compara cuántas veces crecen los pasos cuando n se duplica."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "¿Cuál es exponencial y cómo se nota?",
+          "options": [
+            "Algoritmo D: pasar de 16 a 32 datos multiplica los pasos por 65536",
+            "Algoritmo B: los pasos se multiplican por 4",
+            "Algoritmo C: los pasos casi no cambian"
+          ],
+          "answer": 0,
+          "explanation": "En el crecimiento exponencial, añadir datos multiplica los pasos una y otra vez; aquí 16 datos más multiplican por 65536.",
+          "errorHint": "Busca el algoritmo cuyos pasos explotan con pocos datos más."
+        }
+      ],
+      "hint": "Duplicar n revela la familia.",
+      "explanation": "Comparar los pasos con n y con 2n permite reconocer la familia de un algoritmo.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Familias",
+        "input": "Cuatro tablas de pasos",
+        "output": "La clasificación justificada de cada algoritmo",
+        "reflection": "Explica qué cociente usaste para reconocer cada familia.",
+        "requires": [],
+        "from": "algoritmia/an-escala/integrar-aguanta"
+      }
+    },
+    {
+      "id": "implementar-logaritmico",
+      "type": "javascript",
+      "concept": "algoritmia.an-funciones.logaritmico",
+      "prompt": "Implementa pasosLogaritmicos: recibe n y devuelve cuántas veces se puede dividir entre 2 (redondeando hacia abajo) hasta llegar a 1.",
+      "starter": "function pasosLogaritmicos(n) {\n  // Cuenta las divisiones entre 2.\n}\n",
+      "solution": "function pasosLogaritmicos(n) {\n  let pasos = 0;\n  while (n > 1) {\n    n = Math.floor(n / 2);\n    pasos++;\n  }\n  return pasos;\n}\n",
+      "entrypoint": "pasosLogaritmicos",
+      "cases": [
+        {
+          "name": "Un dato",
+          "args": [
+            1
+          ],
+          "expected": 0
+        },
+        {
+          "name": "Dos datos",
+          "args": [
+            2
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Dieciséis datos",
+          "args": [
+            16
+          ],
+          "expected": 4
+        },
+        {
+          "name": "Mil datos",
+          "args": [
+            1000
+          ],
+          "expected": 9
+        }
+      ],
+      "hint": "Usa un ciclo while que se repita mientras n sea mayor que 1.",
+      "hints": [
+        "Usa un ciclo while que se repita mientras n sea mayor que 1.",
+        "Dentro del ciclo divide n entre 2 con Math.floor y suma 1 a pasos."
+      ],
+      "explanation": "Cada vuelta descarta la mitad, así que el número de vueltas es el logaritmo de n.",
+      "retryFeedback": "Con 16 datos debes obtener 4 vueltas: 16, 8, 4, 2 y 1.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Logarítmico",
+        "input": "La familia logarítmica",
+        "output": "pasosLogaritmicos contando las divisiones",
+        "reflection": "Anota cuántos datos quedan después de cada vuelta.",
+        "requires": [
+          "entender-familias"
+        ],
+        "from": "algoritmia/an-escala/integrar-aguanta"
+      }
+    },
+    {
+      "id": "reescribir-razon",
+      "type": "javascript",
+      "concept": "algoritmia.an-funciones.cuadratico",
+      "prompt": "Reescribe la comparación como un cociente: razonDeCrecimiento recibe los pasos con n datos y con 2n datos, y devuelve cuántas veces creció el número de pasos.",
+      "starter": "function razonDeCrecimiento(pasosN, pasos2N) {\n  // Devuelve cuántas veces crecieron los pasos.\n}\n",
+      "solution": "function razonDeCrecimiento(pasosN, pasos2N) {\n  return pasos2N / pasosN;\n}\n",
+      "entrypoint": "razonDeCrecimiento",
+      "cases": [
+        {
+          "name": "Se duplican",
+          "args": [
+            100,
+            200
+          ],
+          "expected": 2
+        },
+        {
+          "name": "Se multiplican por 4",
+          "args": [
+            100,
+            400
+          ],
+          "expected": 4
+        },
+        {
+          "name": "No cambian",
+          "args": [
+            50,
+            50
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Crecimiento pequeño",
+          "args": [
+            10,
+            25
+          ],
+          "expected": 2.5
+        }
+      ],
+      "hint": "Divide los pasos con 2n datos entre los pasos con n datos.",
+      "hints": [
+        "Divide los pasos con 2n datos entre los pasos con n datos.",
+        "Devuelve el cociente con return."
+      ],
+      "explanation": "El cociente resume cómo reacciona el algoritmo al duplicar los datos.",
+      "retryFeedback": "Comprueba el orden de la división: primero pasos2N y luego pasosN.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Razón",
+        "input": "La clasificación manual",
+        "output": "razonDeCrecimiento como cociente",
+        "reflection": "Explica qué razón corresponde a cada familia.",
+        "requires": [
+          "implementar-logaritmico"
+        ],
+        "from": "algoritmia/an-funciones/implementar-logaritmico"
+      }
+    },
+    {
+      "id": "integrar-familia",
+      "type": "javascript",
+      "concept": "algoritmia.an-funciones.constante",
+      "prompt": "Integra la regla: nombreDeFamilia recibe los pasos con n y con 2n datos y devuelve \"constante\" si la razón es 1, \"lineal\" si es 2, \"cuadrático\" si es 4 y \"otra\" en cualquier otro caso. Reutiliza razonDeCrecimiento.",
+      "starter": "function razonDeCrecimiento(pasosN, pasos2N) {\n  return pasos2N / pasosN;\n}\n\nfunction nombreDeFamilia(pasosN, pasos2N) {\n  // Clasifica según la razón de crecimiento.\n}\n",
+      "solution": "function razonDeCrecimiento(pasosN, pasos2N) {\n  return pasos2N / pasosN;\n}\n\nfunction nombreDeFamilia(pasosN, pasos2N) {\n  const razon = razonDeCrecimiento(pasosN, pasos2N);\n  if (razon === 1) {\n    return \"constante\";\n  }\n  if (razon === 2) {\n    return \"lineal\";\n  }\n  if (razon === 4) {\n    return \"cuadrático\";\n  }\n  return \"otra\";\n}\n",
+      "entrypoint": "nombreDeFamilia",
+      "cases": [
+        {
+          "name": "Constante",
+          "args": [
+            10,
+            10
+          ],
+          "expected": "constante"
+        },
+        {
+          "name": "Lineal",
+          "args": [
+            10,
+            20
+          ],
+          "expected": "lineal"
+        },
+        {
+          "name": "Cuadrático",
+          "args": [
+            10,
+            40
+          ],
+          "expected": "cuadrático"
+        },
+        {
+          "name": "Otra familia",
+          "args": [
+            10,
+            25
+          ],
+          "expected": "otra"
+        }
+      ],
+      "hint": "Calcula la razón una sola vez y guárdala en una variable.",
+      "hints": [
+        "Calcula la razón una sola vez y guárdala en una variable.",
+        "Compara la razón con 1, 2 y 4 usando ===."
+      ],
+      "explanation": "La función convierte la medición en un nombre de familia que cualquiera entiende.",
+      "retryFeedback": "Revisa que los textos devueltos coincidan exactamente, incluida la tilde de cuadrático.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Clasificación",
+        "input": "Las medidas de las etapas anteriores",
+        "output": "nombreDeFamilia clasificando por la razón de crecimiento",
+        "reflection": "Describe por qué esta regla no distingue n log n de lineal con pocos datos.",
+        "requires": [
+          "reescribir-razon"
+        ],
+        "from": "algoritmia/an-funciones/reescribir-razon"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: bucle while",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/while"
+    },
+    {
+      "title": "MDN: operador de exponenciación",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Exponentiation"
+    },
+    {
+      "title": "MDN: Math.floor",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "la lista está ordenada"
+    ],
+    "workedExample": {
+      "problem": "Problema: queremos saber cuántos pasos necesita buscar una estación entre 1024 ordenadas descartando la mitad en cada paso",
+      "reasoning": "1024 se divide entre 2 diez veces hasta llegar a 1",
+      "result": "bastan 10 pasos como máximo, mientras que recorrer toda la lista daría 1024 pasos"
+    },
+    "transferActivityIds": [
+      "integrar-familia"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-funciones.constante": {
+      "explanationExcerpt": "significa que el número de pasos no cambia aunque n aumente",
+      "assessmentIds": [
+        "familia-constante"
+      ]
+    },
+    "algoritmia.an-funciones.logaritmico": {
+      "explanationExcerpt": "aparece cuando cada paso descarta la mitad de los datos",
+      "assessmentIds": [
+        "familia-log-que",
+        "familia-log-valor"
+      ]
+    },
+    "algoritmia.an-funciones.lineal": {
+      "explanationExcerpt": "significa que los pasos crecen igual que n",
+      "assessmentIds": [
+        "familia-lineal"
+      ]
+    },
+    "algoritmia.an-funciones.n-log-n": {
+      "explanationExcerpt": "aparece cuando se hace un trabajo logarítmico para cada uno de los n datos",
+      "assessmentIds": [
+        "familia-nlogn"
+      ]
+    },
+    "algoritmia.an-funciones.cuadratico": {
+      "explanationExcerpt": "da n por n pasos, típico de dos ciclos anidados",
+      "assessmentIds": [
+        "familia-cuadratica"
+      ]
+    },
+    "algoritmia.an-funciones.exponencial": {
+      "explanationExcerpt": "duplica los pasos con cada dato nuevo: 2 elevado a n",
+      "assessmentIds": [
+        "familia-exponencial"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Clasificar los algoritmos del proyecto en familias de crecimiento a partir de sus pasos con n y con 2n datos.",
+    "previous": "algoritmia/an-escala/integrar-aguanta"
+  }
+}

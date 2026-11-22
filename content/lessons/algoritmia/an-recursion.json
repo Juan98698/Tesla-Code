@@ -1,0 +1,429 @@
+{
+  "id": "an-recursion",
+  "outcome": "Escribir la recurrencia de una función recursiva, dibujar su árbol de llamadas y clasificarla con el teorema maestro",
+  "requiresConcepts": [
+    "algoritmia.an-ciclos.conteo-de-operaciones",
+    "algoritmia.an-ciclos.ciclos-anidados",
+    "algoritmia.an-ciclos.ciclos-logaritmicos"
+  ],
+  "html": "<h3>Cómo funciona</h3>\n<p>Una función recursiva se llama a sí misma con una entrada más pequeña hasta llegar a un caso base. Analizarla es distinto a analizar un ciclo, porque el trabajo no está en vueltas visibles sino en llamadas que generan otras llamadas.</p>\n<p>Una <strong>recurrencia</strong> es una ecuación que expresa el número de pasos T(n) en función de los pasos con una entrada menor. Una búsqueda que descarta la mitad en cada llamada cumple T(n) = T(n/2) + 1: el trabajo de n es el de n/2 más un paso. Ordenar dividiendo en dos mitades y mezclando cumple T(n) = 2 T(n/2) + n.</p>\n<p>Un <strong>árbol de llamadas</strong> dibuja cada llamada como un nodo y sus llamadas internas como hijos. Sumar el trabajo de todos los nodos da el total. Cuando cada llamada hace una sola llamada, el árbol es una línea; cuando hace dos, se ramifica y puede crecer muy rápido. El código siguiente cuenta las llamadas del factorial, que forma una línea, y las del Fibonacci ingenuo, que se ramifica.</p>\n<pre data-language=\"javascript\"><code>function llamadasFactorial(n) {\n  if (n &lt;= 1) {\n    return 1;\n  }\n  return 1 + llamadasFactorial(n - 1);\n}\nfunction llamadasFibonacci(n) {\n  if (n &lt;= 1) {\n    return 1;\n  }\n  return 1 + llamadasFibonacci(n - 1) + llamadasFibonacci(n - 2);\n}\nconsole.log(llamadasFactorial(10));\nconsole.log(llamadasFibonacci(5));\nconsole.log(llamadasFibonacci(10));</code></pre>\n<p>El factorial hace 10 llamadas con n = 10. El Fibonacci hace 15 con n = 5 y 177 con n = 10, porque cada llamada repite trabajo que otras ya hicieron: su árbol se ramifica y las llamadas crecen de forma exponencial.</p>\n<p>El <strong>teorema maestro</strong> resuelve recurrencias de la forma T(n) = a T(n/b) + n elevado a d: se hacen a llamadas con entradas n/b y se paga n elevado a d por combinar sus resultados. Se compara a con b elevado a d. Si a es menor, domina combinar y el resultado es Θ(n elevado a d). Si son iguales, el trabajo se reparte por igual en todos los niveles y el resultado es Θ(n elevado a d por log n). Si a es mayor, dominan las hojas del árbol.</p>\n<pre data-language=\"javascript\"><code>function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a &lt; combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\nconsole.log(casoMaestro(2, 2, 1));\nconsole.log(casoMaestro(1, 2, 0));\nconsole.log(casoMaestro(4, 2, 1));\nconsole.log(casoMaestro(2, 2, 2));</code></pre>\n<p>Con 2 llamadas, mitades y combinar en n, el reparto es equilibrado y da n log n, el costo de ordenar por mezcla. La búsqueda que descarta la mitad también queda equilibrada, con un resultado logarítmico.</p>\n<h3>Ejemplo razonado</h3>\n<p>Problema: queremos saber el costo de ordenar por mezcla, cuya recurrencia es T(n) = 2 T(n/2) + n. En este ejemplo n es una potencia de 2.</p>\n<p>Razonamiento: aquí a vale 2, b vale 2 y d vale 1; como b elevado a d es 2 y coincide con a, el trabajo se reparte por igual en todos los niveles del árbol.</p>\n<p>Resultado: el costo es Θ(n log n), con un trabajo de n por nivel y log n niveles.</p>",
+  "examples": [
+    {
+      "id": "an-recursion-e1",
+      "language": "javascript",
+      "code": "function llamadasFactorial(n) {\n  if (n <= 1) {\n    return 1;\n  }\n  return 1 + llamadasFactorial(n - 1);\n}\nfunction llamadasFibonacci(n) {\n  if (n <= 1) {\n    return 1;\n  }\n  return 1 + llamadasFibonacci(n - 1) + llamadasFibonacci(n - 2);\n}\nconsole.log(llamadasFactorial(10));\nconsole.log(llamadasFibonacci(5));\nconsole.log(llamadasFibonacci(10));",
+      "stdout": "10\n15\n177\n"
+    },
+    {
+      "id": "an-recursion-e2",
+      "language": "javascript",
+      "code": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\nconsole.log(casoMaestro(2, 2, 1));\nconsole.log(casoMaestro(1, 2, 0));\nconsole.log(casoMaestro(4, 2, 1));\nconsole.log(casoMaestro(2, 2, 2));",
+      "stdout": "equilibrado\nequilibrado\ndominan las hojas\ndomina combinar\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "recurrencia-que",
+      "type": "choice",
+      "concept": "algoritmia.an-recursion.recurrencia",
+      "prompt": "¿Qué expresa una recurrencia T(n)?",
+      "options": [
+        "Los pasos con n datos en función de los pasos con una entrada menor",
+        "El nombre de la función recursiva",
+        "Cuántas líneas tiene la función",
+        "El tiempo en milisegundos"
+      ],
+      "answer": 0,
+      "explanation": "La recurrencia traduce la recursión a una ecuación de pasos."
+    },
+    {
+      "id": "recurrencia-binaria",
+      "type": "choice",
+      "concept": "algoritmia.an-recursion.recurrencia",
+      "prompt": "¿Qué recurrencia describe una búsqueda que descarta la mitad en cada llamada?",
+      "options": [
+        "T(n) = T(n/2) + 1",
+        "T(n) = 2 T(n/2) + n",
+        "T(n) = T(n-1) + n",
+        "T(n) = T(n-1) + T(n-2)"
+      ],
+      "answer": 0,
+      "explanation": "Una sola llamada con la mitad de los datos y un paso extra para decidir."
+    },
+    {
+      "id": "arbol-factorial",
+      "type": "choice",
+      "concept": "algoritmia.an-recursion.arbol-de-llamadas",
+      "prompt": "¿Qué forma tiene el árbol de llamadas del factorial?",
+      "options": [
+        "Una línea, porque cada llamada hace una sola llamada",
+        "Un árbol que se ramifica en dos",
+        "Un único nodo",
+        "Un círculo"
+      ],
+      "answer": 0,
+      "explanation": "Cada llamada genera una sola llamada interna: el árbol es una cadena de n nodos."
+    },
+    {
+      "id": "arbol-fibonacci",
+      "type": "choice",
+      "concept": "algoritmia.an-recursion.arbol-de-llamadas",
+      "prompt": "¿Cuántas llamadas hace el Fibonacci ingenuo con n = 5 según el ejemplo?",
+      "options": [
+        "15",
+        "5",
+        "10",
+        "32"
+      ],
+      "answer": 0,
+      "explanation": "Se ramifica en dos y repite trabajo: con n = 5 son 15 llamadas."
+    },
+    {
+      "id": "maestro-que",
+      "type": "choice",
+      "concept": "algoritmia.an-recursion.teorema-maestro",
+      "prompt": "¿Con qué se compara a en el teorema maestro?",
+      "options": [
+        "Con b elevado a d",
+        "Con n",
+        "Con log n",
+        "Con la cantidad de líneas"
+      ],
+      "answer": 0,
+      "explanation": "La comparación entre a y b elevado a d decide quién domina."
+    },
+    {
+      "id": "maestro-caso",
+      "type": "choice",
+      "concept": "algoritmia.an-recursion.teorema-maestro",
+      "prompt": "Con a = 4, b = 2 y d = 1, ¿quién domina?",
+      "options": [
+        "Las hojas del árbol",
+        "Combinar",
+        "Se reparte igual",
+        "Ninguno"
+      ],
+      "answer": 0,
+      "explanation": "b elevado a d es 2, y como 4 es mayor, dominan las hojas."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-recursion",
+      "type": "case-study",
+      "concept": "algoritmia.an-recursion.arbol-de-llamadas",
+      "prompt": "Compara dos funciones recursivas",
+      "brief": "El equipo debe elegir entre dos funciones recursivas y quiere entender por qué una crece mucho más rápido que la otra.",
+      "evidence": [
+        {
+          "label": "Factorial",
+          "text": "llamadasFactorial(10) hace 10 llamadas."
+        },
+        {
+          "label": "Fibonacci",
+          "text": "llamadasFibonacci(5) hace 15 llamadas y llamadasFibonacci(10) hace 177."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "decision-1",
+          "prompt": "¿Por qué el Fibonacci hace tantas más llamadas que el factorial?",
+          "options": [
+            "Porque cada llamada genera dos llamadas y repite trabajo",
+            "Porque su caso base es distinto",
+            "Porque usa más variables"
+          ],
+          "answer": 0,
+          "explanation": "Al ramificarse en dos y repetir subproblemas, el número de llamadas crece de forma exponencial.",
+          "errorHint": "Fíjate cuántas llamadas internas hace cada una."
+        },
+        {
+          "id": "decision-2",
+          "prompt": "¿Qué forma tiene el árbol de llamadas del factorial?",
+          "options": [
+            "Una línea de n nodos",
+            "Un árbol que se ramifica en dos",
+            "Un solo nodo"
+          ],
+          "answer": 0,
+          "explanation": "Cada llamada hace una sola llamada interna, así que el árbol es una cadena.",
+          "errorHint": "Piensa cuántos hijos tiene cada nodo."
+        }
+      ],
+      "hint": "Contar los hijos de cada nodo del árbol revela el crecimiento.",
+      "explanation": "El árbol de llamadas muestra por qué una recursión crece de forma lineal y otra de forma exponencial.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Árbol",
+        "input": "Los conteos de llamadas de dos funciones",
+        "output": "La explicación razonada de la diferencia",
+        "reflection": "Explica qué cambia entre un árbol con un hijo y uno con dos hijos.",
+        "requires": [],
+        "from": "algoritmia/an-ciclos/integrar-total"
+      }
+    },
+    {
+      "id": "implementar-fibonacci",
+      "type": "javascript",
+      "concept": "algoritmia.an-recursion.arbol-de-llamadas",
+      "prompt": "Implementa llamadasFibonacci: recibe n y devuelve cuántas llamadas hace el Fibonacci ingenuo. Si n es 0 o 1, hace 1 llamada; en otro caso, 1 más las llamadas de n − 1 y de n − 2.",
+      "starter": "function llamadasFibonacci(n) {\n  // Cuenta las llamadas de la recursión.\n}\n",
+      "solution": "function llamadasFibonacci(n) {\n  if (n <= 1) {\n    return 1;\n  }\n  return 1 + llamadasFibonacci(n - 1) + llamadasFibonacci(n - 2);\n}\n",
+      "entrypoint": "llamadasFibonacci",
+      "cases": [
+        {
+          "name": "Caso base cero",
+          "args": [
+            0
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Caso base uno",
+          "args": [
+            1
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Dos datos",
+          "args": [
+            2
+          ],
+          "expected": 3
+        },
+        {
+          "name": "Cinco datos",
+          "args": [
+            5
+          ],
+          "expected": 15
+        },
+        {
+          "name": "Diez datos",
+          "args": [
+            10
+          ],
+          "expected": 177
+        }
+      ],
+      "hint": "El caso base devuelve 1 cuando n es 0 o 1.",
+      "hints": [
+        "El caso base devuelve 1 cuando n es 0 o 1.",
+        "Para el resto, devuelve 1 + llamadasFibonacci(n - 1) + llamadasFibonacci(n - 2)."
+      ],
+      "explanation": "La función cuenta el nodo actual y los nodos de sus dos subárboles.",
+      "retryFeedback": "Con n = 2 debes obtener 3: la llamada actual y las dos del caso base.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Fibonacci",
+        "input": "El árbol de llamadas",
+        "output": "llamadasFibonacci contando los nodos",
+        "reflection": "Anota cuántos hijos tiene cada nodo que no es caso base.",
+        "requires": [
+          "entender-recursion"
+        ],
+        "from": "algoritmia/an-ciclos/integrar-total"
+      }
+    },
+    {
+      "id": "reescribir-binaria",
+      "type": "javascript",
+      "concept": "algoritmia.an-recursion.recurrencia",
+      "prompt": "Reescribe la recurrencia T(n) = T(n/2) + 1: llamadasBinaria recibe n y devuelve cuántas llamadas hace una función que se llama con la mitad de n (redondeada hacia abajo) hasta llegar a 1.",
+      "starter": "function llamadasBinaria(n) {\n  // Cuenta las llamadas al dividir n entre 2.\n}\n",
+      "solution": "function llamadasBinaria(n) {\n  if (n <= 1) {\n    return 1;\n  }\n  return 1 + llamadasBinaria(Math.floor(n / 2));\n}\n",
+      "entrypoint": "llamadasBinaria",
+      "cases": [
+        {
+          "name": "Un dato",
+          "args": [
+            1
+          ],
+          "expected": 1
+        },
+        {
+          "name": "Dos datos",
+          "args": [
+            2
+          ],
+          "expected": 2
+        },
+        {
+          "name": "Dieciséis datos",
+          "args": [
+            16
+          ],
+          "expected": 5
+        },
+        {
+          "name": "Mil datos",
+          "args": [
+            1000
+          ],
+          "expected": 10
+        }
+      ],
+      "hint": "El caso base devuelve 1 cuando n es 1 o menos.",
+      "hints": [
+        "El caso base devuelve 1 cuando n es 1 o menos.",
+        "En otro caso devuelve 1 + llamadasBinaria(Math.floor(n / 2))."
+      ],
+      "explanation": "Cada llamada hace una sola llamada con la mitad, y por eso el total es logarítmico.",
+      "retryFeedback": "Con 16 datos son 5 llamadas: 16, 8, 4, 2 y 1.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Recurrencia",
+        "input": "El conteo de Fibonacci",
+        "output": "llamadasBinaria con una sola llamada interna",
+        "reflection": "Explica por qué el árbol es una línea de log n nodos.",
+        "requires": [
+          "implementar-fibonacci"
+        ],
+        "from": "algoritmia/an-recursion/implementar-fibonacci"
+      }
+    },
+    {
+      "id": "integrar-maestro",
+      "type": "javascript",
+      "concept": "algoritmia.an-recursion.teorema-maestro",
+      "prompt": "Integra el teorema maestro: casoMaestro recibe a, b y d, y devuelve \"domina combinar\" si a es menor que b elevado a d, \"equilibrado\" si son iguales y \"dominan las hojas\" si a es mayor.",
+      "starter": "function casoMaestro(a, b, d) {\n  // Compara a con b elevado a d.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n",
+      "entrypoint": "casoMaestro",
+      "cases": [
+        {
+          "name": "Ordenar por mezcla",
+          "args": [
+            2,
+            2,
+            1
+          ],
+          "expected": "equilibrado"
+        },
+        {
+          "name": "Búsqueda por mitades",
+          "args": [
+            1,
+            2,
+            0
+          ],
+          "expected": "equilibrado"
+        },
+        {
+          "name": "Dominan las hojas",
+          "args": [
+            4,
+            2,
+            1
+          ],
+          "expected": "dominan las hojas"
+        },
+        {
+          "name": "Domina combinar",
+          "args": [
+            2,
+            2,
+            2
+          ],
+          "expected": "domina combinar"
+        },
+        {
+          "name": "Tres llamadas",
+          "args": [
+            3,
+            2,
+            1
+          ],
+          "expected": "dominan las hojas"
+        }
+      ],
+      "hint": "Calcula b ** d una vez y guárdalo en una variable.",
+      "hints": [
+        "Calcula b ** d una vez y guárdalo en una variable.",
+        "Compara a con ese valor usando <, === y devuelve el texto que corresponde."
+      ],
+      "explanation": "La comparación entre a y b elevado a d decide qué parte del árbol concentra el trabajo.",
+      "retryFeedback": "Para (2, 2, 1) debe devolver equilibrado porque 2 es igual a 2 elevado a 1.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Teorema maestro",
+        "input": "Las recurrencias de las etapas anteriores",
+        "output": "casoMaestro clasificando recurrencias",
+        "reflection": "Describe qué recurrencia de Tesla Metro clasificarías con esta función.",
+        "requires": [
+          "reescribir-binaria"
+        ],
+        "from": "algoritmia/an-recursion/reescribir-binaria"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "MDN: recursión",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Glossary/Recursion"
+    },
+    {
+      "title": "MDN: operador de exponenciación",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Exponentiation"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "n es una potencia de 2"
+    ],
+    "workedExample": {
+      "problem": "Problema: queremos saber el costo de ordenar por mezcla, cuya recurrencia es T(n) = 2 T(n/2) + n",
+      "reasoning": "aquí a vale 2, b vale 2 y d vale 1; como b elevado a d es 2 y coincide con a",
+      "result": "el costo es Θ(n log n), con un trabajo de n por nivel y log n niveles"
+    },
+    "transferActivityIds": [
+      "integrar-maestro"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-recursion.recurrencia": {
+      "explanationExcerpt": "es una ecuación que expresa el número de pasos T(n) en función de los pasos con una entrada menor",
+      "assessmentIds": [
+        "recurrencia-que",
+        "recurrencia-binaria"
+      ]
+    },
+    "algoritmia.an-recursion.arbol-de-llamadas": {
+      "explanationExcerpt": "dibuja cada llamada como un nodo y sus llamadas internas como hijos",
+      "assessmentIds": [
+        "arbol-factorial",
+        "arbol-fibonacci"
+      ]
+    },
+    "algoritmia.an-recursion.teorema-maestro": {
+      "explanationExcerpt": "resuelve recurrencias de la forma T(n) = a T(n/b) + n elevado a d",
+      "assessmentIds": [
+        "maestro-que",
+        "maestro-caso"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-20",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "Los ejemplos y casos del curso se contrastaron en el motor JavaScript de Node. La referencia oficial es MDN.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Analizar la recursión de los algoritmos del proyecto con recurrencias, árboles de llamadas y el teorema maestro.",
+    "previous": "algoritmia/an-ciclos/integrar-total"
+  }
+}

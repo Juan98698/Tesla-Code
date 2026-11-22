@@ -6,7 +6,17 @@ import { indexRoute, isPublished } from '../js/domain/curriculum.js';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const source = read('content/curriculum/algoritmia.json');
 const route = indexRoute(source);
-const PUBLISHED = ['tm-contrato', 'tm-datos', 'tm-pruebas', 'tm-medir', 'an-escala'];
+const PUBLISHED = [
+  'tm-contrato',
+  'tm-datos',
+  'tm-pruebas',
+  'tm-medir',
+  'an-escala',
+  'an-funciones',
+  'an-bigo',
+  'an-ciclos',
+  'an-recursion',
+];
 
 test('Algoritmia publica la edición de JavaScript y conserva la anterior como archivo', () => {
   assert.equal(source.currentEdition, 'javascript-1');
@@ -49,7 +59,7 @@ test('el tronco principal nunca depende de una práctica opcional y cada lecció
   }
 });
 
-test('cada concepto de la edición nueva tiene su registro y están publicadas las cinco primeras lecciones', () => {
+test('cada concepto de la edición nueva tiene su registro y están publicadas las nueve primeras lecciones', () => {
   const registry = new Map(read('content/concepts.json').concepts.map((c) => [c.id, c]));
   for (const lesson of route.lessons) {
     assert.equal(lesson.teaches.length, lesson.concepts.length, lesson.id);
