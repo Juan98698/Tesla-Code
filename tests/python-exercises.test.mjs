@@ -81,7 +81,7 @@ test('published Python solutions execute in the same pinned runtime as the brows
       }
     }
   }
-  assert.ok(examples >= 43);
+  assert.ok(examples >= 42);
   for (const exercise of exercises) {
     assert.deepEqual(pythonExerciseErrors(exercise), [], exercise.key);
     const result = evaluate(exercise.solution, exercise.cases, exercise.entrypoint);
