@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
 import { screenshotPath } from './support/runtime.mjs';
+import { indexRoute } from '../js/domain/curriculum.js';
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const routes = read('content/curriculum/index.json').routes.map((id) =>
-  read(`content/curriculum/${id}.json`),
+  indexRoute(read(`content/curriculum/${id}.json`)),
 );
 const entry = (r) =>
   r.levels.flatMap((level) => level.lessons).find((m) => m.status === 'published');
@@ -83,7 +84,8 @@ await withBrowser(4320, async (browser, origin) => {
     assert.deepEqual(state.completed, []);
     assert.equal(state.xp, 0);
     const algo = routes.find((r) => r.id === 'algoritmia');
-    const algorithmLessons = algo.levels
+    const targetAlgo = algo.archive ?? algo;
+    const algorithmLessons = targetAlgo.levels
       .flatMap((level) => level.lessons)
       .filter((lesson) => lesson.status === 'published');
     const completeAlgorithmLesson = async (meta) => {
@@ -107,7 +109,7 @@ await withBrowser(4320, async (browser, origin) => {
       );
       assert.equal(await page.locator('.worked-example').count(), 1);
       assert.equal(await page.locator('.learning-support').count(), 0);
-      if (meta.id === entry(algo).id)
+      if (meta.id === entry(targetAlgo).id)
         await page.screenshot({
           path: screenshotPath('teslacode-algoritmia-intro-' + width + '.png'),
         });
