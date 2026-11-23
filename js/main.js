@@ -17,6 +17,7 @@ import {
   includeArchives,
 } from './domain/curriculum.js';
 import { recordAttempt, completeIfReady } from './domain/progress.js';
+import { mergeProgress } from './domain/progress-backup.js';
 import { recordProjectArtifact } from './domain/learning-project.js';
 import { updateStreak } from './domain/gamification.js';
 import {
@@ -587,7 +588,11 @@ function bindShell() {
   window.addEventListener('hashchange', render);
   window.addEventListener('storage', (event) => {
     if (event.key !== PROGRESS_KEY || pendingSaves) return;
-    Object.assign(state, progressRepository.load());
+    const loaded = progressRepository.load();
+    const merged = mergeProgress(state, loaded);
+    for (const key of ['goal', 'recent', 'learningMode'])
+      if (loaded[key]) merged[key] = loaded[key];
+    Object.assign(state, merged);
     refreshProgress();
     // Keep an active editor, quiz or console intact while synchronizing achievements.
     if (document.body.dataset.view !== 'leccion') render();

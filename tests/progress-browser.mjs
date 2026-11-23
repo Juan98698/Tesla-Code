@@ -19,6 +19,11 @@ async function solve(page, origin, route, id) {
       'practice-feedback ok',
       `${route}/${id}/${activity.id}: respuesta ${await section.locator('input').inputValue()}`,
     );
+    await page.waitForFunction(
+      ({ key, practice }) =>
+        JSON.parse(localStorage.getItem(key) || '{}').practices?.includes(practice),
+      { key, practice: `${route}/${id}/${activity.id}` },
+    );
   }
   await answerQuiz(page, data);
   try {
