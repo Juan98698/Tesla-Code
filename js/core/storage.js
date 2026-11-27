@@ -1,5 +1,5 @@
 import { emptyProgress, normalizeProgress } from '../domain/progress-state.js';
-import { mergeProgress } from '../domain/progress-backup.js';
+import { rebaseProgress } from '../domain/progress-sync.js';
 export { emptyProgress, normalizeProgress } from '../domain/progress-state.js';
 export const PROGRESS_KEY = 'teslacode:progress:v2';
 const LEGACY = 'teslacode:progress:v1';
@@ -29,6 +29,17 @@ export function createProgressRepository(storage) {
       }
       return structuredClone(baseline);
     },
+    synchronize(state) {
+      try {
+        const current = read();
+        const next = rebaseProgress(state, baseline, current);
+        baseline = structuredClone(current);
+        Object.assign(state, next);
+        return true;
+      } catch {
+        return false;
+      }
+    },
     save(state, { expected } = {}) {
       try {
         let current;
@@ -41,17 +52,7 @@ export function createProgressRepository(storage) {
         if (expected && !same(current, normalizeProgress(expected))) return false;
         let next = normalizeProgress(state);
         if (!expected && !same(current, baseline)) {
-          next = mergeProgress(next, current);
-          // Preferences follow the local edit, or the remote value when unchanged locally.
-          for (const key of ['goal', 'recent', 'learningMode'])
-            if (state[key] === baseline[key]) next[key] = current[key];
-          const removed = new Set(
-            baseline.bookmarks.filter((key) => !state.bookmarks.includes(key)),
-          );
-          const added = state.bookmarks.filter((key) => !baseline.bookmarks.includes(key));
-          next.bookmarks = [...new Set([...current.bookmarks, ...added])].filter(
-            (key) => !removed.has(key),
-          );
+          next = rebaseProgress(next, baseline, current);
         }
         // Verified code is usually identical to the saved delivery. Store one copy locally.
         const projectArtifacts = Object.fromEntries(

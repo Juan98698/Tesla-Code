@@ -68,6 +68,47 @@ test('explicit restoration checks for concurrent changes and can remove imported
   assert.deepEqual(a.load(), restored);
 });
 
+test('a stale writer cannot resurrect restored achievements, attempts, XP or bookmarks', () => {
+  const [a, b] = tabs();
+  const seed = a.load();
+  complete(seed, 'python/imported');
+  seed.xp += 180; // Legacy XP without a reward ledger must also stay undone.
+  seed.bookmarks = ['python/imported'];
+  a.save(seed);
+  const stale = b.load();
+  a.save(emptyProgress(), { expected: seed });
+  complete(stale, 'python/new');
+  stale.goal = 'python';
+  assert.equal(b.save(stale), true);
+  assert.deepEqual(stale.completed, ['python/new']);
+  assert.deepEqual(stale.practices, ['python/new/apply']);
+  assert.deepEqual(stale.rewards, ['python/new/q1']);
+  assert.deepEqual(Object.keys(stale.lessons), ['python/new']);
+  assert.deepEqual(stale.bookmarks, []);
+  assert.equal(stale.xp, 60);
+  assert.equal(stale.goal, 'python');
+});
+
+test('storage synchronization applies removals while retaining unsaved local changes', () => {
+  const [a, b] = tabs();
+  const first = a.load();
+  first.recent = 'python/first';
+  first.bookmarks = ['python/first'];
+  a.save(first);
+  const second = b.load();
+  first.bookmarks.push('python/local');
+  complete(first, 'python/local');
+  second.bookmarks = [];
+  second.recent = null;
+  b.save(second);
+  assert.equal(a.synchronize(first), true);
+  assert.deepEqual(first.bookmarks, ['python/local']);
+  assert.equal(first.recent, null);
+  assert.deepEqual(first.completed, ['python/local']);
+  assert.equal(a.save(first), true);
+  assert.deepEqual(b.load(), first);
+});
+
 test('failed writes preserve the in-memory state and a later save can recover', () => {
   let stored = JSON.stringify({ ...emptyProgress(), completed: ['python/first'], xp: 50 });
   let blocked = true;
@@ -144,4 +185,25 @@ test('malformed storage can be replaced and empty bookmark changes preserve remo
   state.goal = 'python';
   repo.save(state);
   assert.deepEqual(state.bookmarks, []);
+});
+
+test('failed synchronization leaves local edits and the previous baseline intact', () => {
+  let raw = JSON.stringify(emptyProgress());
+  const repository = createProgressRepository({
+    getItem: () => raw,
+    setItem: (_, value) => {
+      raw = value;
+    },
+  });
+  const state = repository.load();
+  state.bookmarks = ['python/new'];
+  const before = structuredClone(state);
+  raw = 'invalid JSON';
+  assert.equal(repository.synchronize(state), false);
+  assert.deepEqual(state, before);
+  raw = JSON.stringify(emptyProgress());
+  assert.equal(repository.synchronize(state), true);
+  assert.equal(repository.synchronize(state), true);
+  assert.equal(repository.save(state), true);
+  assert.deepEqual(repository.load().bookmarks, ['python/new']);
 });

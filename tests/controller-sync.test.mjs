@@ -34,11 +34,19 @@ test('cross-tab updates preserve active lessons and queued writes retain externa
   location.hash = '#/leccion/fundamentos/editor-y-ejecucion/aprender';
   await until(() => document.getElementById('lesson'));
   const lesson = document.getElementById('lesson');
+  external.bookmarks = ['fundamentos/editor-y-ejecucion'];
   external.xp = 100;
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(external));
   notify();
   assert.equal(document.getElementById('lesson'), lesson);
   assert.equal(document.getElementById('xp').textContent, '100 XP');
+  assert.equal(document.getElementById('bookmark').getAttribute('aria-pressed'), 'true');
+  external.bookmarks = [];
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify(external));
+  notify();
+  assert.equal(document.getElementById('bookmark').getAttribute('aria-pressed'), 'false');
+  assert.equal(document.getElementById('bookmark').textContent, '☆');
+  assert.equal(document.getElementById('lesson'), lesson);
   const locks = {
     request: (key, operation) => {
       assert.equal(key, PROGRESS_KEY);
@@ -55,6 +63,24 @@ test('cross-tab updates preserve active lessons and queued writes retain externa
   notify();
   await until(() => JSON.parse(localStorage.getItem(PROGRESS_KEY)).goal === 'python');
   assert.equal(JSON.parse(localStorage.getItem(PROGRESS_KEY)).completed.length, 2);
+  // A persisted Undo in another tab must replace those achievements and clear recent.
+  const restored = {
+    ...external,
+    completed: [],
+    lessons: {},
+    rewards: [],
+    practices: [],
+    xp: 0,
+    bookmarks: [],
+    recent: null,
+  };
+  change(document.getElementById('studio-route-select'), 'frontend', 'change');
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify(restored));
+  notify();
+  await until(() => JSON.parse(localStorage.getItem(PROGRESS_KEY)).goal === 'frontend');
+  assert.equal(document.getElementById('xp').textContent, '0 XP');
+  assert.deepEqual(JSON.parse(localStorage.getItem(PROGRESS_KEY)).completed, []);
+  assert.equal(JSON.parse(localStorage.getItem(PROGRESS_KEY)).recent, null);
   locks.request = () => Promise.reject(Error('unavailable'));
   change(document.getElementById('studio-route-select'), 'frontend', 'change');
   await until(

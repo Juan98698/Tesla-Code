@@ -2,6 +2,7 @@ import { learningContext } from './support/browser.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { withBrowser, answerQuiz } from './support/browser.mjs';
+import { emptyProgress } from '../js/core/storage.js';
 
 const key = 'teslacode:progress:v2';
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -88,4 +89,91 @@ await withBrowser(4324, async (browser, origin) => {
   console.log(
     'PASS: dos pestañas aprenden en paralelo, una tercera conserva ambos avances y repetir la comprobación no duplica XP.',
   );
+  for (const width of [1440, 390]) {
+    const tabs = await learningContext(browser, {
+      viewport: { width, height: 900 },
+      reducedMotion: 'reduce',
+    });
+    const first = await tabs.newPage();
+    await first.goto(origin);
+    await first.locator('.hero').waitFor();
+    const second = await tabs.newPage();
+    await second.goto(origin + '/#/leccion/fundamentos/tu-primer-paso/aprender');
+    await second.locator('#lesson').waitFor();
+    const article = second.locator('#lesson');
+    const handle = await article.elementHandle();
+    const active = await tabs.newPage();
+    await active.goto(origin + '/#/leccion/fundamentos/tu-primer-paso/aprender');
+    await active.locator('#lesson').waitFor();
+    await first.evaluate((key) => {
+      window.progressEvents = 0;
+      addEventListener('storage', (event) => {
+        if (event.key === key) window.progressEvents++;
+      });
+    }, key);
+    await second.locator('#bookmark').click();
+    await second.waitForFunction(
+      (key) => JSON.parse(localStorage.getItem(key)).bookmarks.length === 1,
+      key,
+    );
+    await first.waitForFunction(() => window.progressEvents >= 1);
+    await active.locator('#bookmark[aria-pressed="true"]').waitFor();
+    await second.locator('#bookmark').click();
+    await second.waitForFunction(
+      (key) => JSON.parse(localStorage.getItem(key)).bookmarks.length === 0,
+      key,
+    );
+    await first.waitForFunction(() => window.progressEvents >= 2);
+    await active.locator('#bookmark[aria-pressed="false"]').waitFor();
+    await first.locator('#studio-route-select').selectOption('python');
+    await first.waitForFunction(
+      (key) => JSON.parse(localStorage.getItem(key)).goal === 'python',
+      key,
+    );
+    assert.deepEqual(
+      await first.evaluate((key) => JSON.parse(localStorage.getItem(key)).bookmarks, key),
+      [],
+    );
+    assert.equal(
+      await handle.evaluate((el) => el === document.querySelector('#lesson')),
+      true,
+      'No se desmonta la lección activa',
+    );
+    await second.goto(origin + '/#/progreso');
+    const incoming = emptyProgress();
+    incoming.completed = ['frontend/como-funciona-internet'];
+    incoming.xp = 50;
+    await second.locator('#progress-file').setInputFiles({
+      name: 'copia.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(incoming)),
+    });
+    await second.waitForFunction(() => !document.querySelector('#confirm-import').disabled);
+    await second.locator('#confirm-import').click();
+    await second.locator('#undo-import').waitFor();
+    await first.waitForFunction(() => document.querySelector('#xp').textContent === '50 XP');
+    await second.locator('#undo-import').click();
+    await second.waitForFunction(
+      (key) => JSON.parse(localStorage.getItem(key)).completed.length === 0,
+      key,
+    );
+    await first.waitForFunction(() => document.querySelector('#xp').textContent === '0 XP');
+    await first.locator('#studio-route-select').selectOption('backend');
+    await first.waitForFunction(
+      (key) => JSON.parse(localStorage.getItem(key)).goal === 'backend',
+      key,
+    );
+    const restored = await first.evaluate((key) => JSON.parse(localStorage.getItem(key)), key);
+    assert.equal(restored.xp, 0);
+    assert.deepEqual(restored.completed, []);
+    assert.deepEqual(restored.bookmarks, []);
+    assert.equal(restored.recent, null);
+    await first.reload();
+    await first.locator('.hero').waitFor();
+    assert.equal(await first.locator('#xp').innerText(), '0 XP');
+    await tabs.close();
+    console.log(
+      `PASS sincronización ${width}px: favoritos retirados, importación/deshacer, XP y preferencias; lección activa y recarga conservadas.`,
+    );
+  }
 });

@@ -653,3 +653,37 @@ Laboratorio pasó de 536 elementos iniciales a 91. Los grupos construyen sus
 fichas al desplegarse o al aplicar un filtro. El módulo de simulación se
 descarga al abrir el primer simulador. La comparación usa un servidor local
 y no mide el tiempo de carga de estudiantes en sus dispositivos.
+
+## Corrección de sincronización entre pestañas
+
+26 de noviembre de 2026. Se sustituye la unión de copias completas del evento
+`storage` por la aplicación de los cambios locales respecto de la última copia
+persistida. Los favoritos eliminados y las importaciones deshechas se respetan
+también cuando otra pestaña guarda una preferencia o un avance nuevo. Las nuevas
+recompensas, intentos y entregas se conservan sin recuperar registros antiguos ni
+duplicar XP. Las notas nuevas no restauran por sí solas código o evidencias
+técnicas retiradas. Se preservan el esquema v2, los IDs, los logros históricos y
+la comprobación de concurrencia al importar o deshacer. La sincronización no
+escribe por sí sola y conserva una lección activa.
+
+Las pruebas específicas cubren sincronización, escrituras pendientes o fallidas,
+favoritos, restauración, XP, intentos y entregas. El recorrido de navegador añade
+eliminación de favoritos e importación/deshacer entre dos pestañas en 1440 y
+390 px, además del aprendizaje paralelo anterior. El README se contrasta con el
+catálogo: 113 publicaciones actuales, 80 archivadas y 599 entradas totales;
+Algoritmia publica nueve lecciones JavaScript de su mapa de 87. La verificación
+técnica no sustituye la revisión docente independiente ni el piloto con principiantes.
+
+Verificación final: 286 pruebas unitarias aprobadas en serie con cobertura;
+los 57 módulos cumplen los umbrales globales y por archivo. El módulo nuevo de
+sincronización alcanza 100 % de líneas, ramas y funciones. Pasan validación de
+contenido, política técnica local, formato y coherencia de recursos. El recorrido
+real de aprendizaje paralelo y las regresiones de 1440/390 px pasan con un
+servidor HTTP alternativo. En este equipo, el lanzador habitual de
+`npm run test:progress` se interrumpe por un hook de Console Ninja inyectado en
+`node_modules/serve/build/main.js`, que intenta conectar con un puerto local sin
+respuesta. La alternativa conserva las comprobaciones del recorrido y utiliza
+`createDevServer` sobre los archivos del proyecto; no modifica la extensión ni
+las dependencias instaladas. La cobertura se ejecutó con `--test-concurrency=1`
+para evitar la sensibilidad al límite de 200 ms del evaluador de pruebas bajo
+carga concurrente; no se cambian ese límite ni los umbrales de cobertura.

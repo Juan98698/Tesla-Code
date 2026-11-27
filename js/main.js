@@ -17,7 +17,6 @@ import {
   includeArchives,
 } from './domain/curriculum.js';
 import { recordAttempt, completeIfReady } from './domain/progress.js';
-import { mergeProgress } from './domain/progress-backup.js';
 import { recordProjectArtifact } from './domain/learning-project.js';
 import { updateStreak } from './domain/gamification.js';
 import {
@@ -74,6 +73,13 @@ function toast(message) {
 function refreshProgress() {
   $('xp').textContent = `${state.xp} XP`;
   $('racha').textContent = `♨ ${state.streak.count} ${state.streak.count === 1 ? 'día' : 'días'}`;
+  const bookmark = $('bookmark');
+  if (bookmark) {
+    const key = location.hash.split('/').slice(2, 4).join('/');
+    const selected = state.bookmarks.includes(key);
+    bookmark.textContent = selected ? '★' : '☆';
+    bookmark.setAttribute('aria-pressed', String(selected));
+  }
 }
 function save() {
   pendingSaves++;
@@ -325,8 +331,6 @@ async function render() {
             ? state.bookmarks.filter((k) => k !== key)
             : [...state.bookmarks, key];
           save();
-          $('bookmark').textContent = state.bookmarks.includes(key) ? '★' : '☆';
-          $('bookmark').setAttribute('aria-pressed', String(state.bookmarks.includes(key)));
         };
         const tabs = [...root.querySelectorAll('[data-tab]')];
         tabs.forEach((button, i) => {
@@ -588,11 +592,7 @@ function bindShell() {
   window.addEventListener('hashchange', render);
   window.addEventListener('storage', (event) => {
     if (event.key !== PROGRESS_KEY || pendingSaves) return;
-    const loaded = progressRepository.load();
-    const merged = mergeProgress(state, loaded);
-    for (const key of ['goal', 'recent', 'learningMode'])
-      if (loaded[key]) merged[key] = loaded[key];
-    Object.assign(state, merged);
+    if (!progressRepository.synchronize(state)) return;
     refreshProgress();
     // Keep an active editor, quiz or console intact while synchronizing achievements.
     if (document.body.dataset.view !== 'leccion') render();
