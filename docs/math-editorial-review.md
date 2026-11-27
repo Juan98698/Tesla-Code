@@ -1,6 +1,8 @@
 # Revisión editorial de Math y consultas de JavaScript
 
-Revisión técnica asistida del 26 de noviembre de 2026. Se contrasta la referencia de [Math en MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math) con el catálogo y con ejecuciones reales. El alcance es el objeto Math documentado: 37 funciones y ocho constantes numéricas. La consulta reúne 111 entradas, con 78 lecciones reutilizadas y 33 fichas. Las fichas y talleres complementarios suman 112 actividades y 277 casos; no se cuentan aquí las actividades originales de las 78 lecciones.
+Revisión técnica asistida del 26 de noviembre de 2026, ampliada editorialmente el 27 de noviembre. Se contrasta la referencia de [Math en MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math) con el catálogo y con ejecuciones reales. El alcance es el objeto Math documentado: 37 funciones y ocho constantes numéricas. La consulta reúne 111 entradas, con 78 lecciones reutilizadas y 33 fichas. Las fichas y talleres complementarios suman 168 actividades y 458 casos; no se cuentan aquí las actividades originales de las 78 lecciones.
+
+La [revisión editorial de las 33 fichas](javascript-guide-editorial-review.md) amplía usos prácticos y separa la matemática especializada del recorrido desde cero.
 
 ## Cómo se localiza la evidencia
 

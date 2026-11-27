@@ -78,6 +78,8 @@ Math se desarrolla en doce fichas: redondeos, azar e intervalos, límites, poten
 
 Math se desarrolla en doce fichas: redondeos, azar e intervalos, límites, potencias/raíces, precisión, crecimiento, ángulos y representación numérica. La [revisión de Math](docs/math-editorial-review.md) localiza las 37 funciones y ocho constantes de la referencia revisada, con sus bases, ejemplos y práctica. Las APIs recientes muestran un aviso si el navegador no las implementa. Puedes buscar `Math.random()`, `math floor` o `Math.PI`.
 
+El índice separa **Recorrido desde cero** (78 lecciones), **Consulta y usos prácticos** (27 fichas) y **Matemáticas especializadas** (6 fichas opcionales). Las 33 fichas presentan entradas, resultados, efectos sobre los datos, usos y criterios de elección. Incluyen 85 ejemplos; las fichas y talleres suman 168 actividades y 458 casos. Se amplían arreglos, desestructuración, copias, expresiones regulares, cancelación y comparación de herramientas. Las decisiones escritas se guardan localmente con criterios de autorrevisión. [Revisión y correspondencia de las fichas](docs/javascript-guide-editorial-review.md).
+
 La consulta tiene índice, búsqueda, enlaces directos, lectura en voz alta y borradores separados. No concede XP, no marca lecciones ni entrega el proyecto. Las referencias a la ruta conservan los requisitos de acceso. Las predicciones de los ejemplos se guardan localmente; ejecutar y comprobar siguen siendo acciones distintas. Revisión docente y piloto con principiantes pendientes.
 
 ## Progreso

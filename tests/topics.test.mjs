@@ -14,6 +14,7 @@ import {
   mountTopicExercise,
   mountWalkthrough,
   consultationTheory,
+  mountTopicReasoning,
 } from '../js/features/topic-learning.js';
 import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 import { prepareBindingCases } from '../js/domain/javascript-contract.js';
@@ -25,6 +26,8 @@ import {
   mathReferences,
   MATH_METHODS,
   MATH_CONSTANTS,
+  editorialCoverageErrors,
+  codeEvidence,
 } from '../tools/learning-content-audit.mjs';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -102,6 +105,25 @@ test('topic index reuses the complete current edition, orders extensions and lea
   assert.equal(entries.length, 111);
   assert.equal(entries.filter((entry) => entry.kind === 'lesson').length, 78);
   assert.equal(new Set(entries.map((entry) => entry.id)).size, 111);
+  assert.deepEqual(
+    entries.filter((entry) => entry.collection === 'route').map((entry) => entry.id),
+    route.lessons.filter((lesson) => lesson.status === 'published').map((lesson) => lesson.id),
+  );
+  assert.deepEqual(
+    entries
+      .map((entry) => entry.collection)
+      .filter((value, index, array) => array.indexOf(value) === index),
+    ['route', 'companion', 'mathematics'],
+  );
+  assert.equal(entries.filter((entry) => entry.collection === 'mathematics').length, 6);
+  assert.equal(
+    entries.find((entry) => entry.id === 'consulta-math-hiperbolicas').collection,
+    'mathematics',
+  );
+  assert.throws(
+    () => topicIndex(route, [{ ...catalog.guides[0], collection: 'unknown' }]),
+    /Colección/,
+  );
   const positions = new Map(entries.map((entry, index) => [entry.id, index]));
   for (const guide of catalog.guides)
     for (const required of guide.requires)
@@ -132,6 +154,77 @@ test('topic index reuses the complete current edition, orders extensions and lea
     },
   ];
   assert.ok(guideErrors(invalid, route).length >= 8);
+});
+
+test('every guide links its practical contract, operation training and independent application', () => {
+  assert.equal(Object.keys(catalog.editorialCoverage).length, 33);
+  assert.deepEqual(editorialCoverageErrors(catalog), []);
+  assert.equal(codeEvidence('"lista.splice(1, 2)"; // lista.pop()').has('method:splice'), false);
+  const missing = structuredClone(catalog);
+  delete missing.guides[0].teaching.output;
+  missing.editorialCoverage['consulta-array-cambios'].skills.find(
+    (skill) => skill.name === 'Reemplazar tramo',
+  ).example = 0;
+  missing.editorialCoverage['consulta-regexp'].application = 'missing';
+  missing.guides.find((guide) => guide.id === 'consulta-math-redondeos').requires = [
+    'consulta-math',
+  ];
+  const errors = editorialCoverageErrors(missing);
+  assert.ok(errors.some((message) => /consulta-ternario.*contrato/.test(message)));
+  assert.ok(errors.some((message) => /Reemplazar tramo.*operación/.test(message)));
+  assert.ok(errors.some((message) => /consulta-regexp.*escritura libre/.test(message)));
+  assert.ok(errors.some((message) => /consulta-math-redondeos.*funciones y retorno/.test(message)));
+  const duplicate = structuredClone(catalog);
+  duplicate.guides[0].examples[0].id = duplicate.guides[0].id + '-example';
+  assert.ok(
+    mathCoverageErrors(duplicate).some((message) => /identificador de ejemplo/.test(message)),
+  );
+});
+
+test('reasoning survives topic changes separately from achievements and tolerates unavailable storage', async (t) => {
+  installDOM(t);
+  const root = document.querySelector('#root');
+  const ctx = context('consulta-array-cambios');
+  const before = JSON.stringify(ctx.state);
+  const dispose = await mountTopicLearning(root, ctx, dependencies);
+  await until(() => root.querySelector('.topic-reasoning textarea'));
+  assert.match(root.querySelector('#lesson .topic-usage').textContent, /Qué recibe/);
+  change(
+    root.querySelector('.topic-reasoning textarea'),
+    'Necesito copiar porque el reporte conserva la lista fuente.',
+  );
+  change(root.querySelector('#topic-search'), 'ternario');
+  root.querySelector('a[data-topic="consulta-ternario"]').click();
+  await until(() => root.querySelector('article > h2')?.textContent.includes('ternario'));
+  change(root.querySelector('#topic-search'), 'splice');
+  root.querySelector('a[data-topic="consulta-array-cambios"]').click();
+  await until(() => root.querySelector('article > h2')?.textContent.includes('splice'));
+  assert.match(root.querySelector('.topic-reasoning textarea').value, /copiar porque/);
+  assert.equal(JSON.stringify(ctx.state), before);
+  dispose();
+  const broken = {
+    getItem() {
+      throw Error('blocked');
+    },
+    setItem() {
+      throw Error('blocked');
+    },
+  };
+  const cleanup = mountTopicReasoning(
+    root,
+    {
+      id: 'blocked',
+      teaching: { question: '<img src=x> ¿Qué elegirías?', criteria: 'Explica tu regla.' },
+    },
+    broken,
+  );
+  assert.equal(root.querySelector('img'), null);
+  assert.match(root.querySelector('[data-reasoning-status]').textContent, /recuperar/);
+  const input = root.querySelector('textarea');
+  change(input, 'Mi decisión');
+  assert.match(root.querySelector('[data-reasoning-status]').textContent, /Copia/);
+  cleanup();
+  assert.equal(input.oninput, null);
 });
 
 test('cross-runtime examples and practices execute; capability-specific operations are covered by the browser suite', async () => {
@@ -401,7 +494,7 @@ test('additional examples and practices retain distinct drafts and the original 
   const before = JSON.stringify(ctx.state);
   let dispose = await mountTopicLearning(root, ctx, dependencies);
   await until(() => root.querySelector('[data-topic-exercise="math-muestra-real"]'));
-  assert.equal(root.querySelectorAll('.code-example').length, 2);
+  assert.equal(root.querySelectorAll('.code-example').length, 3);
   const predictions = root.querySelectorAll('.example-prediction textarea');
   change(predictions[0], 'un decimal entre cero y uno');
   change(predictions[1], 'el entero trece');
@@ -417,7 +510,9 @@ test('additional examples and practices retain distinct drafts and the original 
   dispose = await mountTopicLearning(root, ctx, dependencies);
   await until(() => root.querySelector('[data-topic-exercise="math-muestra-real"]'));
   assert.deepEqual(
-    [...root.querySelectorAll('.example-prediction textarea')].map((input) => input.value),
+    [...root.querySelectorAll('.example-prediction textarea')]
+      .slice(0, 2)
+      .map((input) => input.value),
     ['un decimal entre cero y uno', 'el entero trece'],
   );
   assert.equal(

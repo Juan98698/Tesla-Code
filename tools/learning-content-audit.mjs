@@ -98,6 +98,13 @@ export function mathCoverageErrors(catalog) {
     }
   }
   for (const guide of catalog.guides) {
+    const exampleIds = new Set();
+    for (const [index, example] of [guide.example, ...(guide.examples ?? [])].entries()) {
+      const id = example.id ?? guide.id + '-example' + (index ? '-' + index : '');
+      if (!/^[a-z0-9-]+$/.test(id) || exampleIds.has(id))
+        errors.push(`${guide.id}: identificador de ejemplo inválido o repetido`);
+      exampleIds.add(id);
+    }
     const ids = new Set(['guided', 'bug', 'challenge'].map((key) => guide.id + '-' + key));
     for (const activity of guide.practices ?? []) {
       if (!/^[a-z0-9-]+$/.test(activity.id ?? '') || ids.has(activity.id) || !activity.title)
@@ -124,6 +131,86 @@ export function mathCoverageErrors(catalog) {
         errors.push(`${guide.id}: observación variable sin contrato`);
     if (guide.capability && !MATH_METHODS.includes(guide.capability))
       errors.push(`${guide.id}: compatibilidad desconocida`);
+  }
+  return errors;
+}
+
+export function codeEvidence(code) {
+  const evidence = new Set();
+  function visit(node) {
+    if (!node || typeof node !== 'object') return;
+    if (node.type) evidence.add('node:' + node.type);
+    if (node.type === 'CallExpression') {
+      const callee = node.callee;
+      if (callee.type === 'Identifier') evidence.add('call:' + callee.name);
+      if (callee.type === 'MemberExpression') {
+        const name = callee.computed ? callee.property.value : callee.property.name;
+        if (typeof name === 'string') evidence.add('method:' + name);
+      }
+    }
+    for (const value of Object.values(node))
+      if (value && typeof value === 'object')
+        Array.isArray(value) ? value.forEach(visit) : visit(value);
+  }
+  visit(parse(code, { ecmaVersion: 2024, sourceType: 'script' }));
+  return evidence;
+}
+
+export function editorialCoverageErrors(catalog) {
+  const errors = [];
+  const records = catalog.editorialCoverage ?? {};
+  for (const id of Object.keys(records))
+    if (!catalog.guides.some((guide) => guide.id === id))
+      errors.push(`${id}: revisión de una ficha inexistente`);
+  for (const guide of catalog.guides) {
+    const teaching = guide.teaching;
+    if (
+      !teaching ||
+      ['problem', 'input', 'output', 'effect', 'choice', 'question', 'criteria'].some(
+        (key) => typeof teaching[key] !== 'string' || !teaching[key].trim(),
+      ) ||
+      !Array.isArray(teaching.uses) ||
+      !teaching.uses.length ||
+      teaching.uses.some((use) => typeof use !== 'string' || !use.trim())
+    )
+      errors.push(`${guide.id}: faltan propósito, contrato, usos o criterios de decisión`);
+    if (!guide.example.explanation)
+      errors.push(`${guide.id}: el primer ejemplo no tiene razonamiento`);
+    const record = records[guide.id];
+    if (!Array.isArray(record?.skills) || !record.skills.length || !record.scope) {
+      errors.push(`${guide.id}: falta revisión de habilidades y alcance`);
+      continue;
+    }
+    const examples = [guide.example, ...(guide.examples ?? [])];
+    const activities = [
+      ...['guided', 'bug', 'challenge'].map((id) => ({ id, ...guide[id] })),
+      ...(guide.practices ?? []),
+    ];
+    const application = activities.find((activity) => activity.id === record.application);
+    if (
+      activities.some((activity) => activity.entrypoint) &&
+      !guide.requires.includes('js-funciones-y-retorno')
+    )
+      errors.push(`${guide.id}: las aplicaciones requieren explicar funciones y retorno antes`);
+    if (!application || application.starter !== '' || application.syntax)
+      errors.push(`${guide.id}: falta aplicación de escritura libre sin método impuesto`);
+    for (const skill of record.skills) {
+      const section = guide.sections.find((section) => section.title === skill.section);
+      const example = examples[skill.example];
+      const activity = activities.find((activity) => activity.id === skill.practice);
+      if (!skill.name || !section || !example || !activity) {
+        errors.push(`${guide.id}/${skill.name}: correspondencia incompleta`);
+        continue;
+      }
+      if (
+        skill.evidence &&
+        (!codeEvidence(example.code).has(skill.evidence) ||
+          !codeEvidence(activity.solution).has(skill.evidence))
+      )
+        errors.push(
+          `${guide.id}/${skill.name}: la operación anunciada no se usa en el ejemplo y la práctica`,
+        );
+    }
   }
   return errors;
 }

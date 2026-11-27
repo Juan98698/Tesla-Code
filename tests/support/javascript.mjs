@@ -24,6 +24,9 @@ function runSandbox(
   const sandbox = {
     performance,
     setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
     Blob: class {
       constructor(parts) {
         this.source = parts.join('');

@@ -3,6 +3,25 @@ import { isPublished } from './curriculum.js';
 export const topicHref = (id) => `#/practica/javascript/temas/${id}`;
 export const foldTopic = (text) =>
   text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('es').trim();
+export const TOPIC_COLLECTIONS = [
+  {
+    id: 'route',
+    title: 'Recorrido desde cero',
+    description:
+      'Las lecciones de Fundamentos en su secuencia original. Continúa las entregas en la ruta.',
+  },
+  {
+    id: 'companion',
+    title: 'Consulta y usos prácticos',
+    description: 'Amplía una habilidad después de repasar las bases enlazadas en cada ficha.',
+  },
+  {
+    id: 'mathematics',
+    title: 'Matemáticas especializadas',
+    description:
+      'Referencia opcional para modelos numéricos. No es un paso previo a los ciclos ni a las funciones de JavaScript.',
+  },
+];
 
 // The route owns its lessons and prerequisites. Consultation adds no completion rules.
 export function topicIndex(route, guides, searchTerms = {}) {
@@ -16,18 +35,25 @@ export function topicIndex(route, guides, searchTerms = {}) {
     requires: (lesson.progressionRequires ?? []).map((key) => key.split('/')[1]),
     keywords: lesson.concepts.join(' '),
     kind: 'lesson',
+    collection: 'route',
   }));
   for (const guide of guides) {
+    if (!['companion', 'mathematics'].includes(guide.collection ?? 'companion'))
+      throw Error(`Colección de consulta inválida: ${guide.id}`);
     const position = entries.findIndex((entry) => entry.id === guide.after);
     if (position < 0) throw Error(`Referencia de tema desconocida: ${guide.id}`);
     const previous = entries[position];
     entries.splice(position + 1, 0, {
       ...guide,
-      group: previous.group,
-      groupName: previous.groupName,
+      group: guide.collection === 'mathematics' ? 'math-reference' : previous.group,
+      groupName:
+        guide.collection === 'mathematics'
+          ? 'Modelos y representación numérica'
+          : previous.groupName,
       reference: guide.reference ?? previous.reference,
       keywords: guide.keywords ?? '',
       kind: 'guide',
+      collection: guide.collection ?? 'companion',
     });
   }
   const ids = new Set(entries.map((entry) => entry.id));
@@ -39,7 +65,13 @@ export function topicIndex(route, guides, searchTerms = {}) {
     )
       throw Error(`Referencias de búsqueda inválidas: ${id}`);
   }
-  return entries.map((entry) => ({ ...entry, searchTerms: searchTerms[entry.id] ?? [] }));
+  return entries
+    .map((entry) => ({ ...entry, searchTerms: searchTerms[entry.id] ?? [] }))
+    .toSorted(
+      (a, b) =>
+        TOPIC_COLLECTIONS.findIndex((item) => item.id === a.collection) -
+        TOPIC_COLLECTIONS.findIndex((item) => item.id === b.collection),
+    );
 }
 
 export function filterTopics(topics, query) {

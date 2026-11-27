@@ -1,5 +1,5 @@
 import { escapeHtml as e } from '../core/html.js';
-import { topicIndex, filterTopics, topicHref } from '../domain/topics.js';
+import { topicIndex, filterTopics, topicHref, TOPIC_COLLECTIONS } from '../domain/topics.js';
 import { isUnlocked, nextLesson } from '../domain/curriculum.js';
 import { loadLesson, getJson } from '../repositories/content-repository.js';
 import {
@@ -42,6 +42,47 @@ const glossary = [
     'Objeto que representa el resultado futuro de una operación: puede cumplirse o rechazarse.',
   ],
 ];
+
+function teachingMarkup(teaching) {
+  if (!teaching) return '';
+  return `<section class="topic-usage"><h3>El problema que vas a resolver</h3><p>${e(teaching.problem)}</p>
+    <dl><dt>Qué recibe</dt><dd>${e(teaching.input)}</dd><dt>Qué produce</dt><dd>${e(teaching.output)}</dd><dt>Qué cambia</dt><dd>${e(teaching.effect)}</dd></dl>
+    <h3>Usos prácticos y elección de herramienta</h3><ul>${teaching.uses.map((use) => `<li>${e(use)}</li>`).join('')}</ul><p>${e(teaching.choice)}</p></section>`;
+}
+
+export function mountTopicReasoning(
+  root,
+  topic,
+  storage = {
+    getItem: (key) => globalThis.localStorage.getItem(key),
+    setItem: (key, value) => globalThis.localStorage.setItem(key, value),
+  },
+) {
+  const key = 'teslacode:topic-reasoning:v1:' + topic.id;
+  root.innerHTML = `<section class="topic-reasoning"><h3>Elige y explica antes de programar</h3><label for="topic-reasoning">${e(topic.teaching.question)}</label>
+    <textarea id="topic-reasoning" rows="3" maxlength="4000"></textarea><p data-reasoning-status role="status">Tu explicación se guarda aparte del progreso. No recibe una calificación automática.</p>
+    <details><summary>Criterios para revisar tu decisión</summary><p>${e(topic.teaching.criteria)}</p></details></section>`;
+  const input = root.querySelector('textarea');
+  const status = root.querySelector('[data-reasoning-status]');
+  try {
+    input.value = storage.getItem(key)?.slice(0, 4000) ?? '';
+  } catch {
+    status.textContent =
+      'No se pudo recuperar tu explicación. Puedes escribir y copiarla antes de salir.';
+  }
+  input.oninput = () => {
+    try {
+      storage.setItem(key, input.value);
+      status.textContent =
+        'Explicación guardada en este navegador. Revisa tus razones con los criterios; no se califican automáticamente.';
+    } catch {
+      status.textContent = 'No se pudo guardar. Copia tu explicación antes de salir.';
+    }
+  };
+  return () => {
+    input.oninput = null;
+  };
+}
 
 // Keep all the original teaching. Fold project administration rather than copying
 // a second curriculum or inviting consultation to complete a protected delivery.
@@ -150,7 +191,7 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
   };
   root.innerHTML = `<section class="topic-learning" aria-label="Aprender JavaScript por temas">
     <header class="topic-intro"><p class="eyebrow">JavaScript · Desde cero hasta aplicaciones</p><h2>Aprender por temas</h2>
-    <p>Busca una duda o sigue el índice en orden. Consulta, predice, experimenta y practica. El proyecto y sus entregas continúan en tu ruta.</p>
+    <p>Comienza por Recorrido desde cero. Consulta y usos prácticos amplía habilidades con sus bases enlazadas. Matemáticas especializadas es una referencia opcional. El proyecto y sus entregas continúan en tu ruta.</p>
     <p class="topic-consultation-note">Consulta libre · No completa lecciones ni concede XP. Tus borradores se guardan aparte en este navegador.</p></header>
     <div class="topic-layout"><details class="topic-index" open><summary>Índice de JavaScript <span>${topics.length} temas</span></summary>
     <label for="topic-search">Buscar un tema de JavaScript</label><input type="search" id="topic-search" placeholder="Ej. .map(), .includes, colas…" maxlength="100">
@@ -164,21 +205,31 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
     const shown = filterTopics(topics, search.value);
     count.textContent = `${shown.length} de ${topics.length} temas`;
     nav.replaceChildren();
-    const groups = new Map();
-    for (const topic of shown) {
-      if (!groups.has(topic.group)) groups.set(topic.group, []);
-      groups.get(topic.group).push(topic);
-    }
-    for (const entries of groups.values()) {
-      const details = root.ownerDocument.createElement('details');
-      details.open = Boolean(search.value) || entries.some((entry) => entry.id === selected);
-      details.innerHTML = `<summary>${e(entries[0].groupName)}</summary>${entries
-        .map(
-          (entry) =>
-            `<a href="${topicHref(entry.id)}" data-topic="${e(entry.id)}" ${entry.id === selected ? 'aria-current="page"' : ''}>${e(entry.title)}${entry.searchTerms.length ? `<small class="topic-search-terms">${entry.searchTerms.slice(0, 3).map(e).join(' · ')}</small>` : ''}</a>`,
-        )
-        .join('')}`;
-      nav.append(details);
+    for (const collection of TOPIC_COLLECTIONS) {
+      const members = shown.filter((topic) => topic.collection === collection.id);
+      if (!members.length) continue;
+      const shelf = root.ownerDocument.createElement('details');
+      shelf.className = 'topic-collection';
+      shelf.dataset.topicCollection = collection.id;
+      shelf.open = Boolean(search.value) || members.some((entry) => entry.id === selected);
+      shelf.innerHTML = `<summary>${e(collection.title)} <span>${members.length}</span></summary><p>${e(collection.description)}</p>`;
+      const groups = new Map();
+      for (const topic of members) {
+        if (!groups.has(topic.group)) groups.set(topic.group, []);
+        groups.get(topic.group).push(topic);
+      }
+      for (const entries of groups.values()) {
+        const details = root.ownerDocument.createElement('details');
+        details.open = Boolean(search.value) || entries.some((entry) => entry.id === selected);
+        details.innerHTML = `<summary>${e(entries[0].groupName)}</summary>${entries
+          .map(
+            (entry) =>
+              `<a href="${topicHref(entry.id)}" data-topic="${e(entry.id)}" ${entry.id === selected ? 'aria-current="page"' : ''}>${e(entry.title)}${entry.searchTerms.length ? `<small class="topic-search-terms">${entry.searchTerms.slice(0, 3).map(e).join(' · ')}</small>` : ''}</a>`,
+          )
+          .join('')}`;
+        shelf.append(details);
+      }
+      nav.append(shelf);
     }
     if (!shown.length)
       nav.innerHTML = '<p>No hay coincidencias. Prueba otro término o borra la búsqueda.</p>';
@@ -218,7 +269,7 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
         <h2 tabindex="-1">${e(topic.title)}</h2><p class="outcome">${e(data.outcome)}</p>
         ${prerequisites.length ? `<details class="topic-bases"><summary>Antes de este tema: bases que puedes repasar</summary><ul>${prerequisites.map((entry) => `<li><a class="text-link" href="${topicHref(entry.id)}" data-topic="${entry.id}">${e(entry.title)}</a></li>`).join('')}</ul></details>` : '<p>Puedes comenzar aquí: no necesitas experiencia previa.</p>'}
         <div id="lesson-audio" class="lesson-audio" aria-label="Lectura del tema"></div>
-        <section id="lesson" class="lesson-content topic-theory" aria-label="Explicación del tema">${topic.kind === 'guide' ? data.sections.map((section) => `<h3>${e(section.title)}</h3><p>${e(section.text)}</p>`).join('') + `<h3>Predice y experimenta</h3><pre data-language="javascript">${e(data.example.code)}</pre>` : consultationTheory(root.ownerDocument, data.html)}</section>
+        <section id="lesson" class="lesson-content topic-theory" aria-label="Explicación del tema">${topic.kind === 'guide' ? teachingMarkup(data.teaching) + data.sections.map((section) => `<h3>${e(section.title)}</h3><p>${e(section.text)}</p>`).join('') + `<h3>Predice y experimenta</h3><pre data-language="javascript">${e(data.example.code)}</pre>` : consultationTheory(root.ownerDocument, data.html)}</section>
         <div data-topic-trace></div><details class="topic-glossary"><summary>Consultar términos de programación</summary><dl>${glossary.map(([term, definition]) => `<dt>${e(term)}</dt><dd>${e(definition)}</dd>`).join('')}</dl></details>
         <section data-topic-practice aria-label="Práctica del tema"></section>
         <footer class="topic-footer"><h3>Continúa con tu proyecto</h3><p>${unlocked ? 'La lección de referencia está disponible en tu recorrido.' : 'Puedes consultar este tema. Para entregar el proyecto, completa primero los pasos previos de la ruta.'}</p>
@@ -237,7 +288,7 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
         topic.kind === 'guide'
           ? [data.example, ...(data.examples ?? [])].map((example, index) => ({
               ...example,
-              id: topic.id + '-example' + (index ? '-' + index : ''),
+              id: example.id ?? topic.id + '-example' + (index ? '-' + index : ''),
               language: 'javascript',
               ...(unavailable
                 ? {
@@ -250,7 +301,7 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
       if (topic.kind === 'guide') {
         for (const example of examples.slice(1)) {
           const section = root.ownerDocument.createElement('section');
-          section.innerHTML = `<h3>${e(example.title)}</h3><p>${e(example.explanation)}</p><pre data-language="javascript">${e(example.code)}</pre><details class="example-expected"><summary>Comparar con el resultado de referencia</summary><pre tabindex="0">${e(example.observation ?? example.stdout)}</pre></details>`;
+          section.innerHTML = `<h3>${e(example.title)}</h3><p>${e(example.explanation)}</p><pre data-language="javascript">${e(example.code)}</pre><details class="example-expected"><summary>Comparar con el resultado de referencia</summary><pre tabindex="0">${e(example.observation ?? (example.sample ? JSON.stringify(example.sample.expected) : example.stdout))}</pre></details>`;
           article.querySelector('#lesson').append(section);
         }
       }
@@ -278,6 +329,11 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
       else if (data.traceGame)
         mountTraceGame(article.querySelector('[data-topic-trace]'), data.traceGame);
       const practice = article.querySelector('[data-topic-practice]');
+      if (topic.kind === 'guide' && data.teaching) {
+        const reasoning = root.ownerDocument.createElement('div');
+        practice.append(reasoning);
+        cleanups.push(mountTopicReasoning(reasoning, topic));
+      }
       if (topic.kind === 'guide' && !unavailable) {
         const activities = [
           ['guided', 'Implementa con apoyo'],

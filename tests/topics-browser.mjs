@@ -52,6 +52,9 @@ try {
     assert.ok(await page.evaluate(() => __speech.current.text.length > 0));
     await page.locator('#lesson-audio [data-audio-stop]').click();
     const search = page.getByLabel('Buscar un tema de JavaScript');
+    assert.equal(await page.locator('[data-topic-collection="route"] a').count(), 78);
+    assert.equal(await page.locator('[data-topic-collection="companion"] a').count(), 27);
+    assert.equal(await page.locator('[data-topic-collection="mathematics"] a').count(), 6);
     for (const [query, id] of [
       ['.reduce', 'js-reducir-acumulador'],
       ['.map()', 'js-transformar-map'],
@@ -88,9 +91,6 @@ try {
 
     // Run the actual browser implementation, including operations absent in Node.
     // Never replace Math.random or Math.sumPrecise with a testing implementation.
-    const mathGuides = catalog.guides.filter(
-      (guide) => guide.id.includes('math') || guide.id === 'consulta-numeros-precision',
-    );
     const supported = await page.evaluate(() =>
       Object.getOwnPropertyNames(Math).filter((name) => typeof Math[name] === 'function'),
     );
@@ -113,9 +113,20 @@ try {
         'the browser suite must exercise real sumPrecise',
       );
     }
-    for (const guide of width === 1440
-      ? mathGuides
-      : mathGuides.filter((guide) => guide.id === 'consulta-math-random')) {
+    const selectedGuides =
+      width === 1440
+        ? catalog.guides
+        : catalog.guides.filter((guide) =>
+            [
+              'consulta-math-random',
+              'consulta-array-cambios',
+              'consulta-desestructuracion',
+              'consulta-temporizadores',
+              'consulta-regexp',
+              'consulta-elegir-recorrido',
+            ].includes(guide.id),
+          );
+    for (const guide of selectedGuides) {
       await search.fill(guide.title);
       await page.locator(`nav[data-topic-nav] a[data-topic="${guide.id}"]`).click();
       await page.getByRole('heading', { name: guide.title, exact: true }).waitFor();
@@ -132,7 +143,12 @@ try {
           assert.ok(output.length, guide.id);
           const value = Number(output);
           assert.ok(value >= 0 && value < 1 && Number.isFinite(value), output);
-        } else assert.equal(output, exampleData.stdout.trim(), guide.id);
+        } else if (exampleData.sample)
+          assert.ok(
+            output.endsWith('Resultado devuelto: ' + JSON.stringify(exampleData.sample.expected)),
+            guide.id + ': ' + output,
+          );
+        else assert.equal(output, exampleData.stdout.trim(), guide.id);
       }
       const activities = [
         ...['guided', 'bug', 'challenge'].map((step) => ({
@@ -152,11 +168,28 @@ try {
         await card.getByRole('button', { name: 'Comprobar ejercicio' }).click();
         await card.locator('.practice-feedback.ok').waitFor();
       }
+      await page
+        .locator('.topic-reasoning textarea')
+        .fill('Elijo según el retorno y conservo las entradas cuando lo pide el contrato.');
       assert.equal(await stored(page), before);
+      console.log(`✓ ${guide.id}: ejemplos y casos reales a ${width}px.`);
     }
     console.log(
-      `✓ Math: ejemplos reales y prácticas ${width === 1440 ? 'de las 12 fichas' : 'de azar'} a ${width}px.`,
+      `✓ Consulta editorial: ${selectedGuides.length} fichas a ${width}px, sin créditos de la ruta.`,
     );
+    await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
+    for (const theme of ['dark', 'light']) {
+      await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme);
+      const violations = await page.evaluate(async () =>
+        (
+          await axe.run(document.querySelector('[data-topic-learning]'), {
+            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
+          })
+        ).violations.map((item) => item.id),
+      );
+      assert.deepEqual(violations, [], `${width}px ${theme}: contrato, razonamiento e índice`);
+    }
+    await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
     await search.fill('ternario');
     await page.locator('nav[data-topic-nav] a').press('Enter');
     await page
@@ -166,6 +199,9 @@ try {
     assert.equal(await play.isEnabled(), true);
     const exercise = page.locator('[data-topic-exercise="consulta-ternario-guided"]');
     await exercise.locator('.code-editor').fill('const edad = 18;\nconsole.log("mi borrador");');
+    await page
+      .locator('.topic-reasoning textarea')
+      .fill('Escojo el valor según la frontera de edad.');
     await exercise.getByRole('button', { name: 'Comprobar ejercicio' }).click();
     await exercise.locator('.practice-feedback.bad').waitFor();
     await exercise.getByRole('button', { name: 'Necesito una pista' }).click();
@@ -175,6 +211,10 @@ try {
       .getByText('No hay coincidencias. Prueba otro término o borra la búsqueda.')
       .waitFor();
     assert.match(await exercise.locator('.code-editor').inputValue(), /mi borrador/);
+    assert.equal(
+      await page.locator('.topic-reasoning textarea').inputValue(),
+      'Escojo el valor según la frontera de edad.',
+    );
     await search.fill('forEach');
     await page.locator('nav[data-topic-nav] a[data-topic="consulta-for-each"]').click();
     await page
@@ -199,6 +239,10 @@ try {
     // A direct URL survives reload and cannot complete the protected source lesson.
     await page.reload();
     await exercise.waitFor();
+    assert.equal(
+      await page.locator('.topic-reasoning textarea').inputValue(),
+      'Escojo el valor según la frontera de edad.',
+    );
     assert.equal(
       await exercise.locator('.code-editor').inputValue(),
       catalog.guides[0].guided.solution,
