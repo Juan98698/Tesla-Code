@@ -28,6 +28,7 @@ npm run test:console # Consola, entradas, errores y ejemplos en escritorio y mó
 npm run test:javascript # JavaScript: 78 lecciones desde cero, escritorio y móvil
 npm run test:javascript-lab # Interfaz web del proyecto, a 320 y 1440 px
 npm run test:laboratorio # Catálogo, filtros, rondas y simuladores en escritorio y móvil
+npm run test:topics  # Consulta JavaScript, consola, borradores, secuencia y accesibilidad
 npm run test:coverage # Cobertura global y por módulo (Node 24/26)
 npm run test:atmosphere # Intro Full HD completa, fondo global y controles accesibles
 npm run test:tutor   # Tutor contra HTTP real con proveedor simulado, ambos temas y móvil
@@ -68,6 +69,10 @@ La consola JavaScript usa el motor del navegador y se inicia al ejecutar. Admite
 Las simulaciones de IA son didácticas y locales: no ejecutan modelos ni consumen APIs. El editor de pseudocódigo acepta asignaciones numéricas, aritmética y `mostrar`. Las trece prácticas Python y los 43 ejemplos compatibles incluyen una consola con **Pyodide 314.0.7 / Python 3.14.2**. **Ejecutar código** muestra lo impreso y los errores; permite proporcionar entradas para `input()`, detener y limpiar la consola. **Comprobar ejercicio** evalúa los casos publicados y puede acreditar la práctica; experimentar por sí solo no concede progreso. Los borradores se conservan y se puede restaurar el código inicial.
 
 El motor tiene límites de tiempo/salida y capacidades distintas de una instalación local. El ejemplo de hilos explica cómo ejecutarlo en el equipo; los comandos de terminal y Git siguen siendo locales. Cada ejecución Python en el navegador empieza de nuevo y sus archivos son temporales.
+
+El Laboratorio incorpora **Aprender por temas**: 98 entradas de JavaScript, con las 78 lecciones actuales de Fundamentos y 20 fichas complementarias. Incluye ternario, switch, do…while, for…in, forEach, elección de recorridos, plantillas, desestructuración, spread/rest, claves y valores, expresiones regulares, errores, arreglos, alcance, prototipos, Math, temporizadores, encadenamiento opcional y cortocircuito. Las fichas explican su uso y límites, con ejemplo editable, práctica guiada, incidencia y reto independiente. Las lecciones siguen usando su contenido original; tres temas iniciales añaden prácticas cortas y dos tienen una traza preparada. [Alcance y correspondencia editorial](docs/javascript-learning-topics.md).
+
+La consulta tiene índice, búsqueda, enlaces directos, lectura en voz alta y borradores separados. No concede XP, no marca lecciones ni entrega el proyecto. Las referencias a la ruta conservan los requisitos de acceso. Las predicciones de los ejemplos se guardan localmente; ejecutar y comprobar siguen siendo acciones distintas. Revisión docente y piloto con principiantes pendientes.
 
 ## Progreso
 

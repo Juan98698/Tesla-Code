@@ -1,5 +1,7 @@
 # Correspondencia editorial de Fundamentos con JavaScript
 
+La consulta «Aprender por temas» reutiliza estas lecciones y conserva su evaluación. La [correspondencia complementaria](javascript-learning-topics.md) localiza las explicaciones, ejemplos, prácticas guiadas, incidencias y aplicaciones de las 20 fichas adicionales; también identifica los tres talleres cortos y las dos trazas preparadas. La consulta no acredita entregas de la ruta.
+
 Revisión del 17 de noviembre de 2026. La matriz cubre las 78 lecciones de la edición actual. Las primeras tablas detallan el tramo inicial y la tabla final registra las incorporaciones del tramo avanzado. Los números corresponden al orden actual del recorrido.
 
 «Aprender» indica el apartado de la explicación. `e1`, `e2` y `e3` son los sufijos de los ejemplos ejecutables de esa lección. «Implementar» y «Reescribir» identifican las etapas guiadas en «Practicar». En la última columna, el identificador corresponde a un reto posterior a la integración. Cuando vive en otra lección, se indica dónde encontrarlo.

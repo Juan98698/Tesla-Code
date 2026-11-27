@@ -3,6 +3,7 @@ import { createPythonRunner } from '../repositories/python-runner.js';
 import { PYTHON_LIMITS } from '../domain/python-exercise.js';
 import { JAVASCRIPT_LIMITS } from '../domain/javascript-exercise.js';
 import { createJavaScriptRunner } from '../repositories/javascript-runner.js';
+import { javascriptErrorHelp } from '../domain/topics.js';
 
 export function codeActivityMarkup(activity, { practice = true } = {}) {
   const js = activity.type === 'javascript';
@@ -223,6 +224,7 @@ export function mountCodeActivity(
         consoleError.textContent = errors
           .map((item) => item.name + '\n' + (item.traceback ?? item.error))
           .join('\n');
+        if (js) consoleError.textContent += '\n\n' + javascriptErrorHelp(errors[0].error);
       }
       status.textContent =
         (errors.length ? 'Ejecución con errores' : 'Ejecución finalizada') +
@@ -263,6 +265,7 @@ export function mountCodeActivity(
         status.textContent = 'Ejecución interrumpida.';
         consoleError.hidden = false;
         consoleError.textContent = error.message;
+        if (js) consoleError.textContent += '\n\n' + javascriptErrorHelp(String(error));
         if (mode === 'check') {
           feedback.className = 'practice-feedback bad';
           feedback.textContent =
@@ -291,6 +294,18 @@ export function mountCodeActivity(
     section.removeEventListener('project-source-ready', recoverSource);
     runner.dispose();
   };
+}
+
+export function arrangeCodeWorkbench(root) {
+  const form = root.querySelector('form');
+  const console = root.querySelector('.python-console');
+  if (!form || !console) return;
+  const editor = form.querySelector('.code-editor');
+  editor.rows = Math.min(12, Math.max(5, editor.value.split('\n').length + 1));
+  const workbench = root.ownerDocument.createElement('div');
+  workbench.className = 'code-workbench';
+  form.before(workbench);
+  workbench.append(form, console);
 }
 
 export function mountCodeExamples(root, data, options = {}) {
@@ -323,6 +338,38 @@ export function mountCodeExamples(root, data, options = {}) {
         '<summary>Probar este ejemplo en la consola</summary>' +
         codeActivityMarkup(activity, { practice: false });
       cleanups.push(mountCodeActivity(panel, activity, () => {}, options));
+    }
+    if (example.language === 'javascript') {
+      const prediction = document.createElement('div');
+      prediction.className = 'example-prediction';
+      prediction.innerHTML = `<label>Antes de ejecutar: ¿qué esperas observar?<textarea rows="2" maxlength="1000" placeholder="Escribe una predicción y compárala con la consola."></textarea></label><p>Después cambia un dato o una instrucción, predice otra vez y explica qué diferencia aparece.</p>`;
+      const input = prediction.querySelector('textarea');
+      const predictionKey =
+        'teslacode:prediction:v1:' + (options.context ?? 'practice') + '/' + example.id;
+      try {
+        input.value = globalThis.localStorage.getItem(predictionKey)?.slice(0, 1000) ?? '';
+      } catch {}
+      input.oninput = () => {
+        try {
+          globalThis.localStorage.setItem(predictionKey, input.value);
+        } catch {}
+      };
+      panel.querySelector('summary').after(prediction);
+      arrangeCodeWorkbench(panel);
+      // A prepared output is a reference, not a substitute for the prediction.
+      const label = block.nextElementSibling;
+      if (
+        label?.tagName === 'P' &&
+        /salida esperada/iu.test(label.textContent) &&
+        label.nextElementSibling?.tagName === 'PRE'
+      ) {
+        const reference = document.createElement('details');
+        reference.className = 'example-expected';
+        reference.innerHTML = '<summary>Comparar con la salida de referencia</summary>';
+        const output = label.nextElementSibling;
+        label.before(reference);
+        reference.append(label, output);
+      }
     }
     block.after(panel);
   }

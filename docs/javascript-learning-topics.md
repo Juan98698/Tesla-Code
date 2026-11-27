@@ -1,0 +1,50 @@
+# Aprender JavaScript por temas
+
+La consulta del Laboratorio reúne las 78 lecciones publicadas de Fundamentos y 20 fichas complementarias. El índice conserva el orden de los bloques y enlaza las bases de cada ficha. Las explicaciones originales se cargan al seleccionar su tema; las instrucciones del proyecto se conservan en un apartado desplegable. No se publica una segunda versión del currículo.
+
+La consulta es libre. Ejecutar, pedir pistas o comprobar un ejercicio no modifica completados, XP, favoritos, entregas ni bitácoras de la ruta. Los borradores usan el contexto separado topics/; las predicciones tienen su propia clave local. Entrar en la lección de referencia sigue pasando por el control de prerrequisitos.
+
+## Correspondencia complementaria
+
+Cada fila se localiza por su ID en [javascript-guides.json](../content/learning/javascript-guides.json). sections contiene explicación desde cero y límites; example aporta el ejemplo ejecutable; guided es la implementación con apoyo; bug es la reescritura y corrección; challenge plantea otra situación con menor apoyo. Las pistas y una posible solución pueden consultarse. Los casos y las estructuras anunciadas se comprueban en el ejecutor aislado. Esa comprobación no acredita autoría, comprensión ni retención.
+
+| Tema e ID                                                                  | Bases explícitas                                                                      | Explicación y ejemplo                                     | Práctica, error y aplicación                                     |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
+| Operador ternario: elegir un valor con ? : — `consulta-ternario`           | `js-decisiones`, `js-clasificar-planes`                                               | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| switch, case, break y default — `consulta-switch`                          | `js-clasificar-planes`                                                                | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| Valores truthy y falsy: condiciones implícitas — `consulta-truthy`         | `js-condiciones-logicas`, `js-tipos-y-calculos`                                       | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| do…while: ejecutar antes de comprobar — `consulta-do-while`                | `js-ciclo-while`, `js-calendario-con-for`                                             | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| forEach: una acción por cada elemento — `consulta-for-each`                | `js-recorrer-valores`, `js-funciones-como-valores`                                    | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| for…in: recorrer claves de un objeto — `consulta-for-in`                   | `js-objetos-registros`, `js-recorrer-valores`                                         | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| Elegir entre while, for, for…of y forEach — `consulta-elegir-recorrido`    | `js-ciclo-while`, `js-calendario-con-for`, `js-recorrer-valores`, `consulta-for-each` | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| Plantillas de texto con interpolación — `consulta-plantillas`              | `js-texto-normalizado`, `js-operaciones-iniciales`                                    | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Desestructurar objetos y arreglos — `consulta-desestructuracion`           | `js-objetos-registros`, `js-crear-listas`                                             | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Spread y rest: expandir y reunir valores — `consulta-spread-rest`          | `js-objetos-registros`, `js-funciones-y-retorno`, `consulta-desestructuracion`        | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Object.keys, values y entries — `consulta-claves-valores`                  | `consulta-for-in`, `consulta-desestructuracion`                                       | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Expresiones regulares: patrones de texto — `consulta-regexp`               | `js-texto-normalizado`, `js-condiciones-logicas`                                      | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| push, pop, shift, unshift, slice y splice — `consulta-array-cambios`       | `js-crear-listas`, `js-cambios-con-let`                                               | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| try, catch, throw y finally — `consulta-try-catch`                         | `js-json-importar`, `js-funciones-y-retorno`                                          | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| Leer código antiguo: var, let y const — `consulta-var`                     | `js-cierres-y-alcance`, `js-funciones-y-retorno`                                      | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Prototipos y propiedades propias — `consulta-prototipos`                   | `js-clases-y-this`, `consulta-for-in`                                                 | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Math, redondeo y números seguros — `consulta-math`                         | `js-operaciones-y-unidades`, `js-tipos-y-calculos`                                    | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| Temporizadores, retrasos y cancelación — `consulta-temporizadores`         | `js-fetch-await`, `js-cola-de-eventos`                                                | sections (4 apartados), example                           | guided, bug, challenge                                           |
+| Encadenamiento opcional ?. y coalescencia ?? — `consulta-opcional-nullish` | `js-opciones-y-ausencia`, `js-objetos-registros`                                      | sections (3 apartados), example                           | guided, bug, challenge                                           |
+| &&,                                                                        |                                                                                       | y cortocircuito: qué se evalúa — `consulta-cortocircuito` | `js-condiciones-logicas`, `consulta-truthy`, `consulta-ternario` | sections (3 apartados), example | guided, bug, challenge |
+
+## Talleres sobre contenido existente
+
+Primer programa, let y for añaden una práctica corta y una incidencia antes de su aplicación independiente existente. let y for incluyen una traza preparada de su primer ejemplo. La traza señala que describe el código original: no pretende depurar automáticamente cualquier edición del estudiante. Los datos están en workshops y walkthroughs del mismo archivo. El resto de las lecciones conserva su ejemplo razonado y sus aplicaciones.
+
+## Interacción y límites
+
+El índice se agrupa y se busca por título, bloque y palabras clave. Cada tema tiene una dirección #/practica/javascript/temas/ID. En móvil el índice es desplegable. El editor y la consola están juntos; las pantallas amplias pueden mostrarlos en dos columnas. La salida de referencia se despliega después de formular la predicción. La lectura en voz alta reutiliza Web Speech y depende de las voces disponibles.
+
+Las fichas distinguen for…in (claves, incluidas heredadas) de for…of (valores iterables), y forEach (método de arreglos) de ciclos interrumpibles. Explican que forEach no espera callbacks async. Las propiedades propias, fronteras inclusivas, arreglo vacío, cero y ausencia tienen casos específicos según el contrato. Los temporizadores se practican con funciones asíncronas acotadas y sin intervalos infinitos.
+
+La consola de consulta conserva sus límites y aislamiento. DOM, módulos y herramientas locales siguen usando las instrucciones y el proyecto web del recorrido, porque no se ejecutan como una página dentro de la consola JavaScript. No se añade una dependencia ni un servicio de IA.
+
+## Estado y verificación
+
+Implementados: índice y consulta, fichas y talleres descritos, ejecución, predicciones, lectura opcional, pistas, glosario, trazas preparadas y enlaces al proyecto. El contenido de las fichas enlaza documentación primaria de MDN; el código y los casos se contrastan con el ejecutor real y con V8. La ampliación no cambia la secuencia ni migra los logros de la ruta.
+
+La comprobación técnica se registra en implementation-status.md. Revisión docente independiente y piloto con principiantes siguen pendientes; deben contrastar claridad, ritmo, ayuda utilizada y transferencia tras un intervalo. No se afirma cobertura de todas las APIs de JavaScript ni ausencia absoluta de vacíos.

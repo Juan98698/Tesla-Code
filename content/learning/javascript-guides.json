@@ -1,0 +1,2755 @@
+{
+  "version": 1,
+  "guides": [
+    {
+      "id": "consulta-ternario",
+      "after": "js-clasificar-planes",
+      "title": "Operador ternario: elegir un valor con ? :",
+      "outcome": "Elegir entre dos valores después de comprender if y else.",
+      "requires": ["js-decisiones", "js-clasificar-planes"],
+      "sections": [
+        {
+          "title": "Un valor según una condición",
+          "text": "Un if ejecuta instrucciones. El operador condicional, también llamado ternario, produce un valor. Úsalo cuando necesitas elegir entre dos mensajes o cantidades sencillas."
+        },
+        {
+          "title": "Leer sus tres partes",
+          "text": "En condición ? valorSiVerdadero : valorSiFalso, primero se evalúa la condición. El signo ? abre la alternativa verdadera; los dos puntos separan la alternativa falsa. Solo se evalúa la alternativa elegida. El resultado se puede guardar en una variable."
+        },
+        {
+          "title": "Elegir una escritura clara",
+          "text": "const mensaje = edad >= 18 ? \"Adulto\" : \"Menor\"; guarda uno de los textos. No imprime nada hasta llamar a console.log. Para varias instrucciones o categorías, conserva if y else if; anidar ternarios dificulta seguir la decisión."
+        },
+        {
+          "title": "Comprobar la frontera",
+          "text": "Prueba una edad menor que 18, exactamente 18 y una mayor. >= incluye el límite; > lo excluye. No confundas el signo = de asignación con la comparación."
+        }
+      ],
+      "example": {
+        "code": "const edad = 18;\nconst mensaje = edad >= 18 ? \"Adulto\" : \"Menor\";\nconsole.log(mensaje);",
+        "stdout": "Adulto\n"
+      },
+      "guided": {
+        "prompt": "Completa el ternario: con edad >= 18 muestra Adulto y en otro caso Menor. Conserva la declaración edad.",
+        "starter": "const edad = 18;\n// Guarda el mensaje y muéstralo.",
+        "solution": "const edad = 18;\nconst mensaje = edad >= 18 ? \"Adulto\" : \"Menor\";\nconsole.log(mensaje);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Adulto\n",
+            "overrides": {
+              "edad": 18
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Menor\n",
+            "overrides": {
+              "edad": 17
+            }
+          }
+        ],
+        "bindings": {
+          "edad": "const"
+        },
+        "hints": [
+          "Escribe primero la comparación y después las dos alternativas separadas por dos puntos.",
+          "El ternario devuelve el texto; console.log lo presenta."
+        ],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Escribe primero la comparación y después las dos alternativas separadas por dos puntos.",
+        "syntax": {
+          "nodes": ["ConditionalExpression"]
+        }
+      },
+      "bug": {
+        "prompt": "Corrige el límite: una persona de 18 años ya es adulta.",
+        "starter": "const edad = 18;\nconsole.log(edad > 18 ? \"Adulto\" : \"Menor\");",
+        "solution": "const edad = 18;\nconsole.log(edad >= 18 ? \"Adulto\" : \"Menor\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Adulto\n",
+            "overrides": {
+              "edad": 18
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Menor\n",
+            "overrides": {
+              "edad": 12
+            }
+          }
+        ],
+        "bindings": {
+          "edad": "const"
+        },
+        "hints": ["El problema está en la comparación, no en los textos."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El problema está en la comparación, no en los textos.",
+        "syntax": {
+          "nodes": ["ConditionalExpression"]
+        }
+      },
+      "challenge": {
+        "prompt": "En una biblioteca, con retraso igual a cero muestra Al día; con retraso positivo muestra Revisar. Usa un ternario.",
+        "starter": "const retraso = 0;\n",
+        "solution": "const retraso = 0;\nconsole.log(retraso === 0 ? \"Al día\" : \"Revisar\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Al día\n",
+            "overrides": {
+              "retraso": 0
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Revisar\n",
+            "overrides": {
+              "retraso": 3
+            }
+          }
+        ],
+        "bindings": {
+          "retraso": "const"
+        },
+        "hints": ["Compara retraso con cero y elige uno de los dos textos."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Compara retraso con cero y elige uno de los dos textos.",
+        "syntax": {
+          "nodes": ["ConditionalExpression"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator"
+        }
+      ],
+      "walkthrough": [
+        {
+          "line": 1,
+          "state": "edad = 18",
+          "explanation": "La declaración guarda el número de entrada."
+        },
+        {
+          "line": 2,
+          "state": "18 >= 18 → true; mensaje = Adulto",
+          "explanation": "Solo se elige la alternativa anterior a los dos puntos."
+        },
+        {
+          "line": 3,
+          "state": "salida: Adulto",
+          "explanation": "La llamada muestra el valor elegido."
+        }
+      ]
+    },
+    {
+      "id": "consulta-switch",
+      "after": "consulta-ternario",
+      "title": "switch, case, break y default",
+      "outcome": "Seleccionar una alternativa por coincidencia exacta sin ejecutar accidentalmente la siguiente.",
+      "requires": ["js-clasificar-planes"],
+      "sections": [
+        {
+          "title": "Seleccionar por una clave",
+          "text": "switch compara un valor con varios casos. Conviene para opciones concretas, como un modo o un comando. Para intervalos, como edades entre dos límites, suele ser más directo if y else if."
+        },
+        {
+          "title": "Seguir la estructura",
+          "text": "switch (modo) evalúa modo una vez. Cada case incluye el valor que debe coincidir y dos puntos. La comparación es estricta: el número 1 y el texto \"1\" son distintos. default atiende un valor sin coincidencia."
+        },
+        {
+          "title": "Evitar continuar por accidente",
+          "text": "Después de encontrar un case, JavaScript sigue ejecutando hasta encontrar break o el final del switch. break termina esta selección. Si lo omites puede ejecutar también el caso siguiente; esa continuación debe ser intencional."
+        },
+        {
+          "title": "Agrupar opciones",
+          "text": "Dos etiquetas case consecutivas pueden compartir instrucciones. Comprueba cada opción conocida y una desconocida. default no valida por sí solo si los datos de entrada son apropiados."
+        }
+      ],
+      "example": {
+        "code": "const modo = \"leer\";\nswitch (modo) {\n  case \"leer\":\n    console.log(\"Lectura\");\n    break;\n  default:\n    console.log(\"Otro modo\");\n}",
+        "stdout": "Lectura\n"
+      },
+      "guided": {
+        "prompt": "Selecciona el modo: leer muestra Lectura; cualquier otro muestra Otro modo.",
+        "starter": "const modo = \"leer\";\n// Escribe switch con case y default.",
+        "solution": "const modo = \"leer\";\nswitch (modo) {\n  case \"leer\": console.log(\"Lectura\"); break;\n  default: console.log(\"Otro modo\");\n}",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Lectura\n",
+            "overrides": {
+              "modo": "leer"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Otro modo\n",
+            "overrides": {
+              "modo": "editar"
+            }
+          }
+        ],
+        "bindings": {
+          "modo": "const"
+        },
+        "hints": ["Termina la alternativa leer con break."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Termina la alternativa leer con break.",
+        "syntax": {
+          "nodes": ["SwitchStatement"]
+        }
+      },
+      "bug": {
+        "prompt": "Repara la continuación: leer debe imprimir una sola línea.",
+        "starter": "const modo = \"leer\";\nswitch (modo) {\n case \"leer\": console.log(\"Lectura\");\n default: console.log(\"Otro modo\");\n}",
+        "solution": "const modo = \"leer\";\nswitch (modo) {\n case \"leer\": console.log(\"Lectura\"); break;\n default: console.log(\"Otro modo\");\n}",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Lectura\n",
+            "overrides": {
+              "modo": "leer"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Otro modo\n",
+            "overrides": {
+              "modo": "otro"
+            }
+          }
+        ],
+        "bindings": {
+          "modo": "const"
+        },
+        "hints": ["Falta terminar el caso antes de entrar en default."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Falta terminar el caso antes de entrar en default.",
+        "syntax": {
+          "nodes": ["SwitchStatement"]
+        }
+      },
+      "challenge": {
+        "prompt": "Un transporte acepta bus y metro. Muestra Bus, Metro o Desconocido, respectivamente, usando switch.",
+        "starter": "const medio = \"metro\";\n",
+        "solution": "const medio = \"metro\";\nswitch (medio) {\n case \"bus\": console.log(\"Bus\"); break;\n case \"metro\": console.log(\"Metro\"); break;\n default: console.log(\"Desconocido\");\n}",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Metro\n",
+            "overrides": {
+              "medio": "metro"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Desconocido\n",
+            "overrides": {
+              "medio": "taxi"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Bus\n",
+            "overrides": {
+              "medio": "bus"
+            }
+          }
+        ],
+        "bindings": {
+          "medio": "const"
+        },
+        "hints": ["Cada caso conocido necesita terminar su alternativa."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Cada caso conocido necesita terminar su alternativa.",
+        "syntax": {
+          "nodes": ["SwitchStatement"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch"
+        }
+      ]
+    },
+    {
+      "id": "consulta-truthy",
+      "after": "js-condiciones-logicas",
+      "title": "Valores truthy y falsy: condiciones implícitas",
+      "outcome": "Distinguir un dato de su interpretación booleana, incluidos cero y texto vacío.",
+      "requires": ["js-condiciones-logicas", "js-tipos-y-calculos"],
+      "sections": [
+        {
+          "title": "La condición interpreta el valor",
+          "text": "Una condición puede recibir un valor que no sea true o false. JavaScript lo interpreta como booleano. Truthy significa que se interpreta como verdadero; falsy, como falso. Esto no transforma el dato guardado."
+        },
+        {
+          "title": "Reconocer los falsos frecuentes",
+          "text": "false, 0, -0, 0n, \"\", null, undefined y NaN son falsy. Un texto con caracteres, incluso \"0\" o \"false\", es truthy. Los arreglos y objetos, incluidos los vacíos, son truthy. Su tamaño debe comprobarse por separado."
+        },
+        {
+          "title": "Convertir explícitamente",
+          "text": "Boolean(valor) devuelve true o false. Boolean es una función de conversión, como Number para números. No uses una condición implícita para decidir si una cantidad es válida cuando cero es una entrada permitida."
+        },
+        {
+          "title": "No confundir presencia con contenido",
+          "text": "Un espacio \" \" es un texto no vacío y es truthy. Para validar nombres debes normalizar y comprobar su longitud. Consulta la lección de validación antes de combinar estas reglas."
+        }
+      ],
+      "example": {
+        "code": "console.log(Boolean(0));\nconsole.log(Boolean(\"0\"));\nconsole.log(Boolean(\"\"));",
+        "stdout": "false\ntrue\nfalse\n"
+      },
+      "guided": {
+        "prompt": "Muestra la interpretación booleana de dato mediante Boolean.",
+        "starter": "const dato = \"0\";\n",
+        "solution": "const dato = \"0\";\nconsole.log(Boolean(dato));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "true\n",
+            "overrides": {
+              "dato": "0"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "dato": ""
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "dato": 0
+            }
+          }
+        ],
+        "bindings": {
+          "dato": "const"
+        },
+        "hints": ["Boolean recibe el dato y devuelve su interpretación."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Boolean recibe el dato y devuelve su interpretación."
+      },
+      "bug": {
+        "prompt": "Cero es válido. Muestra Válido para cualquier cantidad >= 0; no la descartes solo por ser falsy.",
+        "starter": "const cantidad = 0;\nconsole.log(cantidad ? \"Válido\" : \"Inválido\");",
+        "solution": "const cantidad = 0;\nconsole.log(cantidad >= 0 ? \"Válido\" : \"Inválido\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Válido\n",
+            "overrides": {
+              "cantidad": 0
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Inválido\n",
+            "overrides": {
+              "cantidad": -1
+            }
+          }
+        ],
+        "bindings": {
+          "cantidad": "const"
+        },
+        "hints": ["Usa la regla del problema, no la verdad implícita del dato."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Usa la regla del problema, no la verdad implícita del dato."
+      },
+      "challenge": {
+        "prompt": "Una etiqueta solo cuenta si su longitud es mayor que cero. Muestra true o false. Los datos ya están normalizados.",
+        "starter": "const etiqueta = \"mesa\";\n",
+        "solution": "const etiqueta = \"mesa\";\nconsole.log(etiqueta.length > 0);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "true\n",
+            "overrides": {
+              "etiqueta": "mesa"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "etiqueta": ""
+            }
+          }
+        ],
+        "bindings": {
+          "etiqueta": "const"
+        },
+        "hints": ["length indica la cantidad de unidades del texto."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "length indica la cantidad de unidades del texto."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Glossary/Truthy"
+        }
+      ]
+    },
+    {
+      "id": "consulta-do-while",
+      "after": "js-calendario-con-for",
+      "title": "do…while: ejecutar antes de comprobar",
+      "outcome": "Distinguir un ciclo que puede ejecutar cero veces de uno que ejecuta al menos una.",
+      "requires": ["js-ciclo-while", "js-calendario-con-for"],
+      "sections": [
+        {
+          "title": "El momento de la condición importa",
+          "text": "while pregunta antes de entrar. do…while ejecuta el cuerpo y pregunta después. Por eso do…while realiza al menos una vuelta aunque su condición sea falsa al inicio."
+        },
+        {
+          "title": "Leer la sintaxis",
+          "text": "do abre el bloque entre llaves. Después viene while (condición); con punto y coma. El cambio que acerca a la parada debe ocurrir dentro del cuerpo. Aquí usamos vuelta = vuelta + 1, una reasignación ya conocida."
+        },
+        {
+          "title": "Probar el caso cero",
+          "text": "Si empiezas en 1 y el límite es 0, el ejemplo imprime 1 una vez. No es un error del lenguaje: elegiste una comprobación posterior. Si cero debe producir ninguna salida, usa while o for."
+        },
+        {
+          "title": "Controlar los intentos",
+          "text": "Un intento que siempre debe realizarse una vez encaja con esta estructura. Evita reproducir ciclos sin parada; usa Detener si experimentas con una condición que nunca cambia."
+        }
+      ],
+      "example": {
+        "code": "let vuelta = 1;\ndo {\n  console.log(vuelta);\n  vuelta = vuelta + 1;\n} while (vuelta <= 2);",
+        "stdout": "1\n2\n"
+      },
+      "guided": {
+        "prompt": "Imprime las vueltas desde 1 hasta limite con do…while. Con limite 0, debe aparecer 1 una vez.",
+        "starter": "const limite = 2;\nlet vuelta = 1;\n",
+        "solution": "const limite = 2;\nlet vuelta = 1;\ndo {\n console.log(vuelta);\n vuelta = vuelta + 1;\n} while (vuelta <= limite);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "1\n2\n",
+            "overrides": {
+              "limite": 2
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1\n",
+            "overrides": {
+              "limite": 0
+            }
+          }
+        ],
+        "bindings": {
+          "limite": "const"
+        },
+        "hints": ["El cuerpo está antes de la condición. Actualiza vuelta dentro del bloque."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El cuerpo está antes de la condición. Actualiza vuelta dentro del bloque.",
+        "syntax": {
+          "nodes": ["DoWhileStatement"]
+        }
+      },
+      "bug": {
+        "prompt": "El código termina demasiado pronto. Incluye también la vuelta que coincide con limite.",
+        "starter": "const limite = 2;\nlet vuelta = 1;\ndo {\n console.log(vuelta);\n vuelta = vuelta + 1;\n} while (vuelta < limite);",
+        "solution": "const limite = 2;\nlet vuelta = 1;\ndo {\n console.log(vuelta);\n vuelta = vuelta + 1;\n} while (vuelta <= limite);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "1\n2\n",
+            "overrides": {
+              "limite": 2
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1\n2\n3\n",
+            "overrides": {
+              "limite": 3
+            }
+          }
+        ],
+        "bindings": {
+          "limite": "const"
+        },
+        "hints": ["Comprueba la igualdad en la condición posterior."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Comprueba la igualdad en la condición posterior.",
+        "syntax": {
+          "nodes": ["DoWhileStatement"]
+        }
+      },
+      "challenge": {
+        "prompt": "Un dispensador emite números desde 5, de uno en uno, hasta tope. Debe emitir 5 al menos una vez. Usa do…while.",
+        "starter": "const tope = 6;\n",
+        "solution": "const tope = 6;\nlet numero = 5;\ndo {\n console.log(numero);\n numero = numero + 1;\n} while (numero <= tope);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "5\n6\n",
+            "overrides": {
+              "tope": 6
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "5\n",
+            "overrides": {
+              "tope": 3
+            }
+          }
+        ],
+        "bindings": {
+          "tope": "const"
+        },
+        "hints": ["El inicio es 5; la comprobación ocurre después de emitir y actualizar."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El inicio es 5; la comprobación ocurre después de emitir y actualizar.",
+        "syntax": {
+          "nodes": ["DoWhileStatement"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/do...while"
+        }
+      ],
+      "walkthrough": [
+        {
+          "line": 1,
+          "state": "vuelta = 1",
+          "explanation": "El contador empieza en uno."
+        },
+        {
+          "line": 3,
+          "state": "salida: 1",
+          "explanation": "Se entra sin comprobar primero la condición."
+        },
+        {
+          "line": 4,
+          "state": "vuelta = 2",
+          "explanation": "El contador cambia antes de comprobar."
+        },
+        {
+          "line": 5,
+          "state": "2 <= 2 → true",
+          "explanation": "Se repite: sale 2, vuelta pasa a 3 y la siguiente comparación termina el ciclo."
+        }
+      ]
+    },
+    {
+      "id": "consulta-for-each",
+      "after": "js-funciones-como-valores",
+      "title": "forEach: una acción por cada elemento",
+      "outcome": "Usar un callback para realizar acciones sin confundir forEach con map o un ciclo interrumpible.",
+      "requires": ["js-recorrer-valores", "js-funciones-como-valores"],
+      "sections": [
+        {
+          "title": "Una función llamada por el arreglo",
+          "text": "forEach es un método de los arreglos, no una palabra de ciclo. Recibe una función callback: una función que el método llama por cada elemento presente. Antes de usarlo, repasa arreglos, parámetros y funciones como valores."
+        },
+        {
+          "title": "Entender sus argumentos",
+          "text": "En sesiones.forEach(function(minutos, indice) { ... });, minutos recibe el valor e indice su posición desde cero. La función también puede recibir el arreglo como tercer argumento. La llamada es síncrona: recorre los elementos antes de pasar a la instrucción siguiente."
+        },
+        {
+          "title": "Elegir la herramienta",
+          "text": "forEach devuelve undefined, no un arreglo transformado. Para crear otra colección usa map. break y continue no sirven dentro del callback: usa for…of cuando necesitas detener el recorrido. Un return solo termina esa llamada al callback."
+        },
+        {
+          "title": "Asincronía y cambios",
+          "text": "forEach no espera promesas de callbacks async. Para esperar cada operación se necesita un recorrido compatible con await, después de estudiar promesas. Evita añadir o borrar elementos del mismo arreglo durante la visita inicial; practica primero con una colección estable."
+        }
+      ],
+      "example": {
+        "code": "const sesiones = [20, 30];\nsesiones.forEach(function(minutos, indice) {\n  console.log(indice, minutos);\n});",
+        "stdout": "0 20\n1 30\n"
+      },
+      "guided": {
+        "prompt": "Muestra cada elemento de sesiones, una línea por valor, usando forEach y un callback.",
+        "starter": "const sesiones = [20, 30];\n",
+        "solution": "const sesiones = [20, 30];\nsesiones.forEach(function(minutos) { console.log(minutos); });",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "20\n30\n",
+            "overrides": {
+              "sesiones": [20, 30]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "5\n",
+            "overrides": {
+              "sesiones": [5]
+            }
+          }
+        ],
+        "bindings": {
+          "sesiones": "const"
+        },
+        "hints": ["El parámetro del callback recibe un elemento en cada llamada."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El parámetro del callback recibe un elemento en cada llamada.",
+        "syntax": {
+          "methods": ["forEach"]
+        }
+      },
+      "bug": {
+        "prompt": "Muestra cada número. No imprimas el retorno de forEach, porque añade undefined al final.",
+        "starter": "const datos = [2, 4];\nconsole.log(datos.forEach(function(dato) { console.log(dato); }));",
+        "solution": "const datos = [2, 4];\ndatos.forEach(function(dato) { console.log(dato); });",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "2\n4\n",
+            "overrides": {
+              "datos": [2, 4]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "9\n",
+            "overrides": {
+              "datos": [9]
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "hints": ["Retira la impresión exterior y conserva las del callback."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Retira la impresión exterior y conserva las del callback.",
+        "syntax": {
+          "methods": ["forEach"]
+        }
+      },
+      "challenge": {
+        "prompt": "Una lista contiene precios. Presenta cada uno aumentado en 1, sin cambiar la lista. Usa forEach para la acción de mostrar.",
+        "starter": "const precios = [3, 6];\n",
+        "solution": "const precios = [3, 6];\nprecios.forEach(function(precio) { console.log(precio + 1); });",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "4\n7\n",
+            "overrides": {
+              "precios": [3, 6]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1\n",
+            "overrides": {
+              "precios": [0]
+            }
+          }
+        ],
+        "bindings": {
+          "precios": "const"
+        },
+        "hints": ["Calcula el valor que se muestra a partir del parámetro."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Calcula el valor que se muestra a partir del parámetro.",
+        "syntax": {
+          "methods": ["forEach"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach"
+        }
+      ]
+    },
+    {
+      "id": "consulta-for-in",
+      "after": "js-objetos-registros",
+      "title": "for…in: recorrer claves de un objeto",
+      "outcome": "Distinguir claves y valores y filtrar propiedades propias.",
+      "requires": ["js-objetos-registros", "js-recorrer-valores"],
+      "sections": [
+        {
+          "title": "Un objeto relaciona claves con valores",
+          "text": "En { nombre: \"Luz\", minutos: 20 }, nombre y minutos son claves. for…in entrega claves de propiedades enumerables, no los valores. objeto[clave] consulta el valor de la clave actual; los corchetes aceptan una expresión."
+        },
+        {
+          "title": "Comparar in y of",
+          "text": "for…of recorre valores de una colección iterable, como un arreglo. for…in recorre nombres de propiedades y puede incluir propiedades heredadas. No lo elijas como recorrido habitual de valores de un arreglo."
+        },
+        {
+          "title": "Limitarse a propiedades propias",
+          "text": "Object.hasOwn(objeto, clave) devuelve true si la clave pertenece directamente a ese objeto. Object es una herramienta incorporada y hasOwn una de sus funciones. El if evita procesar una propiedad heredada; herencia se estudia más adelante."
+        },
+        {
+          "title": "Preparar otra alternativa",
+          "text": "Object.keys(objeto) construye un arreglo de claves propias enumerables. Permite usar for…of si deseas trabajar solo con ellas. La ficha de claves, valores y entradas explica también Object.values y Object.entries."
+        }
+      ],
+      "example": {
+        "code": "const plan = { nombre: \"Luz\", minutos: 20 };\nfor (const clave in plan) {\n  if (Object.hasOwn(plan, clave)) {\n    console.log(clave, plan[clave]);\n  }\n}",
+        "stdout": "nombre Luz\nminutos 20\n"
+      },
+      "guided": {
+        "prompt": "Recorre los campos propios de ficha con for…in y muestra clave y valor.",
+        "starter": "const ficha = { sala: \"A\", cupos: 3 };\n",
+        "solution": "const ficha = { sala: \"A\", cupos: 3 };\nfor (const clave in ficha) {\n if (Object.hasOwn(ficha, clave)) console.log(clave, ficha[clave]);\n}",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "sala A\ncupos 3\n",
+            "overrides": {
+              "ficha": {
+                "sala": "A",
+                "cupos": 3
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "turno noche\n",
+            "overrides": {
+              "ficha": {
+                "turno": "noche"
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "ficha": "const"
+        },
+        "hints": ["La variable del ciclo contiene una clave; consulta ficha[clave]."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La variable del ciclo contiene una clave; consulta ficha[clave].",
+        "syntax": {
+          "nodes": ["ForInStatement"],
+          "methods": ["hasOwn"]
+        }
+      },
+      "bug": {
+        "prompt": "Se repite undefined porque ficha.clave busca literalmente una propiedad llamada clave. Corrige la consulta dinámica.",
+        "starter": "const ficha = { sala: \"A\", cupos: 3 };\nfor (const clave in ficha) {\n if (Object.hasOwn(ficha, clave)) console.log(clave, ficha.clave);\n}",
+        "solution": "const ficha = { sala: \"A\", cupos: 3 };\nfor (const clave in ficha) {\n if (Object.hasOwn(ficha, clave)) console.log(clave, ficha[clave]);\n}",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "sala A\ncupos 3\n",
+            "overrides": {
+              "ficha": {
+                "sala": "A",
+                "cupos": 3
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "hora 8\n",
+            "overrides": {
+              "ficha": {
+                "hora": 8
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "ficha": "const"
+        },
+        "hints": ["El punto usa un nombre fijo; los corchetes evalúan la variable."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El punto usa un nombre fijo; los corchetes evalúan la variable.",
+        "syntax": {
+          "nodes": ["ForInStatement"],
+          "methods": ["hasOwn"]
+        }
+      },
+      "challenge": {
+        "prompt": "Suma las cantidades de un inventario. Recorre sus propiedades propias y muestra solo el total.",
+        "starter": "const inventario = { libros: 2, mapas: 4 };\n",
+        "solution": "const inventario = { libros: 2, mapas: 4 };\nlet total = 0;\nfor (const clave in inventario) {\n if (Object.hasOwn(inventario, clave)) total = total + inventario[clave];\n}\nconsole.log(total);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "6\n",
+            "overrides": {
+              "inventario": {
+                "libros": 2,
+                "mapas": 4
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0\n",
+            "overrides": {
+              "inventario": {}
+            }
+          }
+        ],
+        "bindings": {
+          "inventario": "const"
+        },
+        "hints": ["Empieza en cero y acumula cada valor del objeto."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Empieza en cero y acumula cada valor del objeto.",
+        "syntax": {
+          "nodes": ["ForInStatement"],
+          "methods": ["hasOwn"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in"
+        }
+      ]
+    },
+    {
+      "id": "consulta-elegir-recorrido",
+      "after": "consulta-for-each",
+      "title": "Elegir entre while, for, for…of y forEach",
+      "outcome": "Relacionar la estructura con la parada, los índices, los valores y las acciones.",
+      "requires": [
+        "js-ciclo-while",
+        "js-calendario-con-for",
+        "js-recorrer-valores",
+        "consulta-for-each"
+      ],
+      "sections": [
+        {
+          "title": "Una decisión según el problema",
+          "text": "while expresa repetir mientras una condición siga cumpliéndose. for reúne inicio, condición y actualización y resulta útil cuando necesitas un índice o contador. Ninguno evita por sí solo un ciclo infinito."
+        },
+        {
+          "title": "Valores y acciones",
+          "text": "for…of entrega valores de un iterable y permite break o continue. forEach llama un callback por elemento de un arreglo y no tiene una salida normal con break. map crea otro arreglo, filter conserva coincidencias y reduce calcula un acumulado: sus nombres anuncian otra intención."
+        },
+        {
+          "title": "Claves y primera ejecución",
+          "text": "for…in está pensado para claves enumerables de objetos y requiere considerar las heredadas. do…while comprueba después del cuerpo. Estas opciones se consultan en sus fichas cuando ya conoces objetos o ciclos básicos."
+        },
+        {
+          "title": "Una equivalencia comprobable",
+          "text": "Reescribe primero un recorrido pequeño y conserva su salida, incluido el caso vacío. Para detenerte al encontrar un dato usa for…of con break, o un método de búsqueda ya aprendido; no intentes romper forEach."
+        }
+      ],
+      "example": {
+        "code": "const datos = [4, 8];\nfor (const dato of datos) {\n  console.log(dato);\n}",
+        "stdout": "4\n8\n"
+      },
+      "guided": {
+        "prompt": "Presenta los elementos con for…of. El arreglo no debe cambiar.",
+        "starter": "const datos = [4, 8];\n",
+        "solution": "const datos = [4, 8];\nfor (const dato of datos) console.log(dato);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "4\n8\n",
+            "overrides": {
+              "datos": [4, 8]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1\n",
+            "overrides": {
+              "datos": [1]
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "hints": ["La variable después de const recibe un valor en cada vuelta."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La variable después de const recibe un valor en cada vuelta.",
+        "syntax": {
+          "nodes": ["ForOfStatement"]
+        }
+      },
+      "bug": {
+        "prompt": "El índice no es el dato. Corrige el recorrido para mostrar 4 y 8, no 0 y 1.",
+        "starter": "const datos = [4, 8];\nfor (const dato in datos) console.log(dato);",
+        "solution": "const datos = [4, 8];\nfor (const dato of datos) console.log(dato);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "4\n8\n",
+            "overrides": {
+              "datos": [4, 8]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "9\n",
+            "overrides": {
+              "datos": [9]
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "hints": ["of entrega valores; in entrega claves."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "of entrega valores; in entrega claves.",
+        "syntax": {
+          "nodes": ["ForOfStatement"]
+        }
+      },
+      "challenge": {
+        "prompt": "Muestra los números anteriores al primer negativo. Si el primer valor es negativo no muestres ninguno. Usa for…of y break.",
+        "starter": "const datos = [3, 1, -2, 8];\n",
+        "solution": "const datos = [3, 1, -2, 8];\nfor (const dato of datos) {\n if (dato < 0) break;\n console.log(dato);\n}",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "3\n1\n",
+            "overrides": {
+              "datos": [3, 1, -2, 8]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "",
+            "overrides": {
+              "datos": [-1, 8]
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "hints": ["Comprueba el negativo antes de imprimir."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Comprueba el negativo antes de imprimir.",
+        "syntax": {
+          "nodes": ["ForOfStatement"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Loops_and_iteration"
+        }
+      ]
+    },
+    {
+      "id": "consulta-plantillas",
+      "after": "js-texto-normalizado",
+      "title": "Plantillas de texto con interpolación",
+      "outcome": "Construir mensajes con valores y expresiones sin confundir delimitadores.",
+      "requires": ["js-texto-normalizado", "js-operaciones-iniciales"],
+      "sections": [
+        {
+          "title": "Un texto que incorpora datos",
+          "text": "Una plantilla se delimita con acentos graves, también llamados backticks: `. No son las comillas simples. Dentro del texto, ${expresión} evalúa una expresión y coloca su representación en el mensaje."
+        },
+        {
+          "title": "Leer la interpolación",
+          "text": "En `Hola ${nombre}`, nombre se consulta en ese momento. Puedes escribir ${minutos * dias} porque ya conoces la multiplicación. Las llaves cierran la expresión y el acento grave cierra el texto completo."
+        },
+        {
+          "title": "Elegir mensajes legibles",
+          "text": "Una plantilla puede contener saltos de línea reales. Esos saltos forman parte de la salida. Prefiere cálculos pequeños y claros; separa una operación compleja en una variable antes de construir el mensaje."
+        }
+      ],
+      "example": {
+        "code": "const nombre = \"Luz\";\nconst minutos = 20;\nconsole.log(`Hola ${nombre}: ${minutos} minutos`);",
+        "stdout": "Hola Luz: 20 minutos\n"
+      },
+      "guided": {
+        "prompt": "Construye Hola y el nombre con una plantilla, dejando un espacio entre ambos.",
+        "starter": "const nombre = \"Luz\";\n",
+        "solution": "const nombre = \"Luz\";\nconsole.log(`Hola ${nombre}`);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Hola Luz\n",
+            "overrides": {
+              "nombre": "Luz"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Hola Sol\n",
+            "overrides": {
+              "nombre": "Sol"
+            }
+          }
+        ],
+        "bindings": {
+          "nombre": "const"
+        },
+        "hints": ["Usa acentos graves y ${nombre}."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Usa acentos graves y ${nombre}.",
+        "syntax": {
+          "nodes": ["TemplateLiteral"]
+        }
+      },
+      "bug": {
+        "prompt": "Las comillas impiden interpolar. Corrige el mensaje para que incluya el valor.",
+        "starter": "const nombre = \"Luz\";\nconsole.log(\"Hola ${nombre}\");",
+        "solution": "const nombre = \"Luz\";\nconsole.log(`Hola ${nombre}`);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Hola Luz\n",
+            "overrides": {
+              "nombre": "Luz"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Hola Ada\n",
+            "overrides": {
+              "nombre": "Ada"
+            }
+          }
+        ],
+        "bindings": {
+          "nombre": "const"
+        },
+        "hints": ["Cambia los delimitadores del texto."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Cambia los delimitadores del texto.",
+        "syntax": {
+          "nodes": ["TemplateLiteral"]
+        }
+      },
+      "challenge": {
+        "prompt": "Una entrada cuesta precio y se compran cantidad unidades. Presenta Total: seguido del producto en una plantilla.",
+        "starter": "const precio = 4;\nconst cantidad = 3;\n",
+        "solution": "const precio = 4;\nconst cantidad = 3;\nconsole.log(`Total: ${precio * cantidad}`);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Total: 12\n",
+            "overrides": {
+              "precio": 4,
+              "cantidad": 3
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Total: 0\n",
+            "overrides": {
+              "precio": 4,
+              "cantidad": 0
+            }
+          }
+        ],
+        "bindings": {
+          "precio": "const",
+          "cantidad": "const"
+        },
+        "hints": ["Dentro de ${} puedes multiplicar las dos variables."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Dentro de ${} puedes multiplicar las dos variables.",
+        "syntax": {
+          "nodes": ["TemplateLiteral"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals"
+        }
+      ]
+    },
+    {
+      "id": "consulta-desestructuracion",
+      "after": "js-objetos-registros",
+      "title": "Desestructurar objetos y arreglos",
+      "outcome": "Extraer datos con nombres, posiciones y valores por defecto.",
+      "requires": ["js-objetos-registros", "js-crear-listas"],
+      "sections": [
+        {
+          "title": "Extraer sin cambiar el origen",
+          "text": "Desestructurar permite declarar varios nombres a partir de un objeto o arreglo. const { nombre } = persona; consulta la propiedad nombre y crea una variable con ese valor. No elimina la propiedad del objeto."
+        },
+        {
+          "title": "Nombres y posiciones",
+          "text": "En objetos, las llaves seleccionan por clave. const { nombre: alias } = persona; crea alias, no nombre. En arreglos, const [primero, segundo] = lista; selecciona por posición desde cero, usando corchetes."
+        },
+        {
+          "title": "Ausencia y copia",
+          "text": "Un valor por defecto, como const { cupos = 0 } = ficha, se usa cuando la propiedad da undefined. No sustituye null ni cero. Si extraes un objeto anidado, conservas una referencia al mismo objeto; no has creado una copia profunda."
+        }
+      ],
+      "example": {
+        "code": "const ficha = { nombre: \"Luz\", minutos: 20 };\nconst { nombre, minutos } = ficha;\nconsole.log(nombre, minutos);",
+        "stdout": "Luz 20\n"
+      },
+      "guided": {
+        "prompt": "Extrae nombre y minutos de ficha y muéstralos separados por un espacio.",
+        "starter": "const ficha = { nombre: \"Luz\", minutos: 20 };\n",
+        "solution": "const ficha = { nombre: \"Luz\", minutos: 20 };\nconst { nombre, minutos } = ficha;\nconsole.log(nombre, minutos);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Luz 20\n",
+            "overrides": {
+              "ficha": {
+                "nombre": "Luz",
+                "minutos": 20
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Sol 0\n",
+            "overrides": {
+              "ficha": {
+                "nombre": "Sol",
+                "minutos": 0
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "ficha": "const"
+        },
+        "hints": ["Los nombres entre llaves corresponden a las claves."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Los nombres entre llaves corresponden a las claves.",
+        "syntax": {
+          "nodes": ["ObjectPattern"]
+        }
+      },
+      "bug": {
+        "prompt": "La ficha es un objeto, no una lista. Corrige la forma de extraer su nombre.",
+        "starter": "const ficha = { nombre: \"Luz\" };\nconst [nombre] = ficha;\nconsole.log(nombre);",
+        "solution": "const ficha = { nombre: \"Luz\" };\nconst { nombre } = ficha;\nconsole.log(nombre);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Luz\n",
+            "overrides": {
+              "ficha": {
+                "nombre": "Luz"
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Ada\n",
+            "overrides": {
+              "ficha": {
+                "nombre": "Ada"
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "ficha": "const"
+        },
+        "hints": ["Usa llaves para propiedades de objetos."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Usa llaves para propiedades de objetos.",
+        "syntax": {
+          "nodes": ["ObjectPattern"]
+        }
+      },
+      "challenge": {
+        "prompt": "Extrae la primera coordenada de punto con desestructuración de arreglo y muéstrala.",
+        "starter": "const punto = [4, 7];\n",
+        "solution": "const punto = [4, 7];\nconst [x] = punto;\nconsole.log(x);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "4\n",
+            "overrides": {
+              "punto": [4, 7]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0\n",
+            "overrides": {
+              "punto": [0, 9]
+            }
+          }
+        ],
+        "bindings": {
+          "punto": "const"
+        },
+        "hints": ["La primera posición se asigna al primer nombre entre corchetes."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La primera posición se asigna al primer nombre entre corchetes.",
+        "syntax": {
+          "nodes": ["ArrayPattern"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring"
+        }
+      ]
+    },
+    {
+      "id": "consulta-spread-rest",
+      "after": "consulta-desestructuracion",
+      "title": "Spread y rest: expandir y reunir valores",
+      "outcome": "Distinguir los usos de ... y conservar los datos originales.",
+      "requires": ["js-objetos-registros", "js-funciones-y-retorno", "consulta-desestructuracion"],
+      "sections": [
+        {
+          "title": "El mismo símbolo con dos intenciones",
+          "text": "Tres puntos, ..., pueden expandir valores o reunirlos. En [...lista, 30] expanden los elementos de lista dentro de un arreglo nuevo. En { ...persona, activo: true } copian propiedades propias enumerables a otro objeto."
+        },
+        {
+          "title": "El orden de la copia",
+          "text": "Si repites una propiedad, prevalece la que aparece después. { ...plan, minutos: 30 } conserva los demás campos y cambia minutos en la copia. El original permanece igual, pero los objetos anidados siguen compartidos: es una copia superficial."
+        },
+        {
+          "title": "Reunir argumentos",
+          "text": "En function sumar(...valores), rest reúne los argumentos en un arreglo llamado valores. Debe ser el último parámetro. Después puedes recorrerlo con for…of. En una llamada, sumar(...lista) realiza lo contrario: expande elementos como argumentos separados."
+        }
+      ],
+      "example": {
+        "code": "const base = [10, 20];\nconst ampliada = [...base, 30];\nconsole.log(base.length, ampliada.length);",
+        "stdout": "2 3\n"
+      },
+      "guided": {
+        "prompt": "Crea ampliada con los elementos de base y un 30 al final. Muestra ambas longitudes.",
+        "starter": "const base = [10, 20];\n",
+        "solution": "const base = [10, 20];\nconst ampliada = [...base, 30];\nconsole.log(base.length, ampliada.length);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "2 3\n",
+            "overrides": {
+              "base": [10, 20]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0 1\n",
+            "overrides": {
+              "base": []
+            }
+          }
+        ],
+        "bindings": {
+          "base": "const"
+        },
+        "hints": ["Los tres puntos van dentro del arreglo nuevo."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Los tres puntos van dentro del arreglo nuevo.",
+        "syntax": {
+          "nodes": ["SpreadElement"]
+        }
+      },
+      "bug": {
+        "prompt": "La propiedad copiada pisa el cambio. Reordena la expansión para que minutos termine en 30.",
+        "starter": "const plan = { minutos: 20 };\nconst nuevo = { minutos: 30, ...plan };\nconsole.log(plan.minutos, nuevo.minutos);",
+        "solution": "const plan = { minutos: 20 };\nconst nuevo = { ...plan, minutos: 30 };\nconsole.log(plan.minutos, nuevo.minutos);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "20 30\n",
+            "overrides": {
+              "plan": {
+                "minutos": 20
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "5 30\n",
+            "overrides": {
+              "plan": {
+                "minutos": 5
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "plan": "const"
+        },
+        "hints": ["La última propiedad con el mismo nombre gana."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La última propiedad con el mismo nombre gana.",
+        "syntax": {
+          "nodes": ["SpreadElement"]
+        }
+      },
+      "challenge": {
+        "prompt": "Define sumar con rest para reunir cualquier cantidad de números y devolver su suma. Muestra sumar(...valores).",
+        "starter": "const valores = [2, 3, 4];\n",
+        "solution": "const valores = [2, 3, 4];\nfunction sumar(...numeros) {\n let total = 0;\n for (const numero of numeros) total = total + numero;\n return total;\n}\nconsole.log(sumar(...valores));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "9\n",
+            "overrides": {
+              "valores": [2, 3, 4]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0\n",
+            "overrides": {
+              "valores": []
+            }
+          }
+        ],
+        "bindings": {
+          "valores": "const"
+        },
+        "hints": ["Rest reúne los parámetros y spread expande la lista en la llamada."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Rest reúne los parámetros y spread expande la lista en la llamada.",
+        "syntax": {
+          "nodes": ["SpreadElement", "RestElement"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax"
+        },
+        {
+          "title": "Parámetros rest",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters"
+        }
+      ]
+    },
+    {
+      "id": "consulta-claves-valores",
+      "after": "consulta-for-in",
+      "title": "Object.keys, values y entries",
+      "outcome": "Elegir si necesitas claves, valores o pares al recorrer un registro.",
+      "requires": ["consulta-for-in", "consulta-desestructuracion"],
+      "sections": [
+        {
+          "title": "Convertir propiedades en arreglos",
+          "text": "Object.keys(objeto) devuelve un arreglo de nombres de propiedades propias enumerables. Object.values(objeto) devuelve sus valores. Object.entries(objeto) devuelve pares [clave, valor]. Ninguna de estas llamadas modifica el objeto."
+        },
+        {
+          "title": "Recorrer pares",
+          "text": "for (const [clave, valor] of Object.entries(ficha)) combina for…of con desestructuración de un arreglo de dos posiciones. Primero se obtiene el par; después se asignan sus dos partes a los nombres locales."
+        },
+        {
+          "title": "Evitar supuestos sobre el orden",
+          "text": "Las claves que representan índices enteros se enumeran de forma especial antes de otras cadenas. Si necesitas un orden de presentación concreto, construye o clasifica una lista explícita. Estas funciones no incluyen símbolos ni propiedades no enumerables."
+        }
+      ],
+      "example": {
+        "code": "const ficha = { sala: \"A\", cupos: 3 };\nfor (const [clave, valor] of Object.entries(ficha)) {\n  console.log(clave, valor);\n}",
+        "stdout": "sala A\ncupos 3\n"
+      },
+      "guided": {
+        "prompt": "Recorre ficha con Object.entries y muestra cada clave y su valor.",
+        "starter": "const ficha = { sala: \"A\", cupos: 3 };\n",
+        "solution": "const ficha = { sala: \"A\", cupos: 3 };\nfor (const [clave, valor] of Object.entries(ficha)) console.log(clave, valor);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "sala A\ncupos 3\n",
+            "overrides": {
+              "ficha": {
+                "sala": "A",
+                "cupos": 3
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "turno tarde\n",
+            "overrides": {
+              "ficha": {
+                "turno": "tarde"
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "ficha": "const"
+        },
+        "hints": ["Cada entrada es un par; puedes desestructurarlo entre corchetes."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Cada entrada es un par; puedes desestructurarlo entre corchetes.",
+        "syntax": {
+          "methods": ["entries"]
+        }
+      },
+      "bug": {
+        "prompt": "Para sumar cantidades necesitas los valores, no los nombres. Repara la selección.",
+        "starter": "const cantidades = { libros: 2, mapas: 4 };\nlet total = 0;\nfor (const valor of Object.keys(cantidades)) total = total + valor;\nconsole.log(total);",
+        "solution": "const cantidades = { libros: 2, mapas: 4 };\nlet total = 0;\nfor (const valor of Object.values(cantidades)) total = total + valor;\nconsole.log(total);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "6\n",
+            "overrides": {
+              "cantidades": {
+                "libros": 2,
+                "mapas": 4
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0\n",
+            "overrides": {
+              "cantidades": {}
+            }
+          }
+        ],
+        "bindings": {
+          "cantidades": "const"
+        },
+        "hints": ["values devuelve las cantidades; keys devuelve sus etiquetas."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "values devuelve las cantidades; keys devuelve sus etiquetas.",
+        "syntax": {
+          "methods": ["values"]
+        }
+      },
+      "challenge": {
+        "prompt": "Un menú es un objeto con platos como claves. Muestra cuántos platos propios tiene, sin contar sus precios.",
+        "starter": "const menu = { sopa: 8, arroz: 10 };\n",
+        "solution": "const menu = { sopa: 8, arroz: 10 };\nconsole.log(Object.keys(menu).length);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "2\n",
+            "overrides": {
+              "menu": {
+                "sopa": 8,
+                "arroz": 10
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0\n",
+            "overrides": {
+              "menu": {}
+            }
+          }
+        ],
+        "bindings": {
+          "menu": "const"
+        },
+        "hints": ["Obtén las claves y consulta la longitud del arreglo resultante."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Obtén las claves y consulta la longitud del arreglo resultante.",
+        "syntax": {
+          "methods": ["keys"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries"
+        }
+      ]
+    },
+    {
+      "id": "consulta-regexp",
+      "after": "consulta-plantillas",
+      "title": "Expresiones regulares: patrones de texto",
+      "outcome": "Comprobar un formato pequeño distinguiendo coincidencia parcial y completa.",
+      "requires": ["js-texto-normalizado", "js-condiciones-logicas"],
+      "sections": [
+        {
+          "title": "Buscar un patrón",
+          "text": "Una expresión regular describe un patrón de caracteres. /sol/ es un literal delimitado por barras. Su método test(texto) devuelve true si encuentra una coincidencia y false si no. No modifica el texto."
+        },
+        {
+          "title": "Definir el formato completo",
+          "text": "^ indica comienzo y $ final. [0-9] acepta un dígito; {3} exige tres repeticiones. /^[0-9]{3}$/ acepta exactamente tres dígitos. Sin los anclajes podría aceptar esos dígitos dentro de un texto mayor."
+        },
+        {
+          "title": "Usar pocas reglas y comprobarlas",
+          "text": "La bandera i, después de la barra final, ignora diferencias entre mayúsculas y minúsculas. Las banderas g y y mantienen una posición al repetir test; no las necesitas para esta validación. Un patrón pequeño no sustituye validar reglas de negocio ni cubrir todos los formatos posibles de correo o nombres."
+        }
+      ],
+      "example": {
+        "code": "const codigo = \"204\";\nconsole.log(/^[0-9]{3}$/.test(codigo));",
+        "stdout": "true\n"
+      },
+      "guided": {
+        "prompt": "Comprueba si codigo contiene exactamente tres dígitos. Muestra el booleano.",
+        "starter": "const codigo = \"204\";\n",
+        "solution": "const codigo = \"204\";\nconsole.log(/^[0-9]{3}$/.test(codigo));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "true\n",
+            "overrides": {
+              "codigo": "204"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "codigo": "a204b"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "codigo": "20"
+            }
+          }
+        ],
+        "bindings": {
+          "codigo": "const"
+        },
+        "hints": ["Ancla el inicio y el final del patrón."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Ancla el inicio y el final del patrón.",
+        "syntax": {
+          "methods": ["test"]
+        }
+      },
+      "bug": {
+        "prompt": "El patrón está aceptando dígitos dentro de palabras. Exige que todo el texto tenga tres dígitos.",
+        "starter": "const codigo = \"a204b\";\nconsole.log(/[0-9]{3}/.test(codigo));",
+        "solution": "const codigo = \"a204b\";\nconsole.log(/^[0-9]{3}$/.test(codigo));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "false\n",
+            "overrides": {
+              "codigo": "a204b"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "true\n",
+            "overrides": {
+              "codigo": "123"
+            }
+          }
+        ],
+        "bindings": {
+          "codigo": "const"
+        },
+        "hints": ["Añade ^ y $ para comprobar el texto completo."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Añade ^ y $ para comprobar el texto completo.",
+        "syntax": {
+          "methods": ["test"]
+        }
+      },
+      "challenge": {
+        "prompt": "Una referencia tiene exactamente dos letras A mayúsculas seguidas de dos dígitos. Muestra si cumple el formato.",
+        "starter": "const referencia = \"AA12\";\n",
+        "solution": "const referencia = \"AA12\";\nconsole.log(/^AA[0-9]{2}$/.test(referencia));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "true\n",
+            "overrides": {
+              "referencia": "AA12"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "referencia": "AA1"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "referencia": "BA12"
+            }
+          }
+        ],
+        "bindings": {
+          "referencia": "const"
+        },
+        "hints": ["Combina el prefijo literal AA con dos dígitos y ambos anclajes."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Combina el prefijo literal AA con dos dígitos y ambos anclajes.",
+        "syntax": {
+          "methods": ["test"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions"
+        }
+      ]
+    },
+    {
+      "id": "consulta-array-cambios",
+      "after": "js-crear-listas",
+      "title": "push, pop, shift, unshift, slice y splice",
+      "outcome": "Separar los métodos que cambian un arreglo de los que devuelven una copia.",
+      "requires": ["js-crear-listas", "js-cambios-con-let"],
+      "sections": [
+        {
+          "title": "Añadir y retirar",
+          "text": "push(valor) añade al final y devuelve la nueva longitud. pop() retira y devuelve el último elemento. unshift(valor) añade al inicio y devuelve la longitud; shift() retira y devuelve el primero. Los cuatro modifican el arreglo."
+        },
+        {
+          "title": "Const y mutación",
+          "text": "const protege la asignación del nombre; no congela el arreglo. Una lista declarada con const puede recibir push. En cambio, lista = otraLista intenta reasignar el nombre. Retirar de una lista vacía devuelve undefined."
+        },
+        {
+          "title": "Copiar un tramo",
+          "text": "slice(inicio, fin) devuelve un arreglo nuevo sin cambiar el original. inicio se incluye y fin se excluye. Los índices empiezan en cero. lista.slice(1, 3) copia las posiciones 1 y 2."
+        },
+        {
+          "title": "Cambiar un tramo",
+          "text": "splice(inicio, cantidad, ...nuevos) modifica el original y devuelve los retirados. Por ejemplo, lista.splice(1, 1) elimina un elemento desde la posición 1. No confundas ese segundo argumento con el final exclusivo de slice."
+        }
+      ],
+      "example": {
+        "code": "const lista = [10, 20];\nlista.push(30);\nconst ultimo = lista.pop();\nconsole.log(ultimo, lista.length);",
+        "stdout": "30 2\n"
+      },
+      "guided": {
+        "prompt": "Añade 30 al final de lista con push y muestra su nueva longitud.",
+        "starter": "const lista = [10, 20];\n",
+        "solution": "const lista = [10, 20];\nlista.push(30);\nconsole.log(lista.length);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "3\n",
+            "overrides": {
+              "lista": [10, 20]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1\n",
+            "overrides": {
+              "lista": []
+            }
+          }
+        ],
+        "bindings": {
+          "lista": "const"
+        },
+        "hints": ["push cambia la lista existente."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "push cambia la lista existente."
+      },
+      "bug": {
+        "prompt": "Necesitas copiar desde la posición 1 sin cambiar la longitud original. Sustituye el método incorrecto.",
+        "starter": "const lista = [10, 20, 30];\nconst copia = lista.splice(1);\nconsole.log(lista.length, copia.length);",
+        "solution": "const lista = [10, 20, 30];\nconst copia = lista.slice(1);\nconsole.log(lista.length, copia.length);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "3 2\n",
+            "overrides": {
+              "lista": [10, 20, 30]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1 0\n",
+            "overrides": {
+              "lista": [8]
+            }
+          }
+        ],
+        "bindings": {
+          "lista": "const"
+        },
+        "hints": ["slice copia; splice modifica el origen."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "slice copia; splice modifica el origen."
+      },
+      "challenge": {
+        "prompt": "Una cola atiende al primero. Retíralo con shift y muestra el atendido y la cantidad pendiente.",
+        "starter": "const cola = [\"Luz\", \"Sol\"];\n",
+        "solution": "const cola = [\"Luz\", \"Sol\"];\nconst atendido = cola.shift();\nconsole.log(atendido, cola.length);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Luz 1\n",
+            "overrides": {
+              "cola": ["Luz", "Sol"]
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Ada 0\n",
+            "overrides": {
+              "cola": ["Ada"]
+            }
+          }
+        ],
+        "bindings": {
+          "cola": "const"
+        },
+        "hints": ["El primer elemento sale por el inicio, no con pop."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El primer elemento sale por el inicio, no con pop."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array"
+        }
+      ]
+    },
+    {
+      "id": "consulta-try-catch",
+      "after": "js-json-importar",
+      "title": "try, catch, throw y finally",
+      "outcome": "Investigar un error y responder de forma controlada sin ocultarlo.",
+      "requires": ["js-json-importar", "js-funciones-y-retorno"],
+      "sections": [
+        {
+          "title": "Una operación puede fallar",
+          "text": "try encierra instrucciones que pueden lanzar una excepción. Si sucede, se interrumpe ese bloque y se ejecuta catch. El parámetro de catch recibe el error. error.message describe su mensaje; no presupongas que toda entrada externa lanzada es siempre un Error."
+        },
+        {
+          "title": "Crear un rechazo explícito",
+          "text": "throw new Error(\"motivo\") interrumpe la ejecución y envía un objeto Error al manejador. Error es un constructor incorporado; new crea ese objeto con un mensaje. Usa errores para fallos que tu función no puede resolver, no como sustituto de cualquier decisión con if."
+        },
+        {
+          "title": "Limpieza y límites",
+          "text": "finally se ejecuta después de try o catch, también si hay retorno. Es útil para liberar recursos. Evita return dentro de finally porque puede reemplazar un retorno o error anterior. Un try no captura un error de un callback ejecutado más tarde; con promesas debes esperar o tratar su rechazo."
+        },
+        {
+          "title": "Informar y recuperarse",
+          "text": "No dejes un catch vacío: muestra una explicación útil o propaga el error. En este ejemplo, JSON.parse convierte un texto JSON en un valor y puede fallar si el formato está incompleto."
+        }
+      ],
+      "example": {
+        "code": "try {\n  JSON.parse(\"{\");\n} catch (error) {\n  console.log(\"Formato inválido\");\n} finally {\n  console.log(\"Fin\");\n}",
+        "stdout": "Formato inválido\nFin\n"
+      },
+      "guided": {
+        "prompt": "Intenta convertir texto con JSON.parse. Muestra Válido si funciona o Inválido si falla.",
+        "starter": "const texto = \"{}\";\n",
+        "solution": "const texto = \"{}\";\ntry { JSON.parse(texto); console.log(\"Válido\"); }\ncatch (error) { console.log(\"Inválido\"); }",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Válido\n",
+            "overrides": {
+              "texto": "{}"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Inválido\n",
+            "overrides": {
+              "texto": "{"
+            }
+          }
+        ],
+        "bindings": {
+          "texto": "const"
+        },
+        "hints": ["La impresión Válido debe ir después de la conversión dentro de try."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La impresión Válido debe ir después de la conversión dentro de try.",
+        "syntax": {
+          "nodes": ["TryStatement"]
+        }
+      },
+      "bug": {
+        "prompt": "Válido se imprime incluso después del fallo. Colócalo donde solo pueda ejecutarse tras convertir correctamente.",
+        "starter": "const texto = \"{\";\ntry { JSON.parse(texto); } catch (error) { console.log(\"Inválido\"); }\nconsole.log(\"Válido\");",
+        "solution": "const texto = \"{\";\ntry { JSON.parse(texto); console.log(\"Válido\"); } catch (error) { console.log(\"Inválido\"); }",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Inválido\n",
+            "overrides": {
+              "texto": "{"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Válido\n",
+            "overrides": {
+              "texto": "[]"
+            }
+          }
+        ],
+        "bindings": {
+          "texto": "const"
+        },
+        "hints": ["Una instrucción posterior al catch se ejecuta también tras una recuperación."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Una instrucción posterior al catch se ejecuta también tras una recuperación.",
+        "syntax": {
+          "nodes": ["TryStatement"]
+        }
+      },
+      "challenge": {
+        "prompt": "Rechaza una cantidad negativa con throw new Error. Muestra Admitido o Rechazado y, mediante finally, siempre Fin.",
+        "starter": "const cantidad = -1;\n",
+        "solution": "const cantidad = -1;\ntry {\n if (cantidad < 0) throw new Error(\"Cantidad negativa\");\n console.log(\"Admitido\");\n} catch (error) { console.log(\"Rechazado\"); }\nfinally { console.log(\"Fin\"); }",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Rechazado\nFin\n",
+            "overrides": {
+              "cantidad": -1
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Admitido\nFin\n",
+            "overrides": {
+              "cantidad": 0
+            }
+          }
+        ],
+        "bindings": {
+          "cantidad": "const"
+        },
+        "hints": ["El rechazo interrumpe el try; finally se ejecuta en ambos caminos."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El rechazo interrumpe el try; finally se ejecuta en ambos caminos.",
+        "syntax": {
+          "nodes": ["TryStatement", "ThrowStatement"]
+        }
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling"
+        }
+      ]
+    },
+    {
+      "id": "consulta-var",
+      "after": "js-cierres-y-alcance",
+      "title": "Leer código antiguo: var, let y const",
+      "outcome": "Reconocer diferencias de alcance sin adoptar var como opción inicial.",
+      "requires": ["js-cierres-y-alcance", "js-funciones-y-retorno"],
+      "sections": [
+        {
+          "title": "Una forma anterior de declarar",
+          "text": "var sigue siendo válido y aparece en proyectos antiguos. En código nuevo mantén const para vínculos estables y let para reasignación. Esta ficha llega después de aprender alcance y funciones para poder comparar sus diferencias."
+        },
+        {
+          "title": "Alcance de bloque y función",
+          "text": "let y const quedan limitados al bloque entre llaves donde se declaran. var queda limitado a la función que lo contiene, o al ámbito superior si no hay función. Declararlo dentro de un if no crea un ámbito propio para var."
+        },
+        {
+          "title": "Lectura antes de declarar",
+          "text": "La declaración var se prepara antes de ejecutar, pero su asignación ocurre al llegar a ella: una lectura anterior puede dar undefined. let y const tampoco pueden leerse antes de inicializarlas; hacerlo produce ReferenceError. Evita depender de ese comportamiento para ordenar tu programa."
+        }
+      ],
+      "example": {
+        "code": "function probar() {\n  if (true) { var mensaje = \"visible\"; }\n  console.log(mensaje);\n}\nprobar();",
+        "stdout": "visible\n"
+      },
+      "guided": {
+        "prompt": "Declara mensaje antes del if con let y cámbialo dentro. Muestra el estado final.",
+        "starter": "const activo = true;\nlet mensaje = \"inactivo\";\n",
+        "solution": "const activo = true;\nlet mensaje = \"inactivo\";\nif (activo) { mensaje = \"activo\"; }\nconsole.log(mensaje);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "activo\n",
+            "overrides": {
+              "activo": true
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "inactivo\n",
+            "overrides": {
+              "activo": false
+            }
+          }
+        ],
+        "bindings": {
+          "activo": "const"
+        },
+        "hints": ["La variable que se consulta después debe existir fuera del bloque."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La variable que se consulta después debe existir fuera del bloque."
+      },
+      "bug": {
+        "prompt": "let mensaje existe solo dentro del if. Conserva una única declaración exterior y reasigna dentro.",
+        "starter": "const activo = true;\nif (activo) { let mensaje = \"activo\"; }\nconsole.log(mensaje);",
+        "solution": "const activo = true;\nlet mensaje = \"inactivo\";\nif (activo) { mensaje = \"activo\"; }\nconsole.log(mensaje);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "activo\n",
+            "overrides": {
+              "activo": true
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "inactivo\n",
+            "overrides": {
+              "activo": false
+            }
+          }
+        ],
+        "bindings": {
+          "activo": "const"
+        },
+        "hints": ["Mover la declaración conserva la intención sin recurrir a var."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Mover la declaración conserva la intención sin recurrir a var."
+      },
+      "challenge": {
+        "prompt": "Un pedido empieza pendiente y cambia a listo si completo es true. Declara estado con let fuera del bloque y muestra el estado final.",
+        "starter": "const completo = false;\n",
+        "solution": "const completo = false;\nlet estado = \"pendiente\";\nif (completo) { estado = \"listo\"; }\nconsole.log(estado);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "pendiente\n",
+            "overrides": {
+              "completo": false
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "listo\n",
+            "overrides": {
+              "completo": true
+            }
+          }
+        ],
+        "bindings": {
+          "completo": "const"
+        },
+        "hints": ["No declares otro estado dentro del if."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "No declares otro estado dentro del if."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var"
+        }
+      ]
+    },
+    {
+      "id": "consulta-prototipos",
+      "after": "js-clases-y-this",
+      "title": "Prototipos y propiedades propias",
+      "outcome": "Seguir de dónde obtiene un objeto una propiedad y distinguir herencia de copia.",
+      "requires": ["js-clases-y-this", "consulta-for-in"],
+      "sections": [
+        {
+          "title": "Una cadena de consulta",
+          "text": "Cuando consultas objeto.propiedad y el objeto no tiene esa propiedad propia, JavaScript busca en su prototipo y continúa por la cadena hasta null. Un prototipo es otro objeto usado como respaldo de propiedades. No significa que cada instancia tenga una copia propia de esos métodos."
+        },
+        {
+          "title": "Crear una relación explícita",
+          "text": "Object.create(base) crea un objeto cuyo prototipo es base. Object.hasOwn(objeto, clave) comprueba solo propiedades propias; el operador in también considera las heredadas. No cambies prototipos de objetos incorporados para añadir utilidades generales."
+        },
+        {
+          "title": "Clases y sobrescritura",
+          "text": "Las clases organizan esa relación con una sintaxis de constructores y métodos. Una propiedad propia con el mismo nombre oculta la heredada para esa consulta. Eso no modifica automáticamente la propiedad del prototipo."
+        }
+      ],
+      "example": {
+        "code": "const base = { tipo: \"sesión\" };\nconst propia = Object.create(base);\npropia.minutos = 20;\nconsole.log(propia.tipo);\nconsole.log(Object.hasOwn(propia, \"tipo\"));",
+        "stdout": "sesión\nfalse\n"
+      },
+      "guided": {
+        "prompt": "Crea una instancia con Object.create(base), consulta su tipo heredado y muestra si tipo es propio.",
+        "starter": "const base = { tipo: \"sesión\" };\n",
+        "solution": "const base = { tipo: \"sesión\" };\nconst instancia = Object.create(base);\nconsole.log(instancia.tipo);\nconsole.log(Object.hasOwn(instancia, \"tipo\"));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "sesión\nfalse\n",
+            "overrides": {
+              "base": {
+                "tipo": "sesión"
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "curso\nfalse\n",
+            "overrides": {
+              "base": {
+                "tipo": "curso"
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "base": "const"
+        },
+        "hints": ["create conserva una relación con base; no copia tipo como propiedad propia."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "create conserva una relación con base; no copia tipo como propiedad propia."
+      },
+      "bug": {
+        "prompt": "Object.keys no incluye el tipo heredado. Para consultar ese dato usa la propiedad de instancia.",
+        "starter": "const base = { tipo: \"sesión\" };\nconst instancia = Object.create(base);\nconsole.log(Object.keys(instancia)[0]);",
+        "solution": "const base = { tipo: \"sesión\" };\nconst instancia = Object.create(base);\nconsole.log(instancia.tipo);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "sesión\n",
+            "overrides": {
+              "base": {
+                "tipo": "sesión"
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "curso\n",
+            "overrides": {
+              "base": {
+                "tipo": "curso"
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "base": "const"
+        },
+        "hints": ["La consulta normal busca en la cadena de prototipos."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La consulta normal busca en la cadena de prototipos."
+      },
+      "challenge": {
+        "prompt": "Crea una reserva que herede de base y añade cupos como propiedad propia con valor 3. Muestra el tipo y si cupos es propio.",
+        "starter": "const base = { tipo: \"reserva\" };\n",
+        "solution": "const base = { tipo: \"reserva\" };\nconst reserva = Object.create(base);\nreserva.cupos = 3;\nconsole.log(reserva.tipo, Object.hasOwn(reserva, \"cupos\"));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "reserva true\n",
+            "overrides": {
+              "base": {
+                "tipo": "reserva"
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "turno true\n",
+            "overrides": {
+              "base": {
+                "tipo": "turno"
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "base": "const"
+        },
+        "hints": ["La asignación sobre reserva crea el campo propio."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La asignación sobre reserva crea el campo propio."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math",
+      "after": "js-operaciones-y-unidades",
+      "title": "Math, redondeo y números seguros",
+      "outcome": "Elegir cómo redondear y reconocer cuándo una cuenta necesita una regla explícita.",
+      "requires": ["js-operaciones-y-unidades", "js-tipos-y-calculos"],
+      "sections": [
+        {
+          "title": "Herramientas para calcular",
+          "text": "Math reúne funciones matemáticas. Math.floor baja al entero menor o igual, Math.ceil sube al mayor o igual y Math.round elige el entero más próximo, con los empates hacia +infinito. Con negativos sus diferencias importan: floor(-1.2) da -2."
+        },
+        {
+          "title": "Limitar y medir",
+          "text": "Math.min y Math.max eligen el mínimo o máximo de sus argumentos. Math.abs devuelve la distancia a cero. Son funciones, por eso se llaman con paréntesis. Escribe las unidades del resultado: redondear minutos y redondear dinero son decisiones diferentes."
+        },
+        {
+          "title": "Precisión y validez",
+          "text": "Number representa números con precisión finita. Number.isFinite comprueba que sea un número finito sin convertir texto. Para dinero, define unidades enteras y una regla de redondeo; multiplicar decimales no garantiza exactitud. Number.isSafeInteger permite detectar enteros fuera del rango seguro."
+        }
+      ],
+      "example": {
+        "code": "const valor = 1.2;\nconsole.log(Math.floor(valor));\nconsole.log(Math.ceil(valor));",
+        "stdout": "1\n2\n"
+      },
+      "guided": {
+        "prompt": "Muestra los enteros inferior y superior a valor, cada uno en una línea.",
+        "starter": "const valor = 1.2;\n",
+        "solution": "const valor = 1.2;\nconsole.log(Math.floor(valor));\nconsole.log(Math.ceil(valor));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "1\n2\n",
+            "overrides": {
+              "valor": 1.2
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "-2\n-1\n",
+            "overrides": {
+              "valor": -1.2
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "hints": ["floor y ceil tienen reglas distintas con negativos."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "floor y ceil tienen reglas distintas con negativos."
+      },
+      "bug": {
+        "prompt": "Se necesita redondear hacia arriba para reservar cajas completas. Corrige la operación.",
+        "starter": "const unidades = 7;\nconsole.log(Math.floor(unidades / 3));",
+        "solution": "const unidades = 7;\nconsole.log(Math.ceil(unidades / 3));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "3\n",
+            "overrides": {
+              "unidades": 7
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "0\n",
+            "overrides": {
+              "unidades": 0
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "2\n",
+            "overrides": {
+              "unidades": 6
+            }
+          }
+        ],
+        "bindings": {
+          "unidades": "const"
+        },
+        "hints": ["Una fracción de caja también requiere una caja."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Una fracción de caja también requiere una caja."
+      },
+      "challenge": {
+        "prompt": "La diferencia entre dos posiciones puede ser negativa. Muestra su distancia no negativa con Math.abs.",
+        "starter": "const inicio = 8;\nconst fin = 3;\n",
+        "solution": "const inicio = 8;\nconst fin = 3;\nconsole.log(Math.abs(fin - inicio));",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "5\n",
+            "overrides": {
+              "inicio": 8,
+              "fin": 3
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "5\n",
+            "overrides": {
+              "inicio": 3,
+              "fin": 8
+            }
+          }
+        ],
+        "bindings": {
+          "inicio": "const",
+          "fin": "const"
+        },
+        "hints": ["El valor absoluto elimina el signo de la diferencia."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El valor absoluto elimina el signo de la diferencia."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"
+        }
+      ]
+    },
+    {
+      "id": "consulta-temporizadores",
+      "after": "js-fetch-await",
+      "title": "Temporizadores, retrasos y cancelación",
+      "outcome": "Programar una tarea posterior y comprender que el retraso no garantiza una hora exacta.",
+      "requires": ["js-fetch-await", "js-cola-de-eventos"],
+      "sections": [
+        {
+          "title": "Programar sin bloquear",
+          "text": "setTimeout(callback, milisegundos) solicita ejecutar una función después de un retraso mínimo. Devuelve un identificador que puede entregarse a clearTimeout para cancelar la tarea pendiente. El resto del programa continúa. Estas funciones pertenecen al entorno del navegador, no al lenguaje ECMAScript."
+        },
+        {
+          "title": "Comprender el orden",
+          "text": "Un retraso de cero no significa ejecutar inmediatamente. La tarea espera a que termine el trabajo actual y a que el entorno pueda atenderla. Las microtareas, como las continuaciones de promesas, tienen su propio turno antes de la siguiente tarea."
+        },
+        {
+          "title": "Esperar y limpiar",
+          "text": "setInterval solicita repeticiones; clearInterval cancela futuras llamadas. No garantiza una frecuencia exacta ni espera una operación async. Para evitar solapamientos, programa el siguiente intento después de terminar el anterior. Al salir de una vista debes cancelar temporizadores que ya no se necesitan."
+        },
+        {
+          "title": "Entorno de estos ejemplos",
+          "text": "El ejecutor aislado llama a una función async y espera su promesa. Esa función devuelve un arreglo con los pasos; la consola muestra el retorno. No usamos intervalos infinitos ni tiempos largos. Consulta async y await en la lección previa si aún no los conoces."
+        }
+      ],
+      "example": {
+        "code": "async function pasos() {\n const mensajes = [\"Inicio\"];\n await new Promise(function(resolve) { setTimeout(resolve, 0); });\n mensajes.push(\"Fin\");\n return mensajes;\n}",
+        "stdout": "",
+        "sample": {
+          "name": "Orden esperado",
+          "entrypoint": "pasos",
+          "args": [],
+          "expected": ["Inicio", "Fin"],
+          "awaitResult": true
+        }
+      },
+      "guided": {
+        "prompt": "Completa pasos: reúne Inicio, espera la promesa y añade Fin. Devuelve el arreglo.",
+        "starter": "async function pasos() {\n const mensajes = [\"Inicio\"];\n await new Promise(function(resolve) { setTimeout(resolve, 0); });\n // Añade Fin y devuelve mensajes.\n}",
+        "solution": "async function pasos() {\n const mensajes = [\"Inicio\"];\n await new Promise(function(resolve) { setTimeout(resolve, 0); });\n mensajes.push(\"Fin\");\n return mensajes;\n}",
+        "entrypoint": "pasos",
+        "cases": [
+          {
+            "name": "Orden de las tareas",
+            "args": [],
+            "expected": ["Inicio", "Fin"],
+            "awaitResult": true
+          }
+        ],
+        "hints": [
+          "Espera la promesa con await antes de añadir el último mensaje.",
+          "Devuelve el arreglo de mensajes; no hace falta imprimir dentro de esta función."
+        ],
+        "explanation": "El retorno conserva el orden de las tareas comprobadas.",
+        "retryFeedback": "Comprueba dónde esperas la promesa y cuándo añades cada mensaje."
+      },
+      "bug": {
+        "prompt": "El retorno ocurre antes del temporizador. Corrige la espera para devolver Después y luego Fin.",
+        "starter": "async function pasos() {\n const mensajes = [];\n new Promise(function(resolve) {\n  setTimeout(function() { mensajes.push(\"Después\"); resolve(); }, 0);\n });\n mensajes.push(\"Fin\");\n return mensajes;\n}",
+        "solution": "async function pasos() {\n const mensajes = [];\n await new Promise(function(resolve) {\n  setTimeout(function() { mensajes.push(\"Después\"); resolve(); }, 0);\n });\n mensajes.push(\"Fin\");\n return mensajes;\n}",
+        "entrypoint": "pasos",
+        "cases": [
+          {
+            "name": "Orden de las tareas",
+            "args": [],
+            "expected": ["Después", "Fin"],
+            "awaitResult": true
+          }
+        ],
+        "hints": [
+          "Espera la promesa con await antes de añadir el último mensaje.",
+          "Devuelve el arreglo de mensajes; no hace falta imprimir dentro de esta función."
+        ],
+        "explanation": "El retorno conserva el orden de las tareas comprobadas.",
+        "retryFeedback": "Comprueba dónde esperas la promesa y cuándo añades cada mensaje."
+      },
+      "challenge": {
+        "prompt": "Una confirmación registra Preparando, espera el siguiente temporizador y registra Listo. Define pasos y devuelve ambos estados en un arreglo.",
+        "starter": "",
+        "solution": "async function pasos() {\n const mensajes = [\"Preparando\"];\n await new Promise(function(resolve) { setTimeout(resolve, 0); });\n mensajes.push(\"Listo\");\n return mensajes;\n}",
+        "entrypoint": "pasos",
+        "cases": [
+          {
+            "name": "Orden de las tareas",
+            "args": [],
+            "expected": ["Preparando", "Listo"],
+            "awaitResult": true
+          }
+        ],
+        "hints": [
+          "Espera la promesa con await antes de añadir el último mensaje.",
+          "Devuelve el arreglo de mensajes; no hace falta imprimir dentro de esta función."
+        ],
+        "explanation": "El retorno conserva el orden de las tareas comprobadas.",
+        "retryFeedback": "Comprueba dónde esperas la promesa y cuándo añades cada mensaje."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"
+        },
+        {
+          "title": "Temporizadores en el navegador",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout"
+        }
+      ]
+    },
+    {
+      "id": "consulta-opcional-nullish",
+      "after": "js-opciones-y-ausencia",
+      "title": "Encadenamiento opcional ?. y coalescencia ??",
+      "outcome": "Consultar datos que pueden faltar y conservar valores válidos como cero.",
+      "requires": ["js-opciones-y-ausencia", "js-objetos-registros"],
+      "sections": [
+        {
+          "title": "Una ausencia concreta",
+          "text": "null y undefined representan ausencias diferentes según el contrato del programa. Consultar una propiedad de esos valores produce un error. objeto?.campo detiene esa consulta y devuelve undefined cuando objeto es null o undefined."
+        },
+        {
+          "title": "Un valor predeterminado",
+          "text": "valor ?? respaldo usa respaldo solo si valor es null o undefined. A diferencia de ||, conserva cero, false y texto vacío. Es útil cuando cero es una cantidad válida. ?? no puede mezclarse directamente con && o || sin agrupar mediante paréntesis."
+        },
+        {
+          "title": "Seguridad y límites",
+          "text": "El encadenamiento opcional no valida que el dato tenga el tipo correcto ni arregla un nombre sin declarar. Coloca ?. en cada nivel que pueda faltar. No puedes asignar usando esa cadena como destino; primero decide dónde guardar el cambio."
+        }
+      ],
+      "example": {
+        "code": "const respuesta = { plan: { minutos: 0 } };\nconsole.log(respuesta.plan?.minutos ?? 20);",
+        "stdout": "0\n"
+      },
+      "guided": {
+        "prompt": "Consulta plan.minutos si existe; cuando falte plan o minutos usa 20. Conserva el cero.",
+        "starter": "const respuesta = { plan: { minutos: 0 } };\n",
+        "solution": "const respuesta = { plan: { minutos: 0 } };\nconsole.log(respuesta.plan?.minutos ?? 20);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "0\n",
+            "overrides": {
+              "respuesta": {
+                "plan": {
+                  "minutos": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "20\n",
+            "overrides": {
+              "respuesta": {}
+            }
+          }
+        ],
+        "bindings": {
+          "respuesta": "const"
+        },
+        "hints": ["?. protege el acceso y ?? decide el valor de respaldo."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "?. protege el acceso y ?? decide el valor de respaldo."
+      },
+      "bug": {
+        "prompt": "El operador || reemplaza cero por 20. Usa una selección que solo reemplace ausencia.",
+        "starter": "const respuesta = { plan: { minutos: 0 } };\nconsole.log(respuesta.plan?.minutos || 20);",
+        "solution": "const respuesta = { plan: { minutos: 0 } };\nconsole.log(respuesta.plan?.minutos ?? 20);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "0\n",
+            "overrides": {
+              "respuesta": {
+                "plan": {
+                  "minutos": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "20\n",
+            "overrides": {
+              "respuesta": {
+                "plan": null
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "respuesta": "const"
+        },
+        "hints": ["El respaldo depende de null o undefined, no de falsy."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El respaldo depende de null o undefined, no de falsy."
+      },
+      "challenge": {
+        "prompt": "Una entrega puede no traer destino. Muestra su ciudad si existe; si falta, Pendiente. Un texto vacío debe conservarse.",
+        "starter": "const entrega = {};\n",
+        "solution": "const entrega = {};\nconsole.log(entrega.destino?.ciudad ?? \"Pendiente\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Pendiente\n",
+            "overrides": {
+              "entrega": {}
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Medellín\n",
+            "overrides": {
+              "entrega": {
+                "destino": {
+                  "ciudad": "Medellín"
+                }
+              }
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "\n",
+            "overrides": {
+              "entrega": {
+                "destino": {
+                  "ciudad": ""
+                }
+              }
+            }
+          }
+        ],
+        "bindings": {
+          "entrega": "const"
+        },
+        "hints": ["Accede opcionalmente a destino y elige el respaldo con ??."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Accede opcionalmente a destino y elige el respaldo con ??."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining"
+        }
+      ]
+    },
+    {
+      "id": "consulta-cortocircuito",
+      "after": "consulta-truthy",
+      "title": "&&, || y cortocircuito: qué se evalúa",
+      "outcome": "Seguir qué operando se devuelve y cuándo se omite una expresión.",
+      "requires": ["js-condiciones-logicas", "consulta-truthy", "consulta-ternario"],
+      "sections": [
+        {
+          "title": "Evaluar solo lo necesario",
+          "text": "&& evalúa de izquierda a derecha y devuelve el primer operando falsy, o el último si todos son truthy. || devuelve el primer operando truthy, o el último si todos son falsy. El resultado no tiene por qué ser booleano."
+        },
+        {
+          "title": "Distinguir valor y condición",
+          "text": "\"\" || \"Sin nombre\" da el texto de respaldo, mientras 0 || 20 da 20. Si cero es válido debes usar una comparación explícita o, al estudiar ausencia, ??. Los paréntesis hacen explícita la agrupación de expresiones."
+        },
+        {
+          "title": "Escribir decisiones comprensibles",
+          "text": "Una expresión a la derecha puede no ejecutarse. Aunque esto permite proteger consultas, if suele explicar mejor una acción para principiantes. No mezcles asignaciones y varios operadores en una sola línea sin justificar la intención."
+        }
+      ],
+      "example": {
+        "code": "const nombre = \"\";\nconsole.log(nombre || \"Sin nombre\");\nconsole.log(false && \"No se elige\");",
+        "stdout": "Sin nombre\nfalse\n"
+      },
+      "guided": {
+        "prompt": "Muestra nombre si es un texto no vacío o Sin nombre en caso contrario. Usa ||.",
+        "starter": "const nombre = \"\";\n",
+        "solution": "const nombre = \"\";\nconsole.log(nombre || \"Sin nombre\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Sin nombre\n",
+            "overrides": {
+              "nombre": ""
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "Luz\n",
+            "overrides": {
+              "nombre": "Luz"
+            }
+          }
+        ],
+        "bindings": {
+          "nombre": "const"
+        },
+        "hints": ["La alternativa de respaldo va a la derecha de ||."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La alternativa de respaldo va a la derecha de ||."
+      },
+      "bug": {
+        "prompt": "Cero es una cantidad válida. Corrige el respaldo para que solo un negativo se sustituya por 20.",
+        "starter": "const minutos = 0;\nconsole.log(minutos || 20);",
+        "solution": "const minutos = 0;\nconsole.log(minutos >= 0 ? minutos : 20);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "0\n",
+            "overrides": {
+              "minutos": 0
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "20\n",
+            "overrides": {
+              "minutos": -1
+            }
+          }
+        ],
+        "bindings": {
+          "minutos": "const"
+        },
+        "hints": ["Usa la comparación del contrato y el ternario ya estudiado."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Usa la comparación del contrato y el ternario ya estudiado."
+      },
+      "challenge": {
+        "prompt": "Una etiqueta es utilizable si no está vacía y su longitud no supera 5. Muestra un booleano.",
+        "starter": "const etiqueta = \"mesa\";\n",
+        "solution": "const etiqueta = \"mesa\";\nconsole.log(etiqueta.length > 0 && etiqueta.length <= 5);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "true\n",
+            "overrides": {
+              "etiqueta": "mesa"
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "etiqueta": ""
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "false\n",
+            "overrides": {
+              "etiqueta": "demasiado"
+            }
+          }
+        ],
+        "bindings": {
+          "etiqueta": "const"
+        },
+        "hints": ["Ambas reglas deben cumplirse; compara longitudes antes de combinar."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Ambas reglas deben cumplirse; compara longitudes antes de combinar."
+      },
+      "sources": [
+        {
+          "title": "Documentación de JavaScript en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_AND"
+        }
+      ]
+    }
+  ],
+  "workshops": {
+    "js-tu-primer-programa": {
+      "guided": {
+        "prompt": "Escribe dos llamadas a console.log: primero Inicio y luego Fin. Cada texto ocupa una línea.",
+        "starter": "console.log(\"Inicio\");\n// Añade aquí la segunda instrucción.",
+        "solution": "console.log(\"Inicio\");\nconsole.log(\"Fin\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Inicio\nFin\n"
+          }
+        ],
+        "hints": ["Una segunda llamada se ejecuta después de la primera."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "Una segunda llamada se ejecuta después de la primera."
+      },
+      "bug": {
+        "prompt": "Corrige las comillas para que se pueda mostrar Hola.",
+        "starter": "console.log(\"Hola);",
+        "solution": "console.log(\"Hola\");",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "Hola\n"
+          }
+        ],
+        "hints": ["El texto necesita una comilla de apertura y otra de cierre."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El texto necesita una comilla de apertura y otra de cierre."
+      }
+    },
+    "js-cambios-con-let": {
+      "guided": {
+        "prompt": "Muestra minutos antes y después de cambiarlo a 30. Conserva la declaración inicial.",
+        "starter": "let minutos = 20;\n// Muestra, reasigna y vuelve a mostrar.",
+        "solution": "let minutos = 20;\nconsole.log(minutos);\nminutos = 30;\nconsole.log(minutos);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "20\n30\n",
+            "overrides": {
+              "minutos": 20
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "10\n30\n",
+            "overrides": {
+              "minutos": 10
+            }
+          }
+        ],
+        "bindings": {
+          "minutos": "let"
+        },
+        "hints": [
+          "La primera impresión va antes de la reasignación.",
+          "Reasignar no necesita repetir let."
+        ],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La primera impresión va antes de la reasignación."
+      },
+      "bug": {
+        "prompt": "La primera impresión también muestra 30. Muévela para conservar el valor anterior.",
+        "starter": "let minutos = 20;\nminutos = 30;\nconsole.log(minutos);\nconsole.log(minutos);",
+        "solution": "let minutos = 20;\nconsole.log(minutos);\nminutos = 30;\nconsole.log(minutos);",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "20\n30\n",
+            "overrides": {
+              "minutos": 20
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "5\n30\n",
+            "overrides": {
+              "minutos": 5
+            }
+          }
+        ],
+        "bindings": {
+          "minutos": "let"
+        },
+        "hints": [
+          "La consola registra el valor existente al llamar; no conserva valores anteriores automáticamente."
+        ],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "La consola registra el valor existente al llamar; no conserva valores anteriores automáticamente."
+      }
+    },
+    "js-calendario-con-for": {
+      "guided": {
+        "prompt": "Usa for para mostrar los números desde 1 hasta dias. Con cero días no debe aparecer ninguna línea.",
+        "starter": "const dias = 3;\n// Inicio, condición y actualización.",
+        "solution": "const dias = 3;\nfor (let dia = 1; dia <= dias; dia = dia + 1) { console.log(dia); }",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "1\n2\n3\n",
+            "overrides": {
+              "dias": 3
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "",
+            "overrides": {
+              "dias": 0
+            }
+          }
+        ],
+        "bindings": {
+          "dias": "const"
+        },
+        "hints": ["El contador empieza en 1 y la comparación incluye dias."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El contador empieza en 1 y la comparación incluye dias."
+      },
+      "bug": {
+        "prompt": "Falta el último día. Corrige la frontera sin añadir una impresión fuera del ciclo.",
+        "starter": "const dias = 3;\nfor (let dia = 1; dia < dias; dia = dia + 1) { console.log(dia); }",
+        "solution": "const dias = 3;\nfor (let dia = 1; dia <= dias; dia = dia + 1) { console.log(dia); }",
+        "cases": [
+          {
+            "name": "Caso inicial",
+            "stdout": "1\n2\n3\n",
+            "overrides": {
+              "dias": 3
+            }
+          },
+          {
+            "name": "Otra entrada",
+            "stdout": "1\n",
+            "overrides": {
+              "dias": 1
+            }
+          }
+        ],
+        "bindings": {
+          "dias": "const"
+        },
+        "hints": ["El día que coincide con el límite también pertenece al calendario."],
+        "explanation": "Los casos coinciden. Explica qué cambió y prueba otra entrada antes de continuar.",
+        "retryFeedback": "El día que coincide con el límite también pertenece al calendario."
+      }
+    }
+  },
+  "walkthroughs": {
+    "js-cambios-con-let": [
+      {
+        "line": 1,
+        "state": "estado = pendiente",
+        "explanation": "Se declara el nombre y su valor inicial; todavía no hay salida."
+      },
+      {
+        "line": 2,
+        "state": "salida: pendiente",
+        "explanation": "La primera impresión registra el valor actual."
+      },
+      {
+        "line": 3,
+        "state": "estado = confirmada",
+        "explanation": "La reasignación cambia el dato, pero no lo imprime."
+      },
+      {
+        "line": 4,
+        "state": "salida nueva: confirmada",
+        "explanation": "La consola añade otra línea sin cambiar la anterior."
+      }
+    ],
+    "js-calendario-con-for": [
+      {
+        "line": 1,
+        "state": "dia = 1",
+        "explanation": "El inicio se realiza una vez y la condición permite entrar."
+      },
+      {
+        "line": 2,
+        "state": "salida: 1",
+        "explanation": "Se ejecuta el cuerpo con el valor de la primera vuelta."
+      },
+      {
+        "line": 1,
+        "state": "dia = 2; condición verdadera",
+        "explanation": "Después del cuerpo se actualiza el contador y se vuelve a preguntar."
+      },
+      {
+        "line": 1,
+        "state": "dia = 4; condición falsa",
+        "explanation": "Después de mostrar 3, el contador pasa a 4 y el ciclo termina."
+      }
+    ]
+  }
+}

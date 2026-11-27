@@ -687,3 +687,55 @@ respuesta. La alternativa conserva las comprobaciones del recorrido y utiliza
 las dependencias instaladas. La cobertura se ejecutó con `--test-concurrency=1`
 para evitar la sensibilidad al límite de 200 ms del evaluador de pruebas bajo
 carga concurrente; no se cambian ese límite ni los umbrales de cobertura.
+
+## Aprender por temas: consulta JavaScript en el Laboratorio
+
+El Laboratorio añade una sección de consulta con 98 entradas: las 78 lecciones
+publicadas de Fundamentos y 20 fichas complementarias. El índice por bloques
+incluye búsqueda, bases explícitas y enlaces directos. Solo carga el contenido
+seleccionado. Conserva las explicaciones del recorrido y despliega aparte las
+instrucciones del proyecto. Las fichas nuevas contienen explicación, ejemplo,
+implementación guiada, incidencia y aplicación independiente: 66 prácticas nuevas
+con 134 casos, incluidos los talleres cortos de primer programa, let y for.
+
+La ampliación incluye ternario, switch, truthy/falsy, do…while, for…in,
+forEach, selección de recorridos, plantillas, desestructuración, spread/rest,
+Object.keys/values/entries, expresiones regulares, cambios en arreglos,
+try/catch/throw/finally, alcance de var, prototipos, Math, temporizadores,
+encadenamiento opcional y cortocircuito. for…of, while, for, funciones, métodos
+de transformación, clases, módulos, DOM y asincronía reutilizan las lecciones.
+La [correspondencia complementaria](javascript-learning-topics.md) localiza las
+explicaciones y actividades, y distingue esta consulta de la evaluación de la ruta.
+
+Los ejemplos JavaScript añaden predicción editable y guardada, consola próxima
+al código y salida de referencia desplegable. Se ofrecen glosario, pistas,
+orientación de errores y lectura opcional mediante el componente existente.
+Hay trazas preparadas de let, for, ternario y do…while; describen el ejemplo
+original, no cualquier código modificado. Las construcciones y métodos pedidos
+se reconocen con Acorn además de comprobar sus resultados. Los casos no acreditan
+por sí solos autoría ni calidad de razonamiento.
+
+La consulta no acredita XP ni lecciones, y usa borradores separados del proyecto.
+Las entregas, las bitácoras y los requisitos del recorrido conservan sus reglas.
+Cambiar de tema, de sección o de vista libera audio y ejecutores; las respuestas
+tardías no reemplazan el tema actual. No se añade una dependencia ni un servicio.
+
+Pasan 296 pruebas unitarias con cobertura en serie: 98,25 % de líneas, 94,95 %
+de ramas y 96,27 % de funciones. Los 59 módulos cumplen los umbrales globales
+y por archivo. Las fichas y sus soluciones se ejecutan con el mismo evaluador
+JavaScript usado por el navegador. El recorrido real de consulta pasa a 1440,
+390 y 320 px, incluida auditoría WCAG automática en ambos temas, reintento,
+recarga, teclado, borradores y ausencia de créditos o desbloqueos accidentales.
+Pasan también el Laboratorio previo a 1280/320 px, el acceso secuencial a
+1440/390 px y las regresiones de sincronización a 1440/390 px.
+
+La compilación prepara el paquete público. Los recorridos existentes de
+Laboratorio, acceso, progreso y lectura se verifican con el servidor HTTP
+alternativo descrito en la sección anterior: se conserva el código de sus
+comprobaciones y se sustituye solo el lanzador afectado por Console Ninja.
+La cobertura mantiene los umbrales y usa --test-concurrency=1. La sección nueva
+tiene su comando npm run test:topics y está incluida en CI.
+
+La revisión docente independiente y el piloto con principiantes siguen
+pendientes para contrastar claridad, ritmo, ayuda utilizada y transferencia.
+No se afirma cubrir todas las APIs de JavaScript ni ausencia absoluta de vacíos.

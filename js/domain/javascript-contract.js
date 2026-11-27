@@ -8,16 +8,21 @@ export function prepareBindingCases(code, cases, bindings = {}, syntax = {}) {
   if (syntax.comment && !comments.some((c) => c.value.trim()))
     throw Error('Agrega un comentario real fuera de los textos, como pide el reto.');
   const required = new Set(syntax.nodes ?? []);
+  const methods = new Set(syntax.methods ?? []);
   if (syntax.typeof) required.add('typeof');
   const findStructures = (node) => {
     if (!node || typeof node !== 'object') return;
     required.delete(node.type);
+    if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
+      const property = node.callee.property;
+      methods.delete(node.callee.computed ? property.value : property.name);
+    }
     if (node.type === 'UnaryExpression' && node.operator === 'typeof') required.delete('typeof');
     for (const value of Object.values(node))
       if (value && typeof value === 'object')
         Array.isArray(value) ? value.forEach(findStructures) : findStructures(value);
   };
-  if (required.size) {
+  if (required.size || methods.size) {
     findStructures(tree);
     if (required.size)
       throw Error(
@@ -33,11 +38,24 @@ export function prepareBindingCases(code, cases, bindings = {}, syntax = {}) {
                   FunctionDeclaration: 'function',
                   BreakStatement: 'break',
                   ContinueStatement: 'continue',
+                  ConditionalExpression: 'operador ternario ? :',
+                  SwitchStatement: 'switch',
+                  ForOfStatement: 'for…of',
+                  ForInStatement: 'for…in',
+                  TemplateLiteral: 'plantilla de texto',
+                  ObjectPattern: 'desestructuración de objeto',
+                  ArrayPattern: 'desestructuración de arreglo',
+                  SpreadElement: 'expansión con ...',
+                  RestElement: 'parámetro rest',
+                  TryStatement: 'try y catch',
+                  ThrowStatement: 'throw',
                 })[name] ?? name,
             )
             .join(', ') +
           '.',
       );
+    if (methods.size)
+      throw Error('Aplica los métodos del contrato: ' + [...methods].join(', ') + '.');
   }
   if (syntax.singleQuotes) {
     const literals = [];

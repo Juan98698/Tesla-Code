@@ -7,6 +7,7 @@ import { mountChoice, mountPractice } from './practice.js';
 
 const modes = {
   catalog: 'Retos y simuladores',
+  topics: 'Aprender por temas',
   lessons: 'Prácticas de lección',
   saved: 'Guardadas',
 };
@@ -82,6 +83,9 @@ export async function mount(root, ctx, load = loadLaboratory) {
     };
   });
   const filters = { mode: 'catalog', route: initialRoute, topic: 'all', type: 'all', query: '' };
+  let alive = true;
+  let topicDispose;
+  let topicLoading = false;
   const cards = new Map();
   const openRoutes = new Map();
   let itemsInRound = [];
@@ -114,7 +118,7 @@ export async function mount(root, ctx, load = loadLaboratory) {
     <button type="button" class="btn small" data-start-round>Ronda de repaso</button>
   </div>
   <section class="card lab-round" data-round hidden aria-labelledby="lab-round-title"></section>
-  <div class="practice-list"></div>`;
+  <div class="practice-list"></div><div data-topic-learning hidden></div>`;
 
   const q = (selector) => root.querySelector(selector);
   const result = q('.practice-list');
@@ -126,7 +130,45 @@ export async function mount(root, ctx, load = loadLaboratory) {
   const round = q('[data-round]');
   const roundButton = q('[data-start-round]');
   const count = q('.practice-count');
+  const topicsPanel = q('[data-topic-learning]');
   let shown = [];
+
+  async function openTopics() {
+    if (topicDispose || topicLoading) return;
+    topicLoading = true;
+    topicsPanel.innerHTML = '<p role="status">Preparando el índice de JavaScript…</p>';
+    try {
+      const { mountTopicLearning } = await import('../features/topic-learning.js');
+      if (!alive) return;
+      const dispose = await mountTopicLearning(topicsPanel, ctx);
+      if (alive && filters.mode === 'topics') topicDispose = dispose;
+      else dispose();
+    } catch {
+      if (!alive) return;
+      topicsPanel.innerHTML =
+        '<p role="alert">No se pudo cargar el índice de temas.</p><button class="btn small">Reintentar índice</button>';
+      topicsPanel.querySelector('button').onclick = openTopics;
+    } finally {
+      topicLoading = false;
+    }
+  }
+
+  function displayMode() {
+    const learning = filters.mode === 'topics';
+    if (!learning && topicDispose) {
+      topicDispose();
+      topicDispose = undefined;
+      topicsPanel.replaceChildren();
+    }
+    topicsPanel.hidden = !learning;
+    q('.lab-filters').hidden = learning;
+    q('.lab-session').hidden = learning;
+    result.hidden = learning;
+    reset.hidden = learning;
+    round.hidden = true;
+    if (learning) void openTopics();
+    else draw();
+  }
 
   function updateCount() {
     const challenges = shown.filter((item) => Object.hasOwn(PRACTICE_TYPES, item.type));
@@ -335,7 +377,9 @@ export async function mount(root, ctx, load = loadLaboratory) {
         sibling.setAttribute('aria-pressed', String(sibling === button));
       filters.mode = button.dataset.mode;
       filters.topic = filters.type = 'all';
-      draw();
+      if (filters.mode !== 'topics' && location.hash.startsWith('#/practica/javascript/'))
+        root.ownerDocument.defaultView.history.replaceState(null, '', '#/practica');
+      displayMode();
     };
   });
   root.querySelector('form').onsubmit = (event) => event.preventDefault();
@@ -378,4 +422,9 @@ export async function mount(root, ctx, load = loadLaboratory) {
     drawRound();
   };
   draw();
+  if (ctx.learningTopics) q('[data-mode="topics"]').click();
+  return () => {
+    alive = false;
+    topicDispose?.();
+  };
 }

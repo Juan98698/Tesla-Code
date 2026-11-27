@@ -2,6 +2,7 @@ import { escapeHtml as e } from '../core/html.js';
 import { isPublished, isUnlocked, lessonKey } from '../domain/curriculum.js';
 import { lessonHref, editionNotice } from './catalog.js';
 import { supportPanel } from './learning-support.js';
+import { topicHref } from '../domain/topics.js';
 export { mountActivities } from './activities.js';
 export function lessonPage(route, meta, data, state, tab, concepts = new Map()) {
   const key = lessonKey(route.id, meta.id),
@@ -18,7 +19,7 @@ export function lessonPage(route, meta, data, state, tab, concepts = new Map()) 
     )
     .join(
       '',
-    )}</div></details><article class="lesson-main">${route.archivedEdition ? editionNotice(route) : ''}<div class="lesson-heading"><div><div class="eyebrow">${e(route.name)} / ${e(meta.level)}</div><h1>${e(meta.title)}</h1><span class="badge">◷ ${meta.minutes} min orientativos</span> <span class="badge ${done ? 'live' : ''}" id="lesson-status">${done ? '✓ Completada' : 'Aprende · Practica · Comprueba'}</span></div><button class="icon-button" id="bookmark" aria-label="Guardar lección" aria-pressed="${state.bookmarks.includes(key)}">${state.bookmarks.includes(key) ? '★' : '☆'}</button></div><div class="lesson-tabs" role="tablist" aria-label="Etapas de aprendizaje">${[
+    )}</div></details><article class="lesson-main">${route.archivedEdition ? editionNotice(route) : ''}<div class="lesson-heading"><div><div class="eyebrow">${e(route.name)} / ${e(meta.level)}</div><h1>${e(meta.title)}</h1><span class="badge">◷ ${meta.minutes} min orientativos</span> <span class="badge ${done ? 'live' : ''}" id="lesson-status">${done ? '✓ Completada' : 'Aprende · Practica · Comprueba'}</span></div><button class="icon-button" id="bookmark" aria-label="Guardar lección" aria-pressed="${state.bookmarks.includes(key)}">${state.bookmarks.includes(key) ? '★' : '☆'}</button></div>${route.id === 'fundamentos' && !route.archivedEdition ? `<a class="text-link lesson-topic-link" href="${topicHref(meta.id)}">Explorar este tema en el Laboratorio →</a>` : ''}<div class="lesson-tabs" role="tablist" aria-label="Etapas de aprendizaje">${[
     ['aprender', '01', 'Aprender'],
     ['practicar', '02', 'Practicar'],
     ['comprobar', '03', 'Comprobar'],

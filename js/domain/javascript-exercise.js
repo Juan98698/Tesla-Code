@@ -42,25 +42,40 @@ export function javascriptExerciseErrors(exercise) {
       Array.isArray(exercise.syntax) ||
       !Object.keys(exercise.syntax).length ||
       Object.keys(exercise.syntax).some(
-        (k) => !['comment', 'singleQuotes', 'nodes', 'typeof'].includes(k),
+        (k) => !['comment', 'singleQuotes', 'nodes', 'methods', 'typeof'].includes(k),
       ) ||
       Object.entries(exercise.syntax).some(([key, value]) =>
-        key === 'nodes'
+        key === 'methods'
           ? !Array.isArray(value) ||
             !value.length ||
-            value.some(
-              (v) =>
-                ![
-                  'IfStatement',
-                  'WhileStatement',
-                  'DoWhileStatement',
-                  'ForStatement',
-                  'FunctionDeclaration',
-                  'BreakStatement',
-                  'ContinueStatement',
-                ].includes(v),
-            )
-          : value !== true,
+            value.some((name) => typeof name !== 'string' || !/^[a-zA-Z_$][\w$]*$/.test(name))
+          : key === 'nodes'
+            ? !Array.isArray(value) ||
+              !value.length ||
+              value.some(
+                (v) =>
+                  ![
+                    'IfStatement',
+                    'WhileStatement',
+                    'DoWhileStatement',
+                    'ForStatement',
+                    'FunctionDeclaration',
+                    'BreakStatement',
+                    'ContinueStatement',
+                    'ConditionalExpression',
+                    'SwitchStatement',
+                    'ForOfStatement',
+                    'ForInStatement',
+                    'TemplateLiteral',
+                    'ObjectPattern',
+                    'ArrayPattern',
+                    'SpreadElement',
+                    'RestElement',
+                    'TryStatement',
+                    'ThrowStatement',
+                  ].includes(v),
+              )
+            : value !== true,
       ))
   )
     errors.push(

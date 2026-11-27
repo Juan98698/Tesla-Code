@@ -41,6 +41,7 @@ let routes = [],
   filter = 'all',
   toastTimer;
 let disposeView = () => {};
+let widgetCleanups = [];
 let pendingSaves = 0;
 function refreshMotionControls() {
   const paused = document.documentElement.dataset.motion === 'off';
@@ -156,7 +157,11 @@ async function mountWidget(el, name, version, context = labContext) {
     const widget = await widgets[name]();
     if (version !== renderVersion) return;
     if (showLoading) el.replaceChildren();
-    await widget.mount(el, context);
+    const cleanup = await widget.mount(el, context);
+    if (typeof cleanup === 'function') {
+      if (version !== renderVersion) cleanup();
+      else widgetCleanups.push(cleanup);
+    }
   } catch {
     if (version !== renderVersion) return;
     if (showLoading) el.replaceChildren();
@@ -177,6 +182,8 @@ function mountLabs(root, version) {
   );
 }
 async function render() {
+  widgetCleanups.forEach((cleanup) => cleanup());
+  widgetCleanups = [];
   disposeView();
   disposeView = () => {};
   const version = ++renderVersion;
@@ -278,6 +285,8 @@ async function render() {
         routes,
         state,
         route: rid,
+        learningTopics: rid === 'javascript',
+        topic: lid === 'temas' ? requestedTab : undefined,
         mountWidget: (body, name) => mountWidget(body, name, version),
       });
     } else if (view === 'progreso') {
