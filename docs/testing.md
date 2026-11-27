@@ -3,7 +3,7 @@
 ## Comandos
 
 - `npm run test:topics`: consulta JavaScript en Chromium a 1440, 390 y 320 px. Comprueba recuperación de descarga, enlaces directos y recarga, consola real, pistas, borradores y predicciones, errores orientados, acceso secuencial intacto, teclado, ausencia de desbordamiento y WCAG automático. Usa el servidor local de la aplicación sin conectar con Gemini.
-- `tests/topics.test.mjs`: contrasta los 98 temas, las soluciones y contraejemplos de las nuevas fichas, trazas preparadas, búsqueda, respuestas tardías y conservación del estado. Los resultados no acreditan comprensión ni retención.
+- `tests/topics.test.mjs`: contrasta los 100 temas, las soluciones y contraejemplos de las nuevas fichas, trazas preparadas, búsqueda, respuestas tardías y conservación del estado. Los resultados no acreditan comprensión ni retención.
 
 - `npm test`: pruebas unitarias de dominio, componentes DOM, widgets, repositorios y controlador; más pruebas de regresión de las herramientas pedagógicas.
 - `npm run test:coverage`: Node 24/26; genera `coverage/lcov.info` y verifica que todos los módulos de `js/` aparezcan en la cobertura. El informe no sustituye las aserciones.

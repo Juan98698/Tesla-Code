@@ -5,9 +5,11 @@ import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const route = indexRoute(read('content/curriculum/fundamentos.json'));
-const { guides, workshops, walkthroughs } = read('content/learning/javascript-guides.json');
+const { guides, workshops, walkthroughs, searchTerms } = read(
+  'content/learning/javascript-guides.json',
+);
 const errors = guideErrors(guides, route);
-const topics = topicIndex(route, guides);
+const topics = topicIndex(route, guides, searchTerms);
 if (new Set(topics.map((topic) => topic.id)).size !== topics.length)
   errors.push('Hay temas repetidos.');
 for (const [id, item] of [

@@ -5,7 +5,7 @@ export const foldTopic = (text) =>
   text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('es').trim();
 
 // The route owns its lessons and prerequisites. Consultation adds no completion rules.
-export function topicIndex(route, guides) {
+export function topicIndex(route, guides, searchTerms = {}) {
   const published = route.lessons.filter(isPublished);
   const entries = published.map((lesson) => ({
     id: lesson.id,
@@ -30,15 +30,46 @@ export function topicIndex(route, guides) {
       kind: 'guide',
     });
   }
-  return entries;
+  const ids = new Set(entries.map((entry) => entry.id));
+  for (const [id, terms] of Object.entries(searchTerms)) {
+    if (
+      !ids.has(id) ||
+      !Array.isArray(terms) ||
+      terms.some((term) => typeof term !== 'string' || !term.trim())
+    )
+      throw Error(`Referencias de búsqueda inválidas: ${id}`);
+  }
+  return entries.map((entry) => ({ ...entry, searchTerms: searchTerms[entry.id] ?? [] }));
 }
 
 export function filterTopics(topics, query) {
-  const words = foldTopic(query).split(/\s+/u).filter(Boolean);
-  return topics.filter((topic) => {
-    const text = foldTopic([topic.title, topic.groupName, topic.keywords].join(' '));
+  const normalize = (value) =>
+    (foldTopic(value).match(/[\p{L}\p{N}_$]+/gu) ?? [])
+      .filter(
+        (word) =>
+          !['metodo', 'metodos', 'method', 'javascript', 'de', 'del', 'el', 'la'].includes(word),
+      )
+      .join(' ');
+  const normalized = normalize(query);
+  const words = normalized.split(' ').filter(Boolean);
+  const matching = topics.filter((topic) => {
+    const text = normalize(
+      [topic.title, topic.groupName, topic.keywords, ...(topic.searchTerms ?? [])].join(' '),
+    );
     return words.every((word) => text.includes(word));
   });
+  if (!words.length) return matching;
+  const precise = (topic) =>
+    (topic.searchTerms ?? []).some((term) => normalize(term) === normalized);
+  // A method query should prefer its API, rather than a similarly named type
+  // (for example array.map() versus the Map collection). Empty search keeps order.
+  const api = matching.filter((topic) =>
+    (topic.searchTerms ?? []).some((term) => /[.(]/u.test(term) && normalize(term) === normalized),
+  );
+  const methodQuery = /\.|\(/u.test(query);
+  return (methodQuery && api.length ? api : matching).toSorted(
+    (a, b) => Number(precise(b)) - Number(precise(a)),
+  );
 }
 
 export function guideErrors(guides, route) {

@@ -2555,6 +2555,372 @@
           "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_AND"
         }
       ]
+    },
+    {
+      "id": "consulta-includes",
+      "after": "js-crear-listas",
+      "title": "includes(): pertenencia en arreglos y búsqueda en texto",
+      "outcome": "Comprobar si un valor o fragmento aparece, obteniendo un booleano sin confundirlo con una posición.",
+      "requires": ["js-crear-listas", "js-comparaciones"],
+      "sections": [
+        {
+          "title": "Una pregunta de sí o no",
+          "text": "Un método es una operación que se llama sobre un valor. En datos.includes(buscado), el punto accede al método del arreglo y los paréntesis reciben el valor que quieres encontrar. Devuelve true si aparece y false si no. No devuelve la posición, no cuenta coincidencias y no modifica el arreglo."
+        },
+        {
+          "title": "Valores, tipos y límites",
+          "text": "Los índices del arreglo comienzan en cero, pero encontrar un elemento en esa posición también devuelve true. includes no convierte tipos: el número 2 y el texto \"2\" son distintos. Puede encontrar NaN, el valor que representa un resultado numérico inválido; esa es una diferencia respecto a buscar con ===. Los objetos se comparan por referencia, no por campos iguales. En un arreglo vacío devuelve false."
+        },
+        {
+          "title": "Texto y mayúsculas",
+          "text": "En un texto, mensaje.includes(fragmento) busca una secuencia de caracteres contigua. Distingue mayúsculas: \"Tesla\" no contiene \"tesla\" con esta regla. toLowerCase() devuelve una copia del texto en minúsculas. Para ignorar esa diferencia puedes aplicar toLowerCase a ambos textos antes de buscar. Esto no quita tildes: \"música\" sigue siendo diferente de \"musica\". Un fragmento vacío se encuentra en cualquier texto; que sea una consulta válida es otra regla del problema."
+        },
+        {
+          "title": "Desde qué posición buscar",
+          "text": "El segundo argumento opcional indica dónde empezar: datos.includes(buscado, desde). Omitirlo empieza en cero. Un inicio igual o mayor que la longitud no visita elementos. Un valor negativo cuenta desde el final, limitado al comienzo. En texto, una posición negativa se trata como cero. Los argumentos y sus unidades importan: la posición no es una cantidad de coincidencias."
+        },
+        {
+          "title": "No convertir una posición en booleano",
+          "text": "indexOf devuelve la posición de la primera coincidencia o -1 si falta. La posición cero se interpreta como falsa y -1 como verdadera dentro de una condición. Por eso if (datos.indexOf(buscado)) puede invertir dos casos importantes. Cuando solo necesitas saber si existe, includes comunica esa intención y ya devuelve el booleano."
+        }
+      ],
+      "example": {
+        "code": "const datos = [0, 2, 4];\nconsole.log(datos.includes(0));\nconsole.log(datos.includes(\"2\"));\nconsole.log([NaN].includes(NaN));",
+        "stdout": "true\nfalse\ntrue\n"
+      },
+      "guided": {
+        "prompt": "Muestra si buscado aparece en datos con includes. La primera posición también cuenta y no debes convertir tipos.",
+        "starter": "const datos = [0, 2, 4];\nconst buscado = 0;\n// Consulta y muestra el booleano.",
+        "solution": "const datos = [0, 2, 4];\nconst buscado = 0;\nconsole.log(datos.includes(buscado));",
+        "cases": [
+          {
+            "name": "Primera posición",
+            "stdout": "true\n",
+            "overrides": {
+              "datos": [0, 2, 4],
+              "buscado": 0
+            }
+          },
+          {
+            "name": "Ausente",
+            "stdout": "false\n",
+            "overrides": {
+              "datos": [0, 2, 4],
+              "buscado": 3
+            }
+          },
+          {
+            "name": "Otro tipo",
+            "stdout": "false\n",
+            "overrides": {
+              "datos": [0, 2, 4],
+              "buscado": "2"
+            }
+          },
+          {
+            "name": "Colección vacía",
+            "stdout": "false\n",
+            "overrides": {
+              "datos": [],
+              "buscado": 0
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const",
+          "buscado": "const"
+        },
+        "syntax": {
+          "methods": ["includes"]
+        },
+        "hints": [
+          "Identifica el dato que recorres o consultas y el resultado que necesitas.",
+          "Compara el caso inicial con una ausencia o colección vacía. Usa el método anunciado, no una salida fija."
+        ],
+        "explanation": "Los casos y las construcciones pedidas coinciden. Prueba otra entrada y explica por qué se conserva el resultado.",
+        "retryFeedback": "Revisa el tipo devuelto, los valores de entrada y los casos de ausencia o vacío."
+      },
+      "bug": {
+        "prompt": "La condición confunde una posición con presencia. Muestra Está si el dato existe o Falta si no; corrige la consulta con includes.",
+        "starter": "const datos = [4, 8];\nconst buscado = 4;\nif (datos.indexOf(buscado)) console.log(\"Está\");\nelse console.log(\"Falta\");",
+        "solution": "const datos = [4, 8];\nconst buscado = 4;\nif (datos.includes(buscado)) console.log(\"Está\");\nelse console.log(\"Falta\");",
+        "cases": [
+          {
+            "name": "Índice cero",
+            "stdout": "Está\n",
+            "overrides": {
+              "datos": [4, 8],
+              "buscado": 4
+            }
+          },
+          {
+            "name": "Sin coincidencia",
+            "stdout": "Falta\n",
+            "overrides": {
+              "datos": [4, 8],
+              "buscado": 9
+            }
+          },
+          {
+            "name": "Índice posterior",
+            "stdout": "Está\n",
+            "overrides": {
+              "datos": [4, 8],
+              "buscado": 8
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const",
+          "buscado": "const"
+        },
+        "syntax": {
+          "methods": ["includes"]
+        },
+        "hints": [
+          "Identifica el dato que recorres o consultas y el resultado que necesitas.",
+          "Compara el caso inicial con una ausencia o colección vacía. Usa el método anunciado, no una salida fija."
+        ],
+        "explanation": "Los casos y las construcciones pedidas coinciden. Prueba otra entrada y explica por qué se conserva el resultado.",
+        "retryFeedback": "Revisa el tipo devuelto, los valores de entrada y los casos de ausencia o vacío."
+      },
+      "challenge": {
+        "prompt": "Un buscador debe indicar si consulta aparece en mensaje ignorando mayúsculas, pero conservando tildes. Muestra true o false. Usa toLowerCase e includes en texto; una consulta vacía devuelve true.",
+        "starter": "const mensaje = \"Hola TeslaCode\";\nconst consulta = \"tesla\";\n",
+        "solution": "const mensaje = \"Hola TeslaCode\";\nconst consulta = \"tesla\";\nconsole.log(mensaje.toLowerCase().includes(consulta.toLowerCase()));",
+        "cases": [
+          {
+            "name": "Mayúsculas distintas",
+            "stdout": "true\n",
+            "overrides": {
+              "mensaje": "Hola TeslaCode",
+              "consulta": "TESLA"
+            }
+          },
+          {
+            "name": "Ausente",
+            "stdout": "false\n",
+            "overrides": {
+              "mensaje": "Hola TeslaCode",
+              "consulta": "SQL"
+            }
+          },
+          {
+            "name": "Tildes significativas",
+            "stdout": "false\n",
+            "overrides": {
+              "mensaje": "Música",
+              "consulta": "musica"
+            }
+          },
+          {
+            "name": "Fragmento vacío",
+            "stdout": "true\n",
+            "overrides": {
+              "mensaje": "Hola",
+              "consulta": ""
+            }
+          }
+        ],
+        "bindings": {
+          "mensaje": "const",
+          "consulta": "const"
+        },
+        "syntax": {
+          "methods": ["includes", "toLowerCase"]
+        },
+        "hints": [
+          "Identifica el dato que recorres o consultas y el resultado que necesitas.",
+          "Compara el caso inicial con una ausencia o colección vacía. Usa el método anunciado, no una salida fija."
+        ],
+        "explanation": "Los casos y las construcciones pedidas coinciden. Prueba otra entrada y explica por qué se conserva el resultado.",
+        "retryFeedback": "Revisa el tipo devuelto, los valores de entrada y los casos de ausencia o vacío."
+      },
+      "sources": [
+        {
+          "title": "Array.prototype.includes en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes"
+        },
+        {
+          "title": "String.prototype.includes en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/includes"
+        }
+      ]
+    },
+    {
+      "id": "consulta-entries-iteradores",
+      "after": "js-map-y-set",
+      "title": "entries(): pares de arreglos y Map",
+      "outcome": "Recorrer posiciones y valores de un arreglo o claves y valores de un Map, distinguiendo iteradores y arreglos.",
+      "requires": ["js-map-y-set", "consulta-desestructuracion", "consulta-claves-valores"],
+      "sections": [
+        {
+          "title": "Posición y valor juntos",
+          "text": "datos.entries() devuelve un iterador de pares [indice, valor]. Un par es un arreglo de dos elementos. En for (const [indice, valor] of datos.entries()), for…of obtiene cada par y la desestructuración da nombre a sus posiciones. Los índices de un arreglo son números que comienzan en cero; typeof indice muestra \"number\"."
+        },
+        {
+          "title": "Un iterador se consume",
+          "text": "Un iterador entrega resultados progresivamente. No es un arreglo ni tiene necesariamente length. Su método next() devuelve un objeto con value, el valor entregado, y done, que indica si terminó. for…of pide esos pasos por ti. Si recorres hasta el final y vuelves a usar el mismo iterador, no empieza de nuevo. Llama otra vez a entries() para obtener un iterador nuevo."
+        },
+        {
+          "title": "Pares de un Map",
+          "text": "mapa.entries() entrega pares [clave, valor] en orden de inserción. La clave es la que guardaste: puede ser un número o un texto, y 1 no es la misma clave que \"1\". Si guardas otra vez una clave, actualizas su valor sin mover su primera posición de inserción. new Map(pares) construye ese mapa desde una lista de pares. Un Map vacío no produce ninguna vuelta."
+        },
+        {
+          "title": "Diferencia con Object.entries",
+          "text": "Object.entries(objeto) es una función de Object y devuelve un arreglo de propiedades propias enumerables con claves de texto. arreglo.entries() y mapa.entries() son métodos de sus respectivas instancias y devuelven iteradores. Si aplicas Object.entries a un arreglo, sus índices aparecen como claves de texto: no es la misma representación que los índices numéricos de arreglo.entries(). La ficha anterior de Object.keys, values y entries prepara esa diferencia."
+        },
+        {
+          "title": "Elegir y comprobar",
+          "text": "Usa un par cuando necesitas tanto la identificación como el contenido. Comprueba una colección vacía, varios elementos y el tipo de la clave. No confundas los pares con valores sueltos ni reutilices un iterador agotado. Estos ejemplos conservan el orden de los datos y hacen visible el tipo mediante typeof, que ya conoces."
+        }
+      ],
+      "example": {
+        "code": "const nombres = [\"Luz\", \"Sol\"];\nfor (const [indice, nombre] of nombres.entries()) {\n  console.log(indice, nombre, typeof indice);\n}",
+        "stdout": "0 Luz number\n1 Sol number\n"
+      },
+      "guided": {
+        "prompt": "Recorre nombres con entries y muestra índice, nombre y tipo del índice. Los índices deben ser números y una lista vacía no imprime nada.",
+        "starter": "const nombres = [\"Luz\", \"Sol\"];\n",
+        "solution": "const nombres = [\"Luz\", \"Sol\"];\nfor (const [indice, nombre] of nombres.entries()) {\n console.log(indice, nombre, typeof indice);\n}",
+        "cases": [
+          {
+            "name": "Dos nombres",
+            "stdout": "0 Luz number\n1 Sol number\n",
+            "overrides": {
+              "nombres": ["Luz", "Sol"]
+            }
+          },
+          {
+            "name": "Un nombre",
+            "stdout": "0 Ada number\n",
+            "overrides": {
+              "nombres": ["Ada"]
+            }
+          },
+          {
+            "name": "Sin nombres",
+            "stdout": "",
+            "overrides": {
+              "nombres": []
+            }
+          }
+        ],
+        "bindings": {
+          "nombres": "const"
+        },
+        "syntax": {
+          "methods": ["entries"],
+          "nodes": ["ForOfStatement"]
+        },
+        "hints": [
+          "Identifica el dato que recorres o consultas y el resultado que necesitas.",
+          "Compara el caso inicial con una ausencia o colección vacía. Usa el método anunciado, no una salida fija."
+        ],
+        "explanation": "Los casos y las construcciones pedidas coinciden. Prueba otra entrada y explica por qué se conserva el resultado.",
+        "retryFeedback": "Revisa el tipo devuelto, los valores de entrada y los casos de ausencia o vacío."
+      },
+      "bug": {
+        "prompt": "Se necesitan dos recorridos completos, pero el segundo no imprime nada porque cursor ya se agotó. Crea un iterador nuevo para cada recorrido y conserva las dos salidas.",
+        "starter": "const datos = [2, 4];\nconst cursor = datos.entries();\nfor (const [indice, valor] of cursor) console.log(indice, valor);\nfor (const [indice, valor] of cursor) console.log(indice, valor);",
+        "solution": "const datos = [2, 4];\nfor (const [indice, valor] of datos.entries()) console.log(indice, valor);\nfor (const [indice, valor] of datos.entries()) console.log(indice, valor);",
+        "cases": [
+          {
+            "name": "Dos recorridos",
+            "stdout": "0 2\n1 4\n0 2\n1 4\n",
+            "overrides": {
+              "datos": [2, 4]
+            }
+          },
+          {
+            "name": "Un dato, dos veces",
+            "stdout": "0 9\n0 9\n",
+            "overrides": {
+              "datos": [9]
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "syntax": {
+          "methods": ["entries"],
+          "nodes": ["ForOfStatement"]
+        },
+        "hints": [
+          "Identifica el dato que recorres o consultas y el resultado que necesitas.",
+          "Compara el caso inicial con una ausencia o colección vacía. Usa el método anunciado, no una salida fija."
+        ],
+        "explanation": "Los casos y las construcciones pedidas coinciden. Prueba otra entrada y explica por qué se conserva el resultado.",
+        "retryFeedback": "Revisa el tipo devuelto, los valores de entrada y los casos de ausencia o vacío."
+      },
+      "challenge": {
+        "prompt": "Construye un Map a partir de pares y muestra cada clave, valor y tipo de la clave mediante mapa.entries(). Conserva los tipos: una clave numérica y el mismo texto son distintas. Una clave repetida conserva solo su último valor.",
+        "starter": "const pares = [[\"A\", 3], [\"B\", 0]];\n",
+        "solution": "const pares = [[\"A\", 3], [\"B\", 0]];\nconst mapa = new Map(pares);\nfor (const [clave, valor] of mapa.entries()) {\n console.log(clave, valor, typeof clave);\n}",
+        "cases": [
+          {
+            "name": "Dos claves",
+            "stdout": "A 3 string\nB 0 string\n",
+            "overrides": {
+              "pares": [
+                ["A", 3],
+                ["B", 0]
+              ]
+            }
+          },
+          {
+            "name": "Claves de tipos distintos",
+            "stdout": "1 A number\n1 B string\n",
+            "overrides": {
+              "pares": [
+                [1, "A"],
+                ["1", "B"]
+              ]
+            }
+          },
+          {
+            "name": "Clave actualizada",
+            "stdout": "A 4 string\n",
+            "overrides": {
+              "pares": [
+                ["A", 1],
+                ["A", 4]
+              ]
+            }
+          },
+          {
+            "name": "Sin pares",
+            "stdout": "",
+            "overrides": {
+              "pares": []
+            }
+          }
+        ],
+        "bindings": {
+          "pares": "const"
+        },
+        "syntax": {
+          "methods": ["entries"],
+          "nodes": ["ForOfStatement"]
+        },
+        "hints": [
+          "Identifica el dato que recorres o consultas y el resultado que necesitas.",
+          "Compara el caso inicial con una ausencia o colección vacía. Usa el método anunciado, no una salida fija."
+        ],
+        "explanation": "Los casos y las construcciones pedidas coinciden. Prueba otra entrada y explica por qué se conserva el resultado.",
+        "retryFeedback": "Revisa el tipo devuelto, los valores de entrada y los casos de ausencia o vacío."
+      },
+      "sources": [
+        {
+          "title": "Array.prototype.entries en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries"
+        },
+        {
+          "title": "Map.prototype.entries en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries"
+        }
+      ]
     }
   ],
   "workshops": {
@@ -2751,5 +3117,125 @@
         "explanation": "Después de mostrar 3, el contador pasa a 4 y el ciclo termina."
       }
     ]
+  },
+  "searchTerms": {
+    "js-transformar-map": [
+      ".map()",
+      "Array.prototype.map()",
+      "arreglo.map()",
+      "transformar listas"
+    ],
+    "js-reducir-acumulador": [
+      ".reduce()",
+      "Array.prototype.reduce()",
+      "arreglo.reduce()",
+      "acumulador"
+    ],
+    "js-filtrar-encontrar": [
+      ".filter()",
+      ".find()",
+      ".some()",
+      ".every()",
+      "Array.prototype.filter()",
+      "Array.prototype.find()",
+      "Array.prototype.some()",
+      "Array.prototype.every()",
+      "filtrar listas"
+    ],
+    "js-recorrer-valores": ["for…of", "for of", "for...of", "iterables"],
+    "js-pila-de-cambios": [
+      "pilas",
+      "stack",
+      "LIFO",
+      "pila",
+      "stacks",
+      "último en entrar primero en salir"
+    ],
+    "js-pila-y-cola": [
+      "colas",
+      "queue",
+      "FIFO",
+      "cola",
+      "queues",
+      "pilas",
+      "pila",
+      "primero en entrar primero en salir",
+      "recorrido por niveles"
+    ],
+    "js-texto-normalizado": [
+      ".trim()",
+      ".normalize()",
+      ".toLowerCase()",
+      "String.prototype.trim()",
+      "String.prototype.normalize()",
+      "String.prototype.toLowerCase()",
+      "minúsculas",
+      "cadenas"
+    ],
+    "js-map-y-set": [
+      "Map",
+      "Set",
+      "diccionarios",
+      "conjuntos",
+      ".get()",
+      ".set()",
+      ".has()",
+      ".add()",
+      "Map.prototype.get()",
+      "Map.prototype.set()",
+      "Map.prototype.has()",
+      "Set.prototype.add()",
+      "Set.prototype.has()"
+    ],
+    "consulta-claves-valores": [
+      "Object.entries()",
+      "Object.keys()",
+      "Object.values()",
+      ".entries()",
+      ".keys()",
+      ".values()",
+      "propiedades propias"
+    ],
+    "consulta-array-cambios": [
+      ".push()",
+      ".pop()",
+      ".shift()",
+      ".unshift()",
+      ".slice()",
+      ".splice()",
+      "Array.prototype.push()",
+      "Array.prototype.pop()",
+      "Array.prototype.shift()",
+      "Array.prototype.unshift()",
+      "Array.prototype.slice()",
+      "Array.prototype.splice()",
+      "mutación",
+      "copiar arreglos"
+    ],
+    "consulta-includes": [
+      "Array.prototype.includes()",
+      "String.prototype.includes()",
+      ".includes()",
+      ".indexOf()",
+      "Array.prototype.indexOf()",
+      "arreglo.includes()",
+      "texto.includes()",
+      "pertenencia",
+      "contiene"
+    ],
+    "consulta-entries-iteradores": [
+      "Array.prototype.entries()",
+      "Map.prototype.entries()",
+      ".entries()",
+      "arreglo.entries()",
+      "mapa.entries()",
+      "iteradores",
+      "pares"
+    ],
+    "consulta-for-each": [".forEach()", "Array.prototype.forEach()", "for each", "callbacks"],
+    "consulta-for-in": ["for…in", "for in", "for...in", "Object.hasOwn()", "claves de objetos"],
+    "consulta-switch": ["switch", "case", "default", "selección múltiple"],
+    "consulta-ternario": ["ternario", "operador condicional", "conditional operator"],
+    "js-decisiones": ["if", "else", "condicional", "condicionales", "if else"]
   }
 }

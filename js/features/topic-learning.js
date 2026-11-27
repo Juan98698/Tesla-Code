@@ -137,8 +137,8 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
   const getLesson = dependencies.loadLesson ?? loadLesson;
   const exerciseOptions = dependencies.exerciseOptions ?? {};
   const route = ctx.routes.find((item) => item.id === 'fundamentos');
-  const { guides, workshops = {}, walkthroughs = {} } = await loadGuides();
-  const topics = topicIndex(route, guides);
+  const { guides, workshops = {}, walkthroughs = {}, searchTerms = {} } = await loadGuides();
+  const topics = topicIndex(route, guides, searchTerms);
   let selected = ctx.topic ?? topics[0].id;
   let alive = true;
   let revision = 0;
@@ -153,7 +153,7 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
     <p>Busca una duda o sigue el índice en orden. Consulta, predice, experimenta y practica. El proyecto y sus entregas continúan en tu ruta.</p>
     <p class="topic-consultation-note">Consulta libre · No completa lecciones ni concede XP. Tus borradores se guardan aparte en este navegador.</p></header>
     <div class="topic-layout"><details class="topic-index" open><summary>Índice de JavaScript <span>${topics.length} temas</span></summary>
-    <label for="topic-search">Buscar un tema de JavaScript</label><input type="search" id="topic-search" placeholder="Ej. ternario, forEach, objetos…" maxlength="100">
+    <label for="topic-search">Buscar un tema de JavaScript</label><input type="search" id="topic-search" placeholder="Ej. .map(), .includes, colas…" maxlength="100">
     <p data-topic-count role="status"></p><nav aria-label="Temas de JavaScript" data-topic-nav></nav></details>
     <article class="topic-content" aria-live="off"></article></div></section>`;
   const search = root.querySelector('input');
@@ -175,7 +175,7 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
       details.innerHTML = `<summary>${e(entries[0].groupName)}</summary>${entries
         .map(
           (entry) =>
-            `<a href="${topicHref(entry.id)}" data-topic="${e(entry.id)}" ${entry.id === selected ? 'aria-current="page"' : ''}>${e(entry.title)}</a>`,
+            `<a href="${topicHref(entry.id)}" data-topic="${e(entry.id)}" ${entry.id === selected ? 'aria-current="page"' : ''}>${e(entry.title)}${entry.searchTerms.length ? `<small class="topic-search-terms">${entry.searchTerms.slice(0, 3).map(e).join(' · ')}</small>` : ''}</a>`,
         )
         .join('')}`;
       nav.append(details);

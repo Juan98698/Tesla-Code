@@ -757,3 +757,11 @@ una ficha complementaria y el tema de recursión donde se observó el problema.
 El recorrido previo no verificaba el arranque de voz dentro de ese contenedor;
 esta regresión queda cubierta expresamente. La reproducción audible depende
 del motor y las voces del dispositivo. El progreso no cambia.
+
+## Búsqueda de métodos y estructuras por sus nombres
+
+Se reprodujeron búsquedas sin resultados para .map, .reduce, .filter, .includes, .entries y colas. El índice ahora relaciona referencias de API y sinónimos con sus explicaciones, acepta puntuación de métodos y prioriza coincidencias específicas. El resultado muestra referencias para distinguir un método de un nombre general, como .map() frente a Map. Los filtros conservan el tema abierto y los borradores.
+
+Se añaden fichas completas de includes (arreglos y texto) y entries (arreglos y Map), conservando la anterior de Object.entries. El catálogo reúne 100 entradas: 78 lecciones reutilizadas y 22 fichas. Las prácticas complementarias y talleres suman 72 ejercicios con 154 casos. Se contrastan tipos, ausencia, posición cero, consulta vacía, tildes, iteradores agotados, colecciones vacías y claves de Map de tipos distintos. Las fichas enlazan las bases y documentación de MDN. La consulta no modifica créditos ni el proyecto secuencial.
+
+Pasan 25 pruebas de temas y audio, incluidos los ejemplos, soluciones y contraejemplos, las búsquedas solicitadas y la preparación de lectura de las 100 entradas. El navegador verifica esas búsquedas y ejecuta prácticas de includes y entries en el entorno aislado. La ampliación conserva los prerrequisitos y queda sujeta a la revisión docente y piloto ya documentados.

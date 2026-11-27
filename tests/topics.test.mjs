@@ -50,12 +50,52 @@ const options = {
 };
 const dependencies = { loadGuides: async () => catalog, loadLesson, exerciseOptions: options };
 
+test('method signatures and structure names find their actual lessons without requiring title wording', () => {
+  const topics = topicIndex(route, catalog.guides, catalog.searchTerms);
+  for (const [query, id] of [
+    ['.map', 'js-transformar-map'],
+    ['.reduce()', 'js-reducir-acumulador'],
+    ['método .filter', 'js-filtrar-encontrar'],
+    ['Array.prototype.map()', 'js-transformar-map'],
+    ['Object.entries()', 'consulta-claves-valores'],
+    ['colas', 'js-pila-y-cola'],
+    ['queues', 'js-pila-y-cola'],
+    ['pilas', 'js-pila-de-cambios'],
+    ['.includes()', 'consulta-includes'],
+    ['Array.prototype.includes', 'consulta-includes'],
+    ['String.prototype.includes()', 'consulta-includes'],
+    ['Array.prototype.entries()', 'consulta-entries-iteradores'],
+    ['Map.prototype.entries', 'consulta-entries-iteradores'],
+    ['.entries', 'consulta-claves-valores'],
+    ['.entries', 'consulta-entries-iteradores'],
+  ])
+    assert.ok(
+      filterTopics(topics, query).some((topic) => topic.id === id),
+      query,
+    );
+  assert.equal(filterTopics(topics, '.map')[0].id, 'js-transformar-map');
+  assert.deepEqual(
+    filterTopics(topics, '.map').map((topic) => topic.id),
+    ['js-transformar-map'],
+  );
+  assert.deepEqual(
+    filterTopics(topics, '').map((topic) => topic.id),
+    topics.map((topic) => topic.id),
+  );
+  assert.equal(filterTopics(topics, 'función inexistente').length, 0);
+  assert.throws(() => topicIndex(route, catalog.guides, { unknown: ['.map()'] }), /búsqueda/);
+  assert.throws(
+    () => topicIndex(route, catalog.guides, { 'js-transformar-map': [null] }),
+    /búsqueda/,
+  );
+});
+
 test('topic index reuses the complete current edition, orders extensions and leaves progression untouched', () => {
   const before = JSON.stringify(route);
-  const entries = topicIndex(route, catalog.guides);
-  assert.equal(entries.length, 98);
+  const entries = topicIndex(route, catalog.guides, catalog.searchTerms);
+  assert.equal(entries.length, 100);
   assert.equal(entries.filter((entry) => entry.kind === 'lesson').length, 78);
-  assert.equal(new Set(entries.map((entry) => entry.id)).size, 98);
+  assert.equal(new Set(entries.map((entry) => entry.id)).size, 100);
   const positions = new Map(entries.map((entry, index) => [entry.id, index]));
   for (const guide of catalog.guides)
     for (const required of guide.requires)
@@ -66,7 +106,7 @@ test('topic index reuses the complete current edition, orders extensions and lea
   assert.deepEqual(guideErrors(catalog.guides, route), []);
   assert.equal(filterTopics(entries, 'TERNARIO')[0].id, 'consulta-ternario');
   assert.equal(filterTopics(entries, 'forEach')[0].id, 'consulta-for-each');
-  assert.equal(filterTopics(entries, 'Condicionál if').length, 0);
+  assert.ok(filterTopics(entries, 'Condicionál if').some((topic) => topic.id === 'js-decisiones'));
   assert.ok(filterTopics(entries, 'funciones retorno').length);
   assert.equal(filterTopics(entries, 'inexistente').length, 0);
   assert.equal(topicHref('consulta-switch'), '#/practica/javascript/temas/consulta-switch');
@@ -308,7 +348,7 @@ test('the published recursion topic can narrate inside the real laboratory wrapp
   assert.equal(speech.current, undefined);
 });
 
-test('every one of the 98 topics provides readable theory when mounted in the laboratory', async (t) => {
+test('every published topic provides readable theory when mounted in the laboratory', async (t) => {
   installDOM(t, '<main data-lab="practice-hub"><div id="root"></div></main>');
   const speech = installSpeechMock();
   const root = document.querySelector('#root');

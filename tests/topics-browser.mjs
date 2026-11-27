@@ -51,6 +51,33 @@ try {
     assert.ok(await page.evaluate(() => __speech.current.text.length > 0));
     await page.locator('#lesson-audio [data-audio-stop]').click();
     const search = page.getByLabel('Buscar un tema de JavaScript');
+    for (const [query, id] of [
+      ['.reduce', 'js-reducir-acumulador'],
+      ['.map()', 'js-transformar-map'],
+      ['.filter', 'js-filtrar-encontrar'],
+      ['colas', 'js-pila-y-cola'],
+      ['pilas', 'js-pila-de-cambios'],
+      ['Object.entries()', 'consulta-claves-valores'],
+      ['.includes', 'consulta-includes'],
+      ['Map.prototype.entries()', 'consulta-entries-iteradores'],
+    ]) {
+      await search.fill(query);
+      await page.locator(`nav[data-topic-nav] a[data-topic="${id}"]`).waitFor();
+    }
+    for (const [query, id, step] of [
+      ['.includes()', 'consulta-includes', 'guided'],
+      ['Array.prototype.entries()', 'consulta-entries-iteradores', 'challenge'],
+    ]) {
+      await search.fill(query);
+      await page.locator(`nav[data-topic-nav] a[data-topic="${id}"]`).click();
+      const card = page.locator(`[data-topic-exercise="${id}-${step}"]`);
+      await card
+        .locator('.code-editor')
+        .fill(catalog.guides.find((guide) => guide.id === id)[step].solution);
+      await card.getByRole('button', { name: 'Comprobar ejercicio' }).click();
+      await card.locator('.practice-feedback.ok').waitFor();
+      assert.equal(await stored(page), before);
+    }
     await search.fill('ternario');
     await page.locator('nav[data-topic-nav] a').press('Enter');
     await page
