@@ -739,3 +739,21 @@ tiene su comando npm run test:topics y está incluida en CI.
 La revisión docente independiente y el piloto con principiantes siguen
 pendientes para contrastar claridad, ritmo, ayuda utilizada y transferencia.
 No se afirma cubrir todas las APIs de JavaScript ni ausencia absoluta de vacíos.
+
+## Corrección de lectura en Aprender por temas
+
+El filtro de lectura encontraba la etiqueta data-lab del contenedor del
+Laboratorio fuera de la teoría y descartaba todo el texto. El botón quedaba
+deshabilitado con «Esta teoría no tiene texto disponible para lectura».
+Se reprodujo el fallo con una prueba antes de corregirlo. Las exclusiones se
+limitan ahora al interior de la teoría: los simuladores incrustados, editores,
+controles y apartados cerrados siguen fuera de la narración.
+
+Pasan las 24 pruebas de audio y temas, incluida la preparación de lectura para
+las 98 entradas bajo el contenedor real del Laboratorio. El navegador prueba
+voces españolas controladas, inicio con teclado, texto enviado al motor y
+cancelación al cambiar de tema a 1440, 390 y 320 px. Cubre el primer programa,
+una ficha complementaria y el tema de recursión donde se observó el problema.
+El recorrido previo no verificaba el arranque de voz dentro de ese contenedor;
+esta regresión queda cubierta expresamente. La reproducción audible depende
+del motor y las voces del dispositivo. El progreso no cambia.

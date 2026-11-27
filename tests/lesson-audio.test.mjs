@@ -78,6 +78,24 @@ test('unsupported engines and absent panels leave the lesson readable', (t) => {
   mountLessonAudio(f.root)();
 });
 
+test('a surrounding laboratory does not hide theory, while embedded labs and controls stay excluded', (t) => {
+  const f = fixture(
+    t,
+    '<h3>Recursión</h3><p>Una función puede llamarse con un problema más pequeño.</p><div data-lab="runner"><p>NO_WIDGET</p></div><details><p>NO_CERRADO</p></details><form><p>NO_EDITOR</p></form>',
+  );
+  f.root.dataset.lab = 'practice-hub';
+  const dispose = f.mount();
+  assert.equal(f.$('[data-audio-play]').disabled, false);
+  f.play();
+  assert.equal(f.speech.current.text, 'Recursión');
+  f.speech.finish();
+  assert.equal(f.speech.current.text, 'Una función puede llamarse con un problema más pequeño.');
+  f.speech.finish();
+  assert.match(f.$('[data-audio-status]').textContent, /terminada/);
+  assert.doesNotMatch(f.speech.utterances.map((item) => item.text).join(' '), /NO_/);
+  dispose();
+});
+
 test('voices can arrive asynchronously, are filtered to Spanish and never become HTML', (t) => {
   const f = fixture(t);
   f.speech.voices = [];

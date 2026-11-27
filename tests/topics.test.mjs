@@ -19,6 +19,7 @@ import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 import { prepareBindingCases } from '../js/domain/javascript-contract.js';
 import { runJavaScriptAsync } from './support/javascript.mjs';
 import { installDOM, until, change, submit } from './support/dom.mjs';
+import { installSpeechMock } from './support/speech.mjs';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const route = indexRoute(read('content/curriculum/fundamentos.json'));
@@ -285,6 +286,45 @@ test('route teaching, prepared traces, audio and transfer use separate consultat
   assert.ok(root.querySelector('#lesson-audio'));
   assert.match(root.querySelector('.topic-footer').textContent, /pasos previos/);
   dispose();
+});
+
+test('the published recursion topic can narrate inside the real laboratory wrapper without awarding progress', async (t) => {
+  installDOM(t, '<main data-lab="practice-hub"><div id="root"></div></main>');
+  const speech = installSpeechMock();
+  const root = document.querySelector('#root');
+  const ctx = context('js-recursion-y-arbol');
+  const before = JSON.stringify(ctx.state);
+  const dispose = await mountTopicLearning(root, ctx, dependencies);
+  await until(() => root.querySelector('#lesson-audio [data-audio-play]'));
+  const play = root.querySelector('[data-audio-play]');
+  assert.equal(play.disabled, false);
+  play.click();
+  assert.ok(speech.current.text.length > 0);
+  assert.ok(root.querySelector('#lesson').textContent.includes(speech.current.text));
+  speech.start();
+  assert.ok(root.querySelector('#lesson .narration-current'));
+  assert.equal(JSON.stringify(ctx.state), before);
+  dispose();
+  assert.equal(speech.current, undefined);
+});
+
+test('every one of the 98 topics provides readable theory when mounted in the laboratory', async (t) => {
+  installDOM(t, '<main data-lab="practice-hub"><div id="root"></div></main>');
+  const speech = installSpeechMock();
+  const root = document.querySelector('#root');
+  for (const topic of topicIndex(route, catalog.guides)) {
+    const ctx = context(topic.id);
+    const before = JSON.stringify(ctx.state);
+    const dispose = await mountTopicLearning(root, ctx, dependencies);
+    await until(() => root.querySelector('[data-audio-play]'));
+    const play = root.querySelector('[data-audio-play]');
+    assert.equal(play.disabled, false, topic.id);
+    play.click();
+    assert.ok(speech.current?.text.trim(), topic.id);
+    assert.equal(JSON.stringify(ctx.state), before, topic.id);
+    dispose();
+    assert.equal(speech.current, undefined, topic.id);
+  }
 });
 
 test('failed loads can retry; late responses never replace the newly selected topic', async (t) => {

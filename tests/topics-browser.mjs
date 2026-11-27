@@ -5,6 +5,7 @@ import { chromium } from 'playwright';
 import { createDevServer } from '../tools/dev-server.mjs';
 import { browserExecutable } from './support/runtime.mjs';
 import { learningContext } from './support/browser.mjs';
+import { installSpeechMock } from './support/speech.mjs';
 
 // The application server avoids invoking IDE instrumentation in the serve CLI.
 // The tutor is deliberately a local stub: these tests never consume an API quota.
@@ -26,6 +27,7 @@ try {
       reducedMotion: 'reduce',
       colorScheme: 'dark',
     });
+    await context.addInitScript(installSpeechMock);
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
@@ -43,6 +45,11 @@ try {
     await page
       .getByRole('heading', { name: 'Tu primera línea: escribe, ejecuta y observa', exact: true })
       .waitFor();
+    const play = page.locator('#lesson-audio [data-audio-play]');
+    assert.equal(await play.isEnabled(), true);
+    await play.press('Enter');
+    assert.ok(await page.evaluate(() => __speech.current.text.length > 0));
+    await page.locator('#lesson-audio [data-audio-stop]').click();
     const search = page.getByLabel('Buscar un tema de JavaScript');
     await search.fill('ternario');
     await page.locator('nav[data-topic-nav] a').press('Enter');
@@ -50,6 +57,7 @@ try {
       .getByRole('heading', { name: 'Operador ternario: elegir un valor con ? :', exact: true })
       .waitFor();
     assert.match(page.url(), /#\/practica\/javascript\/temas\/consulta-ternario$/);
+    assert.equal(await play.isEnabled(), true);
     const exercise = page.locator('[data-topic-exercise="consulta-ternario-guided"]');
     await exercise.locator('.code-editor').fill('const edad = 18;\nconsole.log("mi borrador");');
     await exercise.getByRole('button', { name: 'Comprobar ejercicio' }).click();
@@ -142,6 +150,24 @@ try {
       'pendiente y confirmada',
     );
     assert.equal(await stored(page), before);
+    await page.goto(origin + '/#/practica/javascript/temas/js-recursion-y-arbol');
+    await page
+      .getByRole('heading', {
+        name: 'Recorrer dependencias jerárquicas con recursión',
+        exact: true,
+      })
+      .waitFor();
+    assert.equal(await play.isEnabled(), true);
+    await play.press('Enter');
+    assert.ok(await page.evaluate(() => __speech.current.text.length > 0));
+    const cancels = await page.evaluate(() => __speech.cancels);
+    await page.getByLabel('Buscar un tema de JavaScript').fill('let');
+    await page.locator('nav[data-topic-nav] a[data-topic="js-cambios-con-let"]').click();
+    await page
+      .getByRole('heading', { name: 'Seguir un dato que cambia con let', exact: true })
+      .waitFor();
+    assert.equal(await page.evaluate(() => __speech.current), undefined);
+    assert.ok(await page.evaluate((before) => __speech.cancels > before, cancels));
     assert.deepEqual(errors, []);
     await context.close();
     console.log(

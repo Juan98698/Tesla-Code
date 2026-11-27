@@ -33,7 +33,10 @@ export function speechBlocks(theory) {
   let node;
   while ((node = walker.nextNode())) {
     const parent = node.parentElement;
-    if (!node.textContent.trim() || parent.closest(OMIT)) continue;
+    const excluded = parent.closest(OMIT);
+    // Only omit content inside the theory. A surrounding laboratory is a
+    // navigation container, not an embedded widget that should silence it.
+    if (!node.textContent.trim() || (excluded && theory.contains(excluded))) continue;
     const element = parent.closest(BLOCK) ?? parent.closest('div,section,article') ?? theory;
     if (groups.at(-1)?.element === element) groups.at(-1).text += ' ' + node.textContent;
     else groups.push({ element, text: node.textContent });
