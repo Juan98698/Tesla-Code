@@ -2080,6 +2080,10 @@
       "requires": ["js-operaciones-y-unidades", "js-tipos-y-calculos"],
       "sections": [
         {
+          "title": "Leer una llamada de Math desde cero",
+          "text": "Math es un objeto que JavaScript ya proporciona. Su nombre lleva M mayúscula. En Math.floor(1.2), el punto selecciona una función y los paréntesis envían un argumento: el número 1.2. La llamada produce un valor que puedes guardar o mostrar con console.log. Una propiedad como Math.PI se consulta sin paréntesis. Estas herramientas no cambian las variables de entrada: debes utilizar el resultado que devuelven."
+        },
+        {
           "title": "Herramientas para calcular",
           "text": "Math reúne funciones matemáticas. Math.floor baja al entero menor o igual, Math.ceil sube al mayor o igual y Math.round elige el entero más próximo, con los empates hacia +infinito. Con negativos sus diferencias importan: floor(-1.2) da -2."
         },
@@ -2094,7 +2098,8 @@
       ],
       "example": {
         "code": "const valor = 1.2;\nconsole.log(Math.floor(valor));\nconsole.log(Math.ceil(valor));",
-        "stdout": "1\n2\n"
+        "stdout": "1\n2\n",
+        "explanation": "El primer cálculo pide el entero inferior; el segundo, el superior. Cambiar de regla cambia la respuesta aunque el dato sea el mismo. Sigue cada llamada desde su argumento hasta el valor devuelto y compáralo con la salida."
       },
       "guided": {
         "prompt": "Muestra los enteros inferior y superior a valor, cada uno en una línea.",
@@ -2745,6 +2750,72 @@
           "title": "String.prototype.includes en MDN",
           "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/includes"
         }
+      ],
+      "examples": [
+        {
+          "title": "Texto: coincidencia y mayúsculas",
+          "explanation": "La búsqueda directa distingue Tesla de tesla. Convertir ambos textos a minúsculas aplica una regla explícita y conserva las tildes.",
+          "code": "const mensaje = \"TeslaCode\";\nconsole.log(mensaje.includes(\"tesla\"));\nconsole.log(mensaje.toLowerCase().includes(\"tesla\"));",
+          "stdout": "false\ntrue\n"
+        }
+      ],
+      "practices": [
+        {
+          "id": "includes-desde-posicion",
+          "title": "Decide desde qué índice buscar",
+          "prompt": "Busca buscado en datos empezando en desde. Muestra el booleano y contrasta un inicio después de la coincidencia, un índice negativo y el final del arreglo.",
+          "starter": "const datos = [0, 2, 4];\nconst buscado = 0;\nconst desde = 1;\n",
+          "solution": "const datos = [0, 2, 4];\nconst buscado = 0;\nconst desde = 1;\nconsole.log(datos.includes(buscado, desde));",
+          "bindings": {
+            "datos": "const",
+            "buscado": "const",
+            "desde": "const"
+          },
+          "cases": [
+            {
+              "name": "Antes de comenzar",
+              "stdout": "true\n",
+              "overrides": {
+                "datos": [0, 2, 4],
+                "buscado": 0,
+                "desde": 0
+              }
+            },
+            {
+              "name": "Coincidencia anterior al inicio",
+              "stdout": "false\n",
+              "overrides": {
+                "datos": [0, 2, 4],
+                "buscado": 0,
+                "desde": 1
+              }
+            },
+            {
+              "name": "Inicio negativo",
+              "stdout": "true\n",
+              "overrides": {
+                "datos": [0, 2, 4],
+                "buscado": 4,
+                "desde": -1
+              }
+            },
+            {
+              "name": "Inicio en el final",
+              "stdout": "false\n",
+              "overrides": {
+                "datos": [0, 2, 4],
+                "buscado": 4,
+                "desde": 3
+              }
+            }
+          ],
+          "syntax": {
+            "methods": ["includes"]
+          },
+          "hints": ["El segundo argumento no cuenta coincidencias; decide desde dónde se visita."],
+          "explanation": "El inicio modifica qué posiciones pueden encontrarse.",
+          "retryFeedback": "Traza las posiciones a partir del inicio dado."
+        }
       ]
     },
     {
@@ -2921,6 +2992,2241 @@
           "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries"
         }
       ]
+    },
+    {
+      "id": "consulta-math-redondeos",
+      "after": "consulta-math",
+      "title": "Math.floor, ceil, round y trunc: cuatro reglas de redondeo",
+      "outcome": "Elegir una regla con positivos, negativos y empates, distinguiendo redondear de formatear.",
+      "requires": ["consulta-math"],
+      "sections": [
+        {
+          "title": "Qué significa redondear",
+          "text": "Un decimal puede quedar entre dos enteros. El entero inferior a 2.7 es 2 y el superior es 3. Para -2.7, el inferior es -3 y el superior -2. La dirección se refiere al orden de la recta numérica, no a borrar el signo."
+        },
+        {
+          "title": "floor y ceil",
+          "text": "Math.floor(x) elige el entero menor o igual que x. Math.ceil(x) elige el mayor o igual. Si x ya es entero, ambos lo conservan. Usa ceil cuando cualquier fracción exige otra unidad completa, como cajas; usa floor cuando solo cuentan unidades completas ya reunidas."
+        },
+        {
+          "title": "round y los empates",
+          "text": "Math.round(x) elige el entero más cercano. En un empate exacto de .5 elige el mayor: 2.5 pasa a 3 y -2.5 a -2. No aplica la regla de alejarse siempre de cero. Comprueba valores a ambos lados de la mitad."
+        },
+        {
+          "title": "trunc y los negativos",
+          "text": "Math.trunc(x) elimina la parte fraccionaria acercándose a cero. trunc(-2.7) da -2 y floor(-2.7) da -3. Por eso floor no es un sustituto general de trunc. Con -0.5, round o trunc pueden producir -0; la consola puede mostrarlo como 0."
+        },
+        {
+          "title": "Explicar antes de escoger",
+          "text": "Redondear una medición y decidir cuántos recipientes comprar son preguntas diferentes. Escribe primero la regla y la unidad. Estas funciones devuelven Number; no producen un texto con dos decimales. La ficha de precisión explica toFixed y el cero con signo."
+        }
+      ],
+      "example": {
+        "code": "const valor = -2.5;\nconsole.log(Math.floor(valor));\nconsole.log(Math.ceil(valor));\nconsole.log(Math.round(valor));\nconsole.log(Math.trunc(valor));",
+        "stdout": "-3\n-2\n-2\n-2\n",
+        "explanation": "Las cuatro llamadas usan el mismo -2.5. En la recta numérica, -3 queda debajo y -2 encima. floor elige -3; ceil y trunc dan -2. round también elige -2 porque, en un empate exacto, JavaScript escoge el entero mayor. Ahora cambia el dato por -2.7 y compara las reglas."
+      },
+      "guided": {
+        "prompt": "Muestra floor, ceil, round y trunc de valor, en ese orden y una operación por línea.",
+        "starter": "const valor = -2.5;\n",
+        "solution": "const valor = -2.5;\nconsole.log(Math.floor(valor));\nconsole.log(Math.ceil(valor));\nconsole.log(Math.round(valor));\nconsole.log(Math.trunc(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = -2.5",
+            "stdout": "-3\n-2\n-2\n-2\n",
+            "overrides": {
+              "valor": -2.5
+            }
+          },
+          {
+            "name": "Caso 2: valor = 2.5",
+            "stdout": "2\n3\n3\n2\n",
+            "overrides": {
+              "valor": 2.5
+            }
+          },
+          {
+            "name": "Caso 3: valor = 4",
+            "stdout": "4\n4\n4\n4\n",
+            "overrides": {
+              "valor": 4
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["floor", "ceil", "round", "trunc"]
+        },
+        "hints": [
+          "Dibuja los dos enteros vecinos, también cuando el valor sea negativo.",
+          "Aplica las cuatro reglas al mismo dato, conservando el orden del enunciado."
+        ],
+        "explanation": "Aplica las cuatro reglas al mismo dato, conservando el orden del enunciado. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Dibuja los dos enteros vecinos, también cuando el valor sea negativo. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "La regla pide retirar la fracción hacia cero. Corrige el uso de floor para que también funcione con negativos.",
+        "starter": "const valor = -2.9;\nconsole.log(Math.floor(valor));",
+        "solution": "const valor = -2.9;\nconsole.log(Math.trunc(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = -2.9",
+            "stdout": "-2\n",
+            "overrides": {
+              "valor": -2.9
+            }
+          },
+          {
+            "name": "Caso 2: valor = 2.9",
+            "stdout": "2\n",
+            "overrides": {
+              "valor": 2.9
+            }
+          },
+          {
+            "name": "Caso 3: valor = -0.4",
+            "stdout": "0\n",
+            "overrides": {
+              "valor": -0.4
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["trunc"]
+        },
+        "hints": [
+          "Retirar la fracción se dirige hacia cero, no siempre hacia el entero inferior.",
+          "Contrasta -2.7 y 2.7 antes de escoger trunc o floor."
+        ],
+        "explanation": "Contrasta -2.7 y 2.7 antes de escoger trunc o floor. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Retirar la fracción se dirige hacia cero, no siempre hacia el entero inferior. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Un sensor muestra el entero más cercano a temperatura. Usa round; los empates negativos deben seguir la regla de JavaScript.",
+        "starter": "const temperatura = -2.5;\n",
+        "solution": "const temperatura = -2.5;\nconsole.log(Math.round(temperatura));",
+        "cases": [
+          {
+            "name": "Caso 1: temperatura = -2.5",
+            "stdout": "-2\n",
+            "overrides": {
+              "temperatura": -2.5
+            }
+          },
+          {
+            "name": "Caso 2: temperatura = 2.5",
+            "stdout": "3\n",
+            "overrides": {
+              "temperatura": 2.5
+            }
+          },
+          {
+            "name": "Caso 3: temperatura = -2.6",
+            "stdout": "-3\n",
+            "overrides": {
+              "temperatura": -2.6
+            }
+          },
+          {
+            "name": "Caso 4: temperatura = 2.4",
+            "stdout": "2\n",
+            "overrides": {
+              "temperatura": 2.4
+            }
+          }
+        ],
+        "bindings": {
+          "temperatura": "const"
+        },
+        "syntax": {
+          "methods": ["round"]
+        },
+        "hints": [
+          "La regla pide cercanía, no cantidad de recipientes completos.",
+          "En -2.5, el mayor de los dos vecinos es -2."
+        ],
+        "explanation": "En -2.5, el mayor de los dos vecinos es -2. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "La regla pide cercanía, no cantidad de recipientes completos. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.floor en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor"
+        },
+        {
+          "title": "Math.ceil en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil"
+        },
+        {
+          "title": "Math.round en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round"
+        },
+        {
+          "title": "Math.trunc en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/trunc"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-extremos",
+      "after": "consulta-math-redondeos",
+      "title": "Math.min, max, abs y sign: límites y distancias",
+      "outcome": "Seleccionar extremos, limitar un valor y separar magnitud y signo.",
+      "requires": ["consulta-math-redondeos"],
+      "sections": [
+        {
+          "title": "Comparar varios argumentos",
+          "text": "Math.min(a, b, c) devuelve el menor y Math.max(a, b, c) el mayor. Las comas separan argumentos. Ninguna ordena ni cambia los datos de entrada. Un empate conserva el valor extremo y no indica cuál variable lo contenía."
+        },
+        {
+          "title": "Distancia y dirección",
+          "text": "Math.abs(x) da la magnitud no negativa: abs(-5) y abs(5) dan 5. Math.sign(x) distingue negativo (-1), positivo (1) y cero (0 o -0). La distancia entre dos posiciones es abs(fin - inicio). La dirección conserva información que la distancia pierde."
+        },
+        {
+          "title": "Limitar a un intervalo",
+          "text": "Para mantener x entre minimo y maximo, primero Math.max(minimo, x) impide bajar del mínimo; después Math.min(maximo, resultado) impide subir del máximo. Aquí los límites ya son números válidos y minimo <= maximo. Validar entradas es otra responsabilidad."
+        },
+        {
+          "title": "Ausencia no significa cero",
+          "text": "Sin argumentos, Math.min() devuelve Infinity y Math.max() devuelve -Infinity. Infinity no es un máximo finito; representa un infinito numérico. Si algún argumento resulta NaN, el extremo también es NaN. Antes de recibir datos externos, estudia la ficha de validación numérica."
+        },
+        {
+          "title": "Arreglos se aprenden después",
+          "text": "Pasar un arreglo como único argumento no equivale a pasar sus elementos. Después de estudiar arreglos y spread podrás escribir Math.max(...lista). Para una lista vacía deberás decidir el contrato; no asumir cero por defecto."
+        }
+      ],
+      "example": {
+        "code": "const a = -5;\nconst b = 3;\nconsole.log(Math.min(a, b));\nconsole.log(Math.max(a, b));\nconsole.log(Math.abs(a));\nconsole.log(Math.sign(a));",
+        "stdout": "-5\n3\n5\n-1\n",
+        "explanation": "min y max comparan los dos argumentos a y b: -5 es menor que 3. abs(a) da la magnitud cinco y sign(a) conserva solo la dirección negativa, -1. Ninguna llamada modifica a ni b: cada resultado se imprime por separado."
+      },
+      "guided": {
+        "prompt": "Muestra mínimo, máximo, magnitud de a y signo de a, en ese orden.",
+        "starter": "const a = -5;\nconst b = 3;\n",
+        "solution": "const a = -5;\nconst b = 3;\nconsole.log(Math.min(a,b));\nconsole.log(Math.max(a,b));\nconsole.log(Math.abs(a));\nconsole.log(Math.sign(a));",
+        "cases": [
+          {
+            "name": "Caso 1: a = -5, b = 3",
+            "stdout": "-5\n3\n5\n-1\n",
+            "overrides": {
+              "a": -5,
+              "b": 3
+            }
+          },
+          {
+            "name": "Caso 2: a = 0, b = 8",
+            "stdout": "0\n8\n0\n0\n",
+            "overrides": {
+              "a": 0,
+              "b": 8
+            }
+          },
+          {
+            "name": "Caso 3: a = 7, b = 2",
+            "stdout": "2\n7\n7\n1\n",
+            "overrides": {
+              "a": 7,
+              "b": 2
+            }
+          }
+        ],
+        "bindings": {
+          "a": "const",
+          "b": "const"
+        },
+        "syntax": {
+          "methods": ["min", "max", "abs", "sign"]
+        },
+        "hints": [
+          "Las comas separan argumentos; mínimo y máximo comparan los tres.",
+          "abs devuelve magnitud y sign devuelve dirección."
+        ],
+        "explanation": "abs devuelve magnitud y sign devuelve dirección. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Las comas separan argumentos; mínimo y máximo comparan los tres. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "El control debe quedar entre 0 y 100. La combinación actual invierte los límites; corrígela.",
+        "starter": "const valor = 120;\nconsole.log(Math.max(100, Math.min(0, valor)));",
+        "solution": "const valor = 120;\nconsole.log(Math.min(100, Math.max(0, valor)));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 120",
+            "stdout": "100\n",
+            "overrides": {
+              "valor": 120
+            }
+          },
+          {
+            "name": "Caso 2: valor = -5",
+            "stdout": "0\n",
+            "overrides": {
+              "valor": -5
+            }
+          },
+          {
+            "name": "Caso 3: valor = 40",
+            "stdout": "40\n",
+            "overrides": {
+              "valor": 40
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["min", "max"]
+        },
+        "hints": [
+          "Primero evita bajar de cero usando max.",
+          "Después impide superar cien usando min."
+        ],
+        "explanation": "Después impide superar cien usando min. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Primero evita bajar de cero usando max. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Una entrega va de inicio a fin. Muestra primero la distancia y luego la dirección del desplazamiento: -1, 0 o 1.",
+        "starter": "const inicio = 8;\nconst fin = 3;\n",
+        "solution": "const inicio = 8;\nconst fin = 3;\nconsole.log(Math.abs(fin - inicio));\nconsole.log(Math.sign(fin - inicio));",
+        "cases": [
+          {
+            "name": "Caso 1: inicio = 8, fin = 3",
+            "stdout": "5\n-1\n",
+            "overrides": {
+              "inicio": 8,
+              "fin": 3
+            }
+          },
+          {
+            "name": "Caso 2: inicio = 3, fin = 8",
+            "stdout": "5\n1\n",
+            "overrides": {
+              "inicio": 3,
+              "fin": 8
+            }
+          },
+          {
+            "name": "Caso 3: inicio = 3, fin = 3",
+            "stdout": "0\n0\n",
+            "overrides": {
+              "inicio": 3,
+              "fin": 3
+            }
+          }
+        ],
+        "bindings": {
+          "inicio": "const",
+          "fin": "const"
+        },
+        "syntax": {
+          "methods": ["abs", "sign"]
+        },
+        "hints": [
+          "Resta inicio a fin para obtener un desplazamiento con dirección.",
+          "Usa abs y sign sobre ese desplazamiento; no sobre cada posición por separado."
+        ],
+        "explanation": "Usa abs y sign sobre ese desplazamiento; no sobre cada posición por separado. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Resta inicio a fin para obtener un desplazamiento con dirección. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.min en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min"
+        },
+        {
+          "title": "Math.max en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max"
+        },
+        {
+          "title": "Math.abs en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs"
+        },
+        {
+          "title": "Math.sign en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-potencias",
+      "after": "consulta-math-extremos",
+      "title": "Math.pow, sqrt, cbrt e hypot: potencias y raíces",
+      "outcome": "Interpretar exponentes, raíces y distancias antes de llamar a sus funciones.",
+      "requires": ["consulta-math-extremos"],
+      "sections": [
+        {
+          "title": "Una potencia cuenta factores",
+          "text": "Math.pow(base, exponente) eleva una base a un exponente. Con un exponente entero positivo, pow(2, 3) significa 2 * 2 * 2, no 2 * 3. El operador ** es otra escritura: 2 ** 3. El exponente cero produce 1, y un exponente negativo expresa un recíproco: 2 ** -1 es 1 / 2."
+        },
+        {
+          "title": "Deshacer cuadrados y cubos",
+          "text": "Math.sqrt(x) busca la raíz cuadrada no negativa: sqrt(16) da 4 porque 4 * 4 es 16. Un número negativo no tiene raíz cuadrada real y produce NaN. Math.cbrt(x) busca la raíz cúbica y admite negativos: cbrt(-8) es -2 porque tres factores -2 producen -8."
+        },
+        {
+          "title": "Una distancia de varias dimensiones",
+          "text": "Math.hypot(x, y) calcula la raíz de x*x + y*y. Representa la distancia al origen de un punto en dos ejes perpendiculares; con 3 y 4 da 5. Puede recibir más componentes y evita algunos desbordamientos de sumar cuadrados manualmente. Con cero argumentos devuelve 0."
+        },
+        {
+          "title": "Constantes y dominio",
+          "text": "Math.SQRT2 es la raíz de 2 y Math.SQRT1_2 la raíz de 1/2. Son propiedades numéricas, sin paréntesis. Las raíces suelen ser aproximadas. Una base negativa con exponente fraccionario puede producir NaN: para raíz cúbica negativa utiliza cbrt. Al escribir (-2) ** 2, los paréntesis hacen explícita la base negativa."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.pow(2, 3));\nconsole.log(Math.sqrt(16));\nconsole.log(Math.cbrt(-8));\nconsole.log(Math.hypot(3, 4));\nconsole.log(Math.round(Math.SQRT2 * Math.SQRT2));\nconsole.log(Math.round(Math.SQRT1_2 * Math.SQRT2));",
+        "stdout": "8\n4\n-2\n5\n2\n1\n",
+        "explanation": "pow(2, 3) calcula tres factores 2 y da 8. sqrt(16) devuelve 4; cbrt(-8), -2. hypot(3, 4) combina cuadrados 9 y 16, cuya suma 25 tiene raíz 5. Las dos últimas líneas consultan constantes y las aproximan para la presentación."
+      },
+      "guided": {
+        "prompt": "Muestra el cuadrado, la raíz cuadrada y la raíz cúbica de valor. Usa las funciones de Math, en ese orden.",
+        "starter": "const valor = 64;\n",
+        "solution": "const valor = 64;\nconsole.log(Math.pow(valor,2));\nconsole.log(Math.sqrt(valor));\nconsole.log(Math.cbrt(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 64",
+            "stdout": "4096\n8\n4\n",
+            "overrides": {
+              "valor": 64
+            }
+          },
+          {
+            "name": "Caso 2: valor = 0",
+            "stdout": "0\n0\n0\n",
+            "overrides": {
+              "valor": 0
+            }
+          },
+          {
+            "name": "Caso 3: valor = 1",
+            "stdout": "1\n1\n1\n",
+            "overrides": {
+              "valor": 1
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["pow", "sqrt", "cbrt"]
+        },
+        "hints": [
+          "El cuadrado usa exponente dos; una raíz deshace una potencia.",
+          "sqrt devuelve una raíz no negativa y cbrt admite entradas negativas."
+        ],
+        "explanation": "sqrt devuelve una raíz no negativa y cbrt admite entradas negativas. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "El cuadrado usa exponente dos; una raíz deshace una potencia. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "base elevada a exponente no significa multiplicarlos. Corrige el cálculo.",
+        "starter": "const base = 2;\nconst exponente = 3;\nconsole.log(base * exponente);",
+        "solution": "const base = 2;\nconst exponente = 3;\nconsole.log(Math.pow(base, exponente));",
+        "cases": [
+          {
+            "name": "Caso 1: base = 2, exponente = 3",
+            "stdout": "8\n",
+            "overrides": {
+              "base": 2,
+              "exponente": 3
+            }
+          },
+          {
+            "name": "Caso 2: base = 5, exponente = 0",
+            "stdout": "1\n",
+            "overrides": {
+              "base": 5,
+              "exponente": 0
+            }
+          },
+          {
+            "name": "Caso 3: base = 2, exponente = -1",
+            "stdout": "0.5\n",
+            "overrides": {
+              "base": 2,
+              "exponente": -1
+            }
+          }
+        ],
+        "bindings": {
+          "base": "const",
+          "exponente": "const"
+        },
+        "syntax": {
+          "methods": ["pow"]
+        },
+        "hints": [
+          "Cuenta los factores: 2 elevado a 3 contiene tres factores 2.",
+          "pow recibe primero base y después exponente."
+        ],
+        "explanation": "pow recibe primero base y después exponente. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Cuenta los factores: 2 elevado a 3 contiene tres factores 2. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Un robot está en (x, y). Muestra la distancia al origen con hypot, también si alguna coordenada es negativa.",
+        "starter": "const x = 3;\nconst y = 4;\n",
+        "solution": "const x = 3;\nconst y = 4;\nconsole.log(Math.hypot(x,y));",
+        "cases": [
+          {
+            "name": "Caso 1: x = 3, y = 4",
+            "stdout": "5\n",
+            "overrides": {
+              "x": 3,
+              "y": 4
+            }
+          },
+          {
+            "name": "Caso 2: x = -3, y = 4",
+            "stdout": "5\n",
+            "overrides": {
+              "x": -3,
+              "y": 4
+            }
+          },
+          {
+            "name": "Caso 3: x = 0, y = 0",
+            "stdout": "0\n",
+            "overrides": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "name": "Caso 4: x = 5, y = 12",
+            "stdout": "13\n",
+            "overrides": {
+              "x": 5,
+              "y": 12
+            }
+          }
+        ],
+        "bindings": {
+          "x": "const",
+          "y": "const"
+        },
+        "syntax": {
+          "methods": ["hypot"]
+        },
+        "hints": [
+          "La distancia usa las dos coordenadas, no su suma directa.",
+          "hypot combina los cuadrados y la raíz sin perder el signo correcto de la distancia."
+        ],
+        "explanation": "hypot combina los cuadrados y la raíz sin perder el signo correcto de la distancia. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "La distancia usa las dos coordenadas, no su suma directa. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.pow en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/pow"
+        },
+        {
+          "title": "Math.sqrt en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sqrt"
+        },
+        {
+          "title": "Math.cbrt en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/cbrt"
+        },
+        {
+          "title": "Math.hypot en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/hypot"
+        }
+      ],
+      "practices": [
+        {
+          "id": "math-constantes-raices",
+          "title": "Usa una constante en una medida",
+          "prompt": "La diagonal de un cuadrado de lado lado es lado * Math.SQRT2. Muestra su medida redondeada al entero más cercano, como pide este panel.",
+          "starter": "const lado = 3;\n",
+          "solution": "const lado = 3;\nconsole.log(Math.round(lado * Math.SQRT2));",
+          "bindings": {
+            "lado": "const"
+          },
+          "cases": [
+            {
+              "name": "Lado tres",
+              "stdout": "4\n",
+              "overrides": {
+                "lado": 3
+              }
+            },
+            {
+              "name": "Lado uno",
+              "stdout": "1\n",
+              "overrides": {
+                "lado": 1
+              }
+            },
+            {
+              "name": "Sin extensión",
+              "stdout": "0\n",
+              "overrides": {
+                "lado": 0
+              }
+            }
+          ],
+          "syntax": {
+            "methods": ["round"]
+          },
+          "hints": ["SQRT2 es un valor, no una función; no lleva paréntesis."],
+          "explanation": "La constante participa en una medida y la presentación declara su redondeo.",
+          "retryFeedback": "Separa la medida sin redondear de la regla de presentación."
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-random",
+      "after": "js-condiciones-logicas",
+      "title": "Math.random(): azar, intervalos y enteros",
+      "outcome": "Separar una muestra aleatoria de su transformación y comprobar los extremos del intervalo.",
+      "requires": ["consulta-math-redondeos", "consulta-math-potencias", "js-condiciones-logicas"],
+      "sections": [
+        {
+          "title": "Qué devuelve random",
+          "text": "Math.random() no recibe argumentos. Devuelve una muestra Number desde 0 incluido hasta 1 excluido: puede ser 0, nunca 1. Cada llamada obtiene otra muestra; puede repetirse un valor. No puedes exigir una salida concreta ni cambiar la semilla mediante esta API. Para comprobar ese rango en JavaScript escribe muestra >= 0 && muestra < 1. El && une dos comparaciones que deben cumplirse; no escribas una comparación matemática encadenada como 0 <= muestra < 1. Las comparaciones y su combinación se estudian en las bases enlazadas antes de esta ficha."
+        },
+        {
+          "title": "Ampliar y desplazar",
+          "text": "Si r está entre 0 y 1, r * amplitud está entre 0 y amplitud. Para un intervalo decimal [minimo, maximo), usa minimo + r * (maximo - minimo). El corchete incluye el límite y el paréntesis lo excluye. Los ejemplos trabajan con límites pequeños y finitos; los cálculos extremos requieren considerar la precisión de Number. En el cálculo real con Number, sumar y multiplicar también redondean: una muestra extremadamente cercana a 1 puede hacer que el valor decimal calculado alcance el máximo por aproximación. Distingue ese efecto de Math.random(), que sí excluye 1. No uses esta fórmula sin revisar la precisión cuando el máximo exclusivo sea un requisito estricto."
+        },
+        {
+          "title": "Enteros desde cero",
+          "text": "Para elegir un entero entre 0 y cantidad - 1, usa Math.floor(r * cantidad). Hay cantidad franjas del mismo ancho. Por ejemplo, con cantidad 6, [0, 1/6) produce 0, la siguiente franja produce 1 y la última produce 5. cantidad debe ser un entero positivo."
+        },
+        {
+          "title": "Ambos extremos incluidos",
+          "text": "Para enteros minimo y maximo incluidos hay maximo - minimo + 1 posibilidades. La fórmula es minimo + Math.floor(r * (maximo - minimo + 1)). El +1 cuenta ambos extremos. Si los límites recibidos son decimales, primero define si admites solo enteros interiores: ceil(minimo) y floor(maximo), y comprueba que queda al menos uno."
+        },
+        {
+          "title": "Por qué no usar round",
+          "text": "Math.round(r * (cantidad - 1)) deja franjas de medio ancho en los extremos. Eso cambia la probabilidad de los resultados. No compruebes un generador esperando una secuencia exacta. Aquí las prácticas dan muestras preparadas para contrastar la fórmula en 0, cerca de 1 y puntos intermedios. El ejemplo de consola sí llama al generador real."
+        },
+        {
+          "title": "Uso y límites",
+          "text": "Math.random sirve para juegos y simulaciones sencillas; no es un generador criptográfico para claves o tokens. Unas pocas tiradas no demuestran uniformidad. Que una fórmula produzca valores del rango tampoco demuestra por sí solo que el generador sea adecuado para otro uso."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.random());",
+        "stdout": "",
+        "observation": "La salida es un número mayor o igual que 0 y menor que 1. El valor exacto puede cambiar en cada ejecución.",
+        "verification": {
+          "kind": "numeric-range",
+          "min": 0,
+          "maxExclusive": 1
+        },
+        "explanation": "La llamada no necesita un dato de entrada. console.log muestra la muestra devuelta. Ejecutar otra vez puede cambiar el valor; el contrato que puedes comprobar es muestra >= 0 && muestra < 1, no una cifra elegida de antemano."
+      },
+      "guided": {
+        "prompt": "Transforma muestra en un entero entre 0 y cantidad - 1. En los datos preparados, muestra es mayor o igual que cero y menor que uno; cantidad es un entero positivo. No llames a random aquí: se comprueba la transformación con muestras preparadas.",
+        "starter": "const muestra = 0.5;\nconst cantidad = 6;\n",
+        "solution": "const muestra = 0.5;\nconst cantidad = 6;\nconsole.log(Math.floor(muestra * cantidad));",
+        "cases": [
+          {
+            "name": "Caso 1: muestra = 0.5, cantidad = 6",
+            "stdout": "3\n",
+            "overrides": {
+              "muestra": 0.5,
+              "cantidad": 6
+            }
+          },
+          {
+            "name": "Caso 2: muestra = 0, cantidad = 6",
+            "stdout": "0\n",
+            "overrides": {
+              "muestra": 0,
+              "cantidad": 6
+            }
+          },
+          {
+            "name": "Caso 3: muestra = 0.9999999999999999, cantidad = 6",
+            "stdout": "5\n",
+            "overrides": {
+              "muestra": 0.9999999999999999,
+              "cantidad": 6
+            }
+          },
+          {
+            "name": "Caso 4: muestra = 0.8, cantidad = 1",
+            "stdout": "0\n",
+            "overrides": {
+              "muestra": 0.8,
+              "cantidad": 1
+            }
+          }
+        ],
+        "bindings": {
+          "muestra": "const",
+          "cantidad": "const"
+        },
+        "syntax": {
+          "methods": ["floor"]
+        },
+        "hints": [
+          "Multiplica la fracción por la cantidad de posibilidades.",
+          "floor convierte cada franja en su índice entero desde cero."
+        ],
+        "explanation": "floor convierte cada franja en su índice entero desde cero. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Multiplica la fracción por la cantidad de posibilidades. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "Un dado debe usar seis franjas del mismo ancho. Repara la transformación defectuosa que usa round; la muestra se entrega para poder repetir el caso.",
+        "starter": "const muestra = 0.1;\nconsole.log(Math.round(muestra * 5) + 1);",
+        "solution": "const muestra = 0.1;\nconsole.log(Math.floor(muestra * 6) + 1);",
+        "cases": [
+          {
+            "name": "Caso 1: muestra = 0.1",
+            "stdout": "1\n",
+            "overrides": {
+              "muestra": 0.1
+            }
+          },
+          {
+            "name": "Caso 2: muestra = 0",
+            "stdout": "1\n",
+            "overrides": {
+              "muestra": 0
+            }
+          },
+          {
+            "name": "Caso 3: muestra = 0.5",
+            "stdout": "4\n",
+            "overrides": {
+              "muestra": 0.5
+            }
+          },
+          {
+            "name": "Caso 4: muestra = 0.9999999999999999",
+            "stdout": "6\n",
+            "overrides": {
+              "muestra": 0.9999999999999999
+            }
+          }
+        ],
+        "bindings": {
+          "muestra": "const"
+        },
+        "syntax": {
+          "methods": ["floor"]
+        },
+        "hints": [
+          "round da franjas más estrechas a los extremos.",
+          "Seis franjas desde cero se obtienen con floor(muestra * 6); desplaza luego a uno."
+        ],
+        "explanation": "Seis franjas desde cero se obtienen con floor(muestra * 6); desplaza luego a uno. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "round da franjas más estrechas a los extremos. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Un selector necesita un entero entre minimo y maximo, ambos incluidos. Los límites son enteros pequeños y ordenados. Aplica la muestra preparada sin llamar al generador.",
+        "starter": "const muestra = 0.5;\nconst minimo = -3;\nconst maximo = 3;\n",
+        "solution": "const muestra = 0.5;\nconst minimo = -3;\nconst maximo = 3;\nconsole.log(minimo + Math.floor(muestra * (maximo - minimo + 1)));",
+        "cases": [
+          {
+            "name": "Caso 1: muestra = 0, minimo = -3, maximo = 3",
+            "stdout": "-3\n",
+            "overrides": {
+              "muestra": 0,
+              "minimo": -3,
+              "maximo": 3
+            }
+          },
+          {
+            "name": "Caso 2: muestra = 0.5, minimo = -3, maximo = 3",
+            "stdout": "0\n",
+            "overrides": {
+              "muestra": 0.5,
+              "minimo": -3,
+              "maximo": 3
+            }
+          },
+          {
+            "name": "Caso 3: muestra = 0.9999999999999999, minimo = -3, maximo = 3",
+            "stdout": "3\n",
+            "overrides": {
+              "muestra": 0.9999999999999999,
+              "minimo": -3,
+              "maximo": 3
+            }
+          },
+          {
+            "name": "Caso 4: muestra = 0.9, minimo = 8, maximo = 8",
+            "stdout": "8\n",
+            "overrides": {
+              "muestra": 0.9,
+              "minimo": 8,
+              "maximo": 8
+            }
+          }
+        ],
+        "bindings": {
+          "muestra": "const",
+          "minimo": "const",
+          "maximo": "const"
+        },
+        "syntax": {
+          "methods": ["floor"]
+        },
+        "hints": [
+          "Cuenta las posibilidades incluyendo los dos extremos.",
+          "Después de obtener un índice desde cero, suma el mínimo."
+        ],
+        "explanation": "Después de obtener un índice desde cero, suma el mínimo. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Cuenta las posibilidades incluyendo los dos extremos. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.random en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random"
+        },
+        {
+          "title": "Math.floor en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor"
+        },
+        {
+          "title": "Math.ceil en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Ejemplo razonado: de una muestra a un intervalo",
+          "explanation": "Entre 10 y 15 incluidos hay seis enteros. Con muestra 0.5, multiplicar por seis da tres; floor conserva tres y desplazar diez produce 13. Ahora puedes contrastar el comienzo y el final sin esperar a que el azar los genere.",
+          "code": "const muestra = 0.5;\nconst minimo = 10;\nconst maximo = 15;\nconsole.log(minimo + Math.floor(muestra * (maximo - minimo + 1)));",
+          "stdout": "13\n"
+        }
+      ],
+      "practices": [
+        {
+          "id": "math-muestra-real",
+          "title": "Observa una propiedad del generador",
+          "prompt": "Obtén una muestra real con random y muestra floor de esa muestra. Debe dar 0 porque la muestra está desde 0 incluido hasta 1 excluido. No escribas el cero fijo: interpreta por qué el generador necesita una escala para producir otros enteros.",
+          "starter": "// Genera una muestra, aplica floor y muestra el resultado.",
+          "solution": "const muestra = Math.random();\nconsole.log(Math.floor(muestra));",
+          "cases": [
+            {
+              "name": "Muestra real dentro del intervalo",
+              "stdout": "0\n"
+            }
+          ],
+          "syntax": {
+            "methods": ["random", "floor"]
+          },
+          "hints": ["random produce una fracción; floor elige el entero inferior."],
+          "explanation": "La propiedad comprobada explica el cero; no demuestra una distribución estadística.",
+          "retryFeedback": "Recuerda el máximo exclusivo de la muestra."
+        },
+        {
+          "id": "math-intervalo-decimal",
+          "title": "Amplía y desplaza una muestra",
+          "prompt": "Convierte muestra al intervalo decimal entre minimo y maximo con minimo + muestra * (maximo - minimo). Se usan valores pequeños, finitos y preparados. No redondees a un entero: conserva la posición proporcional.",
+          "starter": "const muestra = 0.25;\nconst minimo = 10;\nconst maximo = 20;\n",
+          "solution": "const muestra = 0.25;\nconst minimo = 10;\nconst maximo = 20;\nconsole.log(minimo + muestra * (maximo - minimo));",
+          "bindings": {
+            "muestra": "const",
+            "minimo": "const",
+            "maximo": "const"
+          },
+          "cases": [
+            {
+              "name": "Un cuarto del intervalo",
+              "overrides": {
+                "muestra": 0.25,
+                "minimo": 10,
+                "maximo": 20
+              },
+              "stdout": "12.5\n"
+            },
+            {
+              "name": "Comienzo incluido",
+              "overrides": {
+                "muestra": 0,
+                "minimo": -4,
+                "maximo": 4
+              },
+              "stdout": "-4\n"
+            },
+            {
+              "name": "Punto medio",
+              "overrides": {
+                "muestra": 0.5,
+                "minimo": -4,
+                "maximo": 4
+              },
+              "stdout": "0\n"
+            }
+          ],
+          "hints": [
+            "Resta los límites para conocer la amplitud; después aplica la fracción.",
+            "Suma el mínimo al resultado para desplazar el intervalo."
+          ],
+          "explanation": "La fracción indica qué parte de la amplitud se recorre; el mínimo decide dónde comienza.",
+          "retryFeedback": "floor cambia el contrato a enteros. Primero comprueba amplitud y desplazamiento."
+        }
+      ]
+    },
+    {
+      "id": "consulta-numeros-precision",
+      "after": "js-validacion",
+      "title": "Number: precisión, NaN, Infinity y formato decimal",
+      "outcome": "Validar el tipo y los límites del número y distinguir cálculo, comparación aproximada y presentación.",
+      "requires": ["js-validacion", "consulta-math-extremos"],
+      "sections": [
+        {
+          "title": "Por qué no todos los decimales son exactos",
+          "text": "Number usa representación binaria de precisión finita. Igual que 1/3 no termina en decimal, 0.1 no termina en binario y se aproxima. Por eso 0.1 + 0.2 puede mostrar 0.30000000000000004. No es una regla de suma diferente; es un límite de la representación."
+        },
+        {
+          "title": "NaN e infinitos",
+          "text": "NaN significa que no se obtuvo un número utilizable para esa operación. typeof NaN sigue dando \"number\". Infinity y -Infinity son infinitos numéricos y tampoco son cantidades finitas. Number.isNaN(x) identifica NaN y Number.isFinite(x) exige un Number finito, sin convertir texto. No equivalen a validar una entrada textual: Number(\"\") convierte el vacío en cero, por eso ya aprendiste a validar el texto antes."
+        },
+        {
+          "title": "Enteros y enteros seguros",
+          "text": "Number.isInteger(x) pide un Number entero. Number.isSafeInteger(x) también exige que esté entre -(2**53 - 1) y 2**53 - 1, donde cada entero se representa sin saltos. Fuera de ese intervalo puede ser entero y a la vez perder unidades. BigInt se estudia más adelante para otros contratos; no se mezcla directamente con las funciones de Math."
+        },
+        {
+          "title": "Tolerancia y notación científica",
+          "text": "Una comparación aproximada puede comprobar Math.abs(a - b) < tolerancia. 1e-10 significa 0.0000000001. Number.EPSILON es la separación entre 1 y el siguiente Number mayor; no es una corrección universal para cualquier escala ni para dinero. Debes elegir una tolerancia con sentido para la unidad y magnitud del problema."
+        },
+        {
+          "title": "Formatear no cambia el tipo de cálculo",
+          "text": "valor.toFixed(2) devuelve un texto con dos posiciones decimales. Sirve para presentación y puede reflejar la aproximación binaria. Si después sumas 1 al texto, concatenas. Number(texto) lo convierte en número y pierde los ceros de presentación. Para dinero, define reglas y unidades enteras cuando corresponda; no prometas exactitud por añadir EPSILON."
+        },
+        {
+          "title": "Cero con signo",
+          "text": "Number también distingue 0 y -0. === los considera iguales, pero Object.is(0, -0) devuelve false. Object.is es una función que compara valores conservando esa distinción y reconoce NaN como el mismo valor. Math.round(-0.5) puede producir -0 aunque la salida habitual de consola lo muestre como 0."
+        }
+      ],
+      "example": {
+        "code": "console.log(0.1 + 0.2);\nconsole.log(Number.isNaN(Math.sqrt(-1)));\nconsole.log(Number.isFinite(Infinity));\nconsole.log(Number.isSafeInteger(9007199254740992));\nconsole.log(typeof (1.5).toFixed(2));\nconsole.log(Object.is(Math.round(-0.5), -0));",
+        "stdout": "0.30000000000000004\ntrue\nfalse\nfalse\nstring\ntrue\n",
+        "explanation": "La suma inicial hace visible una aproximación binaria. sqrt(-1) produce NaN, que isNaN reconoce. Infinity falla la condición de finito. El entero siguiente al límite seguro no conserva todas las unidades. toFixed devuelve texto y Object.is permite ver el cero con signo."
+      },
+      "guided": {
+        "prompt": "Muestra si valor es finito, entero y entero seguro, en ese orden. No conviertas el dato.",
+        "starter": "const valor = 5;\n",
+        "solution": "const valor = 5;\nconsole.log(Number.isFinite(valor));\nconsole.log(Number.isInteger(valor));\nconsole.log(Number.isSafeInteger(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 5",
+            "stdout": "true\ntrue\ntrue\n",
+            "overrides": {
+              "valor": 5
+            }
+          },
+          {
+            "name": "Caso 2: valor = 2.5",
+            "stdout": "true\nfalse\nfalse\n",
+            "overrides": {
+              "valor": 2.5
+            }
+          },
+          {
+            "name": "Caso 3: valor = \"5\"",
+            "stdout": "false\nfalse\nfalse\n",
+            "overrides": {
+              "valor": "5"
+            }
+          },
+          {
+            "name": "Caso 4: valor = 9007199254740992",
+            "stdout": "true\ntrue\nfalse\n",
+            "overrides": {
+              "valor": 9007199254740992
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["isFinite", "isInteger", "isSafeInteger"]
+        },
+        "hints": [
+          "Un texto que parece número no es un Number finito para esta comprobación.",
+          "isInteger comprueba la fracción; isSafeInteger también comprueba el rango."
+        ],
+        "explanation": "isInteger comprueba la fracción; isSafeInteger también comprueba el rango. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Un texto que parece número no es un Number finito para esta comprobación. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "El formato se está concatenando con 1. Convierte el texto antes de sumar y muestra el resultado numérico.",
+        "starter": "const valor = 1.5;\nconsole.log(valor.toFixed(2) + 1);",
+        "solution": "const valor = 1.5;\nconsole.log(Number(valor.toFixed(2)) + 1);",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 1.5",
+            "stdout": "2.5\n",
+            "overrides": {
+              "valor": 1.5
+            }
+          },
+          {
+            "name": "Caso 2: valor = 0.5",
+            "stdout": "1.5\n",
+            "overrides": {
+              "valor": 0.5
+            }
+          },
+          {
+            "name": "Caso 3: valor = 2",
+            "stdout": "3\n",
+            "overrides": {
+              "valor": 2
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["toFixed"]
+        },
+        "hints": [
+          "toFixed produce texto y + con texto concatena.",
+          "Convierte el texto antes de sumar; no cambies solo el formato."
+        ],
+        "explanation": "Convierte el texto antes de sumar; no cambies solo el formato. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "toFixed produce texto y + con texto concatena. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Un sensor admite una diferencia menor que tolerancia. Muestra el booleano de la comparación aproximada entre observado y esperado. La tolerancia es positiva y tiene las mismas unidades.",
+        "starter": "const observado = 0.1 + 0.2;\nconst esperado = 0.3;\nconst tolerancia = 1e-10;\n",
+        "solution": "const observado = 0.1 + 0.2;\nconst esperado = 0.3;\nconst tolerancia = 1e-10;\nconsole.log(Math.abs(observado - esperado) < tolerancia);",
+        "cases": [
+          {
+            "name": "Caso 1: observado = 0.30000000000000004, esperado = 0.3, tolerancia = 1e-10",
+            "stdout": "true\n",
+            "overrides": {
+              "observado": 0.30000000000000004,
+              "esperado": 0.3,
+              "tolerancia": 1e-10
+            }
+          },
+          {
+            "name": "Caso 2: observado = 0.31, esperado = 0.3, tolerancia = 0.001",
+            "stdout": "false\n",
+            "overrides": {
+              "observado": 0.31,
+              "esperado": 0.3,
+              "tolerancia": 0.001
+            }
+          },
+          {
+            "name": "Caso 3: observado = -2, esperado = -2, tolerancia = 0.001",
+            "stdout": "true\n",
+            "overrides": {
+              "observado": -2,
+              "esperado": -2,
+              "tolerancia": 0.001
+            }
+          }
+        ],
+        "bindings": {
+          "observado": "const",
+          "esperado": "const",
+          "tolerancia": "const"
+        },
+        "syntax": {
+          "methods": ["abs"]
+        },
+        "hints": [
+          "Calcula primero la diferencia y retira la dirección con abs.",
+          "Compara con la tolerancia positiva que exige la unidad del sensor."
+        ],
+        "explanation": "Compara con la tolerancia positiva que exige la unidad del sensor. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Calcula primero la diferencia y retira la dirección con abs. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.abs en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs"
+        },
+        {
+          "title": "Math.sqrt en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sqrt"
+        },
+        {
+          "title": "Math.round en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round"
+        },
+        {
+          "title": "Number en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-logaritmos",
+      "after": "consulta-numeros-precision",
+      "title": "Math.exp y logaritmos: crecimiento e inversas",
+      "outcome": "Interpretar un logaritmo como exponente y comprobar su base y dominio.",
+      "requires": ["consulta-math-potencias", "consulta-numeros-precision"],
+      "sections": [
+        {
+          "title": "Deshacer una potencia",
+          "text": "Si 2**3 da 8, Math.log2(8) da 3: pregunta a qué exponente hay que elevar 2 para llegar a 8. Math.log10(100) pregunta lo mismo con base 10 y da 2. No son raíces ni divisiones. Una duplicación repetida y una escala de tamaños son aplicaciones posibles."
+        },
+        {
+          "title": "La base natural",
+          "text": "Math.E es aproximadamente 2.71828. Math.exp(x) calcula E elevado a x y Math.log(x) es el logaritmo en base E. La relación ideal log(exp(x)) = x puede tener error numérico. Un resultado muy grande puede desbordarse a Infinity."
+        },
+        {
+          "title": "Valores cercanos a cero",
+          "text": "Math.expm1(x) calcula exp(x) - 1 evitando parte de la pérdida de precisión cerca de cero. Math.log1p(x) calcula log(1 + x) con el mismo cuidado. Son útiles cuando un cambio pequeño quedaría oculto al sumarlo a 1 o restarlo después."
+        },
+        {
+          "title": "Dominios y fronteras",
+          "text": "log, log2 y log10 requieren entradas positivas para un resultado finito; con cero dan -Infinity y con negativas NaN. log1p necesita x > -1 para ser finito: en -1 da -Infinity. No sustituyas esos resultados por cero sin una regla del problema."
+        },
+        {
+          "title": "Las constantes de base",
+          "text": "Math.LN2 y Math.LN10 son log(2) y log(10). Math.LOG2E y Math.LOG10E son los logaritmos de E en base 2 y 10. Son valores numéricos, sin paréntesis. Permiten interpretar cambios de base; las aproximaciones se comparan con tolerancia."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.exp(0));\nconsole.log(Math.log(Math.E));\nconsole.log(Math.expm1(0));\nconsole.log(Math.log1p(0));\nconsole.log(Math.log2(8));\nconsole.log(Math.log10(100));\nconsole.log(Math.round(Math.exp(Math.LN2)));\nconsole.log(Math.round(Math.exp(Math.LN10)));\nconsole.log(Math.abs(Math.log2(Math.E) - Math.LOG2E) < 1e-12);\nconsole.log(Math.abs(Math.log10(Math.E) - Math.LOG10E) < 1e-12);",
+        "stdout": "1\n1\n0\n0\n3\n2\n2\n10\ntrue\ntrue\n",
+        "explanation": "exp(0) y log(E) muestran la pareja potencia e inversa. expm1 y log1p aplicados a cero conservan cero. log2(8) recupera tres duplicaciones y log10(100), dos potencias de diez. Las últimas comparaciones usan tolerancia para relacionar constantes aproximadas."
+      },
+      "guided": {
+        "prompt": "Muestra log2(baseDos) y log10(baseDiez). Los datos son potencias exactas de sus bases.",
+        "starter": "const baseDos = 8;\nconst baseDiez = 100;\n",
+        "solution": "const baseDos = 8;\nconst baseDiez = 100;\nconsole.log(Math.log2(baseDos));\nconsole.log(Math.log10(baseDiez));",
+        "cases": [
+          {
+            "name": "Caso 1: baseDos = 8, baseDiez = 100",
+            "stdout": "3\n2\n",
+            "overrides": {
+              "baseDos": 8,
+              "baseDiez": 100
+            }
+          },
+          {
+            "name": "Caso 2: baseDos = 1, baseDiez = 1",
+            "stdout": "0\n0\n",
+            "overrides": {
+              "baseDos": 1,
+              "baseDiez": 1
+            }
+          },
+          {
+            "name": "Caso 3: baseDos = 1024, baseDiez = 1000",
+            "stdout": "10\n3\n",
+            "overrides": {
+              "baseDos": 1024,
+              "baseDiez": 1000
+            }
+          }
+        ],
+        "bindings": {
+          "baseDos": "const",
+          "baseDiez": "const"
+        },
+        "syntax": {
+          "methods": ["log2", "log10"]
+        },
+        "hints": [
+          "Pregunta cuántas potencias de la base hacen falta para llegar al dato.",
+          "No intercambies log2 y log10."
+        ],
+        "explanation": "No intercambies log2 y log10. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Pregunta cuántas potencias de la base hacen falta para llegar al dato. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "El problema pide base 2, no base natural. Corrige la llamada.",
+        "starter": "const cantidad = 8;\nconsole.log(Math.log(cantidad));",
+        "solution": "const cantidad = 8;\nconsole.log(Math.log2(cantidad));",
+        "cases": [
+          {
+            "name": "Caso 1: cantidad = 8",
+            "stdout": "3\n",
+            "overrides": {
+              "cantidad": 8
+            }
+          },
+          {
+            "name": "Caso 2: cantidad = 1024",
+            "stdout": "10\n",
+            "overrides": {
+              "cantidad": 1024
+            }
+          },
+          {
+            "name": "Caso 3: cantidad = 1",
+            "stdout": "0\n",
+            "overrides": {
+              "cantidad": 1
+            }
+          }
+        ],
+        "bindings": {
+          "cantidad": "const"
+        },
+        "syntax": {
+          "methods": ["log2"]
+        },
+        "hints": [
+          "log usa E como base, no dos.",
+          "Selecciona la operación cuya base corresponde a duplicaciones."
+        ],
+        "explanation": "Selecciona la operación cuya base corresponde a duplicaciones. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "log usa E como base, no dos. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Una reserva crece por E elevado a cambio. Muestra el factor exp(cambio) y el cambio relativo expm1(cambio), cada uno como texto con seis decimales usando toFixed(6). En una tercera línea comprueba que log1p recupera cambio con diferencia menor que 1e-10. El formato es para presentar, no para calcular.",
+        "starter": "const cambio = 0;\n",
+        "solution": "const cambio = 0;\nconst relativo = Math.expm1(cambio);\nconsole.log(Math.exp(cambio).toFixed(6));\nconsole.log(relativo.toFixed(6));\nconsole.log(Math.abs(Math.log1p(relativo) - cambio) < 1e-10);",
+        "cases": [
+          {
+            "name": "Caso 1: cambio = 0",
+            "stdout": "1.000000\n0.000000\ntrue\n",
+            "overrides": {
+              "cambio": 0
+            }
+          },
+          {
+            "name": "Caso 2: cambio = 1",
+            "stdout": "2.718282\n1.718282\ntrue\n",
+            "overrides": {
+              "cambio": 1
+            }
+          }
+        ],
+        "bindings": {
+          "cambio": "const"
+        },
+        "syntax": {
+          "methods": ["exp", "expm1", "log1p", "toFixed"]
+        },
+        "hints": [
+          "Calcula relativo como número antes de presentarlo.",
+          "La recuperación con log1p se compara con tolerancia; toFixed solo forma las dos primeras líneas."
+        ],
+        "explanation": "La recuperación con log1p se compara con tolerancia; toFixed solo forma las dos primeras líneas. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Calcula relativo como número antes de presentarlo. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.exp en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/exp"
+        },
+        {
+          "title": "Math.expm1 en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/expm1"
+        },
+        {
+          "title": "Math.log en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log"
+        },
+        {
+          "title": "Math.log1p en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log1p"
+        },
+        {
+          "title": "Math.log2 en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log2"
+        },
+        {
+          "title": "Math.log10 en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log10"
+        }
+      ],
+      "practices": [
+        {
+          "prompt": "Muestra log(valor), después si log(valor) es NaN y si es finito. Contrasta positivo, cero y negativo.",
+          "starter": "const valor = 1;\n",
+          "solution": "const valor = 1;\nconst resultado = Math.log(valor);\nconsole.log(resultado);\nconsole.log(Number.isNaN(resultado));\nconsole.log(Number.isFinite(resultado));",
+          "cases": [
+            {
+              "name": "Caso 1: valor = 1",
+              "stdout": "0\nfalse\ntrue\n",
+              "overrides": {
+                "valor": 1
+              }
+            },
+            {
+              "name": "Caso 2: valor = 0",
+              "stdout": "-Infinity\nfalse\nfalse\n",
+              "overrides": {
+                "valor": 0
+              }
+            },
+            {
+              "name": "Caso 3: valor = -1",
+              "stdout": "NaN\ntrue\nfalse\n",
+              "overrides": {
+                "valor": -1
+              }
+            }
+          ],
+          "bindings": {
+            "valor": "const"
+          },
+          "syntax": {
+            "methods": ["log", "isNaN", "isFinite"]
+          },
+          "hints": [
+            "Identifica primero qué recibe y qué devuelve cada operación. Sigue los valores antes de ejecutar.",
+            "Contrasta el límite, el cero y el signo que cambian la decisión; consulta el ejemplo razonado."
+          ],
+          "explanation": "Los casos comprobados coinciden. Explica la regla utilizada y prueba una entrada distinta.",
+          "retryFeedback": "Compara el valor y su tipo con el contrato. No sustituyas una regla por la salida de un caso.",
+          "id": "math-dominio-log",
+          "title": "Prueba el dominio de una operación"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Ejemplo razonado: contar duplicaciones",
+          "explanation": "Partiendo de uno, duplicar tres veces produce ocho. log2 recupera esa cantidad de pasos. Con 1024 se necesitan diez duplicaciones.",
+          "code": "console.log(Math.log2(8));\nconsole.log(Math.log2(1024));",
+          "stdout": "3\n10\n"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-angulos",
+      "after": "consulta-math-logaritmos",
+      "title": "Math.PI, trigonometría y ángulos en radianes",
+      "outcome": "Relacionar grados y radianes con posiciones y recuperar una dirección sin intercambiar ejes.",
+      "requires": ["consulta-math-logaritmos", "consulta-math-potencias"],
+      "sections": [
+        {
+          "title": "Medir un giro",
+          "text": "Una vuelta tiene 360 grados. Un radián mide un arco cuya longitud coincide con el radio. La vuelta completa tiene 2 * Math.PI radianes. PI es la razón entre circunferencia y diámetro, aproximadamente 3.14159. Para pasar grados a radianes multiplica por PI / 180; para volver, por 180 / PI."
+        },
+        {
+          "title": "Seno, coseno y tangente",
+          "text": "En un círculo de radio 1, cos(ángulo) representa la coordenada horizontal y sin(ángulo) la vertical. Math.sin y Math.cos reciben radianes y dan valores entre -1 y 1. Math.tan es la razón entre seno y coseno cuando está definida. Cerca de un ángulo con coseno cero, esa razón crece mucho y es sensible a la aproximación."
+        },
+        {
+          "title": "Las funciones inversas",
+          "text": "Math.asin y Math.acos reciben una razón entre -1 y 1 y devuelven radianes. asin elige un ángulo entre -PI/2 y PI/2; acos, entre 0 y PI. Math.atan admite una razón real y devuelve un ángulo entre -PI/2 y PI/2. Un ángulo inverso no reconstruye todas las vueltas que pudo tener el original. Fuera de los dominios indicados, asin y acos producen NaN."
+        },
+        {
+          "title": "Una dirección con dos coordenadas",
+          "text": "Math.atan2(y, x) recibe primero la coordenada vertical y después la horizontal. Conserva información del cuadrante que se pierde al dividir y / x. El origen (0, 0) no define una dirección geométrica; los ejercicios no lo usan. Decide por contrato si presentas ángulos negativos o los transformas a otra vuelta."
+        },
+        {
+          "title": "Aproximación no significa igualdad exacta",
+          "text": "Math.sin(PI) puede dar un número cercano a cero en lugar de cero exacto. Para comprobar una identidad usa tolerancia; para una presentación entera, round puede ser apropiado si esa es la regla. No uses grados directamente en las funciones trigonométricas."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.sin(0));\nconsole.log(Math.cos(0));\nconsole.log(Math.tan(0));\nconsole.log(Math.asin(0));\nconsole.log(Math.acos(1));\nconsole.log(Math.atan(0));\nconsole.log(Math.round(Math.atan2(1, 0) * 180 / Math.PI));",
+        "stdout": "0\n1\n0\n0\n0\n0\n90\n",
+        "explanation": "El ángulo cero apunta a la derecha: seno cero y coseno uno. Las inversas recuperan el ángulo principal de razones sencillas. Para el punto (0, 1), atan2 recibe (1, 0), devuelve PI/2 radianes y la conversión muestra 90 grados."
+      },
+      "guided": {
+        "prompt": "Convierte grados a radianes y muestra seno y coseno redondeados para presentar las coordenadas de los ángulos de prueba.",
+        "starter": "const grados = 90;\n",
+        "solution": "const grados = 90;\nconst radianes = grados * Math.PI / 180;\nconsole.log(Math.round(Math.sin(radianes)));\nconsole.log(Math.round(Math.cos(radianes)));",
+        "cases": [
+          {
+            "name": "Caso 1: grados = 90",
+            "stdout": "1\n0\n",
+            "overrides": {
+              "grados": 90
+            }
+          },
+          {
+            "name": "Caso 2: grados = 0",
+            "stdout": "0\n1\n",
+            "overrides": {
+              "grados": 0
+            }
+          },
+          {
+            "name": "Caso 3: grados = 180",
+            "stdout": "0\n-1\n",
+            "overrides": {
+              "grados": 180
+            }
+          },
+          {
+            "name": "Caso 4: grados = 270",
+            "stdout": "-1\n0\n",
+            "overrides": {
+              "grados": 270
+            }
+          }
+        ],
+        "bindings": {
+          "grados": "const"
+        },
+        "syntax": {
+          "methods": ["sin", "cos", "round"]
+        },
+        "hints": [
+          "Primero convierte grados multiplicando por PI / 180.",
+          "La coordenada vertical corresponde a sin y la horizontal a cos."
+        ],
+        "explanation": "La coordenada vertical corresponde a sin y la horizontal a cos. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Primero convierte grados multiplicando por PI / 180. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "La función está recibiendo grados. Corrige la unidad y muestra si el seno calculado difiere de esperado menos de 1e-12.",
+        "starter": "const grados = 90;\nconst esperado = 1;\nconsole.log(Math.abs(Math.sin(grados) - esperado) < 1e-12);",
+        "solution": "const grados = 90;\nconst esperado = 1;\nconsole.log(Math.abs(Math.sin(grados * Math.PI / 180) - esperado) < 1e-12);",
+        "cases": [
+          {
+            "name": "Caso 1: grados = 90, esperado = 1",
+            "stdout": "true\n",
+            "overrides": {
+              "grados": 90,
+              "esperado": 1
+            }
+          },
+          {
+            "name": "Caso 2: grados = 180, esperado = 0",
+            "stdout": "true\n",
+            "overrides": {
+              "grados": 180,
+              "esperado": 0
+            }
+          },
+          {
+            "name": "Caso 3: grados = 90, esperado = 0",
+            "stdout": "false\n",
+            "overrides": {
+              "grados": 90,
+              "esperado": 0
+            }
+          }
+        ],
+        "bindings": {
+          "grados": "const",
+          "esperado": "const"
+        },
+        "syntax": {
+          "methods": ["sin", "abs"]
+        },
+        "hints": [
+          "Un grado no es un radián.",
+          "Convierte dentro de sin y comprueba la diferencia con abs."
+        ],
+        "explanation": "Convierte dentro de sin y comprueba la diferencia con abs. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Un grado no es un radián. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Obtén la dirección del punto (x, y) con atan2 y preséntala en grados enteros. Recuerda el orden y, x. No se recibe el origen.",
+        "starter": "const x = 0;\nconst y = 1;\n",
+        "solution": "const x = 0;\nconst y = 1;\nconsole.log(Math.round(Math.atan2(y,x) * 180 / Math.PI));",
+        "cases": [
+          {
+            "name": "Caso 1: x = 0, y = 1",
+            "stdout": "90\n",
+            "overrides": {
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "name": "Caso 2: x = 1, y = 0",
+            "stdout": "0\n",
+            "overrides": {
+              "x": 1,
+              "y": 0
+            }
+          },
+          {
+            "name": "Caso 3: x = -1, y = 0",
+            "stdout": "180\n",
+            "overrides": {
+              "x": -1,
+              "y": 0
+            }
+          },
+          {
+            "name": "Caso 4: x = 0, y = -1",
+            "stdout": "-90\n",
+            "overrides": {
+              "x": 0,
+              "y": -1
+            }
+          }
+        ],
+        "bindings": {
+          "x": "const",
+          "y": "const"
+        },
+        "syntax": {
+          "methods": ["atan2", "round"]
+        },
+        "hints": [
+          "atan2 recibe primero y y después x.",
+          "Convierte los radianes de la respuesta a grados y redondea para este panel."
+        ],
+        "explanation": "Convierte los radianes de la respuesta a grados y redondea para este panel. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "atan2 recibe primero y y después x. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.sin en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sin"
+        },
+        {
+          "title": "Math.cos en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/cos"
+        },
+        {
+          "title": "Math.tan en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/tan"
+        },
+        {
+          "title": "Math.asin en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/asin"
+        },
+        {
+          "title": "Math.acos en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/acos"
+        },
+        {
+          "title": "Math.atan en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan"
+        },
+        {
+          "title": "Math.atan2 en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2"
+        }
+      ],
+      "practices": [
+        {
+          "prompt": "Usa asin, acos y atan para recuperar tres ángulos y mostrarlos en grados redondeados: asin(razon), acos(razon) y atan(razon). La razón está entre -1 y 1.",
+          "starter": "const razon = 0;\n",
+          "solution": "const razon = 0;\nconsole.log(Math.round(Math.asin(razon) * 180 / Math.PI));\nconsole.log(Math.round(Math.acos(razon) * 180 / Math.PI));\nconsole.log(Math.round(Math.atan(razon) * 180 / Math.PI));",
+          "cases": [
+            {
+              "name": "Caso 1: razon = 0",
+              "stdout": "0\n90\n0\n",
+              "overrides": {
+                "razon": 0
+              }
+            },
+            {
+              "name": "Caso 2: razon = 1",
+              "stdout": "90\n0\n45\n",
+              "overrides": {
+                "razon": 1
+              }
+            },
+            {
+              "name": "Caso 3: razon = -1",
+              "stdout": "-90\n180\n-45\n",
+              "overrides": {
+                "razon": -1
+              }
+            }
+          ],
+          "bindings": {
+            "razon": "const"
+          },
+          "syntax": {
+            "methods": ["asin", "acos", "atan"]
+          },
+          "hints": [
+            "Identifica primero qué recibe y qué devuelve cada operación. Sigue los valores antes de ejecutar.",
+            "Contrasta el límite, el cero y el signo que cambian la decisión; consulta el ejemplo razonado."
+          ],
+          "explanation": "Los casos comprobados coinciden. Explica la regla utilizada y prueba una entrada distinta.",
+          "retryFeedback": "Compara el valor y su tipo con el contrato. No sustituyas una regla por la salida de un caso.",
+          "id": "math-inversas",
+          "title": "Recupera ángulos y contrasta dominios"
+        },
+        {
+          "prompt": "Calcula la tangente de grados después de convertirlos a radianes y muestra su valor redondeado. Los ángulos evitan la singularidad de 90 grados.",
+          "starter": "const grados = 45;\n",
+          "solution": "const grados = 45;\nconsole.log(Math.round(Math.tan(grados * Math.PI / 180)));",
+          "cases": [
+            {
+              "name": "Caso 1: grados = 45",
+              "stdout": "1\n",
+              "overrides": {
+                "grados": 45
+              }
+            },
+            {
+              "name": "Caso 2: grados = 0",
+              "stdout": "0\n",
+              "overrides": {
+                "grados": 0
+              }
+            },
+            {
+              "name": "Caso 3: grados = -45",
+              "stdout": "-1\n",
+              "overrides": {
+                "grados": -45
+              }
+            }
+          ],
+          "bindings": {
+            "grados": "const"
+          },
+          "syntax": {
+            "methods": ["tan"]
+          },
+          "hints": [
+            "Identifica primero qué recibe y qué devuelve cada operación. Sigue los valores antes de ejecutar.",
+            "Contrasta el límite, el cero y el signo que cambian la decisión; consulta el ejemplo razonado."
+          ],
+          "explanation": "Los casos comprobados coinciden. Explica la regla utilizada y prueba una entrada distinta.",
+          "retryFeedback": "Compara el valor y su tipo con el contrato. No sustituyas una regla por la salida de un caso.",
+          "id": "math-tangente",
+          "title": "Aplica una razón con su unidad"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-hiperbolicas",
+      "after": "consulta-math-angulos",
+      "title": "Math.sinh, cosh, tanh y sus inversas",
+      "outcome": "Interpretar funciones hiperbólicas a partir de exponenciales y respetar sus dominios.",
+      "requires": ["consulta-math-logaritmos", "consulta-math-angulos"],
+      "sections": [
+        {
+          "title": "Otra familia de relaciones",
+          "text": "Las funciones hiperbólicas se construyen a partir de exponenciales. sinh(x) corresponde a (exp(x) - exp(-x)) / 2; cosh(x), a la misma suma con +. tanh(x) es sinh(x) / cosh(x). No reciben un ángulo en grados: aquí x es un valor numérico sin esa conversión."
+        },
+        {
+          "title": "Qué valores producen",
+          "text": "Para x real finito, cosh es al menos 1 y sinh puede ser negativo, cero o positivo. tanh se aproxima a -1 o 1 al crecer la magnitud; el redondeo puede presentar esos extremos. Con x = 0, sinh da 0, cosh da 1 y tanh da 0. Son útiles en modelos de curvas y transformaciones, cuando el modelo realmente las requiere."
+        },
+        {
+          "title": "Deshacer la relación",
+          "text": "Math.asinh deshace sinh para reales. Math.acosh recibe valores desde 1 y devuelve un resultado no negativo; deshacer cosh no recupera un signo que ya se perdió. Math.atanh requiere valores entre -1 y 1 para ser finita: en los extremos da infinitos y fuera da NaN."
+        },
+        {
+          "title": "Dominios, precisión y explicación",
+          "text": "Las identidades matemáticas se comprueban con tolerancia porque las funciones son aproximadas. Valores de gran magnitud pueden desbordar las exponenciales. Usa los problemas pequeños y finitos del ejemplo antes de aplicar estas funciones a un modelo."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.sinh(0));\nconsole.log(Math.cosh(0));\nconsole.log(Math.tanh(0));\nconsole.log(Math.asinh(0));\nconsole.log(Math.acosh(1));\nconsole.log(Math.atanh(0));",
+        "stdout": "0\n1\n0\n0\n0\n0\n",
+        "explanation": "Las seis llamadas eligen puntos de referencia: sinh(0), tanh(0) y sus inversas dan cero; cosh(0) da uno y acosh(1) regresa a cero. Cambia x por un número pequeño y contrasta las identidades con tolerancia en la práctica."
+      },
+      "guided": {
+        "prompt": "Para x, comprueba las tres identidades con tolerancia 1e-10: asinh(sinh(x)) = x, acosh(cosh(x)) = abs(x), y atanh(tanh(x)) = x. Usa datos pequeños.",
+        "starter": "const x = 2;\n",
+        "solution": "const x = 2;\nconsole.log(Math.abs(Math.asinh(Math.sinh(x)) - x) < 1e-10);\nconsole.log(Math.abs(Math.acosh(Math.cosh(x)) - Math.abs(x)) < 1e-10);\nconsole.log(Math.abs(Math.atanh(Math.tanh(x)) - x) < 1e-10);",
+        "cases": [
+          {
+            "name": "Caso 1: x = 2",
+            "stdout": "true\ntrue\ntrue\n",
+            "overrides": {
+              "x": 2
+            }
+          },
+          {
+            "name": "Caso 2: x = -2",
+            "stdout": "true\ntrue\ntrue\n",
+            "overrides": {
+              "x": -2
+            }
+          },
+          {
+            "name": "Caso 3: x = 0",
+            "stdout": "true\ntrue\ntrue\n",
+            "overrides": {
+              "x": 0
+            }
+          }
+        ],
+        "bindings": {
+          "x": "const"
+        },
+        "syntax": {
+          "methods": ["asinh", "sinh", "acosh", "cosh", "atanh", "tanh"]
+        },
+        "hints": [
+          "Aplica primero la función y después su inversa.",
+          "cosh pierde el signo: su inversa recupera abs(x), no siempre x."
+        ],
+        "explanation": "cosh pierde el signo: su inversa recupera abs(x), no siempre x. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Aplica primero la función y después su inversa. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "acosh solo admite valores desde 1 para un resultado real. Muestra si su resultado es NaN, en lugar de usar una comparación === NaN.",
+        "starter": "const x = 0;\nconsole.log(Math.acosh(x) === NaN);",
+        "solution": "const x = 0;\nconsole.log(Number.isNaN(Math.acosh(x)));",
+        "cases": [
+          {
+            "name": "Caso 1: x = 0",
+            "stdout": "true\n",
+            "overrides": {
+              "x": 0
+            }
+          },
+          {
+            "name": "Caso 2: x = 1",
+            "stdout": "false\n",
+            "overrides": {
+              "x": 1
+            }
+          },
+          {
+            "name": "Caso 3: x = -1",
+            "stdout": "true\n",
+            "overrides": {
+              "x": -1
+            }
+          }
+        ],
+        "bindings": {
+          "x": "const"
+        },
+        "syntax": {
+          "methods": ["isNaN", "acosh"]
+        },
+        "hints": [
+          "NaN nunca es igual a sí mismo con ===.",
+          "Number.isNaN reconoce ese resultado sin convertir otros tipos."
+        ],
+        "explanation": "Number.isNaN reconoce ese resultado sin convertir otros tipos. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "NaN nunca es igual a sí mismo con ===. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Comprueba si sinh(x) coincide, con tolerancia 1e-10, con la definición exponencial. Muestra true o false para el x dado.",
+        "starter": "const x = 1;\n",
+        "solution": "const x = 1;\nconst definicion = (Math.exp(x) - Math.exp(-x)) / 2;\nconsole.log(Math.abs(Math.sinh(x) - definicion) < 1e-10);",
+        "cases": [
+          {
+            "name": "Caso 1: x = 1",
+            "stdout": "true\n",
+            "overrides": {
+              "x": 1
+            }
+          },
+          {
+            "name": "Caso 2: x = -1",
+            "stdout": "true\n",
+            "overrides": {
+              "x": -1
+            }
+          },
+          {
+            "name": "Caso 3: x = 0",
+            "stdout": "true\n",
+            "overrides": {
+              "x": 0
+            }
+          }
+        ],
+        "bindings": {
+          "x": "const"
+        },
+        "syntax": {
+          "methods": ["sinh", "exp", "abs"]
+        },
+        "hints": [
+          "La definición combina exp(x) y exp(-x).",
+          "Resta, divide entre dos y compara con sinh usando tolerancia."
+        ],
+        "explanation": "Resta, divide entre dos y compara con sinh usando tolerancia. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "La definición combina exp(x) y exp(-x). Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.sinh en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sinh"
+        },
+        {
+          "title": "Math.cosh en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/cosh"
+        },
+        {
+          "title": "Math.tanh en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/tanh"
+        },
+        {
+          "title": "Math.asinh en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/asinh"
+        },
+        {
+          "title": "Math.acosh en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/acosh"
+        },
+        {
+          "title": "Math.atanh en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atanh"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-enteros32",
+      "after": "js-enteros-exactos",
+      "title": "Math.clz32 e imul: representación entera de 32 bits",
+      "outcome": "Interpretar bits, ceros iniciales y multiplicación con desbordamiento de 32 bits.",
+      "requires": ["js-enteros-exactos", "consulta-numeros-precision", "consulta-math-potencias"],
+      "sections": [
+        {
+          "title": "Representar en base dos",
+          "text": "Un bit es una posición que vale 0 o 1. En base dos las posiciones pesan 1, 2, 4, 8 y así sucesivamente. 5 se escribe 101 porque 4 + 1 = 5. El literal JavaScript 0b101 representa ese mismo número. Un contenedor de 32 bits tiene 32 posiciones; sin signo abarca de 0 a 2**32 - 1."
+        },
+        {
+          "title": "Contar ceros iniciales",
+          "text": "Math.clz32 convierte su argumento a entero sin signo de 32 bits y cuenta los ceros antes del primer 1. Para 1 hay 31 ceros; para 0, 32. Para un positivo representable, 32 - clz32(x) cuenta las posiciones necesarias. La conversión usa el valor módulo 2**32 y no equivale a conservar cualquier Number grande."
+        },
+        {
+          "title": "Interpretar el signo",
+          "text": "En la representación con signo de 32 bits, los patrones desde 2**31 se interpretan restando 2**32. El patrón de todos unos representa -1 en ese esquema. Por eso el mismo conjunto de bits puede interpretarse con o sin signo según el contrato. No es la representación habitual de todos los cálculos Number."
+        },
+        {
+          "title": "Multiplicar con imul",
+          "text": "Math.imul(a, b) calcula la parte baja de un producto de enteros de 32 bits y devuelve su interpretación con signo. imul(2147483647, 2) da -2; la multiplicación Number ordinaria da 4294967294. Se usa en algoritmos que exigen esa aritmética, no para contar objetos de negocio o para reemplazar BigInt."
+        },
+        {
+          "title": "Conversiones explícitas",
+          "text": "Los argumentos se convierten a números y luego a enteros de 32 bits; las fracciones pierden su parte decimal y ciertos valores especiales se convierten a cero. Los ejercicios usan enteros declarados y separan esta representación de la validación de entradas."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.clz32(0));\nconsole.log(Math.clz32(1));\nconsole.log(Math.clz32(16));\nconsole.log(Math.imul(2147483647, 2));",
+        "stdout": "32\n31\n27\n-2\n",
+        "explanation": "En 32 posiciones, el número uno ocupa solo la última: quedan 31 ceros iniciales. Para cero no hay ningún uno y clz32 devuelve 32. imul conserva 32 bits del producto y los interpreta con signo; por eso puede dar un resultado negativo aunque ambos factores sean positivos."
+      },
+      "guided": {
+        "prompt": "Muestra los ceros iniciales de valor en 32 bits y después la cantidad de posiciones usadas. Para cero, las posiciones usadas son cero.",
+        "starter": "const valor = 16;\n",
+        "solution": "const valor = 16;\nconsole.log(Math.clz32(valor));\nconsole.log(32 - Math.clz32(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 16",
+            "stdout": "27\n5\n",
+            "overrides": {
+              "valor": 16
+            }
+          },
+          {
+            "name": "Caso 2: valor = 1",
+            "stdout": "31\n1\n",
+            "overrides": {
+              "valor": 1
+            }
+          },
+          {
+            "name": "Caso 3: valor = 0",
+            "stdout": "32\n0\n",
+            "overrides": {
+              "valor": 0
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["clz32"]
+        },
+        "hints": [
+          "Empieza por imaginar las 32 posiciones.",
+          "Las posiciones usadas más los ceros iniciales suman 32."
+        ],
+        "explanation": "Las posiciones usadas más los ceros iniciales suman 32. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Empieza por imaginar las 32 posiciones. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "El cálculo de posiciones usadas está desplazado en uno. Corrige la relación con los 32 bits.",
+        "starter": "const valor = 16;\nconsole.log(31 - Math.clz32(valor));",
+        "solution": "const valor = 16;\nconsole.log(32 - Math.clz32(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 16",
+            "stdout": "5\n",
+            "overrides": {
+              "valor": 16
+            }
+          },
+          {
+            "name": "Caso 2: valor = 1",
+            "stdout": "1\n",
+            "overrides": {
+              "valor": 1
+            }
+          },
+          {
+            "name": "Caso 3: valor = 0",
+            "stdout": "0\n",
+            "overrides": {
+              "valor": 0
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["clz32"]
+        },
+        "hints": [
+          "Comprueba el caso cero: ninguna posición está usada.",
+          "El uno usa una posición y tiene 31 ceros iniciales."
+        ],
+        "explanation": "El uno usa una posición y tiene 31 ceros iniciales. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Comprueba el caso cero: ninguna posición está usada. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Un algoritmo pide multiplicación entera con signo de 32 bits, no el producto Number ordinario. Muestra imul(a, b).",
+        "starter": "const a = 2147483647;\nconst b = 2;\n",
+        "solution": "const a = 2147483647;\nconst b = 2;\nconsole.log(Math.imul(a,b));",
+        "cases": [
+          {
+            "name": "Caso 1: a = 2147483647, b = 2",
+            "stdout": "-2\n",
+            "overrides": {
+              "a": 2147483647,
+              "b": 2
+            }
+          },
+          {
+            "name": "Caso 2: a = 3, b = 4",
+            "stdout": "12\n",
+            "overrides": {
+              "a": 3,
+              "b": 4
+            }
+          },
+          {
+            "name": "Caso 3: a = 4294967295, b = 5",
+            "stdout": "-5\n",
+            "overrides": {
+              "a": 4294967295,
+              "b": 5
+            }
+          }
+        ],
+        "bindings": {
+          "a": "const",
+          "b": "const"
+        },
+        "syntax": {
+          "methods": ["imul"]
+        },
+        "hints": [
+          "El problema pide conservar solo 32 bits del producto.",
+          "imul devuelve ese patrón interpretado con signo."
+        ],
+        "explanation": "imul devuelve ese patrón interpretado con signo. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "El problema pide conservar solo 32 bits del producto. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.clz32 en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/clz32"
+        },
+        {
+          "title": "Math.imul en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul"
+        }
+      ]
+    },
+    {
+      "id": "consulta-math-flotantes",
+      "after": "consulta-math-enteros32",
+      "title": "Math.fround y f16round: precisión de 32 y 16 bits",
+      "outcome": "Distinguir redondear a un entero de aproximar un valor con otra precisión binaria.",
+      "requires": ["consulta-math-enteros32", "consulta-numeros-precision"],
+      "sections": [
+        {
+          "title": "Bits para un número fraccionario",
+          "text": "Un formato flotante guarda signo, escala o exponente y cifras significativas. Number usa el formato de 64 bits con 53 bits de precisión significativa; no significa que todos sus valores sean enteros de 64 bits. Reducir el formato limita la precisión y también el rango."
+        },
+        {
+          "title": "fround conserva una fracción aproximada",
+          "text": "Math.fround(x) aproxima x al formato binario de 32 bits y devuelve esa aproximación como Number. No retira necesariamente la fracción como floor, round o trunc. Por ejemplo, fround(1.5) conserva 1.5 y fround(0.1) produce aproximadamente 0.10000000149. Se usa cuando importa reproducir esa precisión, como en datos de gráficos."
+        },
+        {
+          "title": "f16round reduce más la precisión",
+          "text": "Math.f16round(x) hace la aproximación de 16 bits. Con 0.1 produce 0.0999755859375. Los resultados siguen teniendo tipo Number: la función redondea el valor, no cambia el tipo de la variable ni crea un arreglo de memoria. Valores grandes pueden pasar a Infinity en un formato más pequeño."
+        },
+        {
+          "title": "Disponibilidad y tolerancias",
+          "text": "f16round es más reciente que fround. Esta ficha requiere que el navegador la ofrezca; la interfaz informa cuando no está disponible. Antes de usar otra precisión, define cuánto error admite el problema. Estas operaciones no son herramientas universales para corregir dinero ni para imprimir decimales."
+        }
+      ],
+      "example": {
+        "code": "console.log(Math.fround(0.1));\nconsole.log(Math.f16round(0.1));\nconsole.log(Math.fround(1.5));\nconsole.log(Math.f16round(1.5));",
+        "stdout": "0.10000000149011612\n0.0999755859375\n1.5\n1.5\n",
+        "explanation": "El mismo 0.1 se aproxima en dos formatos distintos. Ambos resultados siguen siendo Number, pero sus cifras difieren. El valor 1.5 se representa exactamente en ambos. Con un valor grande, comprueba si el formato de 16 bits alcanza su límite y produce Infinity."
+      },
+      "guided": {
+        "prompt": "Muestra la aproximación de valor a 32 bits y después a 16 bits.",
+        "starter": "const valor = 1.5;\n",
+        "solution": "const valor = 1.5;\nconsole.log(Math.fround(valor));\nconsole.log(Math.f16round(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 1.5",
+            "stdout": "1.5\n1.5\n",
+            "overrides": {
+              "valor": 1.5
+            }
+          },
+          {
+            "name": "Caso 2: valor = 0.1",
+            "stdout": "0.10000000149011612\n0.0999755859375\n",
+            "overrides": {
+              "valor": 0.1
+            }
+          },
+          {
+            "name": "Caso 3: valor = -2.5",
+            "stdout": "-2.5\n-2.5\n",
+            "overrides": {
+              "valor": -2.5
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["fround", "f16round"]
+        },
+        "hints": [
+          "No se pide retirar la fracción, sino cambiar su aproximación.",
+          "Primero fround y después f16round, ambos sobre valor."
+        ],
+        "explanation": "Primero fround y después f16round, ambos sobre valor. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "No se pide retirar la fracción, sino cambiar su aproximación. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "Se necesita aproximar a 32 bits conservando la fracción representable. El redondeo entero elegido pierde esa información.",
+        "starter": "const valor = 1.5;\nconsole.log(Math.round(valor));",
+        "solution": "const valor = 1.5;\nconsole.log(Math.fround(valor));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 1.5",
+            "stdout": "1.5\n",
+            "overrides": {
+              "valor": 1.5
+            }
+          },
+          {
+            "name": "Caso 2: valor = -2.5",
+            "stdout": "-2.5\n",
+            "overrides": {
+              "valor": -2.5
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["fround"]
+        },
+        "hints": [
+          "round da un entero; ese no es el formato solicitado.",
+          "fround puede conservar 1.5 exactamente."
+        ],
+        "explanation": "fround puede conservar 1.5 exactamente. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "round da un entero; ese no es el formato solicitado. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Un formato pequeño debe conservar un valor finito dentro del rango del problema. Muestra si f16round(valor) sigue siendo finito; el resultado Infinity no es una cantidad válida.",
+        "starter": "const valor = 70000;\n",
+        "solution": "const valor = 70000;\nconsole.log(Number.isFinite(Math.f16round(valor)));",
+        "cases": [
+          {
+            "name": "Caso 1: valor = 70000",
+            "stdout": "false\n",
+            "overrides": {
+              "valor": 70000
+            }
+          },
+          {
+            "name": "Caso 2: valor = 100",
+            "stdout": "true\n",
+            "overrides": {
+              "valor": 100
+            }
+          },
+          {
+            "name": "Caso 3: valor = -70000",
+            "stdout": "false\n",
+            "overrides": {
+              "valor": -70000
+            }
+          }
+        ],
+        "bindings": {
+          "valor": "const"
+        },
+        "syntax": {
+          "methods": ["isFinite", "f16round"]
+        },
+        "hints": [
+          "Primero aproxima el valor al formato de 16 bits.",
+          "Number.isFinite distingue una cantidad de un desbordamiento a Infinity."
+        ],
+        "explanation": "Number.isFinite distingue una cantidad de un desbordamiento a Infinity. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Primero aproxima el valor al formato de 16 bits. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.fround en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/fround"
+        },
+        {
+          "title": "Math.f16round en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/f16round"
+        }
+      ],
+      "capability": "f16round"
+    },
+    {
+      "id": "consulta-math-suma-precisa",
+      "after": "consulta-math-flotantes",
+      "title": "Math.sumPrecise: sumar con atención a la cancelación",
+      "outcome": "Reconocer pérdida de información al acumular y comprobar disponibilidad antes de adoptar una API reciente.",
+      "requires": ["consulta-math-flotantes", "js-reducir-acumulador"],
+      "sections": [
+        {
+          "title": "Cuando el orden revela un límite",
+          "text": "Sumar 1e16, después 1 y después -1e16 con acumulación ordinaria puede dar 0: el 1 se pierde en la representación intermedia. 1e16 significa 10 elevado a 16. La suma matemática de los tres valores es 1. Haber recibido números finitos no garantiza que cada acumulación conserve toda la información."
+        },
+        {
+          "title": "Qué ofrece sumPrecise",
+          "text": "Math.sumPrecise(iterable) suma sus números prestando atención a ese error intermedio y redondea una vez el resultado. Una lista es un iterable, como ya aprendiste con for…of. Recibe números; no convierte textos como si fueran cantidades. Una mezcla como [1, \"2\"] produce TypeError."
+        },
+        {
+          "title": "Límites que permanecen",
+          "text": "No inventa precisión que las entradas ya perdieron: 0.1 y 0.2 siguen siendo aproximaciones binarias. NaN propaga NaN y combinar infinitos de signos opuestos también produce NaN. Una colección vacía produce -0; la presentación habitual puede mostrar 0. Define el contrato para esos casos."
+        },
+        {
+          "title": "Comprobar disponibilidad",
+          "text": "Es una API reciente y no está en todos los navegadores ni en todos los Node. typeof Math.sumPrecise === \"function\" permite comprobarla sin llamarla. Esta ficha habilita el ejecutor solo cuando existe. No reemplaces silenciosamente la operación por una suma simple: cambiarías la propiedad que estás estudiando."
+        },
+        {
+          "title": "Comparar con una intención",
+          "text": "La práctica contrasta cancelación, vacío y orden. No concluyas que sumar con más cuidado resuelve todos los problemas financieros o de medición. La unidad, el rango y el error aceptable siguen siendo decisiones del modelo."
+        }
+      ],
+      "example": {
+        "code": "const datos = [1e16, 1, -1e16];\nconsole.log(Math.sumPrecise(datos));",
+        "stdout": "1\n",
+        "explanation": "La lista contiene un aporte grande, una unidad y el aporte opuesto. Una acumulación común puede perder la unidad en el paso intermedio. sumPrecise conserva el cálculo de esa suma antes del redondeo final, por lo que aquí muestra uno."
+      },
+      "guided": {
+        "prompt": "Suma datos con sumPrecise y muestra el resultado, incluyendo el caso que pierde una unidad con suma ordinaria.",
+        "starter": "const datos = [1e16, 1, -1e16];\n",
+        "solution": "const datos = [1e16, 1, -1e16];\nconsole.log(Math.sumPrecise(datos));",
+        "cases": [
+          {
+            "name": "Caso 1: datos = [10000000000000000,1,-10000000000000000]",
+            "stdout": "1\n",
+            "overrides": {
+              "datos": [10000000000000000, 1, -10000000000000000]
+            }
+          },
+          {
+            "name": "Caso 2: datos = [1,2,3]",
+            "stdout": "6\n",
+            "overrides": {
+              "datos": [1, 2, 3]
+            }
+          },
+          {
+            "name": "Caso 3: datos = []",
+            "stdout": "0\n",
+            "overrides": {
+              "datos": []
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "syntax": {
+          "methods": ["sumPrecise"]
+        },
+        "hints": [
+          "La colección ya está construida; no conviertas sus elementos.",
+          "La suma se obtiene en una llamada a sumPrecise."
+        ],
+        "explanation": "La suma se obtiene en una llamada a sumPrecise. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "La colección ya está construida; no conviertas sus elementos. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "bug": {
+        "prompt": "La reducción ordinaria pierde la unidad intermedia. Sustitúyela por la operación que conserva la suma estudiada.",
+        "starter": "const datos = [1e16, 1, -1e16];\nconsole.log(datos.reduce((total, valor) => total + valor, 0));",
+        "solution": "const datos = [1e16, 1, -1e16];\nconsole.log(Math.sumPrecise(datos));",
+        "cases": [
+          {
+            "name": "Caso 1: datos = [10000000000000000,1,-10000000000000000]",
+            "stdout": "1\n",
+            "overrides": {
+              "datos": [10000000000000000, 1, -10000000000000000]
+            }
+          },
+          {
+            "name": "Caso 2: datos = [10000000000000000,4,-10000000000000000]",
+            "stdout": "4\n",
+            "overrides": {
+              "datos": [10000000000000000, 4, -10000000000000000]
+            }
+          }
+        ],
+        "bindings": {
+          "datos": "const"
+        },
+        "syntax": {
+          "methods": ["sumPrecise"]
+        },
+        "hints": [
+          "Una unidad se puede perder entre los dos aportes grandes.",
+          "No repares la salida a mano: cambia la operación de suma."
+        ],
+        "explanation": "No repares la salida a mano: cambia la operación de suma. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Una unidad se puede perder entre los dos aportes grandes. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "challenge": {
+        "prompt": "Dos conjuntos equivalentes cambian el orden de los aportes. Muestra sus dos sumas con sumPrecise, una por línea.",
+        "starter": "const primero = [1e16, 1, -1e16];\nconst segundo = [-1e16, 1e16, 1];\n",
+        "solution": "const primero = [1e16, 1, -1e16];\nconst segundo = [-1e16, 1e16, 1];\nconsole.log(Math.sumPrecise(primero));\nconsole.log(Math.sumPrecise(segundo));",
+        "cases": [
+          {
+            "name": "Caso 1: primero = [10000000000000000,1,-10000000000000000], segundo = [-10000000000000000,10000000000000000,1]",
+            "stdout": "1\n1\n",
+            "overrides": {
+              "primero": [10000000000000000, 1, -10000000000000000],
+              "segundo": [-10000000000000000, 10000000000000000, 1]
+            }
+          },
+          {
+            "name": "Caso 2: primero = [], segundo = []",
+            "stdout": "0\n0\n",
+            "overrides": {
+              "primero": [],
+              "segundo": []
+            }
+          }
+        ],
+        "bindings": {
+          "primero": "const",
+          "segundo": "const"
+        },
+        "syntax": {
+          "methods": ["sumPrecise"]
+        },
+        "hints": [
+          "Compara colecciones equivalentes en órdenes diferentes.",
+          "Llama a sumPrecise una vez para cada colección y conserva el orden de las líneas."
+        ],
+        "explanation": "Llama a sumPrecise una vez para cada colección y conserva el orden de las líneas. Los casos coinciden; explica por qué esa regla satisface el contrato y prueba otra entrada.",
+        "retryFeedback": "Compara colecciones equivalentes en órdenes diferentes. Contrasta la salida observada con las entradas de cada caso."
+      },
+      "sources": [
+        {
+          "title": "Math.sumPrecise en MDN",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sumPrecise"
+        }
+      ],
+      "capability": "sumPrecise"
     }
   ],
   "workshops": {
@@ -3236,6 +5542,288 @@
     "consulta-for-in": ["for…in", "for in", "for...in", "Object.hasOwn()", "claves de objetos"],
     "consulta-switch": ["switch", "case", "default", "selección múltiple"],
     "consulta-ternario": ["ternario", "operador condicional", "conditional operator"],
-    "js-decisiones": ["if", "else", "condicional", "condicionales", "if else"]
+    "js-decisiones": ["if", "else", "condicional", "condicionales", "if else"],
+    "consulta-math": ["Math", "matemáticas", "números"],
+    "consulta-math-redondeos": ["Math.floor()", "Math.ceil()", "Math.round()", "Math.trunc()"],
+    "consulta-math-extremos": ["Math.min()", "Math.max()", "Math.abs()", "Math.sign()"],
+    "consulta-math-potencias": [
+      "Math.pow()",
+      "Math.sqrt()",
+      "Math.cbrt()",
+      "Math.hypot()",
+      "Math.SQRT2",
+      "Math.SQRT1_2"
+    ],
+    "consulta-math-random": ["Math.random()", "Math.floor()", "Math.ceil()"],
+    "consulta-numeros-precision": [
+      "Math.abs()",
+      "Math.sqrt()",
+      "Math.round()",
+      "Number.isFinite()",
+      "Number.isNaN()",
+      "Number.isInteger()",
+      "Number.isSafeInteger()",
+      "Number.EPSILON",
+      ".toFixed()",
+      "precisión decimal"
+    ],
+    "consulta-math-logaritmos": [
+      "Math.exp()",
+      "Math.expm1()",
+      "Math.log()",
+      "Math.log1p()",
+      "Math.log2()",
+      "Math.log10()",
+      "Math.E",
+      "Math.LN2",
+      "Math.LN10",
+      "Math.LOG2E",
+      "Math.LOG10E"
+    ],
+    "consulta-math-angulos": [
+      "Math.sin()",
+      "Math.cos()",
+      "Math.tan()",
+      "Math.asin()",
+      "Math.acos()",
+      "Math.atan()",
+      "Math.atan2()",
+      "Math.PI"
+    ],
+    "consulta-math-hiperbolicas": [
+      "Math.sinh()",
+      "Math.cosh()",
+      "Math.tanh()",
+      "Math.asinh()",
+      "Math.acosh()",
+      "Math.atanh()"
+    ],
+    "consulta-math-enteros32": ["Math.clz32()", "Math.imul()"],
+    "consulta-math-flotantes": ["Math.fround()", "Math.f16round()"],
+    "consulta-math-suma-precisa": ["Math.sumPrecise()"]
+  },
+  "mathCoverage": {
+    "reviewed": "2026-11-26",
+    "methods": {
+      "floor": {
+        "topic": "consulta-math-redondeos",
+        "section": "floor y ceil",
+        "practice": "guided"
+      },
+      "ceil": {
+        "topic": "consulta-math-redondeos",
+        "section": "floor y ceil",
+        "practice": "guided"
+      },
+      "round": {
+        "topic": "consulta-math-redondeos",
+        "section": "round y los empates",
+        "practice": "guided"
+      },
+      "trunc": {
+        "topic": "consulta-math-redondeos",
+        "section": "trunc y los negativos",
+        "practice": "guided"
+      },
+      "min": {
+        "topic": "consulta-math-extremos",
+        "section": "Comparar varios argumentos",
+        "practice": "guided"
+      },
+      "max": {
+        "topic": "consulta-math-extremos",
+        "section": "Comparar varios argumentos",
+        "practice": "guided"
+      },
+      "abs": {
+        "topic": "consulta-math-extremos",
+        "section": "Distancia y dirección",
+        "practice": "guided"
+      },
+      "sign": {
+        "topic": "consulta-math-extremos",
+        "section": "Distancia y dirección",
+        "practice": "guided"
+      },
+      "pow": {
+        "topic": "consulta-math-potencias",
+        "section": "Una potencia cuenta factores",
+        "practice": "guided"
+      },
+      "sqrt": {
+        "topic": "consulta-math-potencias",
+        "section": "Deshacer cuadrados y cubos",
+        "practice": "guided"
+      },
+      "cbrt": {
+        "topic": "consulta-math-potencias",
+        "section": "Deshacer cuadrados y cubos",
+        "practice": "guided"
+      },
+      "hypot": {
+        "topic": "consulta-math-potencias",
+        "section": "Una distancia de varias dimensiones",
+        "practice": "challenge"
+      },
+      "random": {
+        "topic": "consulta-math-random",
+        "section": "Qué devuelve random",
+        "practice": "math-muestra-real"
+      },
+      "exp": {
+        "topic": "consulta-math-logaritmos",
+        "section": "La base natural",
+        "practice": "challenge"
+      },
+      "expm1": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Valores cercanos a cero",
+        "practice": "challenge"
+      },
+      "log": {
+        "topic": "consulta-math-logaritmos",
+        "section": "La base natural",
+        "practice": "math-dominio-log"
+      },
+      "log1p": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Valores cercanos a cero",
+        "practice": "challenge"
+      },
+      "log2": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Deshacer una potencia",
+        "practice": "guided"
+      },
+      "log10": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Deshacer una potencia",
+        "practice": "guided"
+      },
+      "sin": {
+        "topic": "consulta-math-angulos",
+        "section": "Seno, coseno y tangente",
+        "practice": "guided"
+      },
+      "cos": {
+        "topic": "consulta-math-angulos",
+        "section": "Seno, coseno y tangente",
+        "practice": "guided"
+      },
+      "tan": {
+        "topic": "consulta-math-angulos",
+        "section": "Seno, coseno y tangente",
+        "practice": "math-tangente"
+      },
+      "asin": {
+        "topic": "consulta-math-angulos",
+        "section": "Las funciones inversas",
+        "practice": "math-inversas"
+      },
+      "acos": {
+        "topic": "consulta-math-angulos",
+        "section": "Las funciones inversas",
+        "practice": "math-inversas"
+      },
+      "atan": {
+        "topic": "consulta-math-angulos",
+        "section": "Las funciones inversas",
+        "practice": "math-inversas"
+      },
+      "atan2": {
+        "topic": "consulta-math-angulos",
+        "section": "Una dirección con dos coordenadas",
+        "practice": "challenge"
+      },
+      "sinh": {
+        "topic": "consulta-math-hiperbolicas",
+        "section": "Otra familia de relaciones",
+        "practice": "guided"
+      },
+      "cosh": {
+        "topic": "consulta-math-hiperbolicas",
+        "section": "Otra familia de relaciones",
+        "practice": "guided"
+      },
+      "tanh": {
+        "topic": "consulta-math-hiperbolicas",
+        "section": "Otra familia de relaciones",
+        "practice": "guided"
+      },
+      "asinh": {
+        "topic": "consulta-math-hiperbolicas",
+        "section": "Deshacer la relación",
+        "practice": "guided"
+      },
+      "acosh": {
+        "topic": "consulta-math-hiperbolicas",
+        "section": "Deshacer la relación",
+        "practice": "guided"
+      },
+      "atanh": {
+        "topic": "consulta-math-hiperbolicas",
+        "section": "Deshacer la relación",
+        "practice": "guided"
+      },
+      "clz32": {
+        "topic": "consulta-math-enteros32",
+        "section": "Contar ceros iniciales",
+        "practice": "guided"
+      },
+      "imul": {
+        "topic": "consulta-math-enteros32",
+        "section": "Multiplicar con imul",
+        "practice": "challenge"
+      },
+      "fround": {
+        "topic": "consulta-math-flotantes",
+        "section": "fround conserva una fracción aproximada",
+        "practice": "guided"
+      },
+      "f16round": {
+        "topic": "consulta-math-flotantes",
+        "section": "f16round reduce más la precisión",
+        "practice": "guided"
+      },
+      "sumPrecise": {
+        "topic": "consulta-math-suma-precisa",
+        "section": "Qué ofrece sumPrecise",
+        "practice": "guided"
+      }
+    },
+    "constants": {
+      "SQRT2": {
+        "topic": "consulta-math-potencias",
+        "section": "Constantes y dominio"
+      },
+      "SQRT1_2": {
+        "topic": "consulta-math-potencias",
+        "section": "Constantes y dominio"
+      },
+      "E": {
+        "topic": "consulta-math-logaritmos",
+        "section": "La base natural"
+      },
+      "LN2": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Las constantes de base"
+      },
+      "LN10": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Las constantes de base"
+      },
+      "LOG2E": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Las constantes de base"
+      },
+      "LOG10E": {
+        "topic": "consulta-math-logaritmos",
+        "section": "Las constantes de base"
+      },
+      "PI": {
+        "topic": "consulta-math-angulos",
+        "section": "Medir un giro"
+      }
+    }
   }
 }

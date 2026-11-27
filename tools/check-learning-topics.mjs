@@ -2,13 +2,14 @@ import { readFileSync } from 'node:fs';
 import { indexRoute } from '../js/domain/curriculum.js';
 import { guideErrors, topicIndex } from '../js/domain/topics.js';
 import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
+import { mathCoverageErrors } from './learning-content-audit.mjs';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const route = indexRoute(read('content/curriculum/fundamentos.json'));
-const { guides, workshops, walkthroughs, searchTerms } = read(
-  'content/learning/javascript-guides.json',
-);
+const catalog = read('content/learning/javascript-guides.json');
+const { guides, workshops, walkthroughs, searchTerms } = catalog;
 const errors = guideErrors(guides, route);
+errors.push(...mathCoverageErrors(catalog));
 const topics = topicIndex(route, guides, searchTerms);
 if (new Set(topics.map((topic) => topic.id)).size !== topics.length)
   errors.push('Hay temas repetidos.');
@@ -20,6 +21,10 @@ for (const [id, item] of [
     if (!item[key]) continue;
     errors.push(...javascriptExerciseErrors(item[key]).map((error) => `${id}/${key}: ${error}`));
   }
+  for (const activity of item.practices ?? [])
+    errors.push(
+      ...javascriptExerciseErrors(activity).map((error) => `${id}/${activity.id}: ${error}`),
+    );
 }
 for (const [id, steps] of Object.entries(walkthroughs)) {
   const lesson = read(`content/lessons/fundamentos/${id}.json`);

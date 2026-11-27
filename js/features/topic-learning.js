@@ -225,10 +225,35 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
         <a class="btn small" href="#/leccion/fundamentos/${topic.reference}/aprender">Ver lección de referencia →</a>
         ${next ? `<a class="text-link" href="#/leccion/fundamentos/${next.id}/aprender">Mi siguiente paso en la ruta →</a>` : ''}</footer>
         ${data.sources?.length ? `<details class="topic-sources"><summary>Fuentes y documentación</summary>${data.sources.map((source) => `<p><a class="text-link" href="${e(source.url)}" target="_blank" rel="noopener noreferrer">${e(source.title)}</a></p>`).join('')}</details>` : ''}`;
+      const unavailable =
+        topic.kind === 'guide' && data.capability && typeof Math[data.capability] !== 'function';
+      if (unavailable) {
+        const notice = root.ownerDocument.createElement('p');
+        notice.className = 'callout';
+        notice.textContent = `Este navegador no ofrece Math.${data.capability}(). Puedes leer la explicación; los ejemplos y retos requieren un navegador que implemente esta operación.`;
+        article.querySelector('#lesson').before(notice);
+      }
       const examples =
         topic.kind === 'guide'
-          ? [{ ...data.example, id: topic.id + '-example', language: 'javascript' }]
+          ? [data.example, ...(data.examples ?? [])].map((example, index) => ({
+              ...example,
+              id: topic.id + '-example' + (index ? '-' + index : ''),
+              language: 'javascript',
+              ...(unavailable
+                ? {
+                    environment: 'local',
+                    environmentNote: `Requiere Math.${data.capability}() en un navegador compatible. Consulta las fuentes de esta ficha.`,
+                  }
+                : {}),
+            }))
           : data.examples;
+      if (topic.kind === 'guide') {
+        for (const example of examples.slice(1)) {
+          const section = root.ownerDocument.createElement('section');
+          section.innerHTML = `<h3>${e(example.title)}</h3><p>${e(example.explanation)}</p><pre data-language="javascript">${e(example.code)}</pre><details class="example-expected"><summary>Comparar con el resultado de referencia</summary><pre tabindex="0">${e(example.observation ?? example.stdout)}</pre></details>`;
+          article.querySelector('#lesson').append(section);
+        }
+      }
       cleanups.push(
         mountCodeExamples(
           article.querySelector('#lesson'),
@@ -239,8 +264,8 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
       if (topic.kind === 'guide') {
         const reference = root.ownerDocument.createElement('details');
         reference.className = 'example-expected';
-        reference.innerHTML = `<summary>Comparar con el resultado de referencia</summary><pre tabindex="0">${e(data.example.sample ? JSON.stringify(data.example.sample.expected) : data.example.stdout)}</pre>`;
-        article.querySelector('#lesson').append(reference);
+        reference.innerHTML = `<summary>Comparar y entender el resultado de referencia</summary>${data.example.explanation ? `<p>${e(data.example.explanation)}</p>` : ''}<pre tabindex="0">${e(data.example.observation ?? (data.example.sample ? JSON.stringify(data.example.sample.expected) : data.example.stdout))}</pre>`;
+        article.querySelector('#lesson .code-example').after(reference);
       }
       cleanups.push(mountLessonAudio(article));
       const steps = data.walkthrough ?? walkthroughs[topic.id];
@@ -253,25 +278,27 @@ export async function mountTopicLearning(root, ctx, dependencies = {}) {
       else if (data.traceGame)
         mountTraceGame(article.querySelector('[data-topic-trace]'), data.traceGame);
       const practice = article.querySelector('[data-topic-practice]');
-      if (topic.kind === 'guide') {
-        for (const [key, title] of [
+      if (topic.kind === 'guide' && !unavailable) {
+        const activities = [
           ['guided', 'Implementa con apoyo'],
           ['bug', 'Reescribe, comprueba y corrige'],
           ['challenge', 'Integra en una situación nueva'],
-        ]) {
+        ].map(([key, title]) => ({ ...data[key], id: topic.id + '-' + key, title }));
+        activities.push(...(data.practices ?? []));
+        for (const activity of activities) {
           const body = root.ownerDocument.createElement('div');
           practice.append(body);
           cleanups.push(
             mountTopicExercise(
               body,
-              { ...data[key], id: topic.id + '-' + key, type: 'javascript' },
-              title,
+              { ...activity, type: 'javascript' },
+              activity.title,
               'topics/' + topic.id,
               exerciseOptions,
             ),
           );
         }
-      } else {
+      } else if (topic.kind === 'lesson') {
         for (const [key, title] of [
           ['guided', 'Implementa con apoyo'],
           ['bug', 'Reescribe, comprueba y corrige'],

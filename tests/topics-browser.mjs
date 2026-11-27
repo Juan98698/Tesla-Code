@@ -6,6 +6,7 @@ import { createDevServer } from '../tools/dev-server.mjs';
 import { browserExecutable } from './support/runtime.mjs';
 import { learningContext } from './support/browser.mjs';
 import { installSpeechMock } from './support/speech.mjs';
+import { MATH_METHODS, MATH_CONSTANTS } from '../tools/learning-content-audit.mjs';
 
 // The application server avoids invoking IDE instrumentation in the serve CLI.
 // The tutor is deliberately a local stub: these tests never consume an API quota.
@@ -60,6 +61,12 @@ try {
       ['Object.entries()', 'consulta-claves-valores'],
       ['.includes', 'consulta-includes'],
       ['Map.prototype.entries()', 'consulta-entries-iteradores'],
+      ['math. random', 'consulta-math-random'],
+      ['math floor', 'consulta-math-redondeos'],
+      ['Math.ceil()', 'consulta-math-redondeos'],
+      ['Math.trunc()', 'consulta-math-redondeos'],
+      ['Math.PI', 'consulta-math-angulos'],
+      ['Math.sumPrecise', 'consulta-math-suma-precisa'],
     ]) {
       await search.fill(query);
       await page.locator(`nav[data-topic-nav] a[data-topic="${id}"]`).waitFor();
@@ -78,6 +85,78 @@ try {
       await card.locator('.practice-feedback.ok').waitFor();
       assert.equal(await stored(page), before);
     }
+
+    // Run the actual browser implementation, including operations absent in Node.
+    // Never replace Math.random or Math.sumPrecise with a testing implementation.
+    const mathGuides = catalog.guides.filter(
+      (guide) => guide.id.includes('math') || guide.id === 'consulta-numeros-precision',
+    );
+    const supported = await page.evaluate(() =>
+      Object.getOwnPropertyNames(Math).filter((name) => typeof Math[name] === 'function'),
+    );
+    if (width === 1440) {
+      assert.deepEqual(
+        supported.filter((name) => !MATH_METHODS.includes(name)),
+        [],
+        'unreviewed Math method',
+      );
+      assert.deepEqual(
+        (
+          await page.evaluate(() =>
+            Object.getOwnPropertyNames(Math).filter((name) => typeof Math[name] === 'number'),
+          )
+        ).sort(),
+        [...MATH_CONSTANTS].sort(),
+      );
+      assert.ok(
+        supported.includes('sumPrecise'),
+        'the browser suite must exercise real sumPrecise',
+      );
+    }
+    for (const guide of width === 1440
+      ? mathGuides
+      : mathGuides.filter((guide) => guide.id === 'consulta-math-random')) {
+      await search.fill(guide.title);
+      await page.locator(`nav[data-topic-nav] a[data-topic="${guide.id}"]`).click();
+      await page.getByRole('heading', { name: guide.title, exact: true }).waitFor();
+      const examples = [guide.example, ...(guide.examples ?? [])];
+      for (const [index, exampleData] of examples.entries()) {
+        const panel = page.locator('.code-example').nth(index);
+        await panel.locator(':scope > summary').click();
+        const run = panel.getByRole('button', { name: 'Ejecutar código', exact: true });
+        await run.click();
+        await page.waitForFunction((button) => !button.disabled, await run.elementHandle());
+        assert.equal(await panel.locator('.console-error').isVisible(), false, guide.id);
+        const output = (await panel.locator('.console-output').innerText()).trim();
+        if (exampleData.verification) {
+          assert.ok(output.length, guide.id);
+          const value = Number(output);
+          assert.ok(value >= 0 && value < 1 && Number.isFinite(value), output);
+        } else assert.equal(output, exampleData.stdout.trim(), guide.id);
+      }
+      const activities = [
+        ...['guided', 'bug', 'challenge'].map((step) => ({
+          ...guide[step],
+          id: `${guide.id}-${step}`,
+        })),
+        ...(guide.practices ?? []),
+      ];
+      for (const activity of activities) {
+        const card = page.locator(`[data-topic-exercise="${activity.id}"]`);
+        if (activity.id.endsWith('-bug')) {
+          await card.locator('.code-editor').fill(activity.starter);
+          await card.getByRole('button', { name: 'Comprobar ejercicio' }).click();
+          await card.locator('.practice-feedback.bad').waitFor();
+        }
+        await card.locator('.code-editor').fill(activity.solution);
+        await card.getByRole('button', { name: 'Comprobar ejercicio' }).click();
+        await card.locator('.practice-feedback.ok').waitFor();
+      }
+      assert.equal(await stored(page), before);
+    }
+    console.log(
+      `✓ Math: ejemplos reales y prácticas ${width === 1440 ? 'de las 12 fichas' : 'de azar'} a ${width}px.`,
+    );
     await search.fill('ternario');
     await page.locator('nav[data-topic-nav] a').press('Enter');
     await page
@@ -201,6 +280,25 @@ try {
       `✓ Aprender por temas: navegación, consola real, borradores, límites y WCAG a ${width}px.`,
     );
   }
+
+  const older = await learningContext(browser, {
+    viewport: { width: 390, height: 960 },
+    reducedMotion: 'reduce',
+  });
+  await older.addInitScript(() =>
+    Object.defineProperty(Math, 'sumPrecise', { value: undefined, configurable: true }),
+  );
+  await older.addInitScript(installSpeechMock);
+  const page = await older.newPage();
+  await page.goto(origin + '/#/practica/javascript/temas/consulta-math-suma-precisa');
+  await page.getByText('Este navegador no ofrece Math.sumPrecise().', { exact: false }).waitFor();
+  assert.equal(await page.locator('[data-topic-exercise]').count(), 0);
+  await page.locator('#lesson-audio [data-audio-play]').click();
+  assert.ok(await page.evaluate(() => __speech.current.text.trim()));
+  await older.close();
+  console.log(
+    '✓ Math sin sumPrecise: aviso, teoría y audio disponibles; ninguna sustitución silenciosa.',
+  );
 } finally {
   await browser?.close();
   server.closeAllConnections();

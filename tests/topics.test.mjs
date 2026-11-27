@@ -20,6 +20,12 @@ import { prepareBindingCases } from '../js/domain/javascript-contract.js';
 import { runJavaScriptAsync } from './support/javascript.mjs';
 import { installDOM, until, change, submit } from './support/dom.mjs';
 import { installSpeechMock } from './support/speech.mjs';
+import {
+  mathCoverageErrors,
+  mathReferences,
+  MATH_METHODS,
+  MATH_CONSTANTS,
+} from '../tools/learning-content-audit.mjs';
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const route = indexRoute(read('content/curriculum/fundamentos.json'));
@@ -93,9 +99,9 @@ test('method signatures and structure names find their actual lessons without re
 test('topic index reuses the complete current edition, orders extensions and leaves progression untouched', () => {
   const before = JSON.stringify(route);
   const entries = topicIndex(route, catalog.guides, catalog.searchTerms);
-  assert.equal(entries.length, 100);
+  assert.equal(entries.length, 111);
   assert.equal(entries.filter((entry) => entry.kind === 'lesson').length, 78);
-  assert.equal(new Set(entries.map((entry) => entry.id)).size, 100);
+  assert.equal(new Set(entries.map((entry) => entry.id)).size, 111);
   const positions = new Map(entries.map((entry, index) => [entry.id, index]));
   for (const guide of catalog.guides)
     for (const required of guide.requires)
@@ -128,26 +134,46 @@ test('topic index reuses the complete current edition, orders extensions and lea
   assert.ok(guideErrors(invalid, route).length >= 8);
 });
 
-test('all new explanations have working examples, guided solutions, faults and independent cases', async () => {
+test('cross-runtime examples and practices execute; capability-specific operations are covered by the browser suite', async () => {
   for (const guide of catalog.guides) {
-    const example = guide.example;
-    const exampleResult = (
-      await runJavaScriptAsync(
-        example.code,
-        example.sample ?? { name: guide.id, stdout: example.stdout },
-        false,
-        example.sample?.entrypoint,
-      )
-    ).result;
-    assert.equal(exampleResult.passed, true, guide.id + ': ' + JSON.stringify(exampleResult));
+    if (guide.capability && typeof Math[guide.capability] !== 'function') {
+      assert.ok(['sumPrecise', 'f16round'].includes(guide.capability));
+      continue;
+    }
+    for (const example of [guide.example, ...(guide.examples ?? [])]) {
+      const exampleResult = (
+        await runJavaScriptAsync(
+          example.code,
+          example.sample ?? { name: guide.id, stdout: example.stdout },
+          Boolean(example.verification),
+          example.sample?.entrypoint,
+        )
+      ).result;
+      if (example.verification) {
+        assert.equal(exampleResult.error, undefined);
+        assert.ok(exampleResult.stdout.trim());
+        const value = Number(exampleResult.stdout.trim());
+        assert.ok(
+          Number.isFinite(value) &&
+            value >= example.verification.min &&
+            value < example.verification.maxExclusive,
+          guide.id,
+        );
+      } else
+        assert.equal(exampleResult.passed, true, guide.id + ': ' + JSON.stringify(exampleResult));
+    }
   }
   let cases = 0;
   for (const [id, workshop] of [
     ...catalog.guides.map((guide) => [guide.id, guide]),
     ...Object.entries(catalog.workshops),
   ]) {
-    for (const key of ['guided', 'bug', 'challenge']) {
-      const exercise = workshop[key];
+    if (workshop.capability && typeof Math[workshop.capability] !== 'function') continue;
+    const activities = [
+      ...['guided', 'bug', 'challenge'].map((key) => [key, workshop[key]]),
+      ...(workshop.practices ?? []).map((activity) => [activity.id, activity]),
+    ];
+    for (const [key, exercise] of activities) {
       if (!exercise) continue;
       assert.deepEqual(javascriptExerciseErrors(exercise), [], id + '/' + key);
       let starterFails = false;
@@ -186,6 +212,46 @@ test('all new explanations have working examples, guided solutions, faults and i
     }
   }
   assert.ok(cases > 120);
+});
+
+test('every reviewed Math operation has a located explanation, executable example and practice', () => {
+  assert.equal(MATH_METHODS.length, 37);
+  assert.equal(MATH_CONSTANTS.length, 8);
+  assert.deepEqual(mathCoverageErrors(catalog), []);
+  const topics = topicIndex(route, catalog.guides, catalog.searchTerms);
+  for (const [kind, names] of [
+    ['methods', MATH_METHODS],
+    ['constants', MATH_CONSTANTS],
+  ])
+    for (const name of names)
+      assert.ok(
+        filterTopics(topics, 'Math.' + name).some(
+          (topic) => topic.id === catalog.mathCoverage[kind][name].topic,
+        ),
+        name,
+      );
+  assert.ok(mathReferences('Math["floor"](2); // Math.random()').has('floor'));
+  assert.equal(mathReferences('"Math.random()";').size, 0);
+  const missing = structuredClone(catalog);
+  missing.mathCoverage.methods.random.practice = 'absent';
+  assert.ok(mathCoverageErrors(missing).some((message) => /random.*práctica/.test(message)));
+  const noExample = structuredClone(catalog);
+  noExample.guides.find((guide) => guide.id === 'consulta-math-random').example.code =
+    'console.log("Math.random()");';
+  assert.ok(mathCoverageErrors(noExample).some((message) => /random.*ejemplo/.test(message)));
+  for (const [query, id] of [
+    ['math. random', 'consulta-math-random'],
+    ['math floor', 'consulta-math-redondeos'],
+    ['Math.trunc()', 'consulta-math-redondeos'],
+    ['Math.PI', 'consulta-math-angulos'],
+    ['Math.sumPrecise', 'consulta-math-suma-precisa'],
+  ])
+    assert.ok(
+      filterTopics(topicIndex(route, catalog.guides, catalog.searchTerms), query).some(
+        (topic) => topic.id === id,
+      ),
+      query,
+    );
 });
 
 test('error orientation distinguishes declaration, name, syntax and incompatible value', () => {
@@ -325,6 +391,64 @@ test('route teaching, prepared traces, audio and transfer use separate consultat
   );
   assert.ok(root.querySelector('#lesson-audio'));
   assert.match(root.querySelector('.topic-footer').textContent, /pasos previos/);
+  dispose();
+});
+
+test('additional examples and practices retain distinct drafts and the original example prediction', async (t) => {
+  installDOM(t);
+  const root = document.querySelector('#root');
+  const ctx = context('consulta-math-random');
+  const before = JSON.stringify(ctx.state);
+  let dispose = await mountTopicLearning(root, ctx, dependencies);
+  await until(() => root.querySelector('[data-topic-exercise="math-muestra-real"]'));
+  assert.equal(root.querySelectorAll('.code-example').length, 2);
+  const predictions = root.querySelectorAll('.example-prediction textarea');
+  change(predictions[0], 'un decimal entre cero y uno');
+  change(predictions[1], 'el entero trece');
+  const extra = root.querySelector('[data-topic-exercise="math-muestra-real"] .code-editor');
+  change(extra, 'console.log(Math.floor(Math.random()));');
+  dispose();
+  assert.equal(
+    localStorage.getItem(
+      'teslacode:prediction:v1:topics/consulta-math-random/consulta-math-random-example',
+    ),
+    'un decimal entre cero y uno',
+  );
+  dispose = await mountTopicLearning(root, ctx, dependencies);
+  await until(() => root.querySelector('[data-topic-exercise="math-muestra-real"]'));
+  assert.deepEqual(
+    [...root.querySelectorAll('.example-prediction textarea')].map((input) => input.value),
+    ['un decimal entre cero y uno', 'el entero trece'],
+  );
+  assert.equal(
+    root.querySelector('[data-topic-exercise="math-muestra-real"] .code-editor').value,
+    'console.log(Math.floor(Math.random()));',
+  );
+  assert.equal(JSON.stringify(ctx.state), before);
+  dispose();
+});
+
+test('an unavailable Math operation keeps its theory and audio without offering a misleading replacement', async (t) => {
+  installDOM(t);
+  const descriptor = Object.getOwnPropertyDescriptor(Math, 'sumPrecise');
+  Object.defineProperty(Math, 'sumPrecise', { value: undefined, configurable: true });
+  t.after(() =>
+    descriptor ? Object.defineProperty(Math, 'sumPrecise', descriptor) : delete Math.sumPrecise,
+  );
+  const speech = installSpeechMock();
+  const root = document.querySelector('#root');
+  const dispose = await mountTopicLearning(
+    root,
+    context('consulta-math-suma-precisa'),
+    dependencies,
+  );
+  await until(() => root.querySelector('.callout'));
+  assert.match(root.querySelector('.callout').textContent, /no ofrece Math.sumPrecise/);
+  assert.match(root.querySelector('#lesson').textContent, /cancelación|representación intermedia/);
+  assert.equal(root.querySelectorAll('[data-topic-exercise]').length, 0);
+  assert.equal(root.querySelectorAll('.code-example .code-editor').length, 0);
+  root.querySelector('[data-audio-play]').click();
+  assert.ok(speech.current.text.trim());
   dispose();
 });
 
