@@ -805,3 +805,13 @@ La [correspondencia editorial](algoritmia-javascript.md#correspondencia-del-bloq
 La prueba de Algoritmia ejecuta los ejemplos y realiza las prácticas de las catorce lecciones en Chromium a 1440 y 390 px partiendo de perfiles nuevos. Comprueba bloqueo inicial, recuperación de entregas, traza por teclado, rechazo de la integración defectuosa, desbloqueo de la aplicación, bitácora y XP tras recargar. La auditoría de contraste en la teoría final detectó el fondo de código en línea sobre los bloques oscuros del tema claro. El ajuste da a los bloques el contraste del contenedor y la auditoría pasa en ambos temas. Las pruebas unitarias contrastan copias con un búfer explícito, prefijos con un oráculo directo, salida temprana con lecturas observadas y equivalencia con una salida de longitud incorrecta.
 
 La revisión docente independiente y el piloto con principiantes quedan pendientes. El siguiente bloque previsto es Estructuras lineales y hash.
+
+## Tesla Metro entrega Estructuras lineales y hash
+
+Algoritmia con JavaScript llega a 28 de 87 lecciones. El tercer bloque aporta 14 lecciones, 28 ejemplos ejecutables, 43 decisiones de traza, 70 actividades, 57 preguntas y 203 casos de código. Cada lección recupera la entrega previa, incorpora una incidencia comprobable y cierra con una aplicación independiente. Se mantienen los IDs, la secuencia y el archivo de pseudocódigo.
+
+El primer checkpoint reúne búsqueda exacta y parcial, agrupación de homónimos, caché LRU e historial reversible. Se incluye el contrato de búsqueda por unidades UTF-16 y normalización NFC, el tratamiento de ausencias y la separación entre deshacer una consulta y expulsarla de caché. La correspondencia de los 14 temas está en [Algoritmia con JavaScript](algoritmia-javascript.md).
+
+El código de referencia del catálogo llega a 22 916 caracteres acumulados. El límite compartido por el editor, el evaluador y la persistencia de entregas se amplía de 20 000 a 32 000 para admitir esa entrega y dejar espacio a soluciones propias. Las entregas previas conservan sus identificadores y versiones.
+
+La validación comprueba conceptos, requisitos y cobertura declarada. Las pruebas ejecutan ejemplos, soluciones y borradores con incidencias. Se contrastan ventanas con máximos directos, sondeo con Map y los dos buscadores con coincidencias directas en cadenas pequeñas. Los resultados automáticos cubren el comportamiento comprobado. La revisión docente independiente y el piloto con principiantes quedan pendientes. El siguiente bloque previsto es Buscar y ordenar.

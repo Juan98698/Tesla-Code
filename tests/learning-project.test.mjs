@@ -8,6 +8,7 @@ import {
   validProjectArtifact,
 } from '../js/domain/learning-project.js';
 import { emptyProgress, normalizeProgress } from '../js/domain/progress-state.js';
+import { JAVASCRIPT_LIMITS } from '../js/domain/javascript-exercise.js';
 import { mergeProgress, parseBackup } from '../js/domain/progress-backup.js';
 import { mountActivities } from '../js/features/activities.js';
 import { installDOM, submit, until } from './support/dom.mjs';
@@ -75,9 +76,13 @@ test('invalid or oversized artifacts cannot be imported as verified work', () =>
   const state = emptyProgress();
   recordProjectArtifact(state, key, 'plan-practica', evidence, now);
   const valid = state.projectArtifacts[key];
+  assert.equal(
+    validProjectArtifact(key, { ...valid, code: 'x'.repeat(JAVASCRIPT_LIMITS.source) }),
+    true,
+  );
   for (const item of [
     null,
-    { ...valid, code: 'x'.repeat(20001) },
+    { ...valid, code: 'x'.repeat(JAVASCRIPT_LIMITS.source + 1) },
     { ...valid, report: 'x'.repeat(6001) },
     { ...valid, notes: 'x'.repeat(2001) },
     { ...valid, updatedAt: 'wrong' },

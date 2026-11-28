@@ -32,7 +32,7 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto(origin + urlFor('an-casos'));
+    await page.goto(origin + urlFor('ls-arreglo-dinamico'));
     await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
     assert.deepEqual((await progress(page)).completed ?? [], []);
     let lastSubmission;
@@ -63,6 +63,15 @@ try {
         await example.getByRole('button', { name: 'Ejecutar código', exact: true }).click();
         await example.locator('.console-output').getByText('5 5', { exact: true }).waitFor();
       }
+      if (meta.id === 'ls-kmp') {
+        const example = page.locator('#lesson .code-example').last();
+        await example.locator(':scope > summary').click();
+        await example.getByRole('button', { name: 'Ejecutar código', exact: true }).click();
+        await example
+          .locator('.console-output')
+          .getByText(/Resultado devuelto: \[\s*0,\s*2\s*\]/)
+          .waitFor();
+      }
       await page.getByRole('tab', { name: /Practicar/ }).click();
       const scope = page.locator('#activities');
       await scope.locator('[data-activity]').first().waitFor();
@@ -73,7 +82,7 @@ try {
           await restore.click();
           assert.equal(await card.locator('.code-editor').inputValue(), lastSubmission);
         }
-        if (meta.id === 'an-informe' && index === 3) {
+        if (['an-informe', 'tm-cp1'].includes(meta.id) && index === 3) {
           const followUp = scope.locator(`[data-activity="${data.activities[4].id}"] .code-editor`);
           assert.equal(await followUp.isDisabled(), true);
           await card.locator('.code-editor').fill(activity.starter);
@@ -83,7 +92,9 @@ try {
           await card
             .locator('[data-project-journal]')
             .fill(
-              'Con cinco celdas cabe el índice. Si el presupuesto baja a cuatro, conservo la consulta directa.',
+              meta.id === 'an-informe'
+                ? 'Con cinco celdas cabe el índice. Si el presupuesto baja a cuatro, conservo la consulta directa.'
+                : 'Una exacta y una parcial pueden tener los mismos caracteres y distintos resultados.',
             );
         }
         await solveActivity(page, activity);
@@ -111,9 +122,13 @@ try {
       restored.projectArtifacts['algoritmia/an-informe/integrar-decision'].notes,
       /presupuesto baja a cuatro/,
     );
-    await page.goto(origin + urlFor('ls-arreglo-dinamico'));
+    assert.match(
+      restored.projectArtifacts['algoritmia/tm-cp1/integrar-tesla'].notes,
+      /distintos resultados/,
+    );
+    await page.goto(origin + urlFor('bo-binaria'));
     await page.getByText('Contenido en preparación', { exact: true }).waitFor();
-    await page.goto(origin + urlFor('an-informe'));
+    await page.goto(origin + urlFor('tm-cp1'));
     await page.locator('#lesson').waitFor();
     await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
     for (const theme of ['dark', 'light']) {

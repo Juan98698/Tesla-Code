@@ -1,0 +1,794 @@
+{
+  "id": "ls-arreglos",
+  "outcome": "Combinar dos punteros, ventanas, prefijos y diferencias según la consulta.",
+  "requiresConcepts": [
+    "algoritmia.ls-lru.politica-de-expulsion",
+    "algoritmia.ls-lru.map-mas-lista-doble",
+    "algoritmia.ls-lru.acierto-y-fallo"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>El tablero debe localizar dos conteos compatibles y aplicar correcciones a tramos enteros sin reescribir cada tramo por separado.</p><p>Usa enteros pequeños y sumas representables exactamente. Solo datosOrdenados exige orden ascendente. Los intervalos son [inicio, fin), con 0 ≤ inicio ≤ fin ≤ datos.length. Un ancho no válido devuelve [].</p>\n<h3>Dos punteros</h3><p>Dos punteros son índices que avanzan según una regla que descarta posiciones. Para sumar dos valores de un arreglo ya ordenado, empieza en los extremos. Si su suma es menor al objetivo, el de la izquierda es demasiado pequeño incluso con el máximo disponible. Avanza la izquierda. Si la suma supera el objetivo, disminuye la derecha.</p><p>El invariante es que cualquier pareja todavía posible permanece entre los punteros. Detente cuando coincidan: una pareja usa dos posiciones distintas. Esta estrategia tarda O(n) sin contar ordenar un arreglo inicialmente desordenado.</p>\n<h3>Ventana</h3><p>Una ventana de suma fija se actualiza quitando el valor saliente y agregando el entrante. Para k = 2 y [2, 4, 1], la primera suma es 6 y la siguiente es 6 − 2 + 1 = 5. Esta regla funciona también con negativos. No es lo mismo que cambiar el ancho según una condición, que requiere su propia justificación.</p><p>Usarla cuesta O(n) en total para todos los tramos de igual ancho, con O(1) espacio auxiliar aparte de los resultados.</p>\n<h3>Suma de prefijos</h3><p>Un arreglo de prefijos guarda en prefijo[j] la suma de los primeros j valores. Comienza con prefijo[0] = 0. Para [2, 4, 1] queda [0, 2, 6, 7]. La suma de [1, 3) es prefijo[3] − prefijo[1] = 5. Es el mismo límite semiabierto que usamos para medir distancias en Análisis.</p><p>Construir prefijos cuesta O(n) tiempo y espacio. Cada consulta de suma usa una resta. Si cambian los datos, la tabla de prefijos anterior ya no responde por los valores nuevos.</p>\n<h3>Arreglo de diferencias</h3><p>El arreglo de diferencias representa cuándo empieza y cuándo deja de aplicarse una corrección. Suma delta en inicio y réstalo en fin. Recorre los datos acumulando diferencias para recuperar el ajuste de cada posición. Reserva una celda extra para poder escribir en fin si coincide con la longitud.</p><p>Una actualización [i, i) se cancela en la misma celda. Las correcciones superpuestas se suman. Con n posiciones y q cambios, aplicar todos los cambios en lote cuesta O(n+q). Para consultar luego, arma prefijos sobre el arreglo corregido.</p>\n<h3>Ejemplo ejecutable con parejaOrdenada</h3><p>La comparación permite descartar un extremo sin revisar cada combinación que lo incluya.</p><p>Prueba parejaOrdenada([-2,1,3,9], 4) y explica qué observas.</p><pre data-language=\"javascript\"><code>function parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda &lt; derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma &lt; objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}</code></pre><p>Salida esperada</p><pre data-language=\"json\">[1,2]</pre>\n<h3>Ejemplo ejecutable con medirArreglo</h3><p>La ventana comparte casi todos sus valores con la anterior. Los prefijos permiten responder también consultas con anchos distintos.</p><p>Prueba medirArreglo([2,-4,3,1], 2, [[0,4],[1,3],[3,3]]) y explica qué observas.</p><pre data-language=\"javascript\"><code>function parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda &lt; derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma &lt; objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n\nfunction medirArreglo(datos, ancho, consultas) {\n  const ventanas = [];\n  if (ancho &gt;= 1 &amp;&amp; ancho &lt;= datos.length) {\n    let suma = 0;\n    for (let i = 0; i &lt; datos.length; i++) {\n      suma += datos[i];\n      if (i &gt;= ancho) suma -= datos[i - ancho];\n      if (i &gt;= ancho - 1) ventanas.push(suma);\n    }\n  }\n  const prefijo = [0];\n  for (const numero of datos)\n    prefijo.push(prefijo[prefijo.length - 1] + numero);\n  return {\n    ventanas,\n    tramos: consultas.map(([inicio, fin]) =&gt; prefijo[fin] - prefijo[inicio]),\n  };\n}</code></pre><p>Salida esperada</p><pre data-language=\"json\">{\"ventanas\":[-2,-1,4],\"tramos\":[2,-1,0]}</pre>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Corrige [2, 4, 1, 3] con +2 en [1, 3) y −1 en [2, 4).</p><p>Las marcas quedan [0, +2, −1, −2, +1]. Sus acumulados en las posiciones válidas son [0, 2, 1, −1]. Agrega esos ajustes antes de construir los prefijos.</p><p>Datos corregidos [2, 6, 2, 2]. La suma de [1, 4) es 10.</p></section>\n<h3>Preparar la entrega</h3><p>Para editar y consultar combina diferencias y prefijos. Para una pareja usa solo el arreglo ordenado explícito. Prueba que estas operaciones no modifiquen los argumentos.</p>",
+  "examples": [
+    {
+      "id": "ls-arreglos-e1",
+      "language": "javascript",
+      "code": "function parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Mueve los extremos",
+        "args": [
+          [
+            -2,
+            1,
+            3,
+            9
+          ],
+          4
+        ],
+        "expected": [
+          1,
+          2
+        ],
+        "entrypoint": "parejaOrdenada",
+        "preserveArgs": true
+      }
+    },
+    {
+      "id": "ls-arreglos-e2",
+      "language": "javascript",
+      "code": "function parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n\nfunction medirArreglo(datos, ancho, consultas) {\n  const ventanas = [];\n  if (ancho >= 1 && ancho <= datos.length) {\n    let suma = 0;\n    for (let i = 0; i < datos.length; i++) {\n      suma += datos[i];\n      if (i >= ancho) suma -= datos[i - ancho];\n      if (i >= ancho - 1) ventanas.push(suma);\n    }\n  }\n  const prefijo = [0];\n  for (const numero of datos)\n    prefijo.push(prefijo[prefijo.length - 1] + numero);\n  return {\n    ventanas,\n    tramos: consultas.map(([inicio, fin]) => prefijo[fin] - prefijo[inicio]),\n  };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Negativos y tramo vacío",
+        "args": [
+          [
+            2,
+            -4,
+            3,
+            1
+          ],
+          2,
+          [
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        ],
+        "expected": {
+          "ventanas": [
+            -2,
+            -1,
+            4
+          ],
+          "tramos": [
+            2,
+            -1,
+            0
+          ]
+        },
+        "entrypoint": "medirArreglo",
+        "preserveArgs": true
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "concept": "algoritmia.ls-arreglos.dos-punteros",
+      "prompt": "Si la suma de extremos es menor al objetivo, ¿qué extremo se descarta?",
+      "options": [
+        "El izquierdo",
+        "El derecho",
+        "Ambos siempre"
+      ],
+      "answer": 0,
+      "explanation": "Por orden, el menor no alcanza ni con el mayor restante.",
+      "id": "pregunta-1",
+      "type": "choice"
+    },
+    {
+      "concept": "algoritmia.ls-arreglos.ventana",
+      "prompt": "Ventana de ancho 2 sobre [3, 5, 2]. ¿Cómo actualizas 8?",
+      "options": [
+        "8 − 3 + 2",
+        "8 − 5 + 3",
+        "8 + 2"
+      ],
+      "answer": 0,
+      "explanation": "Sale el 3 y entra el 2.",
+      "id": "pregunta-2",
+      "type": "choice"
+    },
+    {
+      "concept": "algoritmia.ls-arreglos.suma-de-prefijos",
+      "prompt": "¿Cómo se suma [1,3) con prefijos?",
+      "options": [
+        "prefijo[3] − prefijo[1]",
+        "prefijo[2] − prefijo[1]",
+        "prefijo[3] + prefijo[1]"
+      ],
+      "answer": 0,
+      "explanation": "El prefijo en el límite exclusivo ya incluye la última posición válida.",
+      "id": "pregunta-3",
+      "type": "choice"
+    },
+    {
+      "concept": "algoritmia.ls-arreglos.arreglo-de-diferencias",
+      "prompt": "¿Dónde finaliza un cambio +4 para [1,3)?",
+      "options": [
+        "Con −4 en posición 3",
+        "Con −4 en posición 2",
+        "Sin registrar final"
+      ],
+      "answer": 0,
+      "explanation": "El ajuste deja de aplicarse desde el límite exclusivo.",
+      "id": "pregunta-4",
+      "type": "choice"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.ls-arreglos.dos-punteros",
+      "prompt": "Predice el comportamiento en la misión de esta lección",
+      "brief": "Corrige [2, 4, 1, 3] con +2 en [1, 3) y −1 en [2, 4).",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Usa enteros pequeños y sumas representables exactamente. Solo datosOrdenados exige orden ascendente. Los intervalos son [inicio, fin), con 0 ≤ inicio ≤ fin ≤ datos.length. Un ancho no válido devuelve []."
+        },
+        {
+          "label": "Datos y elección",
+          "text": "Corrige [2, 4, 1, 3] con +2 en [1, 3) y −1 en [2, 4)."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "En [2, 4, 1, 3], ¿qué marca deja +2 en [1,3) al llegar al límite 3?",
+          "options": [
+            "−2",
+            "+2",
+            "0"
+          ],
+          "answer": 0,
+          "explanation": "Desde 3 el ajuste ya no se aplica.",
+          "id": "decision-1",
+          "errorHint": "Desde 3 el ajuste ya no se aplica."
+        },
+        {
+          "prompt": "Con los datos corregidos [2, 6, 2, 2], ¿cuál es la suma de [1,4)?",
+          "options": [
+            "8",
+            "10",
+            "12"
+          ],
+          "answer": 1,
+          "explanation": "El prefijo final 12 menos el prefijo inicial 2 da 10.",
+          "id": "decision-2",
+          "errorHint": "El prefijo final 12 menos el prefijo inicial 2 da 10."
+        }
+      ],
+      "hint": "Por orden, el menor no alcanza ni con el mayor restante.",
+      "explanation": "Las marcas quedan [0, +2, −1, −2, +1]. Sus acumulados en las posiciones válidas son [0, 2, 1, −1]. Agrega esos ajustes antes de construir los prefijos.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y datos de la misión.",
+        "output": "Una predicción con sus razones.",
+        "reflection": "Traza las marcas y los acumulados con cuatro celdas.",
+        "requires": [],
+        "from": "algoritmia/ls-lru/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglos.dos-punteros",
+      "prompt": "Devuelve [izquierda, derecha] para la primera pareja encontrada por el método de extremos, o null. Usa dos posiciones distintas.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n\nfunction enlazarSimple(datos) {\n  let cabeza = null;\n  for (let i = datos.length - 1; i >= 0; i--) {\n    cabeza = { valor: datos[i], siguiente: cabeza };\n  }\n  return cabeza;\n}\n\nfunction leerSimple(cabeza) {\n  const datos = [];\n  for (let actual = cabeza; actual !== null; actual = actual.siguiente)\n    datos.push(actual.valor);\n  return datos;\n}\nfunction retirarSimple(cabeza, nombre) {\n  if (cabeza?.valor === nombre) return cabeza.siguiente;\n  for (\n    let anterior = cabeza;\n    anterior?.siguiente;\n    anterior = anterior.siguiente\n  ) {\n    if (anterior.siguiente.valor === nombre) {\n      anterior.siguiente = anterior.siguiente.siguiente;\n      break;\n    }\n  }\n  return cabeza;\n}\nfunction quitarSimple(cabeza, nombre) {\n  return retirarSimple(enlazarSimple(leerSimple(cabeza)), nombre);\n}\n\nfunction recorridoSimple(datos, cambios) {\n  let cabeza = enlazarSimple(datos);\n  for (const [accion, nombre] of cambios) {\n    if (accion === \"frente\") cabeza = { valor: nombre, siguiente: cabeza };\n    else cabeza = retirarSimple(cabeza, nombre);\n  }\n  return leerSimple(cabeza);\n}\n\nfunction crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\nfunction leerDoble(raiz, enlace) {\n  const salida = [];\n  for (let nodo = raiz[enlace]; nodo !== raiz; nodo = nodo[enlace])\n    salida.push(nodo.valor);\n  return salida;\n}\nfunction vistaDoble(datos) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  return {\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction bajaDoble(datos, indice) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  let i = 0;\n  let retirado = null;\n  for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente) {\n    if (i++ === indice) {\n      retirado = nodo.valor;\n      sacarDoble(nodo);\n      break;\n    }\n  }\n  return {\n    retirado,\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction avisoDoble(datos, indice) {\n  return { antes: vistaDoble(datos), despues: bajaDoble(datos, indice) };\n}\n\nfunction historialPila(acciones) {\n  const pila = [];\n  const respuestas = [];\n  for (const [accion, etiqueta] of acciones) {\n    if (accion === \"guardar\") pila.push(etiqueta);\n    else if (accion === \"ver\") respuestas.push(pila[pila.length - 1] ?? null);\n    else respuestas.push(pila.pop() ?? null);\n  }\n  return respuestas;\n}\n\nfunction revisarCierres(texto) {\n  const pares = { \")\": \"(\", \"]\": \"[\", \"}\": \"{\" };\n  const pila = [];\n  for (let i = 0; i < texto.length; i++) {\n    const actual = texto[i];\n    if (\"([{\".includes(actual)) pila.push(actual);\n    else if (\")]}\".includes(actual) && pila.pop() !== pares[actual]) {\n      return { valido: false, error: i };\n    }\n  }\n  return pila.length\n    ? { valido: false, error: texto.length }\n    : { valido: true, error: null };\n}\n\nfunction panelReglas(acciones, reglas) {\n  return {\n    historial: historialPila(acciones),\n    revisiones: reglas.map(revisarCierres),\n  };\n}\n\nfunction indiceCircular(inicio, paso, capacidad) {\n  return (inicio + paso) % capacidad;\n}\n\nfunction estadoCola(capacidad, acciones) {\n  const celdas = Array(capacidad);\n  let cabeza = 0;\n  let cantidad = 0;\n  const respuestas = [];\n  for (const [accion, aviso] of acciones) {\n    if (accion === \"entrar\") {\n      const hayEspacio = cantidad < capacidad;\n      if (hayEspacio) {\n        celdas[indiceCircular(cabeza, cantidad, capacidad)] = aviso;\n        cantidad++;\n      }\n      respuestas.push(hayEspacio);\n    } else if (cantidad === 0) respuestas.push(null);\n    else {\n      respuestas.push(celdas[cabeza]);\n      celdas[cabeza] = undefined;\n      cabeza = indiceCircular(cabeza, 1, capacidad);\n      cantidad--;\n    }\n  }\n  const pendientes = [];\n  for (let i = 0; i < cantidad; i++)\n    pendientes.push(celdas[indiceCircular(cabeza, i, capacidad)]);\n  return { respuestas, pendientes };\n}\n\nfunction turnosCentral(capacidad, acciones) {\n  const { respuestas, pendientes } = estadoCola(capacidad, acciones);\n  return {\n    respuestas,\n    pendientes,\n    siguiente: pendientes[0] ?? null,\n    libres: capacidad - pendientes.length,\n  };\n}\n\nfunction crearDeque(capacidad) {\n  const celdas = Array(capacidad);\n  let inicio = 0;\n  let cantidad = 0;\n  const indice = (paso) => (inicio + paso + capacidad) % capacidad;\n  return {\n    cantidad: () => cantidad,\n    frente: () => (cantidad ? celdas[inicio] : null),\n    fondo: () => (cantidad ? celdas[indice(cantidad - 1)] : null),\n    entrarFrente(valor) {\n      if (cantidad === capacidad) return false;\n      inicio = indice(-1);\n      celdas[inicio] = valor;\n      cantidad++;\n      return true;\n    },\n    entrarFondo(valor) {\n      if (cantidad === capacidad) return false;\n      celdas[indice(cantidad++)] = valor;\n      return true;\n    },\n    salirFrente() {\n      if (!cantidad) return null;\n      const valor = celdas[inicio];\n      celdas[inicio] = undefined;\n      inicio = indice(1);\n      cantidad--;\n      return valor;\n    },\n    salirFondo() {\n      if (!cantidad) return null;\n      const posicion = indice(--cantidad);\n      const valor = celdas[posicion];\n      celdas[posicion] = undefined;\n      return valor;\n    },\n  };\n}\nfunction manejarDeque(capacidad, acciones) {\n  const d = crearDeque(capacidad);\n  return acciones.map(([operacion, valor]) => d[operacion](valor));\n}\n\nfunction maximosVentana(datos, k) {\n  if (k < 1 || k > datos.length) return [];\n  const candidatos = crearDeque(k);\n  const maximos = [];\n  for (let i = 0; i < datos.length; i++) {\n    if (candidatos.cantidad() && candidatos.frente() <= i - k)\n      candidatos.salirFrente();\n    while (candidatos.cantidad() && datos[candidatos.fondo()] <= datos[i])\n      candidatos.salirFondo();\n    candidatos.entrarFondo(i);\n    if (i >= k - 1) maximos.push(datos[candidatos.frente()]);\n  }\n  return maximos;\n}\n\nfunction picosOcupacion(datos, k) {\n  return maximosVentana(datos, k).map((maximo, inicio) => ({ inicio, maximo }));\n}\n\nfunction indiceHash(clave, capacidad) {\n  let hash = 0;\n  for (let i = 0; i < clave.length; i++) {\n    hash = (31 * hash + clave.charCodeAt(i)) % capacidad;\n  }\n  return hash;\n}\n\nfunction indiceEncadenado(capacidad, registros) {\n  const buckets = Array.from({ length: capacidad }, () => []);\n  for (const [clave, valor] of registros) {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    const existente = bucket.find((par) => par[0] === clave);\n    if (existente) existente[1] = valor;\n    else bucket.push([clave, valor]);\n  }\n  return buckets;\n}\n\nfunction consultasEncadenadas(capacidad, registros, claves) {\n  const buckets = indiceEncadenado(capacidad, registros);\n  const respuestas = claves.map((clave) => {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    return bucket.find((par) => par[0] === clave)?.[1] ?? null;\n  });\n  return { respuestas, ocupacion: buckets.map((bucket) => bucket.length) };\n}\n\nfunction sondear(tabla, clave) {\n  const inicio = indiceHash(clave, tabla.length);\n  let hueco = -1;\n  for (let paso = 0; paso < tabla.length; paso++) {\n    const i = (inicio + paso) % tabla.length;\n    const celda = tabla[i];\n    if (celda === null) return { existe: false, indice: hueco < 0 ? i : hueco };\n    if (celda === false) {\n      if (hueco < 0) hueco = i;\n    } else if (celda[0] === clave) return { existe: true, indice: i };\n  }\n  return { existe: false, indice: hueco };\n}\n\nfunction ejecutarSondeo(acciones) {\n  let tabla = Array(4).fill(null);\n  let activos = 0;\n  let usados = 0;\n  const respuestas = [];\n  for (const [accion, clave, valor] of acciones) {\n    let { existe, indice } = sondear(tabla, clave);\n    if (accion === \"leer\") respuestas.push(existe ? tabla[indice][1] : null);\n    else if (accion === \"borrar\") {\n      if (existe) {\n        tabla[indice] = false;\n        activos--;\n      }\n      respuestas.push(existe);\n    } else if (existe) tabla[indice][1] = valor;\n    else {\n      if (tabla[indice] === null && (usados + 1) * 2 > tabla.length) {\n        const capacidad =\n          (activos + 1) * 2 > tabla.length ? tabla.length * 2 : tabla.length;\n        const anterior = tabla;\n        tabla = Array(capacidad).fill(null);\n        for (const par of anterior) {\n          if (par) tabla[sondear(tabla, par[0]).indice] = par;\n        }\n        usados = activos;\n        indice = sondear(tabla, clave).indice;\n      }\n      if (tabla[indice] === null) usados++;\n      tabla[indice] = [clave, valor];\n      activos++;\n    }\n  }\n  return { respuestas, capacidad: tabla.length, activos, usados };\n}\n\nfunction indiceEstacionesAbierto(acciones) {\n  const estado = ejecutarSondeo(acciones);\n  return { ...estado, marcas: estado.usados - estado.activos };\n}\n\nfunction igualdadNativa() {\n  const objeto = { id: 1 };\n  const copia = { id: 1 };\n  const mapa = new Map([\n    [NaN, \"primero\"],\n    [NaN, \"segundo\"],\n    [-0, \"cero\"],\n    [\"u\", undefined],\n  ]);\n  return {\n    nanRepite: mapa.get(NaN) === \"segundo\",\n    cerosCoinciden: mapa.has(+0),\n    tipos: new Set([1, \"1\"]).size,\n    objetos: new Set([objeto, objeto, copia]).size,\n    reconoceReferencia: new Set([objeto]).has(objeto),\n    reconoceCopia: new Set([objeto]).has(copia),\n    indefinidoPresente: mapa.has(\"u\") && mapa.get(\"u\") === undefined,\n  };\n}\n\nfunction ordenNativo(acciones) {\n  const registros = new Map();\n  const activas = new Set();\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") {\n      registros.set(clave, valor);\n      activas.add(clave);\n    } else {\n      registros.delete(clave);\n      activas.delete(clave);\n    }\n  }\n  return { registros: Array.from(registros), activas: Array.from(activas) };\n}\n\nfunction consultasNativas(acciones, claves) {\n  const { registros, activas } = ordenNativo(acciones);\n  const porClave = new Map(registros);\n  return {\n    activas,\n    respuestas: claves.map((clave) => porClave.get(clave) ?? null),\n  };\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\nfunction estadoCache(capacidad, acciones) {\n  const cache = crearLRU(capacidad);\n  const resultados = [];\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") cache.guardar(clave, valor);\n    else resultados.push(cache.leer(clave));\n  }\n  return { resultados, orden: cache.orden() };\n}\n\nfunction diagnosticoLRU(capacidad, acciones) {\n  const { resultados, orden } = estadoCache(capacidad, acciones);\n  let aciertos = 0;\n  for (const resultado of resultados) if (resultado.acierto) aciertos++;\n  return { aciertos, fallos: resultados.length - aciertos, orden };\n}\n\nfunction tableroCache(capacidad, acciones) {\n  const estado = diagnosticoLRU(capacidad, acciones);\n  return {\n    ...estado,\n    primeraExpulsion:\n      estado.orden.length === capacidad ? (estado.orden[0] ?? null) : null,\n  };\n}\n\nfunction parejaOrdenada(datosOrdenados, objetivo) {\n  // Implementa el contrato de este paso.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n\nfunction enlazarSimple(datos) {\n  let cabeza = null;\n  for (let i = datos.length - 1; i >= 0; i--) {\n    cabeza = { valor: datos[i], siguiente: cabeza };\n  }\n  return cabeza;\n}\n\nfunction leerSimple(cabeza) {\n  const datos = [];\n  for (let actual = cabeza; actual !== null; actual = actual.siguiente)\n    datos.push(actual.valor);\n  return datos;\n}\nfunction retirarSimple(cabeza, nombre) {\n  if (cabeza?.valor === nombre) return cabeza.siguiente;\n  for (\n    let anterior = cabeza;\n    anterior?.siguiente;\n    anterior = anterior.siguiente\n  ) {\n    if (anterior.siguiente.valor === nombre) {\n      anterior.siguiente = anterior.siguiente.siguiente;\n      break;\n    }\n  }\n  return cabeza;\n}\nfunction quitarSimple(cabeza, nombre) {\n  return retirarSimple(enlazarSimple(leerSimple(cabeza)), nombre);\n}\n\nfunction recorridoSimple(datos, cambios) {\n  let cabeza = enlazarSimple(datos);\n  for (const [accion, nombre] of cambios) {\n    if (accion === \"frente\") cabeza = { valor: nombre, siguiente: cabeza };\n    else cabeza = retirarSimple(cabeza, nombre);\n  }\n  return leerSimple(cabeza);\n}\n\nfunction crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\nfunction leerDoble(raiz, enlace) {\n  const salida = [];\n  for (let nodo = raiz[enlace]; nodo !== raiz; nodo = nodo[enlace])\n    salida.push(nodo.valor);\n  return salida;\n}\nfunction vistaDoble(datos) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  return {\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction bajaDoble(datos, indice) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  let i = 0;\n  let retirado = null;\n  for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente) {\n    if (i++ === indice) {\n      retirado = nodo.valor;\n      sacarDoble(nodo);\n      break;\n    }\n  }\n  return {\n    retirado,\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction avisoDoble(datos, indice) {\n  return { antes: vistaDoble(datos), despues: bajaDoble(datos, indice) };\n}\n\nfunction historialPila(acciones) {\n  const pila = [];\n  const respuestas = [];\n  for (const [accion, etiqueta] of acciones) {\n    if (accion === \"guardar\") pila.push(etiqueta);\n    else if (accion === \"ver\") respuestas.push(pila[pila.length - 1] ?? null);\n    else respuestas.push(pila.pop() ?? null);\n  }\n  return respuestas;\n}\n\nfunction revisarCierres(texto) {\n  const pares = { \")\": \"(\", \"]\": \"[\", \"}\": \"{\" };\n  const pila = [];\n  for (let i = 0; i < texto.length; i++) {\n    const actual = texto[i];\n    if (\"([{\".includes(actual)) pila.push(actual);\n    else if (\")]}\".includes(actual) && pila.pop() !== pares[actual]) {\n      return { valido: false, error: i };\n    }\n  }\n  return pila.length\n    ? { valido: false, error: texto.length }\n    : { valido: true, error: null };\n}\n\nfunction panelReglas(acciones, reglas) {\n  return {\n    historial: historialPila(acciones),\n    revisiones: reglas.map(revisarCierres),\n  };\n}\n\nfunction indiceCircular(inicio, paso, capacidad) {\n  return (inicio + paso) % capacidad;\n}\n\nfunction estadoCola(capacidad, acciones) {\n  const celdas = Array(capacidad);\n  let cabeza = 0;\n  let cantidad = 0;\n  const respuestas = [];\n  for (const [accion, aviso] of acciones) {\n    if (accion === \"entrar\") {\n      const hayEspacio = cantidad < capacidad;\n      if (hayEspacio) {\n        celdas[indiceCircular(cabeza, cantidad, capacidad)] = aviso;\n        cantidad++;\n      }\n      respuestas.push(hayEspacio);\n    } else if (cantidad === 0) respuestas.push(null);\n    else {\n      respuestas.push(celdas[cabeza]);\n      celdas[cabeza] = undefined;\n      cabeza = indiceCircular(cabeza, 1, capacidad);\n      cantidad--;\n    }\n  }\n  const pendientes = [];\n  for (let i = 0; i < cantidad; i++)\n    pendientes.push(celdas[indiceCircular(cabeza, i, capacidad)]);\n  return { respuestas, pendientes };\n}\n\nfunction turnosCentral(capacidad, acciones) {\n  const { respuestas, pendientes } = estadoCola(capacidad, acciones);\n  return {\n    respuestas,\n    pendientes,\n    siguiente: pendientes[0] ?? null,\n    libres: capacidad - pendientes.length,\n  };\n}\n\nfunction crearDeque(capacidad) {\n  const celdas = Array(capacidad);\n  let inicio = 0;\n  let cantidad = 0;\n  const indice = (paso) => (inicio + paso + capacidad) % capacidad;\n  return {\n    cantidad: () => cantidad,\n    frente: () => (cantidad ? celdas[inicio] : null),\n    fondo: () => (cantidad ? celdas[indice(cantidad - 1)] : null),\n    entrarFrente(valor) {\n      if (cantidad === capacidad) return false;\n      inicio = indice(-1);\n      celdas[inicio] = valor;\n      cantidad++;\n      return true;\n    },\n    entrarFondo(valor) {\n      if (cantidad === capacidad) return false;\n      celdas[indice(cantidad++)] = valor;\n      return true;\n    },\n    salirFrente() {\n      if (!cantidad) return null;\n      const valor = celdas[inicio];\n      celdas[inicio] = undefined;\n      inicio = indice(1);\n      cantidad--;\n      return valor;\n    },\n    salirFondo() {\n      if (!cantidad) return null;\n      const posicion = indice(--cantidad);\n      const valor = celdas[posicion];\n      celdas[posicion] = undefined;\n      return valor;\n    },\n  };\n}\nfunction manejarDeque(capacidad, acciones) {\n  const d = crearDeque(capacidad);\n  return acciones.map(([operacion, valor]) => d[operacion](valor));\n}\n\nfunction maximosVentana(datos, k) {\n  if (k < 1 || k > datos.length) return [];\n  const candidatos = crearDeque(k);\n  const maximos = [];\n  for (let i = 0; i < datos.length; i++) {\n    if (candidatos.cantidad() && candidatos.frente() <= i - k)\n      candidatos.salirFrente();\n    while (candidatos.cantidad() && datos[candidatos.fondo()] <= datos[i])\n      candidatos.salirFondo();\n    candidatos.entrarFondo(i);\n    if (i >= k - 1) maximos.push(datos[candidatos.frente()]);\n  }\n  return maximos;\n}\n\nfunction picosOcupacion(datos, k) {\n  return maximosVentana(datos, k).map((maximo, inicio) => ({ inicio, maximo }));\n}\n\nfunction indiceHash(clave, capacidad) {\n  let hash = 0;\n  for (let i = 0; i < clave.length; i++) {\n    hash = (31 * hash + clave.charCodeAt(i)) % capacidad;\n  }\n  return hash;\n}\n\nfunction indiceEncadenado(capacidad, registros) {\n  const buckets = Array.from({ length: capacidad }, () => []);\n  for (const [clave, valor] of registros) {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    const existente = bucket.find((par) => par[0] === clave);\n    if (existente) existente[1] = valor;\n    else bucket.push([clave, valor]);\n  }\n  return buckets;\n}\n\nfunction consultasEncadenadas(capacidad, registros, claves) {\n  const buckets = indiceEncadenado(capacidad, registros);\n  const respuestas = claves.map((clave) => {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    return bucket.find((par) => par[0] === clave)?.[1] ?? null;\n  });\n  return { respuestas, ocupacion: buckets.map((bucket) => bucket.length) };\n}\n\nfunction sondear(tabla, clave) {\n  const inicio = indiceHash(clave, tabla.length);\n  let hueco = -1;\n  for (let paso = 0; paso < tabla.length; paso++) {\n    const i = (inicio + paso) % tabla.length;\n    const celda = tabla[i];\n    if (celda === null) return { existe: false, indice: hueco < 0 ? i : hueco };\n    if (celda === false) {\n      if (hueco < 0) hueco = i;\n    } else if (celda[0] === clave) return { existe: true, indice: i };\n  }\n  return { existe: false, indice: hueco };\n}\n\nfunction ejecutarSondeo(acciones) {\n  let tabla = Array(4).fill(null);\n  let activos = 0;\n  let usados = 0;\n  const respuestas = [];\n  for (const [accion, clave, valor] of acciones) {\n    let { existe, indice } = sondear(tabla, clave);\n    if (accion === \"leer\") respuestas.push(existe ? tabla[indice][1] : null);\n    else if (accion === \"borrar\") {\n      if (existe) {\n        tabla[indice] = false;\n        activos--;\n      }\n      respuestas.push(existe);\n    } else if (existe) tabla[indice][1] = valor;\n    else {\n      if (tabla[indice] === null && (usados + 1) * 2 > tabla.length) {\n        const capacidad =\n          (activos + 1) * 2 > tabla.length ? tabla.length * 2 : tabla.length;\n        const anterior = tabla;\n        tabla = Array(capacidad).fill(null);\n        for (const par of anterior) {\n          if (par) tabla[sondear(tabla, par[0]).indice] = par;\n        }\n        usados = activos;\n        indice = sondear(tabla, clave).indice;\n      }\n      if (tabla[indice] === null) usados++;\n      tabla[indice] = [clave, valor];\n      activos++;\n    }\n  }\n  return { respuestas, capacidad: tabla.length, activos, usados };\n}\n\nfunction indiceEstacionesAbierto(acciones) {\n  const estado = ejecutarSondeo(acciones);\n  return { ...estado, marcas: estado.usados - estado.activos };\n}\n\nfunction igualdadNativa() {\n  const objeto = { id: 1 };\n  const copia = { id: 1 };\n  const mapa = new Map([\n    [NaN, \"primero\"],\n    [NaN, \"segundo\"],\n    [-0, \"cero\"],\n    [\"u\", undefined],\n  ]);\n  return {\n    nanRepite: mapa.get(NaN) === \"segundo\",\n    cerosCoinciden: mapa.has(+0),\n    tipos: new Set([1, \"1\"]).size,\n    objetos: new Set([objeto, objeto, copia]).size,\n    reconoceReferencia: new Set([objeto]).has(objeto),\n    reconoceCopia: new Set([objeto]).has(copia),\n    indefinidoPresente: mapa.has(\"u\") && mapa.get(\"u\") === undefined,\n  };\n}\n\nfunction ordenNativo(acciones) {\n  const registros = new Map();\n  const activas = new Set();\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") {\n      registros.set(clave, valor);\n      activas.add(clave);\n    } else {\n      registros.delete(clave);\n      activas.delete(clave);\n    }\n  }\n  return { registros: Array.from(registros), activas: Array.from(activas) };\n}\n\nfunction consultasNativas(acciones, claves) {\n  const { registros, activas } = ordenNativo(acciones);\n  const porClave = new Map(registros);\n  return {\n    activas,\n    respuestas: claves.map((clave) => porClave.get(clave) ?? null),\n  };\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\nfunction estadoCache(capacidad, acciones) {\n  const cache = crearLRU(capacidad);\n  const resultados = [];\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") cache.guardar(clave, valor);\n    else resultados.push(cache.leer(clave));\n  }\n  return { resultados, orden: cache.orden() };\n}\n\nfunction diagnosticoLRU(capacidad, acciones) {\n  const { resultados, orden } = estadoCache(capacidad, acciones);\n  let aciertos = 0;\n  for (const resultado of resultados) if (resultado.acierto) aciertos++;\n  return { aciertos, fallos: resultados.length - aciertos, orden };\n}\n\nfunction tableroCache(capacidad, acciones) {\n  const estado = diagnosticoLRU(capacidad, acciones);\n  return {\n    ...estado,\n    primeraExpulsion:\n      estado.orden.length === capacidad ? (estado.orden[0] ?? null) : null,\n  };\n}\n\nfunction parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n",
+      "entrypoint": "parejaOrdenada",
+      "cases": [
+        {
+          "name": "Mueve los extremos",
+          "args": [
+            [
+              -2,
+              1,
+              3,
+              9
+            ],
+            4
+          ],
+          "expected": [
+            1,
+            2
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Un elemento no se reusa",
+          "args": [
+            [
+              2
+            ],
+            4
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Dos repetidos",
+          "args": [
+            [
+              2,
+              2
+            ],
+            4
+          ],
+          "expected": [
+            0,
+            1
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Se conserva la entrega anterior",
+          "args": [
+            2,
+            [
+              [
+                "guardar",
+                "A",
+                "uno"
+              ],
+              [
+                "guardar",
+                "B",
+                "dos"
+              ],
+              [
+                "leer",
+                "A"
+              ]
+            ]
+          ],
+          "expected": {
+            "aciertos": 1,
+            "fallos": 0,
+            "orden": [
+              "B",
+              "A"
+            ],
+            "primeraExpulsion": "B"
+          },
+          "entrypoint": "tableroCache",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Empieza a ambos extremos.",
+      "hints": [
+        "Empieza a ambos extremos.",
+        "En suma baja no puedes encontrar otro valor mayor emparejado con la izquierda actual."
+      ],
+      "explanation": "La comparación permite descartar un extremo sin revisar cada combinación que lo incluya.",
+      "retryFeedback": "En suma baja no puedes encontrar otro valor mayor emparejado con la izquierda actual.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera el código aprobado de la lección anterior.",
+        "output": "Una versión comprobada de parejaOrdenada.",
+        "reflection": "Justifica por qué solo se mueve un extremo de la pareja.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/ls-lru/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglos.ventana",
+      "prompt": "Devuelve {ventanas, tramos}. ventanas contiene sumas de ancho fijo mediante actualización incremental. tramos usa prefijos para sumar intervalos [inicio, fin).",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n\nfunction enlazarSimple(datos) {\n  let cabeza = null;\n  for (let i = datos.length - 1; i >= 0; i--) {\n    cabeza = { valor: datos[i], siguiente: cabeza };\n  }\n  return cabeza;\n}\n\nfunction leerSimple(cabeza) {\n  const datos = [];\n  for (let actual = cabeza; actual !== null; actual = actual.siguiente)\n    datos.push(actual.valor);\n  return datos;\n}\nfunction retirarSimple(cabeza, nombre) {\n  if (cabeza?.valor === nombre) return cabeza.siguiente;\n  for (\n    let anterior = cabeza;\n    anterior?.siguiente;\n    anterior = anterior.siguiente\n  ) {\n    if (anterior.siguiente.valor === nombre) {\n      anterior.siguiente = anterior.siguiente.siguiente;\n      break;\n    }\n  }\n  return cabeza;\n}\nfunction quitarSimple(cabeza, nombre) {\n  return retirarSimple(enlazarSimple(leerSimple(cabeza)), nombre);\n}\n\nfunction recorridoSimple(datos, cambios) {\n  let cabeza = enlazarSimple(datos);\n  for (const [accion, nombre] of cambios) {\n    if (accion === \"frente\") cabeza = { valor: nombre, siguiente: cabeza };\n    else cabeza = retirarSimple(cabeza, nombre);\n  }\n  return leerSimple(cabeza);\n}\n\nfunction crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\nfunction leerDoble(raiz, enlace) {\n  const salida = [];\n  for (let nodo = raiz[enlace]; nodo !== raiz; nodo = nodo[enlace])\n    salida.push(nodo.valor);\n  return salida;\n}\nfunction vistaDoble(datos) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  return {\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction bajaDoble(datos, indice) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  let i = 0;\n  let retirado = null;\n  for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente) {\n    if (i++ === indice) {\n      retirado = nodo.valor;\n      sacarDoble(nodo);\n      break;\n    }\n  }\n  return {\n    retirado,\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction avisoDoble(datos, indice) {\n  return { antes: vistaDoble(datos), despues: bajaDoble(datos, indice) };\n}\n\nfunction historialPila(acciones) {\n  const pila = [];\n  const respuestas = [];\n  for (const [accion, etiqueta] of acciones) {\n    if (accion === \"guardar\") pila.push(etiqueta);\n    else if (accion === \"ver\") respuestas.push(pila[pila.length - 1] ?? null);\n    else respuestas.push(pila.pop() ?? null);\n  }\n  return respuestas;\n}\n\nfunction revisarCierres(texto) {\n  const pares = { \")\": \"(\", \"]\": \"[\", \"}\": \"{\" };\n  const pila = [];\n  for (let i = 0; i < texto.length; i++) {\n    const actual = texto[i];\n    if (\"([{\".includes(actual)) pila.push(actual);\n    else if (\")]}\".includes(actual) && pila.pop() !== pares[actual]) {\n      return { valido: false, error: i };\n    }\n  }\n  return pila.length\n    ? { valido: false, error: texto.length }\n    : { valido: true, error: null };\n}\n\nfunction panelReglas(acciones, reglas) {\n  return {\n    historial: historialPila(acciones),\n    revisiones: reglas.map(revisarCierres),\n  };\n}\n\nfunction indiceCircular(inicio, paso, capacidad) {\n  return (inicio + paso) % capacidad;\n}\n\nfunction estadoCola(capacidad, acciones) {\n  const celdas = Array(capacidad);\n  let cabeza = 0;\n  let cantidad = 0;\n  const respuestas = [];\n  for (const [accion, aviso] of acciones) {\n    if (accion === \"entrar\") {\n      const hayEspacio = cantidad < capacidad;\n      if (hayEspacio) {\n        celdas[indiceCircular(cabeza, cantidad, capacidad)] = aviso;\n        cantidad++;\n      }\n      respuestas.push(hayEspacio);\n    } else if (cantidad === 0) respuestas.push(null);\n    else {\n      respuestas.push(celdas[cabeza]);\n      celdas[cabeza] = undefined;\n      cabeza = indiceCircular(cabeza, 1, capacidad);\n      cantidad--;\n    }\n  }\n  const pendientes = [];\n  for (let i = 0; i < cantidad; i++)\n    pendientes.push(celdas[indiceCircular(cabeza, i, capacidad)]);\n  return { respuestas, pendientes };\n}\n\nfunction turnosCentral(capacidad, acciones) {\n  const { respuestas, pendientes } = estadoCola(capacidad, acciones);\n  return {\n    respuestas,\n    pendientes,\n    siguiente: pendientes[0] ?? null,\n    libres: capacidad - pendientes.length,\n  };\n}\n\nfunction crearDeque(capacidad) {\n  const celdas = Array(capacidad);\n  let inicio = 0;\n  let cantidad = 0;\n  const indice = (paso) => (inicio + paso + capacidad) % capacidad;\n  return {\n    cantidad: () => cantidad,\n    frente: () => (cantidad ? celdas[inicio] : null),\n    fondo: () => (cantidad ? celdas[indice(cantidad - 1)] : null),\n    entrarFrente(valor) {\n      if (cantidad === capacidad) return false;\n      inicio = indice(-1);\n      celdas[inicio] = valor;\n      cantidad++;\n      return true;\n    },\n    entrarFondo(valor) {\n      if (cantidad === capacidad) return false;\n      celdas[indice(cantidad++)] = valor;\n      return true;\n    },\n    salirFrente() {\n      if (!cantidad) return null;\n      const valor = celdas[inicio];\n      celdas[inicio] = undefined;\n      inicio = indice(1);\n      cantidad--;\n      return valor;\n    },\n    salirFondo() {\n      if (!cantidad) return null;\n      const posicion = indice(--cantidad);\n      const valor = celdas[posicion];\n      celdas[posicion] = undefined;\n      return valor;\n    },\n  };\n}\nfunction manejarDeque(capacidad, acciones) {\n  const d = crearDeque(capacidad);\n  return acciones.map(([operacion, valor]) => d[operacion](valor));\n}\n\nfunction maximosVentana(datos, k) {\n  if (k < 1 || k > datos.length) return [];\n  const candidatos = crearDeque(k);\n  const maximos = [];\n  for (let i = 0; i < datos.length; i++) {\n    if (candidatos.cantidad() && candidatos.frente() <= i - k)\n      candidatos.salirFrente();\n    while (candidatos.cantidad() && datos[candidatos.fondo()] <= datos[i])\n      candidatos.salirFondo();\n    candidatos.entrarFondo(i);\n    if (i >= k - 1) maximos.push(datos[candidatos.frente()]);\n  }\n  return maximos;\n}\n\nfunction picosOcupacion(datos, k) {\n  return maximosVentana(datos, k).map((maximo, inicio) => ({ inicio, maximo }));\n}\n\nfunction indiceHash(clave, capacidad) {\n  let hash = 0;\n  for (let i = 0; i < clave.length; i++) {\n    hash = (31 * hash + clave.charCodeAt(i)) % capacidad;\n  }\n  return hash;\n}\n\nfunction indiceEncadenado(capacidad, registros) {\n  const buckets = Array.from({ length: capacidad }, () => []);\n  for (const [clave, valor] of registros) {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    const existente = bucket.find((par) => par[0] === clave);\n    if (existente) existente[1] = valor;\n    else bucket.push([clave, valor]);\n  }\n  return buckets;\n}\n\nfunction consultasEncadenadas(capacidad, registros, claves) {\n  const buckets = indiceEncadenado(capacidad, registros);\n  const respuestas = claves.map((clave) => {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    return bucket.find((par) => par[0] === clave)?.[1] ?? null;\n  });\n  return { respuestas, ocupacion: buckets.map((bucket) => bucket.length) };\n}\n\nfunction sondear(tabla, clave) {\n  const inicio = indiceHash(clave, tabla.length);\n  let hueco = -1;\n  for (let paso = 0; paso < tabla.length; paso++) {\n    const i = (inicio + paso) % tabla.length;\n    const celda = tabla[i];\n    if (celda === null) return { existe: false, indice: hueco < 0 ? i : hueco };\n    if (celda === false) {\n      if (hueco < 0) hueco = i;\n    } else if (celda[0] === clave) return { existe: true, indice: i };\n  }\n  return { existe: false, indice: hueco };\n}\n\nfunction ejecutarSondeo(acciones) {\n  let tabla = Array(4).fill(null);\n  let activos = 0;\n  let usados = 0;\n  const respuestas = [];\n  for (const [accion, clave, valor] of acciones) {\n    let { existe, indice } = sondear(tabla, clave);\n    if (accion === \"leer\") respuestas.push(existe ? tabla[indice][1] : null);\n    else if (accion === \"borrar\") {\n      if (existe) {\n        tabla[indice] = false;\n        activos--;\n      }\n      respuestas.push(existe);\n    } else if (existe) tabla[indice][1] = valor;\n    else {\n      if (tabla[indice] === null && (usados + 1) * 2 > tabla.length) {\n        const capacidad =\n          (activos + 1) * 2 > tabla.length ? tabla.length * 2 : tabla.length;\n        const anterior = tabla;\n        tabla = Array(capacidad).fill(null);\n        for (const par of anterior) {\n          if (par) tabla[sondear(tabla, par[0]).indice] = par;\n        }\n        usados = activos;\n        indice = sondear(tabla, clave).indice;\n      }\n      if (tabla[indice] === null) usados++;\n      tabla[indice] = [clave, valor];\n      activos++;\n    }\n  }\n  return { respuestas, capacidad: tabla.length, activos, usados };\n}\n\nfunction indiceEstacionesAbierto(acciones) {\n  const estado = ejecutarSondeo(acciones);\n  return { ...estado, marcas: estado.usados - estado.activos };\n}\n\nfunction igualdadNativa() {\n  const objeto = { id: 1 };\n  const copia = { id: 1 };\n  const mapa = new Map([\n    [NaN, \"primero\"],\n    [NaN, \"segundo\"],\n    [-0, \"cero\"],\n    [\"u\", undefined],\n  ]);\n  return {\n    nanRepite: mapa.get(NaN) === \"segundo\",\n    cerosCoinciden: mapa.has(+0),\n    tipos: new Set([1, \"1\"]).size,\n    objetos: new Set([objeto, objeto, copia]).size,\n    reconoceReferencia: new Set([objeto]).has(objeto),\n    reconoceCopia: new Set([objeto]).has(copia),\n    indefinidoPresente: mapa.has(\"u\") && mapa.get(\"u\") === undefined,\n  };\n}\n\nfunction ordenNativo(acciones) {\n  const registros = new Map();\n  const activas = new Set();\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") {\n      registros.set(clave, valor);\n      activas.add(clave);\n    } else {\n      registros.delete(clave);\n      activas.delete(clave);\n    }\n  }\n  return { registros: Array.from(registros), activas: Array.from(activas) };\n}\n\nfunction consultasNativas(acciones, claves) {\n  const { registros, activas } = ordenNativo(acciones);\n  const porClave = new Map(registros);\n  return {\n    activas,\n    respuestas: claves.map((clave) => porClave.get(clave) ?? null),\n  };\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\nfunction estadoCache(capacidad, acciones) {\n  const cache = crearLRU(capacidad);\n  const resultados = [];\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") cache.guardar(clave, valor);\n    else resultados.push(cache.leer(clave));\n  }\n  return { resultados, orden: cache.orden() };\n}\n\nfunction diagnosticoLRU(capacidad, acciones) {\n  const { resultados, orden } = estadoCache(capacidad, acciones);\n  let aciertos = 0;\n  for (const resultado of resultados) if (resultado.acierto) aciertos++;\n  return { aciertos, fallos: resultados.length - aciertos, orden };\n}\n\nfunction tableroCache(capacidad, acciones) {\n  const estado = diagnosticoLRU(capacidad, acciones);\n  return {\n    ...estado,\n    primeraExpulsion:\n      estado.orden.length === capacidad ? (estado.orden[0] ?? null) : null,\n  };\n}\n\nfunction parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n\nfunction medirArreglo(datos, ancho, consultas) {\n  // Implementa el contrato de este paso.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n\nfunction enlazarSimple(datos) {\n  let cabeza = null;\n  for (let i = datos.length - 1; i >= 0; i--) {\n    cabeza = { valor: datos[i], siguiente: cabeza };\n  }\n  return cabeza;\n}\n\nfunction leerSimple(cabeza) {\n  const datos = [];\n  for (let actual = cabeza; actual !== null; actual = actual.siguiente)\n    datos.push(actual.valor);\n  return datos;\n}\nfunction retirarSimple(cabeza, nombre) {\n  if (cabeza?.valor === nombre) return cabeza.siguiente;\n  for (\n    let anterior = cabeza;\n    anterior?.siguiente;\n    anterior = anterior.siguiente\n  ) {\n    if (anterior.siguiente.valor === nombre) {\n      anterior.siguiente = anterior.siguiente.siguiente;\n      break;\n    }\n  }\n  return cabeza;\n}\nfunction quitarSimple(cabeza, nombre) {\n  return retirarSimple(enlazarSimple(leerSimple(cabeza)), nombre);\n}\n\nfunction recorridoSimple(datos, cambios) {\n  let cabeza = enlazarSimple(datos);\n  for (const [accion, nombre] of cambios) {\n    if (accion === \"frente\") cabeza = { valor: nombre, siguiente: cabeza };\n    else cabeza = retirarSimple(cabeza, nombre);\n  }\n  return leerSimple(cabeza);\n}\n\nfunction crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\nfunction leerDoble(raiz, enlace) {\n  const salida = [];\n  for (let nodo = raiz[enlace]; nodo !== raiz; nodo = nodo[enlace])\n    salida.push(nodo.valor);\n  return salida;\n}\nfunction vistaDoble(datos) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  return {\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction bajaDoble(datos, indice) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  let i = 0;\n  let retirado = null;\n  for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente) {\n    if (i++ === indice) {\n      retirado = nodo.valor;\n      sacarDoble(nodo);\n      break;\n    }\n  }\n  return {\n    retirado,\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction avisoDoble(datos, indice) {\n  return { antes: vistaDoble(datos), despues: bajaDoble(datos, indice) };\n}\n\nfunction historialPila(acciones) {\n  const pila = [];\n  const respuestas = [];\n  for (const [accion, etiqueta] of acciones) {\n    if (accion === \"guardar\") pila.push(etiqueta);\n    else if (accion === \"ver\") respuestas.push(pila[pila.length - 1] ?? null);\n    else respuestas.push(pila.pop() ?? null);\n  }\n  return respuestas;\n}\n\nfunction revisarCierres(texto) {\n  const pares = { \")\": \"(\", \"]\": \"[\", \"}\": \"{\" };\n  const pila = [];\n  for (let i = 0; i < texto.length; i++) {\n    const actual = texto[i];\n    if (\"([{\".includes(actual)) pila.push(actual);\n    else if (\")]}\".includes(actual) && pila.pop() !== pares[actual]) {\n      return { valido: false, error: i };\n    }\n  }\n  return pila.length\n    ? { valido: false, error: texto.length }\n    : { valido: true, error: null };\n}\n\nfunction panelReglas(acciones, reglas) {\n  return {\n    historial: historialPila(acciones),\n    revisiones: reglas.map(revisarCierres),\n  };\n}\n\nfunction indiceCircular(inicio, paso, capacidad) {\n  return (inicio + paso) % capacidad;\n}\n\nfunction estadoCola(capacidad, acciones) {\n  const celdas = Array(capacidad);\n  let cabeza = 0;\n  let cantidad = 0;\n  const respuestas = [];\n  for (const [accion, aviso] of acciones) {\n    if (accion === \"entrar\") {\n      const hayEspacio = cantidad < capacidad;\n      if (hayEspacio) {\n        celdas[indiceCircular(cabeza, cantidad, capacidad)] = aviso;\n        cantidad++;\n      }\n      respuestas.push(hayEspacio);\n    } else if (cantidad === 0) respuestas.push(null);\n    else {\n      respuestas.push(celdas[cabeza]);\n      celdas[cabeza] = undefined;\n      cabeza = indiceCircular(cabeza, 1, capacidad);\n      cantidad--;\n    }\n  }\n  const pendientes = [];\n  for (let i = 0; i < cantidad; i++)\n    pendientes.push(celdas[indiceCircular(cabeza, i, capacidad)]);\n  return { respuestas, pendientes };\n}\n\nfunction turnosCentral(capacidad, acciones) {\n  const { respuestas, pendientes } = estadoCola(capacidad, acciones);\n  return {\n    respuestas,\n    pendientes,\n    siguiente: pendientes[0] ?? null,\n    libres: capacidad - pendientes.length,\n  };\n}\n\nfunction crearDeque(capacidad) {\n  const celdas = Array(capacidad);\n  let inicio = 0;\n  let cantidad = 0;\n  const indice = (paso) => (inicio + paso + capacidad) % capacidad;\n  return {\n    cantidad: () => cantidad,\n    frente: () => (cantidad ? celdas[inicio] : null),\n    fondo: () => (cantidad ? celdas[indice(cantidad - 1)] : null),\n    entrarFrente(valor) {\n      if (cantidad === capacidad) return false;\n      inicio = indice(-1);\n      celdas[inicio] = valor;\n      cantidad++;\n      return true;\n    },\n    entrarFondo(valor) {\n      if (cantidad === capacidad) return false;\n      celdas[indice(cantidad++)] = valor;\n      return true;\n    },\n    salirFrente() {\n      if (!cantidad) return null;\n      const valor = celdas[inicio];\n      celdas[inicio] = undefined;\n      inicio = indice(1);\n      cantidad--;\n      return valor;\n    },\n    salirFondo() {\n      if (!cantidad) return null;\n      const posicion = indice(--cantidad);\n      const valor = celdas[posicion];\n      celdas[posicion] = undefined;\n      return valor;\n    },\n  };\n}\nfunction manejarDeque(capacidad, acciones) {\n  const d = crearDeque(capacidad);\n  return acciones.map(([operacion, valor]) => d[operacion](valor));\n}\n\nfunction maximosVentana(datos, k) {\n  if (k < 1 || k > datos.length) return [];\n  const candidatos = crearDeque(k);\n  const maximos = [];\n  for (let i = 0; i < datos.length; i++) {\n    if (candidatos.cantidad() && candidatos.frente() <= i - k)\n      candidatos.salirFrente();\n    while (candidatos.cantidad() && datos[candidatos.fondo()] <= datos[i])\n      candidatos.salirFondo();\n    candidatos.entrarFondo(i);\n    if (i >= k - 1) maximos.push(datos[candidatos.frente()]);\n  }\n  return maximos;\n}\n\nfunction picosOcupacion(datos, k) {\n  return maximosVentana(datos, k).map((maximo, inicio) => ({ inicio, maximo }));\n}\n\nfunction indiceHash(clave, capacidad) {\n  let hash = 0;\n  for (let i = 0; i < clave.length; i++) {\n    hash = (31 * hash + clave.charCodeAt(i)) % capacidad;\n  }\n  return hash;\n}\n\nfunction indiceEncadenado(capacidad, registros) {\n  const buckets = Array.from({ length: capacidad }, () => []);\n  for (const [clave, valor] of registros) {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    const existente = bucket.find((par) => par[0] === clave);\n    if (existente) existente[1] = valor;\n    else bucket.push([clave, valor]);\n  }\n  return buckets;\n}\n\nfunction consultasEncadenadas(capacidad, registros, claves) {\n  const buckets = indiceEncadenado(capacidad, registros);\n  const respuestas = claves.map((clave) => {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    return bucket.find((par) => par[0] === clave)?.[1] ?? null;\n  });\n  return { respuestas, ocupacion: buckets.map((bucket) => bucket.length) };\n}\n\nfunction sondear(tabla, clave) {\n  const inicio = indiceHash(clave, tabla.length);\n  let hueco = -1;\n  for (let paso = 0; paso < tabla.length; paso++) {\n    const i = (inicio + paso) % tabla.length;\n    const celda = tabla[i];\n    if (celda === null) return { existe: false, indice: hueco < 0 ? i : hueco };\n    if (celda === false) {\n      if (hueco < 0) hueco = i;\n    } else if (celda[0] === clave) return { existe: true, indice: i };\n  }\n  return { existe: false, indice: hueco };\n}\n\nfunction ejecutarSondeo(acciones) {\n  let tabla = Array(4).fill(null);\n  let activos = 0;\n  let usados = 0;\n  const respuestas = [];\n  for (const [accion, clave, valor] of acciones) {\n    let { existe, indice } = sondear(tabla, clave);\n    if (accion === \"leer\") respuestas.push(existe ? tabla[indice][1] : null);\n    else if (accion === \"borrar\") {\n      if (existe) {\n        tabla[indice] = false;\n        activos--;\n      }\n      respuestas.push(existe);\n    } else if (existe) tabla[indice][1] = valor;\n    else {\n      if (tabla[indice] === null && (usados + 1) * 2 > tabla.length) {\n        const capacidad =\n          (activos + 1) * 2 > tabla.length ? tabla.length * 2 : tabla.length;\n        const anterior = tabla;\n        tabla = Array(capacidad).fill(null);\n        for (const par of anterior) {\n          if (par) tabla[sondear(tabla, par[0]).indice] = par;\n        }\n        usados = activos;\n        indice = sondear(tabla, clave).indice;\n      }\n      if (tabla[indice] === null) usados++;\n      tabla[indice] = [clave, valor];\n      activos++;\n    }\n  }\n  return { respuestas, capacidad: tabla.length, activos, usados };\n}\n\nfunction indiceEstacionesAbierto(acciones) {\n  const estado = ejecutarSondeo(acciones);\n  return { ...estado, marcas: estado.usados - estado.activos };\n}\n\nfunction igualdadNativa() {\n  const objeto = { id: 1 };\n  const copia = { id: 1 };\n  const mapa = new Map([\n    [NaN, \"primero\"],\n    [NaN, \"segundo\"],\n    [-0, \"cero\"],\n    [\"u\", undefined],\n  ]);\n  return {\n    nanRepite: mapa.get(NaN) === \"segundo\",\n    cerosCoinciden: mapa.has(+0),\n    tipos: new Set([1, \"1\"]).size,\n    objetos: new Set([objeto, objeto, copia]).size,\n    reconoceReferencia: new Set([objeto]).has(objeto),\n    reconoceCopia: new Set([objeto]).has(copia),\n    indefinidoPresente: mapa.has(\"u\") && mapa.get(\"u\") === undefined,\n  };\n}\n\nfunction ordenNativo(acciones) {\n  const registros = new Map();\n  const activas = new Set();\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") {\n      registros.set(clave, valor);\n      activas.add(clave);\n    } else {\n      registros.delete(clave);\n      activas.delete(clave);\n    }\n  }\n  return { registros: Array.from(registros), activas: Array.from(activas) };\n}\n\nfunction consultasNativas(acciones, claves) {\n  const { registros, activas } = ordenNativo(acciones);\n  const porClave = new Map(registros);\n  return {\n    activas,\n    respuestas: claves.map((clave) => porClave.get(clave) ?? null),\n  };\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\nfunction estadoCache(capacidad, acciones) {\n  const cache = crearLRU(capacidad);\n  const resultados = [];\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") cache.guardar(clave, valor);\n    else resultados.push(cache.leer(clave));\n  }\n  return { resultados, orden: cache.orden() };\n}\n\nfunction diagnosticoLRU(capacidad, acciones) {\n  const { resultados, orden } = estadoCache(capacidad, acciones);\n  let aciertos = 0;\n  for (const resultado of resultados) if (resultado.acierto) aciertos++;\n  return { aciertos, fallos: resultados.length - aciertos, orden };\n}\n\nfunction tableroCache(capacidad, acciones) {\n  const estado = diagnosticoLRU(capacidad, acciones);\n  return {\n    ...estado,\n    primeraExpulsion:\n      estado.orden.length === capacidad ? (estado.orden[0] ?? null) : null,\n  };\n}\n\nfunction parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n\nfunction medirArreglo(datos, ancho, consultas) {\n  const ventanas = [];\n  if (ancho >= 1 && ancho <= datos.length) {\n    let suma = 0;\n    for (let i = 0; i < datos.length; i++) {\n      suma += datos[i];\n      if (i >= ancho) suma -= datos[i - ancho];\n      if (i >= ancho - 1) ventanas.push(suma);\n    }\n  }\n  const prefijo = [0];\n  for (const numero of datos)\n    prefijo.push(prefijo[prefijo.length - 1] + numero);\n  return {\n    ventanas,\n    tramos: consultas.map(([inicio, fin]) => prefijo[fin] - prefijo[inicio]),\n  };\n}\n",
+      "entrypoint": "medirArreglo",
+      "cases": [
+        {
+          "name": "Negativos y tramo vacío",
+          "args": [
+            [
+              2,
+              -4,
+              3,
+              1
+            ],
+            2,
+            [
+              [
+                0,
+                4
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                3,
+                3
+              ]
+            ]
+          ],
+          "expected": {
+            "ventanas": [
+              -2,
+              -1,
+              4
+            ],
+            "tramos": [
+              2,
+              -1,
+              0
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin datos",
+          "args": [
+            [],
+            1,
+            [
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "expected": {
+            "ventanas": [],
+            "tramos": [
+              0
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar parejaOrdenada",
+          "args": [
+            [
+              -2,
+              1,
+              3,
+              9
+            ],
+            4
+          ],
+          "expected": [
+            1,
+            2
+          ],
+          "entrypoint": "parejaOrdenada",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Al llegar al índice ancho, sale la posición cero.",
+      "hints": [
+        "Al llegar al índice ancho, sale la posición cero.",
+        "Usa el prefijo de fin sin restarle uno."
+      ],
+      "explanation": "La ventana comparte casi todos sus valores con la anterior. Los prefijos permiten responder también consultas con anchos distintos.",
+      "retryFeedback": "Usa el prefijo de fin sin restarle uno.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de medirArreglo.",
+        "reflection": "Contrasta sumas por ventana con dos prefijos.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/ls-arreglos/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglos.suma-de-prefijos",
+      "prompt": "Define aplicarCambios usando diferencias y combina con medirArreglo. Devuelve {corregidos, ventanas, tramos}. Para reproducir la incidencia, guarda una copia de tu entrega y usa Restaurar código inicial para probar el borrador preparado. Recupera tu versión para corregirla y consolidar el contrato.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n\nfunction enlazarSimple(datos) {\n  let cabeza = null;\n  for (let i = datos.length - 1; i >= 0; i--) {\n    cabeza = { valor: datos[i], siguiente: cabeza };\n  }\n  return cabeza;\n}\n\nfunction leerSimple(cabeza) {\n  const datos = [];\n  for (let actual = cabeza; actual !== null; actual = actual.siguiente)\n    datos.push(actual.valor);\n  return datos;\n}\nfunction retirarSimple(cabeza, nombre) {\n  if (cabeza?.valor === nombre) return cabeza.siguiente;\n  for (\n    let anterior = cabeza;\n    anterior?.siguiente;\n    anterior = anterior.siguiente\n  ) {\n    if (anterior.siguiente.valor === nombre) {\n      anterior.siguiente = anterior.siguiente.siguiente;\n      break;\n    }\n  }\n  return cabeza;\n}\nfunction quitarSimple(cabeza, nombre) {\n  return retirarSimple(enlazarSimple(leerSimple(cabeza)), nombre);\n}\n\nfunction recorridoSimple(datos, cambios) {\n  let cabeza = enlazarSimple(datos);\n  for (const [accion, nombre] of cambios) {\n    if (accion === \"frente\") cabeza = { valor: nombre, siguiente: cabeza };\n    else cabeza = retirarSimple(cabeza, nombre);\n  }\n  return leerSimple(cabeza);\n}\n\nfunction crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\nfunction leerDoble(raiz, enlace) {\n  const salida = [];\n  for (let nodo = raiz[enlace]; nodo !== raiz; nodo = nodo[enlace])\n    salida.push(nodo.valor);\n  return salida;\n}\nfunction vistaDoble(datos) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  return {\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction bajaDoble(datos, indice) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  let i = 0;\n  let retirado = null;\n  for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente) {\n    if (i++ === indice) {\n      retirado = nodo.valor;\n      sacarDoble(nodo);\n      break;\n    }\n  }\n  return {\n    retirado,\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction avisoDoble(datos, indice) {\n  return { antes: vistaDoble(datos), despues: bajaDoble(datos, indice) };\n}\n\nfunction historialPila(acciones) {\n  const pila = [];\n  const respuestas = [];\n  for (const [accion, etiqueta] of acciones) {\n    if (accion === \"guardar\") pila.push(etiqueta);\n    else if (accion === \"ver\") respuestas.push(pila[pila.length - 1] ?? null);\n    else respuestas.push(pila.pop() ?? null);\n  }\n  return respuestas;\n}\n\nfunction revisarCierres(texto) {\n  const pares = { \")\": \"(\", \"]\": \"[\", \"}\": \"{\" };\n  const pila = [];\n  for (let i = 0; i < texto.length; i++) {\n    const actual = texto[i];\n    if (\"([{\".includes(actual)) pila.push(actual);\n    else if (\")]}\".includes(actual) && pila.pop() !== pares[actual]) {\n      return { valido: false, error: i };\n    }\n  }\n  return pila.length\n    ? { valido: false, error: texto.length }\n    : { valido: true, error: null };\n}\n\nfunction panelReglas(acciones, reglas) {\n  return {\n    historial: historialPila(acciones),\n    revisiones: reglas.map(revisarCierres),\n  };\n}\n\nfunction indiceCircular(inicio, paso, capacidad) {\n  return (inicio + paso) % capacidad;\n}\n\nfunction estadoCola(capacidad, acciones) {\n  const celdas = Array(capacidad);\n  let cabeza = 0;\n  let cantidad = 0;\n  const respuestas = [];\n  for (const [accion, aviso] of acciones) {\n    if (accion === \"entrar\") {\n      const hayEspacio = cantidad < capacidad;\n      if (hayEspacio) {\n        celdas[indiceCircular(cabeza, cantidad, capacidad)] = aviso;\n        cantidad++;\n      }\n      respuestas.push(hayEspacio);\n    } else if (cantidad === 0) respuestas.push(null);\n    else {\n      respuestas.push(celdas[cabeza]);\n      celdas[cabeza] = undefined;\n      cabeza = indiceCircular(cabeza, 1, capacidad);\n      cantidad--;\n    }\n  }\n  const pendientes = [];\n  for (let i = 0; i < cantidad; i++)\n    pendientes.push(celdas[indiceCircular(cabeza, i, capacidad)]);\n  return { respuestas, pendientes };\n}\n\nfunction turnosCentral(capacidad, acciones) {\n  const { respuestas, pendientes } = estadoCola(capacidad, acciones);\n  return {\n    respuestas,\n    pendientes,\n    siguiente: pendientes[0] ?? null,\n    libres: capacidad - pendientes.length,\n  };\n}\n\nfunction crearDeque(capacidad) {\n  const celdas = Array(capacidad);\n  let inicio = 0;\n  let cantidad = 0;\n  const indice = (paso) => (inicio + paso + capacidad) % capacidad;\n  return {\n    cantidad: () => cantidad,\n    frente: () => (cantidad ? celdas[inicio] : null),\n    fondo: () => (cantidad ? celdas[indice(cantidad - 1)] : null),\n    entrarFrente(valor) {\n      if (cantidad === capacidad) return false;\n      inicio = indice(-1);\n      celdas[inicio] = valor;\n      cantidad++;\n      return true;\n    },\n    entrarFondo(valor) {\n      if (cantidad === capacidad) return false;\n      celdas[indice(cantidad++)] = valor;\n      return true;\n    },\n    salirFrente() {\n      if (!cantidad) return null;\n      const valor = celdas[inicio];\n      celdas[inicio] = undefined;\n      inicio = indice(1);\n      cantidad--;\n      return valor;\n    },\n    salirFondo() {\n      if (!cantidad) return null;\n      const posicion = indice(--cantidad);\n      const valor = celdas[posicion];\n      celdas[posicion] = undefined;\n      return valor;\n    },\n  };\n}\nfunction manejarDeque(capacidad, acciones) {\n  const d = crearDeque(capacidad);\n  return acciones.map(([operacion, valor]) => d[operacion](valor));\n}\n\nfunction maximosVentana(datos, k) {\n  if (k < 1 || k > datos.length) return [];\n  const candidatos = crearDeque(k);\n  const maximos = [];\n  for (let i = 0; i < datos.length; i++) {\n    if (candidatos.cantidad() && candidatos.frente() <= i - k)\n      candidatos.salirFrente();\n    while (candidatos.cantidad() && datos[candidatos.fondo()] <= datos[i])\n      candidatos.salirFondo();\n    candidatos.entrarFondo(i);\n    if (i >= k - 1) maximos.push(datos[candidatos.frente()]);\n  }\n  return maximos;\n}\n\nfunction picosOcupacion(datos, k) {\n  return maximosVentana(datos, k).map((maximo, inicio) => ({ inicio, maximo }));\n}\n\nfunction indiceHash(clave, capacidad) {\n  let hash = 0;\n  for (let i = 0; i < clave.length; i++) {\n    hash = (31 * hash + clave.charCodeAt(i)) % capacidad;\n  }\n  return hash;\n}\n\nfunction indiceEncadenado(capacidad, registros) {\n  const buckets = Array.from({ length: capacidad }, () => []);\n  for (const [clave, valor] of registros) {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    const existente = bucket.find((par) => par[0] === clave);\n    if (existente) existente[1] = valor;\n    else bucket.push([clave, valor]);\n  }\n  return buckets;\n}\n\nfunction consultasEncadenadas(capacidad, registros, claves) {\n  const buckets = indiceEncadenado(capacidad, registros);\n  const respuestas = claves.map((clave) => {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    return bucket.find((par) => par[0] === clave)?.[1] ?? null;\n  });\n  return { respuestas, ocupacion: buckets.map((bucket) => bucket.length) };\n}\n\nfunction sondear(tabla, clave) {\n  const inicio = indiceHash(clave, tabla.length);\n  let hueco = -1;\n  for (let paso = 0; paso < tabla.length; paso++) {\n    const i = (inicio + paso) % tabla.length;\n    const celda = tabla[i];\n    if (celda === null) return { existe: false, indice: hueco < 0 ? i : hueco };\n    if (celda === false) {\n      if (hueco < 0) hueco = i;\n    } else if (celda[0] === clave) return { existe: true, indice: i };\n  }\n  return { existe: false, indice: hueco };\n}\n\nfunction ejecutarSondeo(acciones) {\n  let tabla = Array(4).fill(null);\n  let activos = 0;\n  let usados = 0;\n  const respuestas = [];\n  for (const [accion, clave, valor] of acciones) {\n    let { existe, indice } = sondear(tabla, clave);\n    if (accion === \"leer\") respuestas.push(existe ? tabla[indice][1] : null);\n    else if (accion === \"borrar\") {\n      if (existe) {\n        tabla[indice] = false;\n        activos--;\n      }\n      respuestas.push(existe);\n    } else if (existe) tabla[indice][1] = valor;\n    else {\n      if (tabla[indice] === null && (usados + 1) * 2 > tabla.length) {\n        const capacidad =\n          (activos + 1) * 2 > tabla.length ? tabla.length * 2 : tabla.length;\n        const anterior = tabla;\n        tabla = Array(capacidad).fill(null);\n        for (const par of anterior) {\n          if (par) tabla[sondear(tabla, par[0]).indice] = par;\n        }\n        usados = activos;\n        indice = sondear(tabla, clave).indice;\n      }\n      if (tabla[indice] === null) usados++;\n      tabla[indice] = [clave, valor];\n      activos++;\n    }\n  }\n  return { respuestas, capacidad: tabla.length, activos, usados };\n}\n\nfunction indiceEstacionesAbierto(acciones) {\n  const estado = ejecutarSondeo(acciones);\n  return { ...estado, marcas: estado.usados - estado.activos };\n}\n\nfunction igualdadNativa() {\n  const objeto = { id: 1 };\n  const copia = { id: 1 };\n  const mapa = new Map([\n    [NaN, \"primero\"],\n    [NaN, \"segundo\"],\n    [-0, \"cero\"],\n    [\"u\", undefined],\n  ]);\n  return {\n    nanRepite: mapa.get(NaN) === \"segundo\",\n    cerosCoinciden: mapa.has(+0),\n    tipos: new Set([1, \"1\"]).size,\n    objetos: new Set([objeto, objeto, copia]).size,\n    reconoceReferencia: new Set([objeto]).has(objeto),\n    reconoceCopia: new Set([objeto]).has(copia),\n    indefinidoPresente: mapa.has(\"u\") && mapa.get(\"u\") === undefined,\n  };\n}\n\nfunction ordenNativo(acciones) {\n  const registros = new Map();\n  const activas = new Set();\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") {\n      registros.set(clave, valor);\n      activas.add(clave);\n    } else {\n      registros.delete(clave);\n      activas.delete(clave);\n    }\n  }\n  return { registros: Array.from(registros), activas: Array.from(activas) };\n}\n\nfunction consultasNativas(acciones, claves) {\n  const { registros, activas } = ordenNativo(acciones);\n  const porClave = new Map(registros);\n  return {\n    activas,\n    respuestas: claves.map((clave) => porClave.get(clave) ?? null),\n  };\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\nfunction estadoCache(capacidad, acciones) {\n  const cache = crearLRU(capacidad);\n  const resultados = [];\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") cache.guardar(clave, valor);\n    else resultados.push(cache.leer(clave));\n  }\n  return { resultados, orden: cache.orden() };\n}\n\nfunction diagnosticoLRU(capacidad, acciones) {\n  const { resultados, orden } = estadoCache(capacidad, acciones);\n  let aciertos = 0;\n  for (const resultado of resultados) if (resultado.acierto) aciertos++;\n  return { aciertos, fallos: resultados.length - aciertos, orden };\n}\n\nfunction tableroCache(capacidad, acciones) {\n  const estado = diagnosticoLRU(capacidad, acciones);\n  return {\n    ...estado,\n    primeraExpulsion:\n      estado.orden.length === capacidad ? (estado.orden[0] ?? null) : null,\n  };\n}\n\nfunction parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n\nfunction medirArreglo(datos, ancho, consultas) {\n  const ventanas = [];\n  if (ancho >= 1 && ancho <= datos.length) {\n    let suma = 0;\n    for (let i = 0; i < datos.length; i++) {\n      suma += datos[i];\n      if (i >= ancho) suma -= datos[i - ancho];\n      if (i >= ancho - 1) ventanas.push(suma);\n    }\n  }\n  const prefijo = [0];\n  for (const numero of datos)\n    prefijo.push(prefijo[prefijo.length - 1] + numero);\n  return {\n    ventanas,\n    tramos: consultas.map(([inicio, fin]) => prefijo[fin] - prefijo[inicio]),\n  };\n}\n\nfunction aplicarCambios(datos, cambios) {\n  const diferencias = Array(datos.length + 1).fill(0);\n  for (const [inicio, fin, delta] of cambios) {\n    diferencias[inicio] += delta;\n    diferencias[fin - 1] -= delta;\n  }\n  let ajuste = 0;\n  return datos.map((dato, i) => {\n    ajuste += diferencias[i];\n    return dato + ajuste;\n  });\n}\nfunction tableroTramos(datos, cambios, ancho, consultas) {\n  const corregidos = aplicarCambios(datos, cambios);\n  return { corregidos, ...medirArreglo(corregidos, ancho, consultas) };\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n\nfunction enlazarSimple(datos) {\n  let cabeza = null;\n  for (let i = datos.length - 1; i >= 0; i--) {\n    cabeza = { valor: datos[i], siguiente: cabeza };\n  }\n  return cabeza;\n}\n\nfunction leerSimple(cabeza) {\n  const datos = [];\n  for (let actual = cabeza; actual !== null; actual = actual.siguiente)\n    datos.push(actual.valor);\n  return datos;\n}\nfunction retirarSimple(cabeza, nombre) {\n  if (cabeza?.valor === nombre) return cabeza.siguiente;\n  for (\n    let anterior = cabeza;\n    anterior?.siguiente;\n    anterior = anterior.siguiente\n  ) {\n    if (anterior.siguiente.valor === nombre) {\n      anterior.siguiente = anterior.siguiente.siguiente;\n      break;\n    }\n  }\n  return cabeza;\n}\nfunction quitarSimple(cabeza, nombre) {\n  return retirarSimple(enlazarSimple(leerSimple(cabeza)), nombre);\n}\n\nfunction recorridoSimple(datos, cambios) {\n  let cabeza = enlazarSimple(datos);\n  for (const [accion, nombre] of cambios) {\n    if (accion === \"frente\") cabeza = { valor: nombre, siguiente: cabeza };\n    else cabeza = retirarSimple(cabeza, nombre);\n  }\n  return leerSimple(cabeza);\n}\n\nfunction crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\nfunction leerDoble(raiz, enlace) {\n  const salida = [];\n  for (let nodo = raiz[enlace]; nodo !== raiz; nodo = nodo[enlace])\n    salida.push(nodo.valor);\n  return salida;\n}\nfunction vistaDoble(datos) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  return {\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction bajaDoble(datos, indice) {\n  const raiz = crearDoble();\n  for (const dato of datos) ponerAntes(raiz, dato);\n  let i = 0;\n  let retirado = null;\n  for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente) {\n    if (i++ === indice) {\n      retirado = nodo.valor;\n      sacarDoble(nodo);\n      break;\n    }\n  }\n  return {\n    retirado,\n    ida: leerDoble(raiz, \"siguiente\"),\n    vuelta: leerDoble(raiz, \"anterior\"),\n  };\n}\n\nfunction avisoDoble(datos, indice) {\n  return { antes: vistaDoble(datos), despues: bajaDoble(datos, indice) };\n}\n\nfunction historialPila(acciones) {\n  const pila = [];\n  const respuestas = [];\n  for (const [accion, etiqueta] of acciones) {\n    if (accion === \"guardar\") pila.push(etiqueta);\n    else if (accion === \"ver\") respuestas.push(pila[pila.length - 1] ?? null);\n    else respuestas.push(pila.pop() ?? null);\n  }\n  return respuestas;\n}\n\nfunction revisarCierres(texto) {\n  const pares = { \")\": \"(\", \"]\": \"[\", \"}\": \"{\" };\n  const pila = [];\n  for (let i = 0; i < texto.length; i++) {\n    const actual = texto[i];\n    if (\"([{\".includes(actual)) pila.push(actual);\n    else if (\")]}\".includes(actual) && pila.pop() !== pares[actual]) {\n      return { valido: false, error: i };\n    }\n  }\n  return pila.length\n    ? { valido: false, error: texto.length }\n    : { valido: true, error: null };\n}\n\nfunction panelReglas(acciones, reglas) {\n  return {\n    historial: historialPila(acciones),\n    revisiones: reglas.map(revisarCierres),\n  };\n}\n\nfunction indiceCircular(inicio, paso, capacidad) {\n  return (inicio + paso) % capacidad;\n}\n\nfunction estadoCola(capacidad, acciones) {\n  const celdas = Array(capacidad);\n  let cabeza = 0;\n  let cantidad = 0;\n  const respuestas = [];\n  for (const [accion, aviso] of acciones) {\n    if (accion === \"entrar\") {\n      const hayEspacio = cantidad < capacidad;\n      if (hayEspacio) {\n        celdas[indiceCircular(cabeza, cantidad, capacidad)] = aviso;\n        cantidad++;\n      }\n      respuestas.push(hayEspacio);\n    } else if (cantidad === 0) respuestas.push(null);\n    else {\n      respuestas.push(celdas[cabeza]);\n      celdas[cabeza] = undefined;\n      cabeza = indiceCircular(cabeza, 1, capacidad);\n      cantidad--;\n    }\n  }\n  const pendientes = [];\n  for (let i = 0; i < cantidad; i++)\n    pendientes.push(celdas[indiceCircular(cabeza, i, capacidad)]);\n  return { respuestas, pendientes };\n}\n\nfunction turnosCentral(capacidad, acciones) {\n  const { respuestas, pendientes } = estadoCola(capacidad, acciones);\n  return {\n    respuestas,\n    pendientes,\n    siguiente: pendientes[0] ?? null,\n    libres: capacidad - pendientes.length,\n  };\n}\n\nfunction crearDeque(capacidad) {\n  const celdas = Array(capacidad);\n  let inicio = 0;\n  let cantidad = 0;\n  const indice = (paso) => (inicio + paso + capacidad) % capacidad;\n  return {\n    cantidad: () => cantidad,\n    frente: () => (cantidad ? celdas[inicio] : null),\n    fondo: () => (cantidad ? celdas[indice(cantidad - 1)] : null),\n    entrarFrente(valor) {\n      if (cantidad === capacidad) return false;\n      inicio = indice(-1);\n      celdas[inicio] = valor;\n      cantidad++;\n      return true;\n    },\n    entrarFondo(valor) {\n      if (cantidad === capacidad) return false;\n      celdas[indice(cantidad++)] = valor;\n      return true;\n    },\n    salirFrente() {\n      if (!cantidad) return null;\n      const valor = celdas[inicio];\n      celdas[inicio] = undefined;\n      inicio = indice(1);\n      cantidad--;\n      return valor;\n    },\n    salirFondo() {\n      if (!cantidad) return null;\n      const posicion = indice(--cantidad);\n      const valor = celdas[posicion];\n      celdas[posicion] = undefined;\n      return valor;\n    },\n  };\n}\nfunction manejarDeque(capacidad, acciones) {\n  const d = crearDeque(capacidad);\n  return acciones.map(([operacion, valor]) => d[operacion](valor));\n}\n\nfunction maximosVentana(datos, k) {\n  if (k < 1 || k > datos.length) return [];\n  const candidatos = crearDeque(k);\n  const maximos = [];\n  for (let i = 0; i < datos.length; i++) {\n    if (candidatos.cantidad() && candidatos.frente() <= i - k)\n      candidatos.salirFrente();\n    while (candidatos.cantidad() && datos[candidatos.fondo()] <= datos[i])\n      candidatos.salirFondo();\n    candidatos.entrarFondo(i);\n    if (i >= k - 1) maximos.push(datos[candidatos.frente()]);\n  }\n  return maximos;\n}\n\nfunction picosOcupacion(datos, k) {\n  return maximosVentana(datos, k).map((maximo, inicio) => ({ inicio, maximo }));\n}\n\nfunction indiceHash(clave, capacidad) {\n  let hash = 0;\n  for (let i = 0; i < clave.length; i++) {\n    hash = (31 * hash + clave.charCodeAt(i)) % capacidad;\n  }\n  return hash;\n}\n\nfunction indiceEncadenado(capacidad, registros) {\n  const buckets = Array.from({ length: capacidad }, () => []);\n  for (const [clave, valor] of registros) {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    const existente = bucket.find((par) => par[0] === clave);\n    if (existente) existente[1] = valor;\n    else bucket.push([clave, valor]);\n  }\n  return buckets;\n}\n\nfunction consultasEncadenadas(capacidad, registros, claves) {\n  const buckets = indiceEncadenado(capacidad, registros);\n  const respuestas = claves.map((clave) => {\n    const bucket = buckets[indiceHash(clave, capacidad)];\n    return bucket.find((par) => par[0] === clave)?.[1] ?? null;\n  });\n  return { respuestas, ocupacion: buckets.map((bucket) => bucket.length) };\n}\n\nfunction sondear(tabla, clave) {\n  const inicio = indiceHash(clave, tabla.length);\n  let hueco = -1;\n  for (let paso = 0; paso < tabla.length; paso++) {\n    const i = (inicio + paso) % tabla.length;\n    const celda = tabla[i];\n    if (celda === null) return { existe: false, indice: hueco < 0 ? i : hueco };\n    if (celda === false) {\n      if (hueco < 0) hueco = i;\n    } else if (celda[0] === clave) return { existe: true, indice: i };\n  }\n  return { existe: false, indice: hueco };\n}\n\nfunction ejecutarSondeo(acciones) {\n  let tabla = Array(4).fill(null);\n  let activos = 0;\n  let usados = 0;\n  const respuestas = [];\n  for (const [accion, clave, valor] of acciones) {\n    let { existe, indice } = sondear(tabla, clave);\n    if (accion === \"leer\") respuestas.push(existe ? tabla[indice][1] : null);\n    else if (accion === \"borrar\") {\n      if (existe) {\n        tabla[indice] = false;\n        activos--;\n      }\n      respuestas.push(existe);\n    } else if (existe) tabla[indice][1] = valor;\n    else {\n      if (tabla[indice] === null && (usados + 1) * 2 > tabla.length) {\n        const capacidad =\n          (activos + 1) * 2 > tabla.length ? tabla.length * 2 : tabla.length;\n        const anterior = tabla;\n        tabla = Array(capacidad).fill(null);\n        for (const par of anterior) {\n          if (par) tabla[sondear(tabla, par[0]).indice] = par;\n        }\n        usados = activos;\n        indice = sondear(tabla, clave).indice;\n      }\n      if (tabla[indice] === null) usados++;\n      tabla[indice] = [clave, valor];\n      activos++;\n    }\n  }\n  return { respuestas, capacidad: tabla.length, activos, usados };\n}\n\nfunction indiceEstacionesAbierto(acciones) {\n  const estado = ejecutarSondeo(acciones);\n  return { ...estado, marcas: estado.usados - estado.activos };\n}\n\nfunction igualdadNativa() {\n  const objeto = { id: 1 };\n  const copia = { id: 1 };\n  const mapa = new Map([\n    [NaN, \"primero\"],\n    [NaN, \"segundo\"],\n    [-0, \"cero\"],\n    [\"u\", undefined],\n  ]);\n  return {\n    nanRepite: mapa.get(NaN) === \"segundo\",\n    cerosCoinciden: mapa.has(+0),\n    tipos: new Set([1, \"1\"]).size,\n    objetos: new Set([objeto, objeto, copia]).size,\n    reconoceReferencia: new Set([objeto]).has(objeto),\n    reconoceCopia: new Set([objeto]).has(copia),\n    indefinidoPresente: mapa.has(\"u\") && mapa.get(\"u\") === undefined,\n  };\n}\n\nfunction ordenNativo(acciones) {\n  const registros = new Map();\n  const activas = new Set();\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") {\n      registros.set(clave, valor);\n      activas.add(clave);\n    } else {\n      registros.delete(clave);\n      activas.delete(clave);\n    }\n  }\n  return { registros: Array.from(registros), activas: Array.from(activas) };\n}\n\nfunction consultasNativas(acciones, claves) {\n  const { registros, activas } = ordenNativo(acciones);\n  const porClave = new Map(registros);\n  return {\n    activas,\n    respuestas: claves.map((clave) => porClave.get(clave) ?? null),\n  };\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\nfunction estadoCache(capacidad, acciones) {\n  const cache = crearLRU(capacidad);\n  const resultados = [];\n  for (const [accion, clave, valor] of acciones) {\n    if (accion === \"guardar\") cache.guardar(clave, valor);\n    else resultados.push(cache.leer(clave));\n  }\n  return { resultados, orden: cache.orden() };\n}\n\nfunction diagnosticoLRU(capacidad, acciones) {\n  const { resultados, orden } = estadoCache(capacidad, acciones);\n  let aciertos = 0;\n  for (const resultado of resultados) if (resultado.acierto) aciertos++;\n  return { aciertos, fallos: resultados.length - aciertos, orden };\n}\n\nfunction tableroCache(capacidad, acciones) {\n  const estado = diagnosticoLRU(capacidad, acciones);\n  return {\n    ...estado,\n    primeraExpulsion:\n      estado.orden.length === capacidad ? (estado.orden[0] ?? null) : null,\n  };\n}\n\nfunction parejaOrdenada(datosOrdenados, objetivo) {\n  let izquierda = 0;\n  let derecha = datosOrdenados.length - 1;\n  while (izquierda < derecha) {\n    const suma = datosOrdenados[izquierda] + datosOrdenados[derecha];\n    if (suma === objetivo) return [izquierda, derecha];\n    if (suma < objetivo) izquierda++;\n    else derecha--;\n  }\n  return null;\n}\n\nfunction medirArreglo(datos, ancho, consultas) {\n  const ventanas = [];\n  if (ancho >= 1 && ancho <= datos.length) {\n    let suma = 0;\n    for (let i = 0; i < datos.length; i++) {\n      suma += datos[i];\n      if (i >= ancho) suma -= datos[i - ancho];\n      if (i >= ancho - 1) ventanas.push(suma);\n    }\n  }\n  const prefijo = [0];\n  for (const numero of datos)\n    prefijo.push(prefijo[prefijo.length - 1] + numero);\n  return {\n    ventanas,\n    tramos: consultas.map(([inicio, fin]) => prefijo[fin] - prefijo[inicio]),\n  };\n}\n\nfunction aplicarCambios(datos, cambios) {\n  const diferencias = Array(datos.length + 1).fill(0);\n  for (const [inicio, fin, delta] of cambios) {\n    diferencias[inicio] += delta;\n    diferencias[fin] -= delta;\n  }\n  let ajuste = 0;\n  return datos.map((dato, i) => {\n    ajuste += diferencias[i];\n    return dato + ajuste;\n  });\n}\nfunction tableroTramos(datos, cambios, ancho, consultas) {\n  const corregidos = aplicarCambios(datos, cambios);\n  return { corregidos, ...medirArreglo(corregidos, ancho, consultas) };\n}\n",
+      "entrypoint": "tableroTramos",
+      "cases": [
+        {
+          "name": "Corrige ambos extremos",
+          "args": [
+            [
+              2,
+              4,
+              1,
+              3
+            ],
+            [
+              [
+                1,
+                3,
+                2
+              ],
+              [
+                2,
+                4,
+                -1
+              ]
+            ],
+            2,
+            [
+              [
+                1,
+                4
+              ]
+            ]
+          ],
+          "expected": {
+            "corregidos": [
+              2,
+              6,
+              2,
+              2
+            ],
+            "ventanas": [
+              8,
+              8,
+              4
+            ],
+            "tramos": [
+              10
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Cambio vacío",
+          "args": [
+            [
+              1
+            ],
+            [
+              [
+                0,
+                0,
+                9
+              ],
+              [
+                0,
+                1,
+                2
+              ]
+            ],
+            1,
+            [
+              [
+                0,
+                1
+              ]
+            ]
+          ],
+          "expected": {
+            "corregidos": [
+              3
+            ],
+            "ventanas": [
+              3
+            ],
+            "tramos": [
+              3
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar medirArreglo",
+          "args": [
+            [
+              2,
+              -4,
+              3,
+              1
+            ],
+            2,
+            [
+              [
+                0,
+                4
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                3,
+                3
+              ]
+            ]
+          ],
+          "expected": {
+            "ventanas": [
+              -2,
+              -1,
+              4
+            ],
+            "tramos": [
+              2,
+              -1,
+              0
+            ]
+          },
+          "entrypoint": "medirArreglo",
+          "preserveArgs": true
+        },
+        {
+          "name": "Se conserva la entrega anterior",
+          "args": [
+            2,
+            [
+              [
+                "guardar",
+                "A",
+                "uno"
+              ],
+              [
+                "guardar",
+                "B",
+                "dos"
+              ],
+              [
+                "leer",
+                "A"
+              ]
+            ]
+          ],
+          "expected": {
+            "aciertos": 1,
+            "fallos": 0,
+            "orden": [
+              "B",
+              "A"
+            ],
+            "primeraExpulsion": "B"
+          },
+          "entrypoint": "tableroCache",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "La marca de salida se resta en fin, no en fin − 1.",
+      "hints": [
+        "La marca de salida se resta en fin, no en fin − 1.",
+        "Las sumas consultan corregidos, incluso si ancho es inválido."
+      ],
+      "explanation": "Primero cambia los datos y luego calcula las sumas. Una consulta sobre [i, i) vale cero.",
+      "retryFeedback": "Las sumas consultan corregidos, incluso si ancho es inválido.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de tableroTramos.",
+        "reflection": "Identifica el caso de superposición que detectó aplicar cada cambio hasta el final inclusivo.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/ls-arreglos/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglos.arreglo-de-diferencias",
+      "prompt": "Convierte reservas [inicio, fin, plazas] en ocupación por hora usando diferencias. El día parte de cero y fin puede coincidir con horas.",
+      "starter": "",
+      "solution": "function reservasPorHora(horas, reservas) {\n  const cambios = Array(horas + 1).fill(0);\n  for (const [inicio, fin, plazas] of reservas) {\n    cambios[inicio] += plazas;\n    cambios[fin] -= plazas;\n  }\n  let plazas = 0;\n  const resultado = [];\n  for (let i = 0; i < horas; i++) {\n    plazas += cambios[i];\n    resultado.push(plazas);\n  }\n  return resultado;\n}\n",
+      "entrypoint": "reservasPorHora",
+      "cases": [
+        {
+          "name": "Se superponen",
+          "args": [
+            4,
+            [
+              [
+                0,
+                2,
+                1
+              ],
+              [
+                1,
+                4,
+                2
+              ]
+            ]
+          ],
+          "expected": [
+            1,
+            3,
+            2,
+            2
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin reservas",
+          "args": [
+            2,
+            []
+          ],
+          "expected": [
+            0,
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Reserva vacía",
+          "args": [
+            2,
+            [
+              [
+                1,
+                1,
+                8
+              ]
+            ]
+          ],
+          "expected": [
+            0,
+            0
+          ],
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Registra entrada y salida por separado.",
+      "hints": [
+        "Registra entrada y salida por separado.",
+        "Devuelve una posición por hora, sin incluir la celda extra."
+      ],
+      "explanation": "Cada reserva aporta plazas durante el intervalo. El acumulado de marcas es directamente la ocupación.",
+      "retryFeedback": "Devuelve una posición por hora, sin incluir la celda extra.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Aplica la misma idea a datos distintos después de integrar la capacidad."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Predice el resultado antes de ejecutar",
+    "brief": "Corrige [2, 4, 1, 3] con +2 en [1, 3) y −1 en [2, 4).",
+    "rounds": [
+      {
+        "prompt": "En [2, 4, 1, 3], ¿qué marca deja +2 en [1,3) al llegar al límite 3?",
+        "options": [
+          "−2",
+          "+2",
+          "0"
+        ],
+        "answer": 0,
+        "explanation": "Desde 3 el ajuste ya no se aplica."
+      },
+      {
+        "prompt": "Con los datos corregidos [2, 6, 2, 2], ¿cuál es la suma de [1,4)?",
+        "options": [
+          "8",
+          "10",
+          "12"
+        ],
+        "answer": 1,
+        "explanation": "El prefijo final 12 menos el prefijo inicial 2 da 10."
+      },
+      {
+        "prompt": "La primera ventana de ancho 2 suma 8. ¿Qué pasa al moverla una posición?",
+        "options": [
+          "Sale 6 y entra 2; baja a 4",
+          "No se puede reusar una suma",
+          "Sale 2 y entra 2; la suma sigue en 8"
+        ],
+        "answer": 2,
+        "explanation": "Los valores que se quedan no necesitan volver a sumarse."
+      },
+      {
+        "prompt": "Considera ahora [2, 2, 2, 6] como entrada ya ordenada. Para objetivo 4, ¿qué mueves primero?",
+        "options": [
+          "El extremo derecho",
+          "El extremo izquierdo",
+          "Los dos extremos"
+        ],
+        "answer": 0,
+        "explanation": "La suma 8 supera el objetivo, incluso con el mínimo restante."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "MIT 6.006 · Estructuras de datos y arreglos dinámicos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/79a07dc1cb47d76dae2ffedc701e3d2b_MIT6_006S20_lec2.pdf"
+    },
+    {
+      "title": "Cornell CS 2110 · Invariantes",
+      "url": "https://courses.cs.cornell.edu/courses/cs2110/2026fa/lectures/lec04/"
+    },
+    {
+      "title": "ECMAScript · Colecciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html"
+    }
+  ],
+  "coverage": {
+    "algoritmia.ls-arreglos.dos-punteros": {
+      "explanationExcerpt": "Dos punteros son índices que avanzan según una regla que descarta posiciones",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.ls-arreglos.ventana": {
+      "explanationExcerpt": "Una ventana de suma fija se actualiza quitando el valor saliente y agregando el entrante",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.ls-arreglos.suma-de-prefijos": {
+      "explanationExcerpt": "Un arreglo de prefijos guarda en prefijo[j] la suma de los primeros j valores",
+      "assessmentIds": [
+        "pregunta-3"
+      ]
+    },
+    "algoritmia.ls-arreglos.arreglo-de-diferencias": {
+      "explanationExcerpt": "El arreglo de diferencias representa cuándo empieza y cuándo deja de aplicarse una corrección",
+      "assessmentIds": [
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Usa enteros pequeños y sumas representables exactamente. Solo datosOrdenados exige orden ascendente. Los intervalos son [inicio, fin), con 0 ≤ inicio ≤ fin ≤ datos.length. Un ancho no válido devuelve []."
+    ],
+    "workedExample": {
+      "problem": "Corrige [2, 4, 1, 3] con +2 en [1, 3) y −1 en [2, 4).",
+      "reasoning": "Las marcas quedan [0, +2, −1, −2, +1]. Sus acumulados en las posiciones válidas son [0, 2, 1, −1]. Agrega esos ajustes antes de construir los prefijos.",
+      "result": "Datos corregidos [2, 6, 2, 2]. La suma de [1, 4) es 10."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Las cuentas de operaciones y memoria corresponden al modelo descrito en la lección.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Combinar dos punteros, ventanas, prefijos y diferencias según la consulta.",
+    "previous": "algoritmia/ls-lru/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

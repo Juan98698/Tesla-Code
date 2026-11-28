@@ -14,7 +14,7 @@ import { prepareBindingCases } from '../js/domain/javascript-contract.js';
 import { emptyProgress } from '../js/domain/progress-state.js';
 import { recordAttempt, completeIfReady } from '../js/domain/progress.js';
 import { parseBackup } from '../js/domain/progress-backup.js';
-import { javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
+import { JAVASCRIPT_LIMITS, javascriptExerciseErrors } from '../js/domain/javascript-exercise.js';
 const ids = [
   'js-tu-primer-programa',
   'js-valores-y-secuencia',
@@ -243,7 +243,7 @@ test('proof survives journals and backup, stays attached to its tested code and 
   for (const proof of [
     { version: 2 },
     { ...previous[key].assessment, rewrite: { before: 'string', after: [] } },
-    { ...previous[key].assessment, testedCode: 'x'.repeat(20001) },
+    { ...previous[key].assessment, testedCode: 'x'.repeat(JAVASCRIPT_LIMITS.source + 1) },
   ])
     assert.equal(validProjectArtifact(key, { ...previous[key], assessment: proof }), false);
 });

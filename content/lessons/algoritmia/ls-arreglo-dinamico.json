@@ -1,0 +1,629 @@
+{
+  "id": "ls-arreglo-dinamico",
+  "outcome": "Crear el registro indexado de estaciones y medir las copias reales al crecer.",
+  "requiresConcepts": [
+    "algoritmia.an-informe.informe-de-decision",
+    "algoritmia.an-informe.modelo-frente-a-medicion",
+    "algoritmia.an-amortizado.analisis-amortizado",
+    "algoritmia.an-amortizado.duplicacion-de-capacidad",
+    "algoritmia.an-amortizado.metodo-agregado"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>El centro de control recibe estaciones de una en una. Debe conservar el orden y poder consultar por posición mientras crece.</p><p>Las entradas son nombres no vacíos. El búfer arranca con capacidad 1. Las consultas son índices enteros desde 0 y devuelven null fuera de la longitud.</p>\n<h3>Memoria contigua</h3><p>En el modelo, las celdas consecutivas están a una distancia fija. Si la primera empieza en la dirección 100 y cada celda mide 4 unidades, la celda 2 empieza en 100 + 2 × 4 = 108. Calcular la dirección permite acceder por índice con un número constante de pasos.</p><p>Usamos un Array como representación de las celdas. ECMAScript define su comportamiento visible, pero no exige que sus elementos ocupen posiciones físicas consecutivas ni un tamaño fijo. Aquí contamos accesos y copias del modelo que escribimos.</p>\n<h3>Capacidad y longitud</h3><p>La longitud lógica cuenta valores guardados y la capacidad cuenta celdas reservadas. Si hay dos nombres en cuatro celdas, existen los índices 0 y 1 en el catálogo. Las celdas 2 y 3 todavía no representan estaciones.</p>\n<h3>Estrategia de crecimiento</h3><p>Al llenar el búfer, reserva el doble, copia solo los valores ocupados y añade el siguiente al final. Debes guardar el nuevo arreglo como búfer actual. El crecimiento cuesta tantas copias como valores ya guardados.</p><p>Al registrar cinco estaciones desde capacidad 1 se copian 1 + 2 + 4 = 7 nombres. En general la suma de las potencias de dos copiadas queda por debajo de 2n. Con n altas, el coste total es O(n) en este modelo y añadir cuesta O(1) amortizado, aunque un alta particular pueda costar O(n).</p>\n<h3>Copia un búfer</h3><p>Copia Central y Norte. El tercer y cuarto índice quedan disponibles y null representa una celda libre.</p><p>Prueba copiarBuffer([\"Central\",\"Norte\",\"ignorar\"], 2, 4) y explica qué observas.</p><pre data-language=\"javascript\"><code>function copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i &lt; longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}</code></pre><p>Salida esperada</p><pre data-language=\"json\">[\"Central\",\"Norte\",null,null]</pre>\n<h3>Crece solo al agotar espacio</h3><p>Con tres altas, la segunda y la tercera necesitan otro búfer. Conserva la longitud al sustituir el arreglo.</p><p>Prueba altasBuffer([\"Central\",\"Norte\",\"Sur\"]) y explica qué observas.</p><pre data-language=\"javascript\"><code>function copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i &lt; longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}</code></pre><p>Salida esperada</p><pre data-language=\"json\">{\"celdas\":[\"Central\",\"Norte\",\"Sur\",null],\"longitud\":3,\"copias\":3}</pre>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Guarda Central, Norte y Sur. Consulta las posiciones 0, 2 y 3.</p><p>Con Central se ocupa la única celda. Norte obliga a copiar una. Antes de Sur se copian las dos existentes a un búfer de cuatro. Compara el índice con la longitud de tres, no con cuatro.</p><p>Capacidad 4, longitud 3, copias 3. Las consultas devuelven Central, Sur y null.</p></section>\n<h3>Preparar la entrega</h3><p>Conserva el informe de Análisis. Añade el catálogo indexado como una operación nueva y comprueba que consultar la primera celda libre devuelve ausencia.</p>",
+  "examples": [
+    {
+      "id": "ls-arreglo-dinamico-e1",
+      "language": "javascript",
+      "code": "function copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Dos ocupadas",
+        "args": [
+          [
+            "Central",
+            "Norte",
+            "ignorar"
+          ],
+          2,
+          4
+        ],
+        "expected": [
+          "Central",
+          "Norte",
+          null,
+          null
+        ],
+        "entrypoint": "copiarBuffer",
+        "preserveArgs": true
+      }
+    },
+    {
+      "id": "ls-arreglo-dinamico-e2",
+      "language": "javascript",
+      "code": "function copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Cruza capacidad dos",
+        "args": [
+          [
+            "Central",
+            "Norte",
+            "Sur"
+          ]
+        ],
+        "expected": {
+          "celdas": [
+            "Central",
+            "Norte",
+            "Sur",
+            null
+          ],
+          "longitud": 3,
+          "copias": 3
+        },
+        "entrypoint": "altasBuffer",
+        "preserveArgs": true
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "concept": "algoritmia.ls-arreglo-dinamico.memoria-contigua",
+      "prompt": "Con base 200, ancho 4 e índice 3, ¿qué dirección da el modelo?",
+      "options": [
+        "212",
+        "203",
+        "216"
+      ],
+      "answer": 0,
+      "explanation": "Multiplica el índice por el ancho y suma la base.",
+      "id": "pregunta-1",
+      "type": "choice"
+    },
+    {
+      "concept": "algoritmia.ls-arreglo-dinamico.capacidad-y-longitud",
+      "prompt": "¿Cuándo puede consultarse el índice 0?",
+      "options": [
+        "Cuando la longitud es al menos 1",
+        "Cuando la capacidad es al menos 1",
+        "Siempre"
+      ],
+      "answer": 0,
+      "explanation": "La primera alta hace válida la posición 0.",
+      "id": "pregunta-2",
+      "type": "choice"
+    },
+    {
+      "concept": "algoritmia.ls-arreglo-dinamico.estrategia-de-crecimiento",
+      "prompt": "¿Qué cuesta una inserción justo al crecer?",
+      "options": [
+        "Copiar los n nombres existentes",
+        "Siempre una sola escritura",
+        "Mover todos los nombres de posición"
+      ],
+      "answer": 0,
+      "explanation": "Cada valor se copia a la misma posición en otro arreglo.",
+      "id": "pregunta-3",
+      "type": "choice"
+    },
+    {
+      "concept": "algoritmia.ls-arreglo-dinamico.memoria-contigua",
+      "prompt": "¿Qué puedes deducir del modelo sobre Array en un motor real?",
+      "options": [
+        "Su distribución física depende del motor",
+        "Siempre usa celdas físicas de 4 bytes",
+        "Siempre enlaza nodos"
+      ],
+      "answer": 0,
+      "explanation": "El estándar describe el comportamiento visible de Array.",
+      "id": "pregunta-4",
+      "type": "choice"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.ls-arreglo-dinamico.memoria-contigua",
+      "prompt": "Predice el comportamiento en la misión de esta lección",
+      "brief": "Guarda Central, Norte y Sur. Consulta las posiciones 0, 2 y 3.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Las entradas son nombres no vacíos. El búfer arranca con capacidad 1. Las consultas son índices enteros desde 0 y devuelven null fuera de la longitud."
+        },
+        {
+          "label": "Datos y elección",
+          "text": "Antes de registrar la tercera estación hay dos celdas ocupadas, capacidad 2 y una copia acumulada."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "En el modelo de base 100 y ancho 4, ¿dónde empieza la celda para Sur en índice 2?",
+          "options": [
+            "108",
+            "102",
+            "112"
+          ],
+          "answer": 0,
+          "explanation": "Cada celda suma cuatro unidades de dirección.",
+          "id": "decision-1",
+          "errorHint": "Cada celda suma cuatro unidades de dirección."
+        },
+        {
+          "prompt": "Después de registrar Central y Norte, ¿qué posición nueva necesita Sur?",
+          "options": [
+            "La 3, porque es la tercera",
+            "La 2, todavía fuera de la capacidad actual",
+            "La 1, que está libre"
+          ],
+          "answer": 1,
+          "explanation": "Las dos celdas existentes están ocupadas en 0 y 1.",
+          "id": "decision-2",
+          "errorHint": "Las dos celdas existentes están ocupadas en 0 y 1."
+        }
+      ],
+      "hint": "Enumera primero los índices ocupados.",
+      "explanation": "Con Central se ocupa la única celda. Norte obliga a copiar una. Antes de Sur se copian las dos existentes a un búfer de cuatro. Compara el índice con la longitud de tres, no con cuatro.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y datos de la misión.",
+        "output": "Una predicción con sus razones.",
+        "reflection": "Dibuja qué cambia al insertar la tercera estación.",
+        "requires": [],
+        "from": "algoritmia/an-informe/integrar-decision"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglo-dinamico.memoria-contigua",
+      "prompt": "Reserva capacidad celdas con null y copia los primeros longitud valores de origen con sus mismos índices.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  // Implementa el contrato de este paso.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n",
+      "entrypoint": "copiarBuffer",
+      "cases": [
+        {
+          "name": "Dos ocupadas",
+          "args": [
+            [
+              "Central",
+              "Norte",
+              "ignorar"
+            ],
+            2,
+            4
+          ],
+          "expected": [
+            "Central",
+            "Norte",
+            null,
+            null
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Copia vacía",
+          "args": [
+            [],
+            0,
+            1
+          ],
+          "expected": [
+            null
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Se conserva la distancia de Análisis",
+          "args": [
+            [
+              2,
+              3
+            ],
+            0,
+            2
+          ],
+          "expected": 5,
+          "entrypoint": "distanciaTramo",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Comienza con un arreglo de celdas libres.",
+      "hints": [
+        "Comienza con un arreglo de celdas libres.",
+        "Copia desde cero hasta longitud sin incluirla."
+      ],
+      "explanation": "Copia Central y Norte. El tercer y cuarto índice quedan disponibles y null representa una celda libre.",
+      "retryFeedback": "Copia desde cero hasta longitud sin incluirla.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera el código aprobado de la lección anterior.",
+        "output": "Una versión comprobada de copiarBuffer.",
+        "reflection": "Explica cómo conservas el orden al copiar.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/an-informe/integrar-decision"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglo-dinamico.capacidad-y-longitud",
+      "prompt": "Registra los nombres de uno en uno, usa copiarBuffer cuando haga falta y devuelve {celdas, longitud, copias}.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  // Implementa el contrato de este paso.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n",
+      "entrypoint": "altasBuffer",
+      "cases": [
+        {
+          "name": "Cruza capacidad dos",
+          "args": [
+            [
+              "Central",
+              "Norte",
+              "Sur"
+            ]
+          ],
+          "expected": {
+            "celdas": [
+              "Central",
+              "Norte",
+              "Sur",
+              null
+            ],
+            "longitud": 3,
+            "copias": 3
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin altas",
+          "args": [
+            []
+          ],
+          "expected": {
+            "celdas": [
+              null
+            ],
+            "longitud": 0,
+            "copias": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Llena sin crecer antes de tiempo",
+          "args": [
+            [
+              "A",
+              "A",
+              "B",
+              "C"
+            ]
+          ],
+          "expected": {
+            "celdas": [
+              "A",
+              "A",
+              "B",
+              "C"
+            ],
+            "longitud": 4,
+            "copias": 3
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar copiarBuffer",
+          "args": [
+            [
+              "Central",
+              "Norte",
+              "ignorar"
+            ],
+            2,
+            4
+          ],
+          "expected": [
+            "Central",
+            "Norte",
+            null,
+            null
+          ],
+          "entrypoint": "copiarBuffer",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Antes de cada alta comprueba si longitud coincide con capacidad.",
+      "hints": [
+        "Antes de cada alta comprueba si longitud coincide con capacidad.",
+        "Suma la longitud previa solo en el paso que copia."
+      ],
+      "explanation": "Con tres altas, la segunda y la tercera necesitan otro búfer. Conserva la longitud al sustituir el arreglo.",
+      "retryFeedback": "Suma la longitud previa solo en el paso que copia.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de altasBuffer.",
+        "reflection": "Comprueba la diferencia entre guardar 4 y 5 nombres.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/ls-arreglo-dinamico/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglo-dinamico.estrategia-de-crecimiento",
+      "prompt": "Integra altasBuffer. Devuelve {capacidad, longitud, copias, encontrados}. En encontrados escribe el nombre o null para cada índice solicitado. Para reproducir la incidencia, guarda una copia de tu entrega y usa Restaurar código inicial para probar el borrador preparado. Recupera tu versión para corregirla y consolidar el contrato.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i > 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n\nfunction copiarBuffer(origen, longitud, capacidad) {\n  const celdas = Array(capacidad).fill(null);\n  for (let i = 0; i < longitud; i++) celdas[i] = origen[i];\n  return celdas;\n}\n\nfunction altasBuffer(nombres) {\n  let celdas = [null];\n  let longitud = 0;\n  let copias = 0;\n  for (const nombre of nombres) {\n    if (longitud === celdas.length) {\n      celdas = copiarBuffer(celdas, longitud, celdas.length * 2);\n      copias += longitud;\n    }\n    celdas[longitud] = nombre;\n    longitud++;\n  }\n  return { celdas, longitud, copias };\n}\n\nfunction catalogoBuffer(nombres, consultas) {\n  const { celdas, longitud, copias } = altasBuffer(nombres);\n  const encontrados = consultas.map((i) =>\n    i >= 0 && i < longitud ? celdas[i] : null,\n  );\n  return { capacidad: celdas.length, longitud, copias, encontrados };\n}\n",
+      "entrypoint": "catalogoBuffer",
+      "cases": [
+        {
+          "name": "Primera celda libre",
+          "args": [
+            [
+              "A",
+              "B",
+              "C"
+            ],
+            [
+              0,
+              2,
+              3,
+              -1
+            ]
+          ],
+          "expected": {
+            "capacidad": 4,
+            "longitud": 3,
+            "copias": 3,
+            "encontrados": [
+              "A",
+              "C",
+              null,
+              null
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Catálogo vacío",
+          "args": [
+            [],
+            [
+              0
+            ]
+          ],
+          "expected": {
+            "capacidad": 1,
+            "longitud": 0,
+            "copias": 0,
+            "encontrados": [
+              null
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar altasBuffer",
+          "args": [
+            [
+              "Central",
+              "Norte",
+              "Sur"
+            ]
+          ],
+          "expected": {
+            "celdas": [
+              "Central",
+              "Norte",
+              "Sur",
+              null
+            ],
+            "longitud": 3,
+            "copias": 3
+          },
+          "entrypoint": "altasBuffer",
+          "preserveArgs": true
+        },
+        {
+          "name": "Se conserva la distancia de Análisis",
+          "args": [
+            [
+              2,
+              3
+            ],
+            0,
+            2
+          ],
+          "expected": 5,
+          "entrypoint": "distanciaTramo",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Usa longitud para delimitar el catálogo.",
+      "hints": [
+        "Usa longitud para delimitar el catálogo.",
+        "El índice 0 de un catálogo vacío no es una estación."
+      ],
+      "explanation": "Solo un índice entre 0 y longitud − 1 identifica un nombre.",
+      "retryFeedback": "El índice 0 de un catálogo vacío no es una estación.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de catalogoBuffer.",
+        "reflection": "Anota qué prueba detectó que una celda libre se trataba como estación.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/ls-arreglo-dinamico/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.ls-arreglo-dinamico.estrategia-de-crecimiento",
+      "prompt": "Una pantalla almacena altas números de avisos consecutivos. A partir de capacidadInicial positiva, devuelve el número de avisos copiados en cada ampliación al duplicar capacidad. No necesitas guardar textos.",
+      "starter": "",
+      "solution": "function mudanzas(altas, capacidadInicial) {\n  const movimientos = [];\n  let capacidad = capacidadInicial;\n  for (let i = 0; i < altas; i++) {\n    if (i !== capacidad) continue;\n    movimientos.push(i);\n    capacidad *= 2;\n  }\n  return movimientos;\n}\n",
+      "entrypoint": "mudanzas",
+      "cases": [
+        {
+          "name": "Parte desde tres",
+          "args": [
+            13,
+            3
+          ],
+          "expected": [
+            3,
+            6,
+            12
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Capacidad exacta",
+          "args": [
+            4,
+            4
+          ],
+          "expected": [],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin avisos",
+          "args": [
+            0,
+            2
+          ],
+          "expected": [],
+          "preserveArgs": true
+        }
+      ],
+      "hint": "El índice de la nueva alta coincide con cuántas ya se guardaron.",
+      "hints": [
+        "El índice de la nueva alta coincide con cuántas ya se guardaron.",
+        "Si solo llenaste la capacidad, la próxima alta pagaría la copia."
+      ],
+      "explanation": "La ampliación ocurre justo antes de escribir un aviso en un búfer lleno.",
+      "retryFeedback": "Si solo llenaste la capacidad, la próxima alta pagaría la copia.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Aplica la misma idea a datos distintos después de integrar la capacidad."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Sigue las celdas del búfer",
+    "brief": "Guarda Central, Norte y Sur. Consulta las posiciones 0, 2 y 3.",
+    "rounds": [
+      {
+        "prompt": "En el modelo de base 100 y ancho 4, ¿dónde empieza la celda para Sur en índice 2?",
+        "options": [
+          "108",
+          "102",
+          "112"
+        ],
+        "answer": 0,
+        "explanation": "Cada celda suma cuatro unidades de dirección."
+      },
+      {
+        "prompt": "Después de registrar Central y Norte, ¿qué posición nueva necesita Sur?",
+        "options": [
+          "La 3, porque es la tercera",
+          "La 2, todavía fuera de la capacidad actual",
+          "La 1, que está libre"
+        ],
+        "answer": 1,
+        "explanation": "Las dos celdas existentes están ocupadas en 0 y 1."
+      },
+      {
+        "prompt": "Tras guardar Sur, ¿cuáles son capacidad, longitud y copias acumuladas?",
+        "options": [
+          "3, 3 y 2",
+          "4, 4 y 7",
+          "4, 3 y 3"
+        ],
+        "answer": 2,
+        "explanation": "Hubo dos mudanzas. Copiaron una y dos estaciones."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "MIT 6.006 · Estructuras de datos y arreglos dinámicos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/79a07dc1cb47d76dae2ffedc701e3d2b_MIT6_006S20_lec2.pdf"
+    },
+    {
+      "title": "ECMAScript · Colecciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html"
+    }
+  ],
+  "coverage": {
+    "algoritmia.ls-arreglo-dinamico.memoria-contigua": {
+      "explanationExcerpt": "las celdas consecutivas están a una distancia fija",
+      "assessmentIds": [
+        "pregunta-1",
+        "pregunta-4"
+      ]
+    },
+    "algoritmia.ls-arreglo-dinamico.capacidad-y-longitud": {
+      "explanationExcerpt": "La longitud lógica cuenta valores guardados",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.ls-arreglo-dinamico.estrategia-de-crecimiento": {
+      "explanationExcerpt": "reserva el doble, copia solo los valores ocupados",
+      "assessmentIds": [
+        "pregunta-3"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Las entradas son nombres no vacíos. El búfer arranca con capacidad 1. Las consultas son índices enteros desde 0 y devuelven null fuera de la longitud."
+    ],
+    "workedExample": {
+      "problem": "Guarda Central, Norte y Sur. Consulta las posiciones 0, 2 y 3.",
+      "reasoning": "Con Central se ocupa la única celda. Norte obliga a copiar una. Antes de Sur se copian las dos existentes a un búfer de cuatro. Compara el índice con la longitud de tres, no con cuatro.",
+      "result": "Capacidad 4, longitud 3, copias 3. Las consultas devuelven Central, Sur y null."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Las cuentas de operaciones y memoria corresponden al modelo descrito en la lección.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Crear el registro indexado de estaciones y medir las copias reales al crecer.",
+    "previous": "algoritmia/an-informe/integrar-decision",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

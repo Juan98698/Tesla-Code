@@ -1,6 +1,6 @@
 # Algoritmia en JavaScript: ruta secuencial con proyecto acumulativo
 
-La edición JavaScript publica las primeras 14 lecciones de un mapa de 87. Taller y Análisis están disponibles en secuencia. Los siete niveles siguientes, con 73 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
+La edición JavaScript publica las primeras 28 lecciones de un mapa de 87. Taller, Análisis y Estructuras lineales y hash están disponibles en secuencia. Los seis niveles siguientes, con 59 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
 
 ## 1. Decisión y alcance
 
@@ -8,7 +8,7 @@ La edición JavaScript publica las primeras 14 lecciones de un mapa de 87. Talle
 - **Entrada libre:** se recomienda Fundamentos con JavaScript. Las lecciones introducen o repasan la sintaxis que utilizan antes de pedir su aplicación. Algoritmia amplía contratos, pruebas, demostraciones y costes a medida que construye Tesla Metro.
 - **Secuencial:** 87 lecciones en 9 niveles. Cada una depende de la anterior y, cuando hace falta, de otras lecciones concretas (columna «Además requiere»).
 - **Proyecto acumulativo:** Tesla Metro, el motor de rutas de una ciudad que crece lección a lección.
-- **Interacción:** las cinco lecciones nuevas de Análisis incluyen una traza interactiva con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
+- **Interacción.** Las cinco últimas lecciones de Análisis y las 14 de Estructuras lineales y hash incluyen una traza interactiva con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
 
 ## 2. Principios para no dejar vacíos
 
@@ -47,6 +47,29 @@ Los hitos específicos de rendimiento y nuevos visualizadores pertenecen al plan
 | Elegir con evidencia        | Sumas acumuladas, equivalencia, coste de preparación, memoria y reloj. El experimento alterna orden y mide ambas estrategias. | `implementar-directa` y `reescribir-indice` conservan el contrato de cada consulta.      | `integrar-decision` aplica presupuesto y empate. `aplicar-estimacion` decide antes de ejecutar un lote de lecturas.                                       |
 
 Mitades y recurrencias conservan su práctica original. La explicación delimita el caso simplificado del teorema maestro, completa el coste cuando dominan las hojas y muestra por qué Fibonacci queda fuera de ese modelo.
+
+### Correspondencia de Estructuras lineales y hash
+
+Cada lección incluye dos ejemplos ejecutables y sigue el ciclo de cuatro pasos. Las prácticas `implementar-estructura` y `reescribir-operacion` construyen y comprueban la capacidad. `integrar-tesla` parte de la entrega anterior e introduce un fallo reproducible. `aplicar-otro-caso` empieza con el editor vacío.
+
+| Lección                 | Conceptos y práctica guiada                                                       | Entrega y aplicación independiente                                           |
+| ----------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Arreglo dinámico        | Modelar celdas, separar longitud y capacidad, contar copias al duplicar           | Consultar índices ocupados y predecir mudanzas de un panel de avisos         |
+| Lista simple            | Enlazar nodos, conservar identidad y reconectar al borrar                         | Editar un recorrido y seguir un camino de evacuación hasta su destino        |
+| Lista doble             | Mantener enlaces recíprocos y centinela, distinguir búsqueda de borrado           | Auditar ambos sentidos y desconectar un vagón sin perder sus vecinos         |
+| Pila                    | Operar LIFO, detectar desbalances y conservar el índice del fallo                 | Revisar reglas y limitar la profundidad en un editor                         |
+| Cola                    | Operar FIFO, distinguir vacío de lleno y reutilizar celdas                        | Presentar turnos pendientes y localizar rechazos por aforo                   |
+| Deque                   | Operar ambos extremos, retirar candidatos vencidos y dominados                    | Reportar picos de ocupación y calcular mínimos de temperatura                |
+| Hash encadenado         | Calcular el índice, conservar colisiones y actualizar por igualdad                | Consultar pares por bucket y distinguir duplicados de nuevas colisiones      |
+| Hash abierto            | Sondear con marcas, medir carga y reconstruir la tabla                            | Auditar bajas y crecimiento, y compactar el inventario de armarios           |
+| Map y Set               | Comparar SameValueZero, pertenencia, recencia de inserción y coste promedio       | Servir consultas nativas y contar visitantes en orden de primera inscripción |
+| LRU                     | Unir el índice Map y la lista doble, promover usos y expulsar por recencia        | Diagnosticar aciertos y fallos y simular recálculos en una biblioteca        |
+| Técnicas con arreglos   | Descartar extremos, actualizar sumas por ventana y aplicar prefijos y diferencias | Consultar tramos corregidos y calcular ocupación por reservas                |
+| Rabin–Karp              | Probar inicios, actualizar la huella y confirmar colisiones                       | Reportar coincidencias y localizar avisos sin atravesar líneas               |
+| KMP                     | Obtener bordes propios, construir pi y reusar coincidencias parciales             | Contrastar ambos buscadores y contar motivos en varios códigos               |
+| Checkpoint del catálogo | Preparar claves NFC, agrupar homónimos y conectar búsqueda, caché e historial     | Entregar el catálogo y transferir el patrón a un registro de biblioteca      |
+
+El modelo de almacenamiento de los ejercicios distingue sus operaciones de las garantías de JavaScript. Las tablas hash didácticas hacen visibles las colisiones y las reconstrucciones. Map y Set usan las garantías de ECMAScript sobre igualdad, orden y coste promedio. El catálogo no cambia durante las consultas. Su contrato conserva acentos y orden de estaciones, permite coincidencias solapadas en los buscadores y distingue deshacer de expulsar en caché. [ECMAScript, colecciones indexadas](https://tc39.es/ecma262/multipage/indexed-collections.html), [Map y Set](https://tc39.es/ecma262/multipage/keyed-collections.html), [cadenas y normalización](https://tc39.es/ecma262/multipage/text-processing.html).
 
 ## 4. Proyecto acumulativo: Tesla Metro
 
@@ -265,4 +288,4 @@ El temario posterior contempla métodos de conjuntos, iteradores, arreglos tipad
    - Tanda 7: JavaScript real, Dominio y entrega (13).
 7. **Riesgo principal:** que los visualizadores se conviertan en el cuello de botella. Se mitiga con un motor único de pasos (estado, paso siguiente, retroceso) reutilizado por todos.
 
-El siguiente bloque previsto es Estructuras lineales y hash. La revisión docente independiente y el piloto con estudiantes quedan pendientes.
+El siguiente bloque previsto es Buscar y ordenar. La revisión docente independiente y el piloto con estudiantes quedan pendientes.

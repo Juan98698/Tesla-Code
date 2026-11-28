@@ -22,8 +22,22 @@ const PUBLISHED = [
   'an-espacio',
   'an-invariantes',
   'an-informe',
+  'ls-arreglo-dinamico',
+  'ls-lista',
+  'ls-doble',
+  'ls-pila',
+  'ls-cola',
+  'ls-deque',
+  'ls-hash1',
+  'ls-hash2',
+  'ls-nativas',
+  'ls-lru',
+  'ls-arreglos',
+  'ls-rabin',
+  'ls-kmp',
+  'tm-cp1',
 ];
-const analysis = PUBLISHED.slice(9);
+const withTransfer = PUBLISHED.slice(9);
 const loadLesson = (id) => read(`content/lessons/algoritmia/${id}.json`);
 
 test('Algoritmia publica la edición de JavaScript y conserva la anterior como archivo', () => {
@@ -67,7 +81,7 @@ test('el tronco principal nunca depende de una práctica opcional y cada lecció
   }
 });
 
-test('cada concepto tiene su registro y Taller y Análisis están publicados en orden', () => {
+test('cada concepto tiene su registro y los bloques publicados siguen el orden del mapa', () => {
   const registry = new Map(read('content/concepts.json').concepts.map((c) => [c.id, c]));
   for (const lesson of route.lessons) {
     assert.equal(lesson.teaches.length, lesson.concepts.length, lesson.id);
@@ -89,7 +103,7 @@ test('las entregas se encadenan y cada ejemplo, solución e incidencia se contra
     assert.equal(lesson.learningProject.id, 'tesla-metro', id);
     assert.equal(lesson.learningProject.previous, previous, id);
     previous = `algoritmia/${id}/${lesson.activities[3].id}`;
-    const expanded = analysis.includes(id);
+    const expanded = withTransfer.includes(id);
     assert.equal(lesson.activities.length, expanded ? 5 : 4, id);
     if (expanded) {
       assert.ok(lesson.traceGame.rounds.length >= 2, id);
@@ -224,4 +238,64 @@ test('el informe conserva la versión directa si el índice añade un resultado 
   assert.equal(report.coinciden, false);
   assert.equal(report.estrategia, 'directa');
   assert.deepEqual(report.resultados, [10, 10, 10]);
+});
+
+test('las ventanas de deque coinciden con máximos directos para anchos, empates y salidas', () => {
+  const maximos = solutionFor('ls-deque', 'reescribir-operacion', 'maximosVentana');
+  const series = [[], [7], [1, 2, 3, 4], [4, 3, 2, 1], [-2, -3, -2, -5, -2]];
+  for (const datos of series) {
+    for (let k = 0; k <= datos.length + 1; k++) {
+      const expected =
+        k > 0 && k <= datos.length
+          ? Array.from({ length: datos.length - k + 1 }, (_, i) =>
+              Math.max(...datos.slice(i, i + k)),
+            )
+          : [];
+      assert.deepEqual(maximos(datos, k), expected);
+    }
+  }
+});
+
+test('el sondeo conserva la misma pertenencia que Map durante altas, bajas y rehash', () => {
+  const sondeo = solutionFor('ls-hash2', 'integrar-tesla', 'indiceEstacionesAbierto');
+  const claves = Array.from({ length: 48 }, (_, i) => `A${i * 32}`);
+  const acciones = claves.map((clave, i) => ['guardar', clave, `estación-${i}`]);
+  for (const [i, clave] of claves.entries()) {
+    if (i % 2 === 0) acciones.push(['borrar', clave], ['borrar', clave]);
+    const siguiente = claves[(i + 1) % claves.length];
+    acciones.push(['leer', clave], ['leer', siguiente], ['guardar', siguiente, 'nuevo']);
+  }
+  acciones.push(...claves.map((clave) => ['leer', clave]));
+  const mapa = new Map();
+  const respuestas = [];
+  for (const [accion, clave, valor] of acciones) {
+    if (accion === 'guardar') mapa.set(clave, valor);
+    else if (accion === 'borrar') respuestas.push(mapa.delete(clave));
+    else respuestas.push(mapa.get(clave) ?? null);
+  }
+  const final = sondeo(acciones);
+  assert.deepEqual(final.respuestas, respuestas);
+  assert.equal(final.activos, mapa.size);
+  assert.equal(final.marcas + final.activos, final.usados);
+  assert.ok(final.usados <= final.capacidad / 2);
+});
+
+test('Rabin–Karp y KMP coinciden con búsqueda directa en cadenas exhaustivas pequeñas', () => {
+  const rabin = solutionFor('ls-rabin', 'reescribir-operacion', 'buscarRabin');
+  const kmp = solutionFor('ls-kmp', 'reescribir-operacion', 'buscarKMP');
+  const cadenas = [''];
+  for (let length = 1; length <= 6; length++) {
+    for (let n = 0; n < 2 ** length; n++) {
+      cadenas.push(n.toString(2).padStart(length, '0').replaceAll('0', 'a').replaceAll('1', 'b'));
+    }
+  }
+  for (const texto of cadenas) {
+    for (const patron of cadenas.filter((item) => item.length <= 4)) {
+      const expected = Array.from({ length: texto.length + 1 }, (_, i) => i).filter(
+        (i) => texto.slice(i, i + patron.length) === patron,
+      );
+      assert.deepEqual(kmp(texto, patron), expected, JSON.stringify({ texto, patron }));
+      assert.deepEqual(rabin(texto, patron, 2), expected, JSON.stringify({ texto, patron }));
+    }
+  }
 });

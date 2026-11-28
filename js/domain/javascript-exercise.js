@@ -1,4 +1,4 @@
-export const JAVASCRIPT_LIMITS = Object.freeze({ source: 20000, cases: 20, output: 6000 });
+export const JAVASCRIPT_LIMITS = Object.freeze({ source: 32000, cases: 20, output: 6000 });
 
 const jsonValue = (value, depth = 0) =>
   depth <= 20 &&
