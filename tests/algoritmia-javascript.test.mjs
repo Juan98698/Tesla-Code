@@ -36,6 +36,17 @@ const PUBLISHED = [
   'ls-rabin',
   'ls-kmp',
   'tm-cp1',
+  'bo-binaria',
+  'bo-respuesta',
+  'bo-cuadraticos',
+  'bo-merge',
+  'bo-quick',
+  'bo-heap',
+  'bo-heapsort',
+  'bo-lineales',
+  'bo-seleccion',
+  'bo-patrones',
+  'tm-cp2',
 ];
 const withTransfer = PUBLISHED.slice(9);
 const loadLesson = (id) => read(`content/lessons/algoritmia/${id}.json`);
@@ -297,5 +308,102 @@ test('Rabin–Karp y KMP coinciden con búsqueda directa en cadenas exhaustivas 
       assert.deepEqual(kmp(texto, patron), expected, JSON.stringify({ texto, patron }));
       assert.deepEqual(rabin(texto, patron, 2), expected, JSON.stringify({ texto, patron }));
     }
+  }
+});
+
+test('los límites binarios coinciden con un recorrido directo y conservan índices de más de 31 bits', () => {
+  const limite = solutionFor('bo-binaria', 'implementar-estructura', 'limiteHorario');
+  const datos = [0, 0, 2, 2, 2, 5, 7];
+  for (let hora = -1; hora <= 8; hora++) {
+    assert.equal(limite(datos, hora), datos.filter((minuto) => minuto < hora).length);
+    assert.equal(limite(datos, hora, true), datos.filter((minuto) => minuto <= hora).length);
+  }
+  const length = 2 ** 31 + 17;
+  let lecturas = 0;
+  const agendaVirtual = new Proxy(
+    { length },
+    {
+      get: (target, key) => {
+        if (key === 'length') return target.length;
+        lecturas++;
+        assert.ok(Number(key) >= 0 && Number(key) < length);
+        return Number(key);
+      },
+    },
+  );
+  assert.equal(limite(agendaVirtual, length - 3), length - 3);
+  assert.ok(lecturas <= 32);
+});
+
+test('merge, conteo y radix conservan todos los códigos empatados; heapsort y quicksort conservan las claves', () => {
+  const mezclar = solutionFor('bo-merge', 'reescribir-operacion', 'ordenarMezcla');
+  const contar = solutionFor('bo-lineales', 'implementar-estructura', 'contarMinutos');
+  const radix = solutionFor('bo-lineales', 'reescribir-operacion', 'ordenarRadix');
+  const heap = solutionFor('bo-heapsort', 'implementar-estructura', 'ordenarMonticulo');
+  const quick = solutionFor('bo-quick', 'reescribir-operacion', 'ordenarRapido');
+  const series = [[], [0], [7, 7, 7], [4, 0, 4, 1], [101, 2, 11, 12, 0, 101, 2]];
+  for (const claves of series) {
+    const registros = claves.map((clave, i) => [clave, `T${i}`]);
+    const antes = structuredClone(registros);
+    const esperado = registros.toSorted((a, b) => a[0] - b[0]);
+    assert.deepEqual(mezclar(registros), esperado);
+    assert.deepEqual(contar(registros, 101), esperado);
+    assert.deepEqual(radix(registros), esperado);
+    const extraido = heap(registros);
+    assert.deepEqual(
+      extraido.map(([clave]) => clave),
+      esperado.map(([clave]) => clave),
+    );
+    assert.deepEqual(
+      extraido.toSorted((a, b) => Number(a[1].slice(1)) - Number(b[1].slice(1))),
+      antes,
+    );
+    for (const fraccion of [0, 0.42, 0.99]) {
+      assert.deepEqual(
+        quick(claves, fraccion),
+        esperado.map(([clave]) => clave),
+      );
+    }
+    assert.deepEqual(registros, antes);
+  }
+});
+
+test('Quickselect y top-k coinciden con el orden completo para todos los rangos pequeños', () => {
+  const seleccionar = solutionFor('bo-seleccion', 'implementar-estructura', 'seleccionarRango');
+  const top = solutionFor('bo-seleccion', 'reescribir-operacion', 'mayoresDemoras');
+  for (const datos of [[], [5], [3, 9, 0, 3, 6, -1, 3], [0, 0, 0, 0], [9, 8, 7, 6]]) {
+    const esperado = datos.toSorted((a, b) => a - b);
+    for (let k = 0; k <= datos.length + 1; k++) {
+      assert.equal(seleccionar(datos, k, 0), esperado[k] ?? null);
+      assert.equal(seleccionar(datos, k, 0.99), esperado[k] ?? null);
+      assert.deepEqual(top(datos, k), esperado.toReversed().slice(0, k));
+    }
+  }
+});
+
+test('la simulación por montículo respeta el reloj y los empates de una agenda lineal', () => {
+  const simular = solutionFor('tm-cp2', 'reescribir-operacion', 'simularLlegadas');
+  const viajes = [
+    ['B', 'N', 4, [1, 6, 2]],
+    ['A', 'N', 0, [4, 1, 5]],
+    ['C', 'S', 4, []],
+    ['D', 'S', 2, [2, 1, 2]],
+  ];
+  for (const hasta of [-1, 0, 2, 4, 5, 6, 7, 15]) {
+    const pendientes = viajes.map((viaje, i) => ({ minuto: viaje[2], i, parada: 0 }));
+    const esperado = [];
+    while (pendientes.length) {
+      let anterior = 0;
+      for (let i = 1; i < pendientes.length; i++) {
+        if (pendientes[i].minuto < pendientes[anterior].minuto) anterior = i;
+      }
+      const [{ minuto, i, parada }] = pendientes.splice(anterior, 1);
+      if (minuto > hasta) break;
+      esperado.push([minuto, viajes[i][0], parada]);
+      const duracion = viajes[i][3][parada];
+      if (duracion !== undefined)
+        pendientes.push({ minuto: minuto + duracion, i, parada: parada + 1 });
+    }
+    assert.deepEqual(simular(viajes, hasta), esperado);
   }
 });

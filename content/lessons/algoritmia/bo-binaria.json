@@ -1,0 +1,816 @@
+{
+  "id": "bo-binaria",
+  "outcome": "Incorporar al catálogo consultas sobre un horario ya ordenado y distinguir ausencia de empate.",
+  "requiresConcepts": [
+    "algoritmia.tm-cp1.integracion-de-estructuras",
+    "algoritmia.tm-cp1.indice-por-nombre",
+    "algoritmia.tm-cp1.historial",
+    "algoritmia.an-invariantes.invariante-de-ciclo",
+    "algoritmia.an-invariantes.terminacion",
+    "algoritmia.an-invariantes.induccion"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Consulta la primera salida a una hora dada y encuentra todas las salidas que comparten el mismo minuto.</p><p>Los horarios son arreglos densos de minutos enteros en orden ascendente y pueden tener repetidos. Los índices empiezan en cero. Las consultas trabajan con esos datos preparados sin ordenarlos ni modificarlos.</p>\n<h3>Invariante de intervalo</h3><p>Un intervalo semiabierto incluye inicio y excluye fin. Antes de cada vuelta, todos los minutos anteriores a inicio están por debajo de la hora y los minutos desde fin son mayores o iguales. Si el minuto medio es menor, fija inicio en medio + 1. Si no, fija fin en medio. La posición buscada puede coincidir con fin porque representa un límite, incluso al final del arreglo.</p><p>Cuando inicio y fin coinciden, ya no hay celdas por examinar. Ambos casos acortan el intervalo. Para n minutos, el número de pasos crece como O(log(n + 1)) y solo se guardan unos cuantos índices. Esta prueba depende de que los datos estén ordenados.</p>\n<h3>Desbordes y errores de límite</h3><p>Un error de límite aparece al incluir una posición que debía quedar fuera o al excluir una válida. Usar length como fin inicial permite devolver length cuando todos los minutos son menores. Con inicio &lt; fin, medio siempre es un índice válido. Usar inicio = medio haría que una ventana de una celda pudiera no avanzar.</p><p>Calcula medio con inicio + Math.floor((fin − inicio) / 2). Math.floor redondea hacia abajo. En un lenguaje de enteros de tamaño fijo, sumar ambos extremos antes de dividir puede desbordar. Para índices válidos de Array, Number representa la suma exactamente, pero los operadores de bits de JavaScript convierten a 32 bits y pueden truncar o cambiar de signo.</p>\n<h3>Primera y última aparición</h3><p>El límite inferior es el primer índice con minuto mayor o igual al buscado. El límite superior es el primer índice con minuto estrictamente mayor. Para el superior descarta también los minutos iguales. Entre ambos límites están todas las apariciones. Si son iguales, no hay apariciones. Si son distintos, la última está en superior − 1.</p><p>Para consultar la siguiente salida desde una hora inclusiva, usa el límite inferior. Si vale length, la salida no existe y el tablero indica null. Una ausencia puede devolver una posición entre dos valores, útil para insertar en ese lugar.</p>\n<h3>Entrega del catálogo y del horario</h3><p>Una interfaz pública es el contrato que los otros pasos usan para llamar una función. Conserva catalogoTesla y lo que esta función necesita para ejecutarse. En la versión de referencia son crearDoble, ponerAntes, sacarDoble, crearLRU, tablaPrefijos, buscarKMP, canonizarNombre e indiceDeNombres. Si usaste otros nombres, sigue las llamadas de tu propia versión. El editor recupera el archivo original completo. Prueba primero tu nueva búsqueda y luego guarda en esta entrega la parte del catálogo que seguirás extendiendo. La entrega de Estructuras sigue disponible en su lección.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>En [10, 15, 15, 15, 22], localiza 15 y luego consulta la primera salida desde 23.</p><p>El límite inferior de 15 acaba en el índice 1 y el superior en 4. El intervalo [1, 4) contiene tres salidas. En la consulta 23 se descartan todos los minutos y el límite queda en 5.</p><p>Para 15, primera 1 y última 3. Desde 23, no hay próxima salida.</p></section>\n<h3>Prueba limiteHorario</h3><p>Usa un único intervalo y cambia el tratamiento de la igualdad según despues.</p><p>Predice el retorno al invocar limiteHorario([10,15,15,15,22], 15).</p><pre data-language=\"javascript\">function limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio &lt; fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto &lt; hora || (despues &amp;&amp; minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}</pre><p>Salida esperada</p><pre data-language=\"json\">1</pre>\n<h3>Prueba aparicionesHorario</h3><p>Calcula ambos límites. Antes de restar, distingue el intervalo vacío.</p><p>Predice el retorno al invocar aparicionesHorario([10,15,15,15,22], 15).</p><pre data-language=\"javascript\">function limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio &lt; fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto &lt; hora || (despues &amp;&amp; minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}</pre><p>Salida esperada</p><pre data-language=\"json\">[1,3]</pre>\n<h3>Preparar la entrega</h3><p>Ejecuta el caso del catálogo y las fronteras del horario. Comprueba entrada vacía, hora exacta y hora posterior a la última salida. El proyecto sigue usando minutos preparados en esta lección.</p>",
+  "examples": [
+    {
+      "id": "bo-binaria-ejemplo-1",
+      "language": "javascript",
+      "code": "function limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Primera igualdad",
+        "args": [
+          [
+            10,
+            15,
+            15,
+            15,
+            22
+          ],
+          15
+        ],
+        "expected": 1,
+        "preserveArgs": true,
+        "entrypoint": "limiteHorario"
+      }
+    },
+    {
+      "id": "bo-binaria-ejemplo-2",
+      "language": "javascript",
+      "code": "function limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Tres empatadas",
+        "args": [
+          [
+            10,
+            15,
+            15,
+            15,
+            22
+          ],
+          15
+        ],
+        "expected": [
+          1,
+          3
+        ],
+        "preserveArgs": true,
+        "entrypoint": "aparicionesHorario"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "¿Qué sabes de las posiciones anteriores a inicio al buscar el límite inferior?",
+      "options": [
+        "Son menores que la hora",
+        "Son iguales a la hora",
+        "Quedan por comprobar"
+      ],
+      "answer": 0,
+      "explanation": "El límite izquierdo solo avanza cuando puede descartar todo ese tramo.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.bo-binaria.invariante-de-intervalo"
+    },
+    {
+      "prompt": "¿Qué problema tiene usar inicio = medio en vez de medio + 1?",
+      "options": [
+        "Salta la última celda",
+        "La ventana puede quedarse igual",
+        "Siempre devuelve una posición negativa"
+      ],
+      "answer": 1,
+      "explanation": "Cuando queda un candidato, el medio coincide con inicio.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.bo-binaria.desbordes-y-off-by-one"
+    },
+    {
+      "prompt": "Inferior 2 y superior 5. ¿Dónde está la última aparición?",
+      "options": [
+        "En 5",
+        "En 2",
+        "En 4"
+      ],
+      "answer": 2,
+      "explanation": "El límite superior se excluye.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.bo-binaria.primera-y-ultima-aparicion"
+    },
+    {
+      "prompt": "Si ambos límites devuelven 0, ¿qué indica?",
+      "options": [
+        "La hora no aparece",
+        "Aparece una vez",
+        "La hora es el primer registro"
+      ],
+      "answer": 0,
+      "explanation": "El intervalo de apariciones tiene longitud cero.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.bo-binaria.primera-y-ultima-aparicion"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.bo-binaria.invariante-de-intervalo",
+      "prompt": "Sigue el caso de la misión y justifica tus decisiones",
+      "brief": "En [10, 15, 15, 15, 22], localiza 15 y luego consulta la primera salida desde 23.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Los horarios son arreglos densos de minutos enteros en orden ascendente y pueden tener repetidos. Los índices empiezan en cero. Las consultas trabajan con esos datos preparados sin ordenarlos ni modificarlos."
+        },
+        {
+          "label": "Situación",
+          "text": "En [10, 15, 15, 15, 22], localiza 15 y luego consulta la primera salida desde 23."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "El primer medio es 2 y contiene 15. ¿Qué haces al buscar el límite inferior?",
+          "options": [
+            "Fijar fin en 2",
+            "Devolver 2 de inmediato",
+            "Fijar inicio en 3"
+          ],
+          "answer": 0,
+          "explanation": "Todavía puede haber iguales a la izquierda.",
+          "id": "decision-1",
+          "errorHint": "Todavía puede haber iguales a la izquierda."
+        },
+        {
+          "prompt": "Ahora buscas el límite superior. Si el medio contiene 15, ¿qué haces?",
+          "options": [
+            "Devolver medio",
+            "Fijar inicio en medio + 1",
+            "Fijar fin en medio"
+          ],
+          "answer": 1,
+          "explanation": "Para el límite estricto, las igualdades también se descartan.",
+          "id": "decision-2",
+          "errorHint": "Para el límite estricto, las igualdades también se descartan."
+        }
+      ],
+      "hint": "Todavía puede haber iguales a la izquierda.",
+      "explanation": "El límite inferior de 15 acaba en el índice 1 y el superior en 4. El intervalo [1, 4) contiene tres salidas. En la consulta 23 se descartan todos los minutos y el límite queda en 5.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y escenario de la misión.",
+        "output": "Predicciones y razones de tu decisión.",
+        "reflection": "Dibuja ambos límites sobre los tres 15.",
+        "requires": [],
+        "from": "algoritmia/tm-cp1/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.bo-binaria.invariante-de-intervalo",
+      "prompt": "Añade limiteHorario que busca el primer minuto ≥ hora. Cuando despues sea true, busca el primero > hora. Conserva catalogoTesla y las funciones que usa.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  // Completa la operación comprobando el contrato.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n",
+      "entrypoint": "limiteHorario",
+      "cases": [
+        {
+          "name": "Primera igualdad",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "Superior",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              15,
+              22
+            ],
+            15,
+            true
+          ],
+          "expected": 4,
+          "preserveArgs": true
+        },
+        {
+          "name": "Todo menor",
+          "args": [
+            [
+              1,
+              2
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            5
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "El catálogo conserva NFC, caché e historial",
+          "args": [
+            [
+              [
+                "C1",
+                "León"
+              ],
+              [
+                "S1",
+                "Sur"
+              ],
+              [
+                "C2",
+                "LEÓN"
+              ]
+            ],
+            [
+              [
+                "exacta",
+                " León "
+              ],
+              [
+                "contiene",
+                "le"
+              ],
+              [
+                "deshacer"
+              ],
+              [
+                "contiene",
+                "LE"
+              ]
+            ],
+            2
+          ],
+          "expected": {
+            "respuestas": [
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": true,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ],
+            "historia": [
+              {
+                "modo": "exacta",
+                "clave": "león",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "catalogoTesla"
+        }
+      ],
+      "explanation": "Usa un único intervalo y cambia el tratamiento de la igualdad según despues.",
+      "hint": "Comienza con [0, datos.length).",
+      "hints": [
+        "Comienza con [0, datos.length).",
+        "En la rama que descarta medio, avanza a medio + 1."
+      ],
+      "retryFeedback": "En la rama que descarta medio, avanza a medio + 1.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera el catálogo aprobado. Conserva su interfaz y sus dependencias junto a la función nueva de búsqueda.",
+        "output": "Una versión comprobada de limiteHorario.",
+        "reflection": "Anota qué funciones necesita tu catálogo y cómo comprobaste que sigue funcionando.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/tm-cp1/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.bo-binaria.desbordes-y-off-by-one",
+      "prompt": "Devuelve [primera, última] o null. Reutiliza el límite inferior y superior.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  // Completa la operación comprobando el contrato.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n",
+      "entrypoint": "aparicionesHorario",
+      "cases": [
+        {
+          "name": "Tres empatadas",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": [
+            1,
+            3
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Ausente en medio",
+          "args": [
+            [
+              10,
+              15
+            ],
+            11
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Último único",
+          "args": [
+            [
+              2,
+              3
+            ],
+            3
+          ],
+          "expected": [
+            1,
+            1
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Nada",
+          "args": [
+            [],
+            0
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva limiteHorario",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": 1,
+          "preserveArgs": true,
+          "entrypoint": "limiteHorario"
+        }
+      ],
+      "explanation": "Calcula ambos límites. Antes de restar, distingue el intervalo vacío.",
+      "hint": "Usa el segundo modo de limiteHorario.",
+      "hints": [
+        "Usa el segundo modo de limiteHorario.",
+        "Cuando inferior y superior sean iguales, devuelve null."
+      ],
+      "retryFeedback": "Cuando inferior y superior sean iguales, devuelve null.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de aparicionesHorario.",
+        "reflection": "Distingue el límite superior de la última aparición con un empate.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/bo-binaria/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.bo-binaria.primera-y-ultima-aparicion",
+      "prompt": "Entrega {apariciones, siguiente}, con siguiente igual al primer minuto mayor o igual a hora o null. Guarda primero tu versión. Usa Restaurar código inicial para reproducir el fallo preparado y vuelve a tu copia al repararlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora, true)] ?? null;\n  return { apariciones, siguiente };\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n",
+      "entrypoint": "consultarHorario",
+      "cases": [
+        {
+          "name": "Sale ahora",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": {
+            "apariciones": [
+              1,
+              2
+            ],
+            "siguiente": 15
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Entre salidas",
+          "args": [
+            [
+              10,
+              15
+            ],
+            12
+          ],
+          "expected": {
+            "apariciones": null,
+            "siguiente": 15
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Después de última",
+          "args": [
+            [
+              10
+            ],
+            11
+          ],
+          "expected": {
+            "apariciones": null,
+            "siguiente": null
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Medianoche",
+          "args": [
+            [
+              0
+            ],
+            0
+          ],
+          "expected": {
+            "apariciones": [
+              0,
+              0
+            ],
+            "siguiente": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "El catálogo conserva NFC, caché e historial",
+          "args": [
+            [
+              [
+                "C1",
+                "León"
+              ],
+              [
+                "S1",
+                "Sur"
+              ],
+              [
+                "C2",
+                "LEÓN"
+              ]
+            ],
+            [
+              [
+                "exacta",
+                " León "
+              ],
+              [
+                "contiene",
+                "le"
+              ],
+              [
+                "deshacer"
+              ],
+              [
+                "contiene",
+                "LE"
+              ]
+            ],
+            2
+          ],
+          "expected": {
+            "respuestas": [
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": true,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ],
+            "historia": [
+              {
+                "modo": "exacta",
+                "clave": "león",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "catalogoTesla"
+        },
+        {
+          "name": "Conserva aparicionesHorario",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": [
+            1,
+            3
+          ],
+          "preserveArgs": true,
+          "entrypoint": "aparicionesHorario"
+        }
+      ],
+      "explanation": "La próxima salida puede coincidir exactamente con la hora solicitada.",
+      "hint": "Busca la primera salida que todavía se puede tomar.",
+      "hints": [
+        "Busca la primera salida que todavía se puede tomar.",
+        "Usa ?? para que cero siga representando una salida válida."
+      ],
+      "retryFeedback": "Usa ?? para que cero siga representando una salida válida.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de consultarHorario.",
+        "reflection": "Describe el caso que descubre devolver la salida anterior en vez de la siguiente.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/bo-binaria/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.bo-binaria.primera-y-ultima-aparicion",
+      "prompt": "Un sensor guarda minutos ordenados. Cuenta cuántas lecturas pertenecen a [desde,hasta), mediante límites binarios. Devuelve cero si desde ≥ hasta.",
+      "starter": "",
+      "solution": "function limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\nfunction contarLecturas(datos, desde, hasta) {\n  if (desde >= hasta) return 0;\n  return limiteHorario(datos, hasta) - limiteHorario(datos, desde);\n}\n",
+      "entrypoint": "contarLecturas",
+      "cases": [
+        {
+          "name": "Empates en ambos bordes",
+          "args": [
+            [
+              1,
+              2,
+              2,
+              4,
+              4
+            ],
+            2,
+            4
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "Igual",
+          "args": [
+            [
+              2
+            ],
+            2,
+            2
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "Extremos externos",
+          "args": [
+            [
+              2,
+              4
+            ],
+            0,
+            5
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "Restar dos límites inferiores incluye desde y excluye hasta.",
+      "hint": "Obtén dos posiciones con la misma regla ≥.",
+      "hints": [
+        "Obtén dos posiciones con la misma regla ≥.",
+        "Separa intervalos vacíos e invertidos antes de restar."
+      ],
+      "retryFeedback": "Separa intervalos vacíos e invertidos antes de restar.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación nueva una vez comprobada la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Encuentra los dos extremos",
+    "brief": "En [10, 15, 15, 15, 22], localiza 15 y luego consulta la primera salida desde 23.",
+    "rounds": [
+      {
+        "prompt": "El primer medio es 2 y contiene 15. ¿Qué haces al buscar el límite inferior?",
+        "options": [
+          "Fijar fin en 2",
+          "Devolver 2 de inmediato",
+          "Fijar inicio en 3"
+        ],
+        "answer": 0,
+        "explanation": "Todavía puede haber iguales a la izquierda."
+      },
+      {
+        "prompt": "Ahora buscas el límite superior. Si el medio contiene 15, ¿qué haces?",
+        "options": [
+          "Devolver medio",
+          "Fijar inicio en medio + 1",
+          "Fijar fin en medio"
+        ],
+        "answer": 1,
+        "explanation": "Para el límite estricto, las igualdades también se descartan."
+      },
+      {
+        "prompt": "¿Qué índice devuelve el límite inferior de 23?",
+        "options": [
+          "4",
+          "−1",
+          "5"
+        ],
+        "answer": 2,
+        "explanation": "La posición final exclusiva también es un límite válido."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Cornell CS 2110 · Invariantes de bucle",
+      "url": "https://courses.cs.cornell.edu/courses/cs2110/2026fa/lectures/lec04/"
+    },
+    {
+      "title": "ECMAScript · Number y Math",
+      "url": "https://tc39.es/ecma262/multipage/numbers-and-dates.html"
+    }
+  ],
+  "coverage": {
+    "algoritmia.bo-binaria.invariante-de-intervalo": {
+      "explanationExcerpt": "Un intervalo semiabierto incluye inicio y excluye fin",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.bo-binaria.desbordes-y-off-by-one": {
+      "explanationExcerpt": "Un error de límite aparece al incluir una posición que debía quedar fuera o al excluir una válida",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.bo-binaria.primera-y-ultima-aparicion": {
+      "explanationExcerpt": "El límite inferior es el primer índice con minuto mayor o igual al buscado",
+      "assessmentIds": [
+        "pregunta-3",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Los horarios son arreglos densos de minutos enteros en orden ascendente y pueden tener repetidos. Los índices empiezan en cero. Las consultas trabajan con esos datos preparados sin ordenarlos ni modificarlos."
+    ],
+    "workedExample": {
+      "problem": "En [10, 15, 15, 15, 22], localiza 15 y luego consulta la primera salida desde 23.",
+      "reasoning": "El límite inferior de 15 acaba en el índice 1 y el superior en 4. El intervalo [1, 4) contiene tres salidas. En la consulta 23 se descartan todos los minutos y el límite queda en 5.",
+      "result": "Para 15, primera 1 y última 3. Desde 23, no hay próxima salida."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Las cotas se aplican al modelo y los contratos indicados.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Incorporar al catálogo consultas sobre un horario ya ordenado y distinguir ausencia de empate.",
+    "previous": "algoritmia/tm-cp1/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

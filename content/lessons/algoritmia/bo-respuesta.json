@@ -1,0 +1,720 @@
+{
+  "id": "bo-respuesta",
+  "outcome": "Buscar una capacidad mínima usando una decisión verificable y monotónica.",
+  "requiresConcepts": [
+    "algoritmia.bo-binaria.invariante-de-intervalo",
+    "algoritmia.bo-binaria.desbordes-y-off-by-one",
+    "algoritmia.bo-binaria.primera-y-ultima-aparicion"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Encuentra la menor capacidad de un tren que pueda transportar equipos en un máximo de viajes, respetando su turno.</p><p>Las cargas son pesos positivos enteros pequeños, indivisibles y en orden de llegada. Hay al menos un viaje permitido. Sin cargas, la capacidad mínima es 0. El peso total cabe exactamente en Number.</p>\n<h3>Predicado monótono</h3><p>Un predicado es una pregunta que devuelve verdadero o falso. En esta búsqueda, si una capacidad permite llevar todas las cargas dentro del máximo de viajes, toda capacidad mayor también lo permite. A eso llamamos predicado monótono de falso a verdadero. La pregunta se responde recorriendo los pesos y llenando cada viaje hasta que el siguiente ya no quepa.</p><p>Para capacidad fija, ese recorrido ocupa el mayor prefijo posible en el primer viaje. Cualquier plan en orden termina ese viaje a más tardar ahí. Repite el razonamiento desde el siguiente peso y obtendrás el mínimo número de viajes para esa capacidad. Si un peso aislado no cabe, la capacidad es inviable.</p>\n<h3>Espacio de respuestas</h3><p>El espacio de respuestas contiene las capacidades candidatas, no los pesos de las cargas. La capacidad mínima posible está entre el mayor peso y la suma de los pesos, inclusive. La superior es válida porque permite llevar todo junto. Mientras se mantenga válida, puedes converger a ella aunque nunca la consultes dentro del bucle.</p><p>Si medio funciona, busca a la izquierda conservando medio. Si falla, descarta medio y todo lo menor. Con n cargas y R capacidades, cada decisión cuesta O(n) en el peor caso y se toman O(log(R + 1)) decisiones, más el recorrido para fijar los límites. Si el criterio cambiara varias veces de verdadero a falso, esta búsqueda ya no aplicaría.</p>\n<h3>Pasa la pregunta como función</h3><p>La función primerVerdadero recibe cumple. La expresión i =&gt; estados[i] devuelve el estado de una posición. Para la capacidad, usa una función que calcule el número de viajes y decida si supera el máximo. Un estado null representa una carga inviable, así que compruébalo antes de comparar números.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Pesos [4, 2, 3, 3] y máximo de dos viajes. ¿Qué capacidad mínima funciona?</p><p>Capacidad 5 produce grupos [4], [2,3] y [3]. Capacidad 6 permite [4,2] y [3,3]. Por monotonía, si 5 falla, las capacidades menores también fallan.</p><p>La capacidad mínima es 6. Cuando los viajes caben exactamente en el máximo, la capacidad sí cumple.</p></section>\n<h3>Prueba inicioAutorizado</h3><p>La lista de estados pasa de false a true como máximo una vez.</p><p>Predice el retorno al invocar inicioAutorizado([false,false,true,true]).</p><pre data-language=\"javascript\">function primerVerdadero(inicio, fin, cumple) {\n  while (inicio &lt; fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) =&gt; estados[i]);\n}</pre><p>Salida esperada</p><pre data-language=\"json\">2</pre>\n<h3>Prueba viajesPara</h3><p>Comienza el siguiente viaje solo si el peso siguiente rebasa lo disponible, o si aún no tienes ningún viaje.</p><p>Predice el retorno al invocar viajesPara([4,2,3,3], 6).</p><pre data-language=\"javascript\">function primerVerdadero(inicio, fin, cumple) {\n  while (inicio &lt; fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) =&gt; estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso &gt; capacidad) return null;\n    if (!viajes || ocupado + peso &gt; capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}</pre><p>Salida esperada</p><pre data-language=\"json\">2</pre>\n<h3>Preparar la entrega</h3><p>Usa la búsqueda de frontera para decidir una capacidad y vuelve a comprobar las consultas de horarios. Distingue el coste de cada decisión del número de decisiones.</p>",
+  "examples": [
+    {
+      "id": "bo-respuesta-ejemplo-1",
+      "language": "javascript",
+      "code": "function primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Falsos y verdaderos",
+        "args": [
+          [
+            false,
+            false,
+            true,
+            true
+          ]
+        ],
+        "expected": 2,
+        "preserveArgs": true,
+        "entrypoint": "inicioAutorizado"
+      }
+    },
+    {
+      "id": "bo-respuesta-ejemplo-2",
+      "language": "javascript",
+      "code": "function primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Justo al límite",
+        "args": [
+          [
+            4,
+            2,
+            3,
+            3
+          ],
+          6
+        ],
+        "expected": 2,
+        "preserveArgs": true,
+        "entrypoint": "viajesPara"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "Si 7 cumple, ¿qué puedes afirmar sobre 8?",
+      "options": [
+        "También cumple",
+        "Debe fallar",
+        "Depende de partir el equipo"
+      ],
+      "answer": 0,
+      "explanation": "El mismo reparto sigue siendo válido con más capacidad.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.bo-respuesta.predicado-monotono"
+    },
+    {
+      "prompt": "¿Qué valor sirve de cota superior válida?",
+      "options": [
+        "Cero",
+        "La suma de todos los pesos",
+        "El peso menor"
+      ],
+      "answer": 1,
+      "explanation": "Un único viaje puede llevarlos con esa capacidad.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.bo-respuesta.espacio-de-respuestas"
+    },
+    {
+      "prompt": "¿Qué hora sería mala candidata para un predicado monótono?",
+      "options": [
+        "Una carga que debe caber en todos los casos",
+        "Capacidad suficiente para completar en dos viajes",
+        "Una regla que acepta solo capacidades pares"
+      ],
+      "answer": 2,
+      "explanation": "Pares e impares alternan resultados en vez de tener una frontera.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.bo-respuesta.predicado-monotono"
+    },
+    {
+      "prompt": "Si medio no alcanza, ¿dónde queda el siguiente inicio?",
+      "options": [
+        "medio + 1",
+        "medio",
+        "fin − 1"
+      ],
+      "answer": 0,
+      "explanation": "Todo candidato menor o igual también falla.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.bo-respuesta.espacio-de-respuestas"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.bo-respuesta.predicado-monotono",
+      "prompt": "Sigue el caso de la misión y justifica tus decisiones",
+      "brief": "Pesos [4, 2, 3, 3] y máximo de dos viajes. ¿Qué capacidad mínima funciona?",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Las cargas son pesos positivos enteros pequeños, indivisibles y en orden de llegada. Hay al menos un viaje permitido. Sin cargas, la capacidad mínima es 0. El peso total cabe exactamente en Number."
+        },
+        {
+          "label": "Situación",
+          "text": "Pesos [4, 2, 3, 3] y máximo de dos viajes. ¿Qué capacidad mínima funciona?"
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Cuál es el menor candidato inicial?",
+          "options": [
+            "4",
+            "2",
+            "0"
+          ],
+          "answer": 0,
+          "explanation": "Hay que poder llevar el equipo indivisible más pesado.",
+          "id": "decision-1",
+          "errorHint": "Hay que poder llevar el equipo indivisible más pesado."
+        },
+        {
+          "prompt": "¿Cuántos viajes se usan con capacidad 5?",
+          "options": [
+            "Cuatro",
+            "Tres",
+            "Dos"
+          ],
+          "answer": 1,
+          "explanation": "Los cortes en orden quedan [4], [2,3] y [3].",
+          "id": "decision-2",
+          "errorHint": "Los cortes en orden quedan [4], [2,3] y [3]."
+        }
+      ],
+      "hint": "Hay que poder llevar el equipo indivisible más pesado.",
+      "explanation": "Capacidad 5 produce grupos [4], [2,3] y [3]. Capacidad 6 permite [4,2] y [3,3]. Por monotonía, si 5 falla, las capacidades menores también fallan.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y escenario de la misión.",
+        "output": "Predicciones y razones de tu decisión.",
+        "reflection": "Escribe el reparto para 5 y para 6.",
+        "requires": [],
+        "from": "algoritmia/bo-binaria/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.bo-respuesta.predicado-monotono",
+      "prompt": "Crea primerVerdadero y úsalo para devolver el primer estado true. Si no hay, devuelve estados.length.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction inicioAutorizado(estados) {\n  // Completa la operación comprobando el contrato.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n",
+      "entrypoint": "inicioAutorizado",
+      "cases": [
+        {
+          "name": "Falsos y verdaderos",
+          "args": [
+            [
+              false,
+              false,
+              true,
+              true
+            ]
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "Todo falso",
+          "args": [
+            [
+              false
+            ]
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "Todo verdadero",
+          "args": [
+            [
+              true,
+              true
+            ]
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            []
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": {
+            "apariciones": [
+              1,
+              2
+            ],
+            "siguiente": 15
+          },
+          "preserveArgs": true,
+          "entrypoint": "consultarHorario"
+        }
+      ],
+      "explanation": "La lista de estados pasa de false a true como máximo una vez.",
+      "hint": "Mantén como frontera válida el final exclusivo.",
+      "hints": [
+        "Mantén como frontera válida el final exclusivo.",
+        "Si el predicado cumple, intenta encontrar otro índice antes."
+      ],
+      "retryFeedback": "Si el predicado cumple, intenta encontrar otro índice antes.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera el código aprobado de la lección anterior.",
+        "output": "Una versión comprobada de inicioAutorizado.",
+        "reflection": "Compara primer estado válido con todos los estados falsos.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/bo-binaria/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.bo-respuesta.espacio-de-respuestas",
+      "prompt": "Cuenta los viajes llenando en orden. Devuelve null si un peso supera la capacidad.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  // Completa la operación comprobando el contrato.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n",
+      "entrypoint": "viajesPara",
+      "cases": [
+        {
+          "name": "Justo al límite",
+          "args": [
+            [
+              4,
+              2,
+              3,
+              3
+            ],
+            6
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "Capacidad menor",
+          "args": [
+            [
+              4,
+              2,
+              3,
+              3
+            ],
+            5
+          ],
+          "expected": 3,
+          "preserveArgs": true
+        },
+        {
+          "name": "No cabe",
+          "args": [
+            [
+              6
+            ],
+            5
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin equipos",
+          "args": [
+            [],
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva inicioAutorizado",
+          "args": [
+            [
+              false,
+              false,
+              true,
+              true
+            ]
+          ],
+          "expected": 2,
+          "preserveArgs": true,
+          "entrypoint": "inicioAutorizado"
+        }
+      ],
+      "explanation": "Comienza el siguiente viaje solo si el peso siguiente rebasa lo disponible, o si aún no tienes ningún viaje.",
+      "hint": "Mantén el peso ocupado en el viaje actual.",
+      "hints": [
+        "Mantén el peso ocupado en el viaje actual.",
+        "Una carga que cabe exactamente no obliga a abrir otro viaje."
+      ],
+      "retryFeedback": "Una carga que cabe exactamente no obliga a abrir otro viaje.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de viajesPara.",
+        "reflection": "Justifica por qué el reparto en orden minimiza viajes para capacidad fija.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/bo-respuesta/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.bo-respuesta.espacio-de-respuestas",
+      "prompt": "Busca el primer peso viable entre el mayor peso y la suma. Devuelve 0 si no hay equipos. Guarda primero tu versión. Usa Restaurar código inicial para reproducir el fallo preparado y vuelve a tu copia al repararlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes < maximoViajes;\n  });\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n",
+      "entrypoint": "capacidadMinima",
+      "cases": [
+        {
+          "name": "Dos trenes",
+          "args": [
+            [
+              4,
+              2,
+              3,
+              3
+            ],
+            2
+          ],
+          "expected": 6,
+          "preserveArgs": true
+        },
+        {
+          "name": "Todos juntos",
+          "args": [
+            [
+              1,
+              2,
+              3
+            ],
+            1
+          ],
+          "expected": 6,
+          "preserveArgs": true
+        },
+        {
+          "name": "Separados",
+          "args": [
+            [
+              1,
+              2,
+              3
+            ],
+            10
+          ],
+          "expected": 3,
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            2
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              10,
+              15,
+              15,
+              22
+            ],
+            15
+          ],
+          "expected": {
+            "apariciones": [
+              1,
+              2
+            ],
+            "siguiente": 15
+          },
+          "preserveArgs": true,
+          "entrypoint": "consultarHorario"
+        },
+        {
+          "name": "Conserva viajesPara",
+          "args": [
+            [
+              4,
+              2,
+              3,
+              3
+            ],
+            6
+          ],
+          "expected": 2,
+          "preserveArgs": true,
+          "entrypoint": "viajesPara"
+        },
+        {
+          "name": "El catálogo conserva NFC, caché e historial",
+          "args": [
+            [
+              [
+                "C1",
+                "León"
+              ],
+              [
+                "S1",
+                "Sur"
+              ],
+              [
+                "C2",
+                "LEÓN"
+              ]
+            ],
+            [
+              [
+                "exacta",
+                " León "
+              ],
+              [
+                "contiene",
+                "le"
+              ],
+              [
+                "deshacer"
+              ],
+              [
+                "contiene",
+                "LE"
+              ]
+            ],
+            2
+          ],
+          "expected": {
+            "respuestas": [
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": true,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ],
+            "historia": [
+              {
+                "modo": "exacta",
+                "clave": "león",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "catalogoTesla"
+        }
+      ],
+      "explanation": "La prueba acepta una capacidad si el cálculo usa como máximo los viajes permitidos.",
+      "hint": "La capacidad mayor ya permite un viaje.",
+      "hints": [
+        "La capacidad mayor ya permite un viaje.",
+        "Incluye el caso de viajes exactamente iguales al máximo."
+      ],
+      "retryFeedback": "Incluye el caso de viajes exactamente iguales al máximo.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de capacidadMinima.",
+        "reflection": "Deja escrito el caso que exige aceptar exactamente el máximo.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/bo-respuesta/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.bo-respuesta.espacio-de-respuestas",
+      "prompt": "En el arreglo no decreciente de entregas acumuladas, devuelve el primer día numerado desde 1 que alcanza la meta, o null si no se alcanza.",
+      "starter": "",
+      "solution": "function primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\nfunction primerDia(acumulado, meta) {\n  const i = primerVerdadero(\n    0,\n    acumulado.length,\n    (dia) => acumulado[dia] >= meta,\n  );\n  return i === acumulado.length ? null : i + 1;\n}\n",
+      "entrypoint": "primerDia",
+      "cases": [
+        {
+          "name": "Meta repetida",
+          "args": [
+            [
+              1,
+              3,
+              3,
+              8
+            ],
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true
+        },
+        {
+          "name": "No alcanzada",
+          "args": [
+            [
+              1,
+              3
+            ],
+            4
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Primer día",
+          "args": [
+            [
+              4
+            ],
+            4
+          ],
+          "expected": 1,
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin días",
+          "args": [
+            [],
+            1
+          ],
+          "expected": null,
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "Los índices empiezan en cero y los días en uno. El último límite excluido indica ausencia.",
+      "hint": "Construye el predicado con el acumulado del día.",
+      "hints": [
+        "Construye el predicado con el acumulado del día.",
+        "Convierte a día después de revisar si se alcanzó la meta."
+      ],
+      "retryFeedback": "Convierte a día después de revisar si se alcanzó la meta.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación nueva una vez comprobada la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Decide una capacidad",
+    "brief": "Pesos [4, 2, 3, 3] y máximo de dos viajes. ¿Qué capacidad mínima funciona?",
+    "rounds": [
+      {
+        "prompt": "¿Cuál es el menor candidato inicial?",
+        "options": [
+          "4",
+          "2",
+          "0"
+        ],
+        "answer": 0,
+        "explanation": "Hay que poder llevar el equipo indivisible más pesado."
+      },
+      {
+        "prompt": "¿Cuántos viajes se usan con capacidad 5?",
+        "options": [
+          "Cuatro",
+          "Tres",
+          "Dos"
+        ],
+        "answer": 1,
+        "explanation": "Los cortes en orden quedan [4], [2,3] y [3]."
+      },
+      {
+        "prompt": "Capacidad 6 da dos viajes. ¿Puedes descartarla?",
+        "options": [
+          "Sí; busca de 7 en adelante",
+          "Sí; regresa directamente a 4",
+          "No; sigue siendo la menor válida conocida"
+        ],
+        "answer": 2,
+        "explanation": "Un predicado verdadero conserva medio como candidato."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Cornell CS 2110 · Invariantes de bucle",
+      "url": "https://courses.cs.cornell.edu/courses/cs2110/2026fa/lectures/lec04/"
+    },
+    {
+      "title": "MIT 6.006 · Ordenamientos, montículos y cotas",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/"
+    }
+  ],
+  "coverage": {
+    "algoritmia.bo-respuesta.predicado-monotono": {
+      "explanationExcerpt": "Un predicado es una pregunta que devuelve verdadero o falso",
+      "assessmentIds": [
+        "pregunta-1",
+        "pregunta-3"
+      ]
+    },
+    "algoritmia.bo-respuesta.espacio-de-respuestas": {
+      "explanationExcerpt": "El espacio de respuestas contiene las capacidades candidatas, no los pesos de las cargas",
+      "assessmentIds": [
+        "pregunta-2",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Las cargas son pesos positivos enteros pequeños, indivisibles y en orden de llegada. Hay al menos un viaje permitido. Sin cargas, la capacidad mínima es 0. El peso total cabe exactamente en Number."
+    ],
+    "workedExample": {
+      "problem": "Pesos [4, 2, 3, 3] y máximo de dos viajes. ¿Qué capacidad mínima funciona?",
+      "reasoning": "Capacidad 5 produce grupos [4], [2,3] y [3]. Capacidad 6 permite [4,2] y [3,3]. Por monotonía, si 5 falla, las capacidades menores también fallan.",
+      "result": "La capacidad mínima es 6. Cuando los viajes caben exactamente en el máximo, la capacidad sí cumple."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Las cotas se aplican al modelo y los contratos indicados.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Buscar una capacidad mínima usando una decisión verificable y monotónica.",
+    "previous": "algoritmia/bo-binaria/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

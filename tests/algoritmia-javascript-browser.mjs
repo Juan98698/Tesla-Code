@@ -32,7 +32,7 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto(origin + urlFor('ls-arreglo-dinamico'));
+    await page.goto(origin + urlFor('bo-binaria'));
     await page.getByText('Completa el paso anterior', { exact: true }).waitFor();
     assert.deepEqual((await progress(page)).completed ?? [], []);
     let lastSubmission;
@@ -72,6 +72,16 @@ try {
           .getByText(/Resultado devuelto: \[\s*0,\s*2\s*\]/)
           .waitFor();
       }
+      if (meta.id === 'tm-cp2') {
+        const example = page.locator('#lesson .code-example').last();
+        await example.locator(':scope > summary').click();
+        await example.getByRole('button', { name: 'Ejecutar código', exact: true }).click();
+        const output = example.locator('.console-output');
+        await output.getByText('Resultado devuelto:', { exact: false }).waitFor();
+        assert.ok(
+          (await output.innerText()).includes(JSON.stringify(data.examples.at(-1).sample.expected)),
+        );
+      }
       await page.getByRole('tab', { name: /Practicar/ }).click();
       const scope = page.locator('#activities');
       await scope.locator('[data-activity]').first().waitFor();
@@ -82,20 +92,23 @@ try {
           await restore.click();
           assert.equal(await card.locator('.code-editor').inputValue(), lastSubmission);
         }
-        if (['an-informe', 'tm-cp1'].includes(meta.id) && index === 3) {
+        if (['an-informe', 'tm-cp1', 'tm-cp2'].includes(meta.id) && index === 3) {
           const followUp = scope.locator(`[data-activity="${data.activities[4].id}"] .code-editor`);
           assert.equal(await followUp.isDisabled(), true);
           await card.locator('.code-editor').fill(activity.starter);
           await card.getByRole('button', { name: 'Comprobar ejercicio' }).click();
           await card.locator('.practice-feedback.bad').waitFor();
           assert.equal(await followUp.isDisabled(), true);
-          await card
-            .locator('[data-project-journal]')
-            .fill(
-              meta.id === 'an-informe'
-                ? 'Con cinco celdas cabe el índice. Si el presupuesto baja a cuatro, conservo la consulta directa.'
-                : 'Una exacta y una parcial pueden tener los mismos caracteres y distintos resultados.',
-            );
+          await card.locator('[data-project-journal]').fill(
+            {
+              'an-informe':
+                'Con cinco celdas cabe el índice. Si el presupuesto baja a cuatro, conservo la consulta directa.',
+              'tm-cp1':
+                'Una exacta y una parcial pueden tener los mismos caracteres y distintos resultados.',
+              'tm-cp2':
+                'Con horizonte 4 se incluyen tanto la salida como la llegada de ese minuto.',
+            }[meta.id],
+          );
         }
         await solveActivity(page, activity);
         if (index === 3) {
@@ -126,9 +139,17 @@ try {
       restored.projectArtifacts['algoritmia/tm-cp1/integrar-tesla'].notes,
       /distintos resultados/,
     );
-    await page.goto(origin + urlFor('bo-binaria'));
+    assert.match(
+      restored.projectArtifacts['algoritmia/tm-cp2/integrar-tesla'].notes,
+      /horizonte 4/,
+    );
+    assert.equal(
+      restored.projectArtifacts['algoritmia/tm-cp1/integrar-tesla'].code,
+      read('content/lessons/algoritmia/tm-cp1.json').activities[3].solution,
+    );
+    await page.goto(origin + urlFor('ar-recorridos'));
     await page.getByText('Contenido en preparación', { exact: true }).waitFor();
-    await page.goto(origin + urlFor('tm-cp1'));
+    await page.goto(origin + urlFor('tm-cp2'));
     await page.locator('#lesson').waitFor();
     await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
     for (const theme of ['dark', 'light']) {

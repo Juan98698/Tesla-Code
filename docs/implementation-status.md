@@ -815,3 +815,13 @@ El primer checkpoint reúne búsqueda exacta y parcial, agrupación de homónimo
 El código de referencia del catálogo llega a 22 916 caracteres acumulados. El límite compartido por el editor, el evaluador y la persistencia de entregas se amplía de 20 000 a 32 000 para admitir esa entrega y dejar espacio a soluciones propias. Las entregas previas conservan sus identificadores y versiones.
 
 La validación comprueba conceptos, requisitos y cobertura declarada. Las pruebas ejecutan ejemplos, soluciones y borradores con incidencias. Se contrastan ventanas con máximos directos, sondeo con Map y los dos buscadores con coincidencias directas en cadenas pequeñas. Los resultados automáticos cubren el comportamiento comprobado. La revisión docente independiente y el piloto con principiantes quedan pendientes. El siguiente bloque previsto es Buscar y ordenar.
+
+## Tesla Metro entrega Buscar y ordenar
+
+Algoritmia con JavaScript llega a 39 de 87 lecciones. El cuarto bloque aporta 11 lecciones, 22 ejemplos ejecutables, 33 decisiones de traza, 55 actividades, 44 preguntas y 189 casos de código. Los registros con hora igual e identidad distinta permiten comprobar orden y estabilidad por separado. Se practican los límites binarios, el comportamiento de JavaScript al ordenar, las cotas por modelo y los contratos de los algoritmos.
+
+El segundo checkpoint recibe el nombre de una estación, conserva homónimos, prepara el horario con mezcla estable y obtiene la próxima salida con el límite inferior. Simula eventos con una cola de prioridad ordenada por minuto y orden de alta. Incluye el horizonte exacto y mantiene el horario disponible para consultas posteriores al horizonte de simulación.
+
+La primera práctica recupera el archivo anterior y guía al estudiante para conservar el punto de entrada del catálogo con sus dependencias. Cada integración sigue contrastando su comportamiento. La solución del segundo checkpoint ocupa 17 032 caracteres y las entregas completas de Estructuras permanecen disponibles en sus lecciones. Se conservan los IDs, las versiones y los prerrequisitos del bloque.
+
+Las pruebas contrastan búsqueda binaria con recorrido directo, estabilidad con orden de referencia, Quickselect y top-k con orden completo y simulación con una agenda lineal. La [correspondencia editorial](algoritmia-javascript.md) vincula cada tema con su práctica. Siguen pendientes la revisión docente independiente y el piloto con principiantes. Árboles y estructuras jerárquicas queda en preparación.

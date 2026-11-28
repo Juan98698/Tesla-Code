@@ -1,6 +1,6 @@
 # Algoritmia en JavaScript: ruta secuencial con proyecto acumulativo
 
-La edición JavaScript publica las primeras 28 lecciones de un mapa de 87. Taller, Análisis y Estructuras lineales y hash están disponibles en secuencia. Los seis niveles siguientes, con 59 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
+La edición JavaScript publica las primeras 39 lecciones de un mapa de 87. Taller, Análisis, Estructuras lineales y hash y Buscar y ordenar están disponibles en secuencia. Los cinco niveles siguientes, con 48 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
 
 ## 1. Decisión y alcance
 
@@ -8,7 +8,7 @@ La edición JavaScript publica las primeras 28 lecciones de un mapa de 87. Talle
 - **Entrada libre:** se recomienda Fundamentos con JavaScript. Las lecciones introducen o repasan la sintaxis que utilizan antes de pedir su aplicación. Algoritmia amplía contratos, pruebas, demostraciones y costes a medida que construye Tesla Metro.
 - **Secuencial:** 87 lecciones en 9 niveles. Cada una depende de la anterior y, cuando hace falta, de otras lecciones concretas (columna «Además requiere»).
 - **Proyecto acumulativo:** Tesla Metro, el motor de rutas de una ciudad que crece lección a lección.
-- **Interacción.** Las cinco últimas lecciones de Análisis y las 14 de Estructuras lineales y hash incluyen una traza interactiva con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
+- **Interacción.** Las cinco últimas lecciones de Análisis, las 14 de Estructuras lineales y hash y las 11 de Buscar y ordenar incluyen una traza interactiva con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
 
 ## 2. Principios para no dejar vacíos
 
@@ -70,6 +70,24 @@ Cada lección incluye dos ejemplos ejecutables y sigue el ciclo de cuatro pasos.
 | Checkpoint del catálogo | Preparar claves NFC, agrupar homónimos y conectar búsqueda, caché e historial     | Entregar el catálogo y transferir el patrón a un registro de biblioteca      |
 
 El modelo de almacenamiento de los ejercicios distingue sus operaciones de las garantías de JavaScript. Las tablas hash didácticas hacen visibles las colisiones y las reconstrucciones. Map y Set usan las garantías de ECMAScript sobre igualdad, orden y coste promedio. El catálogo no cambia durante las consultas. Su contrato conserva acentos y orden de estaciones, permite coincidencias solapadas en los buscadores y distingue deshacer de expulsar en caché. [ECMAScript, colecciones indexadas](https://tc39.es/ecma262/multipage/indexed-collections.html), [Map y Set](https://tc39.es/ecma262/multipage/keyed-collections.html), [cadenas y normalización](https://tc39.es/ecma262/multipage/text-processing.html).
+
+### Correspondencia de Buscar y ordenar
+
+| Lección                     | Explicación y ejercicios de práctica                                              | Entrega y reto independiente                                                   |
+| --------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Búsqueda binaria            | Invariante semiabierto, cálculo del punto medio y dos límites para empates        | Consultar próxima salida, conservar el catálogo y contar lecturas en un rango  |
+| Búsqueda sobre la respuesta | Monotonía, mínimo y máximo candidatos, reparto de cargas en orden                 | Hallar capacidad mínima y localizar el primer día que alcanza una meta         |
+| Ordenamientos cuadráticos   | Inserción, selección y burbuja, con claves iguales e identidades distintas        | Contrastar estabilidad y ordenar prioridades descendentes sin invertir empates |
+| Merge sort                  | Caso base, mezcla estable y coste por niveles                                     | Preparar horarios para la búsqueda y combinar dos agendas de reservas          |
+| Quicksort                   | Invariantes de partición, elección del pivote y tres vías                         | Medir brechas de un listado y clasificar lecturas respecto de un umbral        |
+| Montículo                   | Índices de padre e hijos, subir, bajar y construcción desde abajo                 | Atender avisos por prioridad y seleccionar las primeras alertas                |
+| Heapsort y JavaScript       | Región activa, estabilidad y garantías de sort y toSorted                         | Comparar identidades empatadas y ordenar turnos por prioridad estable          |
+| Conteo y radix              | Frecuencias acumuladas, estabilidad por dígito y cota del modelo de comparaciones | Contrastar orden numérico y clasificar temperaturas con rango desplazado       |
+| Quickselect y top-k         | Rango absoluto, mediana par e impar, montículo de tamaño acotado                  | Presentar demoras extremas y calcular un umbral de clasificación               |
+| Intervalos y barrido        | Ordenar por inicio, mantener el fin máximo y agrupar marcas simultáneas           | Consultar cierres y ocupación, y calcular minutos de uso sin contar doble      |
+| Checkpoint de horarios      | Agenda inicial, cola de eventos, desempate por alta y horizonte inclusivo         | Simular salidas y llegadas por estación y trasladar la lógica a un despacho    |
+
+La primera entrega recupera el archivo del catálogo y conserva en el código nuevo `catalogoTesla` con sus dependencias. Las pruebas siguientes siguen ejecutando ese contrato. El historial de entregas conserva el archivo completo para consultar los ejercicios anteriores. El simulador usa mezcla para ordenar horarios, búsqueda binaria para la próxima salida y montículo para el reloj de eventos. [ECMAScript, ordenamiento de arreglos](https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array.prototype.sort), [MIT 6.006, ordenamientos y cotas](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/).
 
 ## 4. Proyecto acumulativo: Tesla Metro
 
@@ -288,4 +306,4 @@ El temario posterior contempla métodos de conjuntos, iteradores, arreglos tipad
    - Tanda 7: JavaScript real, Dominio y entrega (13).
 7. **Riesgo principal:** que los visualizadores se conviertan en el cuello de botella. Se mitiga con un motor único de pasos (estado, paso siguiente, retroceso) reutilizado por todos.
 
-El siguiente bloque previsto es Buscar y ordenar. La revisión docente independiente y el piloto con estudiantes quedan pendientes.
+El siguiente bloque previsto es Árboles y estructuras jerárquicas. La revisión docente independiente y el piloto con estudiantes quedan pendientes.

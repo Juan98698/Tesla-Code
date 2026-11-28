@@ -1,0 +1,841 @@
+{
+  "id": "bo-seleccion",
+  "outcome": "Seleccionar por rango con Quickselect y conservar las mayores k demoras con un montículo acotado.",
+  "requiresConcepts": [
+    "algoritmia.bo-lineales.counting-sort",
+    "algoritmia.bo-lineales.radix-sort",
+    "algoritmia.bo-lineales.cota-inferior-de-comparaciones",
+    "algoritmia.bo-quick.particion",
+    "algoritmia.bo-quick.pivote-aleatorio",
+    "algoritmia.bo-quick.tres-vias",
+    "algoritmia.bo-heap.monticulo",
+    "algoritmia.bo-heap.subir-y-bajar",
+    "algoritmia.bo-heap.construir-en-tiempo-lineal"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>La pantalla quiere saber la demora mediana y mostrar las peores demoras del turno sin ordenar una copia completa para cada consulta.</p><p>Los datos son tiempos enteros pequeños. El rango es un índice entero desde cero. La mediana vacía es null. k es entero no negativo; si excede la cantidad, devuelve todas las demoras.</p>\n<h3>Quickselect</h3><p>Quickselect busca el valor que quedaría en un rango concreto después de ordenar. Particiona alrededor de un pivote como Quicksort. Si el rango cae entre menor inclusive y mayor exclusivo, devuelve el pivote. Si queda a un lado, conserva solo ese tramo y conserva rango como índice absoluto de la copia.</p><p>Con pivotes uniformes independientes, el coste esperado es O(n) en el modelo habitual. Si siempre se descarta apenas un valor, el peor caso es Θ(n²). El resultado de una selección es un valor, no un arreglo completamente ordenado. La copia que preserva los datos de entrada usa O(n) espacio.</p>\n<h3>Mediana</h3><p>La mediana usa el centro del orden ascendente. En tamaño impar toma el rango floor(n/2). En tamaño par promedia los rangos n/2−1 y n/2. Con [2, 8, 10, 20], 8 y 10 dan mediana 9, aunque el valor 9 no aparezca en el arreglo.</p>\n<h3>Top-k con montículo</h3><p>Top-k devuelve los k valores de mayor interés; aquí son los mayores k, contando empates como ocurrencias. Mantén un montículo mínimo con como máximo k valores. La raíz representa la menor de las mejores demoras retenidas. Si llega una demora mayor que la raíz, retira la raíz y guarda la nueva. Si todavía hay espacio, guarda la demora sin comparar con un umbral.</p><p>Con m = min(k,n), el recorrido cuesta O(n log(m+1)) si m &gt; 0, y el montículo usa O(m) espacio. Para salida en orden descendente, extrae de menor a mayor y revierte el arreglo de salida. Extraer todo añade O(m log(m+1)). Si k es 0, se devuelve [] antes de construir el montículo.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Con [9,3,5,1,5] busca la mediana y las dos demoras mayores.</p><p>Partir por 5 deja dos menores, dos iguales y un mayor. El rango 2 pertenece a los iguales, así que la mediana es 5. La cola de tamaño dos conserva 9 y el primer 5 admitido; el segundo 5 no mejora la raíz.</p><p>Mediana 5 y top 2 [9,5]. No necesitas ordenar por completo los cinco valores.</p></section>\n<h3>Prueba medianaHoraria</h3><p>La posición de la mediana depende del rango, no de qué pivote escogiste.</p><p>Predice el retorno al invocar medianaHoraria([9,3,5,1,5], 0.5).</p><pre data-language=\"javascript\">function partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i &lt; mayor) {\n    if (datos[i] &lt; pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] &gt; pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 &lt; tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho &lt; tamano &amp;&amp; compara(datos[derecho], datos[izquierdo]) &lt; 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) &gt;= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i &gt;= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) =&gt; a - b);\n}\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () =&gt; heap.length,\n    ver: () =&gt; heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i &gt; 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) &gt;= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) =&gt; a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango &lt; 0 || rango &gt;= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio &lt; fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango &lt; menor) fin = menor;\n    else if (rango &gt;= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}</pre><p>Salida esperada</p><pre data-language=\"json\">5</pre>\n<h3>Prueba mayoresDemoras</h3><p>Durante el recorrido el montículo nunca supera k. Un lote totalmente repetido llena sus k plazas.</p><p>Predice el retorno al invocar mayoresDemoras([9,3,5,1,5,8], 2).</p><pre data-language=\"javascript\">function partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i &lt; mayor) {\n    if (datos[i] &lt; pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] &gt; pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 &lt; tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho &lt; tamano &amp;&amp; compara(datos[derecho], datos[izquierdo]) &lt; 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) &gt;= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i &gt;= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) =&gt; a - b);\n}\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () =&gt; heap.length,\n    ver: () =&gt; heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i &gt; 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) &gt;= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) =&gt; a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango &lt; 0 || rango &gt;= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio &lt; fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango &lt; menor) fin = menor;\n    else if (rango &gt;= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n\nfunction mayoresDemoras(datos, k) {\n  if (k &lt;= 0) return [];\n  const cola = crearColaPrioridad([], (a, b) =&gt; a - b);\n  for (const valor of datos) {\n    if (cola.tamano() &lt; k) cola.agregar(valor);\n    else if (valor &gt; cola.ver()) {\n      cola.extraer();\n      cola.agregar(valor);\n    }\n  }\n  const salida = [];\n  while (cola.tamano()) salida.push(cola.extraer());\n  return salida.reverse();\n}</pre><p>Salida esperada</p><pre data-language=\"json\">[9,8]</pre>\n<h3>Preparar la entrega</h3><p>Incluye mediana y top-k en el panel de demora. Comprueba que la definición para tamaños pares se mantiene al cambiar el criterio de prioridades.</p>",
+  "examples": [
+    {
+      "id": "bo-seleccion-ejemplo-1",
+      "language": "javascript",
+      "code": "function partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Repetidos",
+        "args": [
+          [
+            9,
+            3,
+            5,
+            1,
+            5
+          ],
+          0.5
+        ],
+        "expected": 5,
+        "preserveArgs": true,
+        "entrypoint": "medianaHoraria"
+      }
+    },
+    {
+      "id": "bo-seleccion-ejemplo-2",
+      "language": "javascript",
+      "code": "function partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n\nfunction mayoresDemoras(datos, k) {\n  if (k <= 0) return [];\n  const cola = crearColaPrioridad([], (a, b) => a - b);\n  for (const valor of datos) {\n    if (cola.tamano() < k) cola.agregar(valor);\n    else if (valor > cola.ver()) {\n      cola.extraer();\n      cola.agregar(valor);\n    }\n  }\n  const salida = [];\n  while (cola.tamano()) salida.push(cola.extraer());\n  return salida.reverse();\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Reemplaza mínimo",
+        "args": [
+          [
+            9,
+            3,
+            5,
+            1,
+            5,
+            8
+          ],
+          2
+        ],
+        "expected": [
+          9,
+          8
+        ],
+        "preserveArgs": true,
+        "entrypoint": "mayoresDemoras"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "¿Qué haces si rango es mayor o igual al límite mayor?",
+      "options": [
+        "Conservas el tramo [mayor,fin)",
+        "Buscas entre los iguales",
+        "Restas mayor al rango aunque uses índices absolutos"
+      ],
+      "answer": 0,
+      "explanation": "La respuesta está en el lado derecho y el índice sigue siendo absoluto.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.bo-seleccion.quickselect"
+    },
+    {
+      "prompt": "¿Cuál es la mediana de [1,4,6,9]?",
+      "options": [
+        "6",
+        "5",
+        "4"
+      ],
+      "answer": 1,
+      "explanation": "En tamaño par promedia los dos valores centrales.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.bo-seleccion.mediana"
+    },
+    {
+      "prompt": "¿Qué debe representar la raíz de un top-k de máximos?",
+      "options": [
+        "El máximo total",
+        "El próximo índice del lote",
+        "El menor valor retenido"
+      ],
+      "answer": 2,
+      "explanation": "El menor candidato es el que puede ser reemplazado.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.bo-seleccion.top-k-con-monticulo"
+    },
+    {
+      "prompt": "¿Qué conserva top-k de tamaño 2 si todos los valores son 8?",
+      "options": [
+        "Dos ochos si hay al menos dos valores",
+        "Un solo ocho",
+        "Ningún ocho"
+      ],
+      "answer": 0,
+      "explanation": "El límite cuenta ocurrencias, no claves distintas.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.bo-seleccion.top-k-con-monticulo"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.bo-seleccion.quickselect",
+      "prompt": "Sigue el caso de la misión y justifica tus decisiones",
+      "brief": "Con [9,3,5,1,5] busca la mediana y las dos demoras mayores.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Los datos son tiempos enteros pequeños. El rango es un índice entero desde cero. La mediana vacía es null. k es entero no negativo; si excede la cantidad, devuelve todas las demoras."
+        },
+        {
+          "label": "Situación",
+          "text": "Con [9,3,5,1,5] busca la mediana y las dos demoras mayores."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué rango se busca para cinco demoras?",
+          "options": [
+            "2",
+            "3",
+            "1"
+          ],
+          "answer": 0,
+          "explanation": "Los índices empiezan en cero.",
+          "id": "decision-1",
+          "errorHint": "Los índices empiezan en cero."
+        },
+        {
+          "prompt": "El rango está en [2,4) de iguales al 5. ¿Qué haces?",
+          "options": [
+            "Ordeno los dos extremos",
+            "Devuelvo 5",
+            "Busco otra vez a la derecha"
+          ],
+          "answer": 1,
+          "explanation": "Cualquier índice de ese tramo tiene el pivote.",
+          "id": "decision-2",
+          "errorHint": "Cualquier índice de ese tramo tiene el pivote."
+        }
+      ],
+      "hint": "Los índices empiezan en cero.",
+      "explanation": "Partir por 5 deja dos menores, dos iguales y un mayor. El rango 2 pertenece a los iguales, así que la mediana es 5. La cola de tamaño dos conserva 9 y el primer 5 admitido; el segundo 5 no mejora la raíz.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y escenario de la misión.",
+        "output": "Predicciones y razones de tu decisión.",
+        "reflection": "Ubica el rango dentro de los grupos del ejemplo.",
+        "requires": [],
+        "from": "algoritmia/bo-lineales/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.bo-seleccion.quickselect",
+      "prompt": "Implementa seleccionarRango y la mediana. Divide como en Quicksort, avanza solo por el lado que contiene el rango y calcula dos selecciones si el tamaño es par.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n\nfunction porInsercion(registros) {\n  const salida = registros.slice();\n  for (let i = 1; i < salida.length; i++) {\n    const nuevo = salida[i];\n    let hueco = i;\n    while (hueco > 0 && salida[hueco - 1][0] > nuevo[0]) {\n      salida[hueco] = salida[hueco - 1];\n      hueco--;\n    }\n    salida[hueco] = nuevo;\n  }\n  return salida;\n}\n\nfunction porSeleccion(registros) {\n  const salida = registros.slice();\n  for (let i = 0; i < salida.length; i++) {\n    let menor = i;\n    for (let j = i + 1; j < salida.length; j++) {\n      if (salida[j][0] < salida[menor][0]) menor = j;\n    }\n    [salida[i], salida[menor]] = [salida[menor], salida[i]];\n  }\n  return salida;\n}\nfunction porBurbuja(registros) {\n  const salida = registros.slice();\n  for (let fin = salida.length - 1; fin > 0; fin--) {\n    let huboCambio = false;\n    for (let i = 0; i < fin; i++) {\n      if (salida[i][0] > salida[i + 1][0]) {\n        [salida[i], salida[i + 1]] = [salida[i + 1], salida[i]];\n        huboCambio = true;\n      }\n    }\n    if (!huboCambio) break;\n  }\n  return salida;\n}\nfunction contrastarCuadraticos(registros) {\n  return { seleccion: porSeleccion(registros), burbuja: porBurbuja(registros) };\n}\n\nfunction prepararListado(registros) {\n  const insercion = porInsercion(registros);\n  const { seleccion, burbuja } = contrastarCuadraticos(registros);\n  const empatesConservados = insercion.every(\n    (registro, i) => registro[1] === burbuja[i][1],\n  );\n  return { insercion, seleccion, burbuja, empatesConservados };\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction consultaOrdenada(registros, minuto) {\n  const horario = ordenarMezcla(registros);\n  const consulta = consultarHorario(\n    horario.map((registro) => registro[0]),\n    minuto,\n  );\n  return { horario, consulta };\n}\n\nfunction partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\n\nfunction ordenarRapido(datos, fraccion) {\n  const copia = datos.slice();\n  const pendientes = [[0, copia.length]];\n  while (pendientes.length) {\n    const [inicio, fin] = pendientes.pop();\n    if (fin - inicio < 2) continue;\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    pendientes.push([inicio, menor], [mayor, fin]);\n  }\n  return copia;\n}\n\nfunction brechasHorarias(datos, fraccion) {\n  const orden = ordenarRapido(datos, fraccion);\n  const brechas = orden.slice(1).map((minuto, i) => minuto - orden[i]);\n  return { orden, brechas };\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction ordenDeAvisos(avisos) {\n  const registros = avisos.map(([minuto, codigo], i) => [minuto, i, codigo]);\n  const cola = crearColaPrioridad(\n    registros,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const orden = [];\n  while (cola.tamano()) orden.push(cola.extraer()[2]);\n  return orden;\n}\n\nfunction ordenarMonticulo(registros) {\n  const compara = (a, b) => b[0] - a[0];\n  const orden = construirMonticulo(registros, compara);\n  for (let fin = orden.length - 1; fin > 0; fin--) {\n    [orden[0], orden[fin]] = [orden[fin], orden[0]];\n    bajarMonticulo(orden, 0, fin, compara);\n  }\n  return orden;\n}\n\nfunction ordenarNativo(registros) {\n  return registros.toSorted((a, b) => a[0] - b[0]);\n}\n\nfunction contrastarEstabilidad(registros) {\n  const horario = ordenarNativo(registros);\n  const monticulo = ordenarMonticulo(registros);\n  const mismosCodigos = horario.every(\n    (registro, i) => registro[1] === monticulo[i][1],\n  );\n  return { horario, monticulo, mismosCodigos };\n}\n\nfunction porConteo(registros, maximo, clave) {\n  const cuentas = Array(maximo + 1).fill(0);\n  for (const registro of registros) cuentas[clave(registro)]++;\n  for (let i = 1; i < cuentas.length; i++) cuentas[i] += cuentas[i - 1];\n  const salida = Array(registros.length);\n  for (let i = registros.length - 1; i >= 0; i--) {\n    const registro = registros[i];\n    const valor = clave(registro);\n    cuentas[valor]--;\n    salida[cuentas[valor]] = registro;\n  }\n  return salida;\n}\nfunction contarMinutos(registros, maximo) {\n  return porConteo(registros, maximo, (registro) => registro[0]);\n}\n\nfunction ordenarRadix(registros) {\n  let maximo = 0;\n  for (const registro of registros) maximo = Math.max(maximo, registro[0]);\n  let orden = registros.slice();\n  for (let unidad = 1; unidad <= maximo; unidad *= 10) {\n    orden = porConteo(\n      orden,\n      9,\n      (registro) => Math.floor(registro[0] / unidad) % 10,\n    );\n  }\n  return orden;\n}\n\nfunction cronologiaNumerica(registros, maximo) {\n  const conteo = contarMinutos(registros, maximo);\n  const radix = ordenarRadix(registros);\n  const coinciden = conteo.every((registro, i) => registro[1] === radix[i][1]);\n  return { conteo, radix, coinciden };\n}\n\nfunction medianaHoraria(datos, fraccion) {\n  // Completa la operación comprobando el contrato.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n\nfunction porInsercion(registros) {\n  const salida = registros.slice();\n  for (let i = 1; i < salida.length; i++) {\n    const nuevo = salida[i];\n    let hueco = i;\n    while (hueco > 0 && salida[hueco - 1][0] > nuevo[0]) {\n      salida[hueco] = salida[hueco - 1];\n      hueco--;\n    }\n    salida[hueco] = nuevo;\n  }\n  return salida;\n}\n\nfunction porSeleccion(registros) {\n  const salida = registros.slice();\n  for (let i = 0; i < salida.length; i++) {\n    let menor = i;\n    for (let j = i + 1; j < salida.length; j++) {\n      if (salida[j][0] < salida[menor][0]) menor = j;\n    }\n    [salida[i], salida[menor]] = [salida[menor], salida[i]];\n  }\n  return salida;\n}\nfunction porBurbuja(registros) {\n  const salida = registros.slice();\n  for (let fin = salida.length - 1; fin > 0; fin--) {\n    let huboCambio = false;\n    for (let i = 0; i < fin; i++) {\n      if (salida[i][0] > salida[i + 1][0]) {\n        [salida[i], salida[i + 1]] = [salida[i + 1], salida[i]];\n        huboCambio = true;\n      }\n    }\n    if (!huboCambio) break;\n  }\n  return salida;\n}\nfunction contrastarCuadraticos(registros) {\n  return { seleccion: porSeleccion(registros), burbuja: porBurbuja(registros) };\n}\n\nfunction prepararListado(registros) {\n  const insercion = porInsercion(registros);\n  const { seleccion, burbuja } = contrastarCuadraticos(registros);\n  const empatesConservados = insercion.every(\n    (registro, i) => registro[1] === burbuja[i][1],\n  );\n  return { insercion, seleccion, burbuja, empatesConservados };\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction consultaOrdenada(registros, minuto) {\n  const horario = ordenarMezcla(registros);\n  const consulta = consultarHorario(\n    horario.map((registro) => registro[0]),\n    minuto,\n  );\n  return { horario, consulta };\n}\n\nfunction partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\n\nfunction ordenarRapido(datos, fraccion) {\n  const copia = datos.slice();\n  const pendientes = [[0, copia.length]];\n  while (pendientes.length) {\n    const [inicio, fin] = pendientes.pop();\n    if (fin - inicio < 2) continue;\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    pendientes.push([inicio, menor], [mayor, fin]);\n  }\n  return copia;\n}\n\nfunction brechasHorarias(datos, fraccion) {\n  const orden = ordenarRapido(datos, fraccion);\n  const brechas = orden.slice(1).map((minuto, i) => minuto - orden[i]);\n  return { orden, brechas };\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction ordenDeAvisos(avisos) {\n  const registros = avisos.map(([minuto, codigo], i) => [minuto, i, codigo]);\n  const cola = crearColaPrioridad(\n    registros,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const orden = [];\n  while (cola.tamano()) orden.push(cola.extraer()[2]);\n  return orden;\n}\n\nfunction ordenarMonticulo(registros) {\n  const compara = (a, b) => b[0] - a[0];\n  const orden = construirMonticulo(registros, compara);\n  for (let fin = orden.length - 1; fin > 0; fin--) {\n    [orden[0], orden[fin]] = [orden[fin], orden[0]];\n    bajarMonticulo(orden, 0, fin, compara);\n  }\n  return orden;\n}\n\nfunction ordenarNativo(registros) {\n  return registros.toSorted((a, b) => a[0] - b[0]);\n}\n\nfunction contrastarEstabilidad(registros) {\n  const horario = ordenarNativo(registros);\n  const monticulo = ordenarMonticulo(registros);\n  const mismosCodigos = horario.every(\n    (registro, i) => registro[1] === monticulo[i][1],\n  );\n  return { horario, monticulo, mismosCodigos };\n}\n\nfunction porConteo(registros, maximo, clave) {\n  const cuentas = Array(maximo + 1).fill(0);\n  for (const registro of registros) cuentas[clave(registro)]++;\n  for (let i = 1; i < cuentas.length; i++) cuentas[i] += cuentas[i - 1];\n  const salida = Array(registros.length);\n  for (let i = registros.length - 1; i >= 0; i--) {\n    const registro = registros[i];\n    const valor = clave(registro);\n    cuentas[valor]--;\n    salida[cuentas[valor]] = registro;\n  }\n  return salida;\n}\nfunction contarMinutos(registros, maximo) {\n  return porConteo(registros, maximo, (registro) => registro[0]);\n}\n\nfunction ordenarRadix(registros) {\n  let maximo = 0;\n  for (const registro of registros) maximo = Math.max(maximo, registro[0]);\n  let orden = registros.slice();\n  for (let unidad = 1; unidad <= maximo; unidad *= 10) {\n    orden = porConteo(\n      orden,\n      9,\n      (registro) => Math.floor(registro[0] / unidad) % 10,\n    );\n  }\n  return orden;\n}\n\nfunction cronologiaNumerica(registros, maximo) {\n  const conteo = contarMinutos(registros, maximo);\n  const radix = ordenarRadix(registros);\n  const coinciden = conteo.every((registro, i) => registro[1] === radix[i][1]);\n  return { conteo, radix, coinciden };\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n",
+      "entrypoint": "medianaHoraria",
+      "cases": [
+        {
+          "name": "Repetidos",
+          "args": [
+            [
+              9,
+              3,
+              5,
+              1,
+              5
+            ],
+            0.5
+          ],
+          "expected": 5,
+          "preserveArgs": true
+        },
+        {
+          "name": "Mediana entre dos",
+          "args": [
+            [
+              10,
+              2,
+              8,
+              20
+            ],
+            0
+          ],
+          "expected": 9,
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin datos",
+          "args": [
+            []
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Uno",
+          "args": [
+            [
+              4
+            ]
+          ],
+          "expected": 4,
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              [
+                10,
+                "A"
+              ],
+              [
+                1,
+                "B"
+              ],
+              [
+                10,
+                "C"
+              ],
+              [
+                0,
+                "D"
+              ]
+            ],
+            15
+          ],
+          "expected": {
+            "conteo": [
+              [
+                0,
+                "D"
+              ],
+              [
+                1,
+                "B"
+              ],
+              [
+                10,
+                "A"
+              ],
+              [
+                10,
+                "C"
+              ]
+            ],
+            "radix": [
+              [
+                0,
+                "D"
+              ],
+              [
+                1,
+                "B"
+              ],
+              [
+                10,
+                "A"
+              ],
+              [
+                10,
+                "C"
+              ]
+            ],
+            "coinciden": true
+          },
+          "preserveArgs": true,
+          "entrypoint": "cronologiaNumerica"
+        }
+      ],
+      "explanation": "La posición de la mediana depende del rango, no de qué pivote escogiste.",
+      "hint": "No ajustes rango si tus límites son índices absolutos.",
+      "hints": [
+        "No ajustes rango si tus límites son índices absolutos.",
+        "Marca el límite mayor como exclusivo al decidir si encontraste el pivote."
+      ],
+      "retryFeedback": "Marca el límite mayor como exclusivo al decidir si encontraste el pivote.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera el código aprobado de la lección anterior.",
+        "output": "Una versión comprobada de medianaHoraria.",
+        "reflection": "Traza qué pasa si el pivote deja todas las claves menores a un lado.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/bo-lineales/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.bo-seleccion.mediana",
+      "prompt": "Mantén el menor de los mejores como raíz. Devuelve los mayores valores en orden descendente, incluidos empates.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n\nfunction porInsercion(registros) {\n  const salida = registros.slice();\n  for (let i = 1; i < salida.length; i++) {\n    const nuevo = salida[i];\n    let hueco = i;\n    while (hueco > 0 && salida[hueco - 1][0] > nuevo[0]) {\n      salida[hueco] = salida[hueco - 1];\n      hueco--;\n    }\n    salida[hueco] = nuevo;\n  }\n  return salida;\n}\n\nfunction porSeleccion(registros) {\n  const salida = registros.slice();\n  for (let i = 0; i < salida.length; i++) {\n    let menor = i;\n    for (let j = i + 1; j < salida.length; j++) {\n      if (salida[j][0] < salida[menor][0]) menor = j;\n    }\n    [salida[i], salida[menor]] = [salida[menor], salida[i]];\n  }\n  return salida;\n}\nfunction porBurbuja(registros) {\n  const salida = registros.slice();\n  for (let fin = salida.length - 1; fin > 0; fin--) {\n    let huboCambio = false;\n    for (let i = 0; i < fin; i++) {\n      if (salida[i][0] > salida[i + 1][0]) {\n        [salida[i], salida[i + 1]] = [salida[i + 1], salida[i]];\n        huboCambio = true;\n      }\n    }\n    if (!huboCambio) break;\n  }\n  return salida;\n}\nfunction contrastarCuadraticos(registros) {\n  return { seleccion: porSeleccion(registros), burbuja: porBurbuja(registros) };\n}\n\nfunction prepararListado(registros) {\n  const insercion = porInsercion(registros);\n  const { seleccion, burbuja } = contrastarCuadraticos(registros);\n  const empatesConservados = insercion.every(\n    (registro, i) => registro[1] === burbuja[i][1],\n  );\n  return { insercion, seleccion, burbuja, empatesConservados };\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction consultaOrdenada(registros, minuto) {\n  const horario = ordenarMezcla(registros);\n  const consulta = consultarHorario(\n    horario.map((registro) => registro[0]),\n    minuto,\n  );\n  return { horario, consulta };\n}\n\nfunction partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\n\nfunction ordenarRapido(datos, fraccion) {\n  const copia = datos.slice();\n  const pendientes = [[0, copia.length]];\n  while (pendientes.length) {\n    const [inicio, fin] = pendientes.pop();\n    if (fin - inicio < 2) continue;\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    pendientes.push([inicio, menor], [mayor, fin]);\n  }\n  return copia;\n}\n\nfunction brechasHorarias(datos, fraccion) {\n  const orden = ordenarRapido(datos, fraccion);\n  const brechas = orden.slice(1).map((minuto, i) => minuto - orden[i]);\n  return { orden, brechas };\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction ordenDeAvisos(avisos) {\n  const registros = avisos.map(([minuto, codigo], i) => [minuto, i, codigo]);\n  const cola = crearColaPrioridad(\n    registros,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const orden = [];\n  while (cola.tamano()) orden.push(cola.extraer()[2]);\n  return orden;\n}\n\nfunction ordenarMonticulo(registros) {\n  const compara = (a, b) => b[0] - a[0];\n  const orden = construirMonticulo(registros, compara);\n  for (let fin = orden.length - 1; fin > 0; fin--) {\n    [orden[0], orden[fin]] = [orden[fin], orden[0]];\n    bajarMonticulo(orden, 0, fin, compara);\n  }\n  return orden;\n}\n\nfunction ordenarNativo(registros) {\n  return registros.toSorted((a, b) => a[0] - b[0]);\n}\n\nfunction contrastarEstabilidad(registros) {\n  const horario = ordenarNativo(registros);\n  const monticulo = ordenarMonticulo(registros);\n  const mismosCodigos = horario.every(\n    (registro, i) => registro[1] === monticulo[i][1],\n  );\n  return { horario, monticulo, mismosCodigos };\n}\n\nfunction porConteo(registros, maximo, clave) {\n  const cuentas = Array(maximo + 1).fill(0);\n  for (const registro of registros) cuentas[clave(registro)]++;\n  for (let i = 1; i < cuentas.length; i++) cuentas[i] += cuentas[i - 1];\n  const salida = Array(registros.length);\n  for (let i = registros.length - 1; i >= 0; i--) {\n    const registro = registros[i];\n    const valor = clave(registro);\n    cuentas[valor]--;\n    salida[cuentas[valor]] = registro;\n  }\n  return salida;\n}\nfunction contarMinutos(registros, maximo) {\n  return porConteo(registros, maximo, (registro) => registro[0]);\n}\n\nfunction ordenarRadix(registros) {\n  let maximo = 0;\n  for (const registro of registros) maximo = Math.max(maximo, registro[0]);\n  let orden = registros.slice();\n  for (let unidad = 1; unidad <= maximo; unidad *= 10) {\n    orden = porConteo(\n      orden,\n      9,\n      (registro) => Math.floor(registro[0] / unidad) % 10,\n    );\n  }\n  return orden;\n}\n\nfunction cronologiaNumerica(registros, maximo) {\n  const conteo = contarMinutos(registros, maximo);\n  const radix = ordenarRadix(registros);\n  const coinciden = conteo.every((registro, i) => registro[1] === radix[i][1]);\n  return { conteo, radix, coinciden };\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n\nfunction mayoresDemoras(datos, k) {\n  // Completa la operación comprobando el contrato.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n\nfunction porInsercion(registros) {\n  const salida = registros.slice();\n  for (let i = 1; i < salida.length; i++) {\n    const nuevo = salida[i];\n    let hueco = i;\n    while (hueco > 0 && salida[hueco - 1][0] > nuevo[0]) {\n      salida[hueco] = salida[hueco - 1];\n      hueco--;\n    }\n    salida[hueco] = nuevo;\n  }\n  return salida;\n}\n\nfunction porSeleccion(registros) {\n  const salida = registros.slice();\n  for (let i = 0; i < salida.length; i++) {\n    let menor = i;\n    for (let j = i + 1; j < salida.length; j++) {\n      if (salida[j][0] < salida[menor][0]) menor = j;\n    }\n    [salida[i], salida[menor]] = [salida[menor], salida[i]];\n  }\n  return salida;\n}\nfunction porBurbuja(registros) {\n  const salida = registros.slice();\n  for (let fin = salida.length - 1; fin > 0; fin--) {\n    let huboCambio = false;\n    for (let i = 0; i < fin; i++) {\n      if (salida[i][0] > salida[i + 1][0]) {\n        [salida[i], salida[i + 1]] = [salida[i + 1], salida[i]];\n        huboCambio = true;\n      }\n    }\n    if (!huboCambio) break;\n  }\n  return salida;\n}\nfunction contrastarCuadraticos(registros) {\n  return { seleccion: porSeleccion(registros), burbuja: porBurbuja(registros) };\n}\n\nfunction prepararListado(registros) {\n  const insercion = porInsercion(registros);\n  const { seleccion, burbuja } = contrastarCuadraticos(registros);\n  const empatesConservados = insercion.every(\n    (registro, i) => registro[1] === burbuja[i][1],\n  );\n  return { insercion, seleccion, burbuja, empatesConservados };\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction consultaOrdenada(registros, minuto) {\n  const horario = ordenarMezcla(registros);\n  const consulta = consultarHorario(\n    horario.map((registro) => registro[0]),\n    minuto,\n  );\n  return { horario, consulta };\n}\n\nfunction partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\n\nfunction ordenarRapido(datos, fraccion) {\n  const copia = datos.slice();\n  const pendientes = [[0, copia.length]];\n  while (pendientes.length) {\n    const [inicio, fin] = pendientes.pop();\n    if (fin - inicio < 2) continue;\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    pendientes.push([inicio, menor], [mayor, fin]);\n  }\n  return copia;\n}\n\nfunction brechasHorarias(datos, fraccion) {\n  const orden = ordenarRapido(datos, fraccion);\n  const brechas = orden.slice(1).map((minuto, i) => minuto - orden[i]);\n  return { orden, brechas };\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction ordenDeAvisos(avisos) {\n  const registros = avisos.map(([minuto, codigo], i) => [minuto, i, codigo]);\n  const cola = crearColaPrioridad(\n    registros,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const orden = [];\n  while (cola.tamano()) orden.push(cola.extraer()[2]);\n  return orden;\n}\n\nfunction ordenarMonticulo(registros) {\n  const compara = (a, b) => b[0] - a[0];\n  const orden = construirMonticulo(registros, compara);\n  for (let fin = orden.length - 1; fin > 0; fin--) {\n    [orden[0], orden[fin]] = [orden[fin], orden[0]];\n    bajarMonticulo(orden, 0, fin, compara);\n  }\n  return orden;\n}\n\nfunction ordenarNativo(registros) {\n  return registros.toSorted((a, b) => a[0] - b[0]);\n}\n\nfunction contrastarEstabilidad(registros) {\n  const horario = ordenarNativo(registros);\n  const monticulo = ordenarMonticulo(registros);\n  const mismosCodigos = horario.every(\n    (registro, i) => registro[1] === monticulo[i][1],\n  );\n  return { horario, monticulo, mismosCodigos };\n}\n\nfunction porConteo(registros, maximo, clave) {\n  const cuentas = Array(maximo + 1).fill(0);\n  for (const registro of registros) cuentas[clave(registro)]++;\n  for (let i = 1; i < cuentas.length; i++) cuentas[i] += cuentas[i - 1];\n  const salida = Array(registros.length);\n  for (let i = registros.length - 1; i >= 0; i--) {\n    const registro = registros[i];\n    const valor = clave(registro);\n    cuentas[valor]--;\n    salida[cuentas[valor]] = registro;\n  }\n  return salida;\n}\nfunction contarMinutos(registros, maximo) {\n  return porConteo(registros, maximo, (registro) => registro[0]);\n}\n\nfunction ordenarRadix(registros) {\n  let maximo = 0;\n  for (const registro of registros) maximo = Math.max(maximo, registro[0]);\n  let orden = registros.slice();\n  for (let unidad = 1; unidad <= maximo; unidad *= 10) {\n    orden = porConteo(\n      orden,\n      9,\n      (registro) => Math.floor(registro[0] / unidad) % 10,\n    );\n  }\n  return orden;\n}\n\nfunction cronologiaNumerica(registros, maximo) {\n  const conteo = contarMinutos(registros, maximo);\n  const radix = ordenarRadix(registros);\n  const coinciden = conteo.every((registro, i) => registro[1] === radix[i][1]);\n  return { conteo, radix, coinciden };\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n\nfunction mayoresDemoras(datos, k) {\n  if (k <= 0) return [];\n  const cola = crearColaPrioridad([], (a, b) => a - b);\n  for (const valor of datos) {\n    if (cola.tamano() < k) cola.agregar(valor);\n    else if (valor > cola.ver()) {\n      cola.extraer();\n      cola.agregar(valor);\n    }\n  }\n  const salida = [];\n  while (cola.tamano()) salida.push(cola.extraer());\n  return salida.reverse();\n}\n",
+      "entrypoint": "mayoresDemoras",
+      "cases": [
+        {
+          "name": "Reemplaza mínimo",
+          "args": [
+            [
+              9,
+              3,
+              5,
+              1,
+              5,
+              8
+            ],
+            2
+          ],
+          "expected": [
+            9,
+            8
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Duplicados",
+          "args": [
+            [
+              8,
+              8,
+              8,
+              2
+            ],
+            2
+          ],
+          "expected": [
+            8,
+            8
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Pide más",
+          "args": [
+            [
+              1,
+              3
+            ],
+            4
+          ],
+          "expected": [
+            3,
+            1
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "No pide datos",
+          "args": [
+            [
+              9
+            ],
+            0
+          ],
+          "expected": [],
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva medianaHoraria",
+          "args": [
+            [
+              9,
+              3,
+              5,
+              1,
+              5
+            ],
+            0.5
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "entrypoint": "medianaHoraria"
+        }
+      ],
+      "explanation": "Durante el recorrido el montículo nunca supera k. Un lote totalmente repetido llena sus k plazas.",
+      "hint": "Usa el comparador creciente de números.",
+      "hints": [
+        "Usa el comparador creciente de números.",
+        "Extrae todo y revierte para producir orden descendente."
+      ],
+      "retryFeedback": "Extrae todo y revierte para producir orden descendente.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de mayoresDemoras.",
+        "reflection": "Prueba k vacío y un k mayor que el lote.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/bo-seleccion/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.bo-seleccion.top-k-con-monticulo",
+      "prompt": "Devuelve {mediana, peores}. El panel debe conservar el promedio de los dos centrales en tamaño par. Guarda primero tu versión. Usa Restaurar código inicial para reproducir el fallo preparado y vuelve a tu copia al repararlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n\nfunction porInsercion(registros) {\n  const salida = registros.slice();\n  for (let i = 1; i < salida.length; i++) {\n    const nuevo = salida[i];\n    let hueco = i;\n    while (hueco > 0 && salida[hueco - 1][0] > nuevo[0]) {\n      salida[hueco] = salida[hueco - 1];\n      hueco--;\n    }\n    salida[hueco] = nuevo;\n  }\n  return salida;\n}\n\nfunction porSeleccion(registros) {\n  const salida = registros.slice();\n  for (let i = 0; i < salida.length; i++) {\n    let menor = i;\n    for (let j = i + 1; j < salida.length; j++) {\n      if (salida[j][0] < salida[menor][0]) menor = j;\n    }\n    [salida[i], salida[menor]] = [salida[menor], salida[i]];\n  }\n  return salida;\n}\nfunction porBurbuja(registros) {\n  const salida = registros.slice();\n  for (let fin = salida.length - 1; fin > 0; fin--) {\n    let huboCambio = false;\n    for (let i = 0; i < fin; i++) {\n      if (salida[i][0] > salida[i + 1][0]) {\n        [salida[i], salida[i + 1]] = [salida[i + 1], salida[i]];\n        huboCambio = true;\n      }\n    }\n    if (!huboCambio) break;\n  }\n  return salida;\n}\nfunction contrastarCuadraticos(registros) {\n  return { seleccion: porSeleccion(registros), burbuja: porBurbuja(registros) };\n}\n\nfunction prepararListado(registros) {\n  const insercion = porInsercion(registros);\n  const { seleccion, burbuja } = contrastarCuadraticos(registros);\n  const empatesConservados = insercion.every(\n    (registro, i) => registro[1] === burbuja[i][1],\n  );\n  return { insercion, seleccion, burbuja, empatesConservados };\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction consultaOrdenada(registros, minuto) {\n  const horario = ordenarMezcla(registros);\n  const consulta = consultarHorario(\n    horario.map((registro) => registro[0]),\n    minuto,\n  );\n  return { horario, consulta };\n}\n\nfunction partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\n\nfunction ordenarRapido(datos, fraccion) {\n  const copia = datos.slice();\n  const pendientes = [[0, copia.length]];\n  while (pendientes.length) {\n    const [inicio, fin] = pendientes.pop();\n    if (fin - inicio < 2) continue;\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    pendientes.push([inicio, menor], [mayor, fin]);\n  }\n  return copia;\n}\n\nfunction brechasHorarias(datos, fraccion) {\n  const orden = ordenarRapido(datos, fraccion);\n  const brechas = orden.slice(1).map((minuto, i) => minuto - orden[i]);\n  return { orden, brechas };\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction ordenDeAvisos(avisos) {\n  const registros = avisos.map(([minuto, codigo], i) => [minuto, i, codigo]);\n  const cola = crearColaPrioridad(\n    registros,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const orden = [];\n  while (cola.tamano()) orden.push(cola.extraer()[2]);\n  return orden;\n}\n\nfunction ordenarMonticulo(registros) {\n  const compara = (a, b) => b[0] - a[0];\n  const orden = construirMonticulo(registros, compara);\n  for (let fin = orden.length - 1; fin > 0; fin--) {\n    [orden[0], orden[fin]] = [orden[fin], orden[0]];\n    bajarMonticulo(orden, 0, fin, compara);\n  }\n  return orden;\n}\n\nfunction ordenarNativo(registros) {\n  return registros.toSorted((a, b) => a[0] - b[0]);\n}\n\nfunction contrastarEstabilidad(registros) {\n  const horario = ordenarNativo(registros);\n  const monticulo = ordenarMonticulo(registros);\n  const mismosCodigos = horario.every(\n    (registro, i) => registro[1] === monticulo[i][1],\n  );\n  return { horario, monticulo, mismosCodigos };\n}\n\nfunction porConteo(registros, maximo, clave) {\n  const cuentas = Array(maximo + 1).fill(0);\n  for (const registro of registros) cuentas[clave(registro)]++;\n  for (let i = 1; i < cuentas.length; i++) cuentas[i] += cuentas[i - 1];\n  const salida = Array(registros.length);\n  for (let i = registros.length - 1; i >= 0; i--) {\n    const registro = registros[i];\n    const valor = clave(registro);\n    cuentas[valor]--;\n    salida[cuentas[valor]] = registro;\n  }\n  return salida;\n}\nfunction contarMinutos(registros, maximo) {\n  return porConteo(registros, maximo, (registro) => registro[0]);\n}\n\nfunction ordenarRadix(registros) {\n  let maximo = 0;\n  for (const registro of registros) maximo = Math.max(maximo, registro[0]);\n  let orden = registros.slice();\n  for (let unidad = 1; unidad <= maximo; unidad *= 10) {\n    orden = porConteo(\n      orden,\n      9,\n      (registro) => Math.floor(registro[0] / unidad) % 10,\n    );\n  }\n  return orden;\n}\n\nfunction cronologiaNumerica(registros, maximo) {\n  const conteo = contarMinutos(registros, maximo);\n  const radix = ordenarRadix(registros);\n  const coinciden = conteo.every((registro, i) => registro[1] === radix[i][1]);\n  return { conteo, radix, coinciden };\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n\nfunction mayoresDemoras(datos, k) {\n  if (k <= 0) return [];\n  const cola = crearColaPrioridad([], (a, b) => a - b);\n  for (const valor of datos) {\n    if (cola.tamano() < k) cola.agregar(valor);\n    else if (valor > cola.ver()) {\n      cola.extraer();\n      cola.agregar(valor);\n    }\n  }\n  const salida = [];\n  while (cola.tamano()) salida.push(cola.extraer());\n  return salida.reverse();\n}\n\nfunction panelDemora(datos, k, fraccion) {\n  return {\n    mediana: seleccionarRango(datos, Math.floor(datos.length / 2), fraccion),\n    peores: mayoresDemoras(datos, k),\n  };\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction aparicionesHorario(datos, hora) {\n  const primera = limiteHorario(datos, hora);\n  const fin = limiteHorario(datos, hora, true);\n  return primera === fin ? null : [primera, fin - 1];\n}\n\nfunction consultarHorario(datos, hora) {\n  const apariciones = aparicionesHorario(datos, hora);\n  const siguiente = datos[limiteHorario(datos, hora)] ?? null;\n  return { apariciones, siguiente };\n}\n\nfunction primerVerdadero(inicio, fin, cumple) {\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    if (cumple(medio)) fin = medio;\n    else inicio = medio + 1;\n  }\n  return inicio;\n}\nfunction inicioAutorizado(estados) {\n  return primerVerdadero(0, estados.length, (i) => estados[i]);\n}\n\nfunction viajesPara(cargas, capacidad) {\n  let viajes = 0;\n  let ocupado = 0;\n  for (const peso of cargas) {\n    if (peso > capacidad) return null;\n    if (!viajes || ocupado + peso > capacidad) {\n      viajes++;\n      ocupado = 0;\n    }\n    ocupado += peso;\n  }\n  return viajes;\n}\n\nfunction capacidadMinima(cargas, maximoViajes) {\n  let mayor = 0;\n  let suma = 0;\n  for (const peso of cargas) {\n    mayor = Math.max(mayor, peso);\n    suma += peso;\n  }\n  return primerVerdadero(mayor, suma, (capacidad) => {\n    const viajes = viajesPara(cargas, capacidad);\n    return viajes !== null && viajes <= maximoViajes;\n  });\n}\n\nfunction porInsercion(registros) {\n  const salida = registros.slice();\n  for (let i = 1; i < salida.length; i++) {\n    const nuevo = salida[i];\n    let hueco = i;\n    while (hueco > 0 && salida[hueco - 1][0] > nuevo[0]) {\n      salida[hueco] = salida[hueco - 1];\n      hueco--;\n    }\n    salida[hueco] = nuevo;\n  }\n  return salida;\n}\n\nfunction porSeleccion(registros) {\n  const salida = registros.slice();\n  for (let i = 0; i < salida.length; i++) {\n    let menor = i;\n    for (let j = i + 1; j < salida.length; j++) {\n      if (salida[j][0] < salida[menor][0]) menor = j;\n    }\n    [salida[i], salida[menor]] = [salida[menor], salida[i]];\n  }\n  return salida;\n}\nfunction porBurbuja(registros) {\n  const salida = registros.slice();\n  for (let fin = salida.length - 1; fin > 0; fin--) {\n    let huboCambio = false;\n    for (let i = 0; i < fin; i++) {\n      if (salida[i][0] > salida[i + 1][0]) {\n        [salida[i], salida[i + 1]] = [salida[i + 1], salida[i]];\n        huboCambio = true;\n      }\n    }\n    if (!huboCambio) break;\n  }\n  return salida;\n}\nfunction contrastarCuadraticos(registros) {\n  return { seleccion: porSeleccion(registros), burbuja: porBurbuja(registros) };\n}\n\nfunction prepararListado(registros) {\n  const insercion = porInsercion(registros);\n  const { seleccion, burbuja } = contrastarCuadraticos(registros);\n  const empatesConservados = insercion.every(\n    (registro, i) => registro[1] === burbuja[i][1],\n  );\n  return { insercion, seleccion, burbuja, empatesConservados };\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction consultaOrdenada(registros, minuto) {\n  const horario = ordenarMezcla(registros);\n  const consulta = consultarHorario(\n    horario.map((registro) => registro[0]),\n    minuto,\n  );\n  return { horario, consulta };\n}\n\nfunction partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\n\nfunction ordenarRapido(datos, fraccion) {\n  const copia = datos.slice();\n  const pendientes = [[0, copia.length]];\n  while (pendientes.length) {\n    const [inicio, fin] = pendientes.pop();\n    if (fin - inicio < 2) continue;\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    pendientes.push([inicio, menor], [mayor, fin]);\n  }\n  return copia;\n}\n\nfunction brechasHorarias(datos, fraccion) {\n  const orden = ordenarRapido(datos, fraccion);\n  const brechas = orden.slice(1).map((minuto, i) => minuto - orden[i]);\n  return { orden, brechas };\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\nfunction vistaMonticulo(numeros) {\n  return construirMonticulo(numeros, (a, b) => a - b);\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\nfunction prioridadesNumericas(datos, acciones) {\n  const cola = crearColaPrioridad(datos, (a, b) => a - b);\n  const respuestas = [];\n  for (const [accion, valor] of acciones) {\n    if (accion === \"agregar\") cola.agregar(valor);\n    else if (accion === \"ver\") respuestas.push(cola.ver());\n    else respuestas.push(cola.extraer());\n  }\n  return respuestas;\n}\n\nfunction ordenDeAvisos(avisos) {\n  const registros = avisos.map(([minuto, codigo], i) => [minuto, i, codigo]);\n  const cola = crearColaPrioridad(\n    registros,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const orden = [];\n  while (cola.tamano()) orden.push(cola.extraer()[2]);\n  return orden;\n}\n\nfunction ordenarMonticulo(registros) {\n  const compara = (a, b) => b[0] - a[0];\n  const orden = construirMonticulo(registros, compara);\n  for (let fin = orden.length - 1; fin > 0; fin--) {\n    [orden[0], orden[fin]] = [orden[fin], orden[0]];\n    bajarMonticulo(orden, 0, fin, compara);\n  }\n  return orden;\n}\n\nfunction ordenarNativo(registros) {\n  return registros.toSorted((a, b) => a[0] - b[0]);\n}\n\nfunction contrastarEstabilidad(registros) {\n  const horario = ordenarNativo(registros);\n  const monticulo = ordenarMonticulo(registros);\n  const mismosCodigos = horario.every(\n    (registro, i) => registro[1] === monticulo[i][1],\n  );\n  return { horario, monticulo, mismosCodigos };\n}\n\nfunction porConteo(registros, maximo, clave) {\n  const cuentas = Array(maximo + 1).fill(0);\n  for (const registro of registros) cuentas[clave(registro)]++;\n  for (let i = 1; i < cuentas.length; i++) cuentas[i] += cuentas[i - 1];\n  const salida = Array(registros.length);\n  for (let i = registros.length - 1; i >= 0; i--) {\n    const registro = registros[i];\n    const valor = clave(registro);\n    cuentas[valor]--;\n    salida[cuentas[valor]] = registro;\n  }\n  return salida;\n}\nfunction contarMinutos(registros, maximo) {\n  return porConteo(registros, maximo, (registro) => registro[0]);\n}\n\nfunction ordenarRadix(registros) {\n  let maximo = 0;\n  for (const registro of registros) maximo = Math.max(maximo, registro[0]);\n  let orden = registros.slice();\n  for (let unidad = 1; unidad <= maximo; unidad *= 10) {\n    orden = porConteo(\n      orden,\n      9,\n      (registro) => Math.floor(registro[0] / unidad) % 10,\n    );\n  }\n  return orden;\n}\n\nfunction cronologiaNumerica(registros, maximo) {\n  const conteo = contarMinutos(registros, maximo);\n  const radix = ordenarRadix(registros);\n  const coinciden = conteo.every((registro, i) => registro[1] === radix[i][1]);\n  return { conteo, radix, coinciden };\n}\n\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\n\nfunction mayoresDemoras(datos, k) {\n  if (k <= 0) return [];\n  const cola = crearColaPrioridad([], (a, b) => a - b);\n  for (const valor of datos) {\n    if (cola.tamano() < k) cola.agregar(valor);\n    else if (valor > cola.ver()) {\n      cola.extraer();\n      cola.agregar(valor);\n    }\n  }\n  const salida = [];\n  while (cola.tamano()) salida.push(cola.extraer());\n  return salida.reverse();\n}\n\nfunction panelDemora(datos, k, fraccion) {\n  return {\n    mediana: medianaHoraria(datos, fraccion),\n    peores: mayoresDemoras(datos, k),\n  };\n}\n",
+      "entrypoint": "panelDemora",
+      "cases": [
+        {
+          "name": "Centro par",
+          "args": [
+            [
+              10,
+              2,
+              8,
+              20
+            ],
+            3,
+            0.75
+          ],
+          "expected": {
+            "mediana": 9,
+            "peores": [
+              20,
+              10,
+              8
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            5,
+            0
+          ],
+          "expected": {
+            "mediana": null,
+            "peores": []
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              [
+                10,
+                "A"
+              ],
+              [
+                1,
+                "B"
+              ],
+              [
+                10,
+                "C"
+              ],
+              [
+                0,
+                "D"
+              ]
+            ],
+            15
+          ],
+          "expected": {
+            "conteo": [
+              [
+                0,
+                "D"
+              ],
+              [
+                1,
+                "B"
+              ],
+              [
+                10,
+                "A"
+              ],
+              [
+                10,
+                "C"
+              ]
+            ],
+            "radix": [
+              [
+                0,
+                "D"
+              ],
+              [
+                1,
+                "B"
+              ],
+              [
+                10,
+                "A"
+              ],
+              [
+                10,
+                "C"
+              ]
+            ],
+            "coinciden": true
+          },
+          "preserveArgs": true,
+          "entrypoint": "cronologiaNumerica"
+        },
+        {
+          "name": "Conserva mayoresDemoras",
+          "args": [
+            [
+              9,
+              3,
+              5,
+              1,
+              5,
+              8
+            ],
+            2
+          ],
+          "expected": [
+            9,
+            8
+          ],
+          "preserveArgs": true,
+          "entrypoint": "mayoresDemoras"
+        },
+        {
+          "name": "El catálogo conserva NFC, caché e historial",
+          "args": [
+            [
+              [
+                "C1",
+                "León"
+              ],
+              [
+                "S1",
+                "Sur"
+              ],
+              [
+                "C2",
+                "LEÓN"
+              ]
+            ],
+            [
+              [
+                "exacta",
+                " León "
+              ],
+              [
+                "contiene",
+                "le"
+              ],
+              [
+                "deshacer"
+              ],
+              [
+                "contiene",
+                "LE"
+              ]
+            ],
+            2
+          ],
+          "expected": {
+            "respuestas": [
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": false,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "acierto": true,
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ],
+            "historia": [
+              {
+                "modo": "exacta",
+                "clave": "león",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              },
+              {
+                "modo": "contiene",
+                "clave": "le",
+                "codigos": [
+                  "C1",
+                  "C2"
+                ]
+              }
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "catalogoTesla"
+        }
+      ],
+      "explanation": "Los dos valores describen cosas distintas: el centro del orden y su extremo superior.",
+      "hint": "Usa medianaHoraria incluso si k es cero.",
+      "hints": [
+        "Usa medianaHoraria incluso si k es cero.",
+        "Verifica una mediana que no exista en el arreglo original."
+      ],
+      "retryFeedback": "Verifica una mediana que no exista en el arreglo original.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera el código aprobado del paso anterior.",
+        "output": "Una versión comprobada de panelDemora.",
+        "reflection": "Describe el fallo que se ve solo en una mediana par.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/bo-seleccion/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.bo-seleccion.top-k-con-monticulo",
+      "prompt": "Devuelve el umbral para entrar entre las k mejores puntuaciones. Si k es cero o faltan puntuaciones devuelve null. Usa Quickselect y cuenta los empates como posiciones.",
+      "starter": "",
+      "solution": "function partirTres(datos, inicio, fin, pivote) {\n  let menor = inicio;\n  let i = inicio;\n  let mayor = fin;\n  while (i < mayor) {\n    if (datos[i] < pivote) {\n      [datos[menor], datos[i]] = [datos[i], datos[menor]];\n      menor++;\n      i++;\n    } else if (datos[i] > pivote) {\n      mayor--;\n      [datos[i], datos[mayor]] = [datos[mayor], datos[i]];\n    } else i++;\n  }\n  return [menor, mayor];\n}\nfunction separarClaves(datos, pivote) {\n  const copia = datos.slice();\n  const [menor, mayor] = partirTres(copia, 0, copia.length, pivote);\n  return [copia.slice(0, menor), copia.slice(menor, mayor), copia.slice(mayor)];\n}\nfunction seleccionarRango(datos, rango, fraccion) {\n  if (rango < 0 || rango >= datos.length) return null;\n  const copia = datos.slice();\n  let inicio = 0;\n  let fin = copia.length;\n  while (inicio < fin) {\n    const muestra = fraccion === undefined ? Math.random() : fraccion;\n    const pivote = copia[inicio + Math.floor(muestra * (fin - inicio))];\n    const [menor, mayor] = partirTres(copia, inicio, fin, pivote);\n    if (rango < menor) fin = menor;\n    else if (rango >= mayor) inicio = mayor;\n    else return pivote;\n  }\n  return null;\n}\nfunction medianaHoraria(datos, fraccion) {\n  if (!datos.length) return null;\n  const medio = Math.floor(datos.length / 2);\n  const alto = seleccionarRango(datos, medio, fraccion);\n  if (datos.length % 2) return alto;\n  return (seleccionarRango(datos, medio - 1, fraccion) + alto) / 2;\n}\nfunction umbralDeClasificacion(puntuaciones, k) {\n  if (k === 0 || k > puntuaciones.length) return null;\n  return seleccionarRango(puntuaciones, puntuaciones.length - k, 0.5);\n}\n",
+      "entrypoint": "umbralDeClasificacion",
+      "cases": [
+        {
+          "name": "Umbral empatado",
+          "args": [
+            [
+              12,
+              20,
+              12,
+              2
+            ],
+            3
+          ],
+          "expected": 12,
+          "preserveArgs": true
+        },
+        {
+          "name": "El mayor",
+          "args": [
+            [
+              4,
+              20,
+              5
+            ],
+            1
+          ],
+          "expected": 20,
+          "preserveArgs": true
+        },
+        {
+          "name": "Sobran lugares",
+          "args": [
+            [
+              4
+            ],
+            2
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin cupo",
+          "args": [
+            [
+              4
+            ],
+            0
+          ],
+          "expected": null,
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "Para obtener el k-ésimo mayor en orden ascendente, el rango absoluto es longitud − k.",
+      "hint": "Traduce posiciones descendentes a rango ascendente.",
+      "hints": [
+        "Traduce posiciones descendentes a rango ascendente.",
+        "Revisa que k tenga un cupo válido antes de seleccionar."
+      ],
+      "retryFeedback": "Revisa que k tenga un cupo válido antes de seleccionar.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación nueva una vez comprobada la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Decide qué parte conservar",
+    "brief": "Con [9,3,5,1,5] busca la mediana y las dos demoras mayores.",
+    "rounds": [
+      {
+        "prompt": "¿Qué rango se busca para cinco demoras?",
+        "options": [
+          "2",
+          "3",
+          "1"
+        ],
+        "answer": 0,
+        "explanation": "Los índices empiezan en cero."
+      },
+      {
+        "prompt": "El rango está en [2,4) de iguales al 5. ¿Qué haces?",
+        "options": [
+          "Ordeno los dos extremos",
+          "Devuelvo 5",
+          "Busco otra vez a la derecha"
+        ],
+        "answer": 1,
+        "explanation": "Cualquier índice de ese tramo tiene el pivote."
+      },
+      {
+        "prompt": "Si el montículo tiene [5,9] y llega 8, ¿qué sale?",
+        "options": [
+          "9",
+          "Nada",
+          "5"
+        ],
+        "answer": 2,
+        "explanation": "Como 8 supera el menor retenido, lo reemplaza."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Princeton · Partición y Quicksort",
+      "url": "https://algs4.cs.princeton.edu/23quicksort/"
+    },
+    {
+      "title": "MIT 6.006 · Ordenamientos, montículos y cotas",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/"
+    }
+  ],
+  "coverage": {
+    "algoritmia.bo-seleccion.quickselect": {
+      "explanationExcerpt": "Quickselect busca el valor que quedaría en un rango concreto después de ordenar",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.bo-seleccion.mediana": {
+      "explanationExcerpt": "La mediana usa el centro del orden ascendente",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.bo-seleccion.top-k-con-monticulo": {
+      "explanationExcerpt": "Top-k devuelve los k valores de mayor interés; aquí son los mayores k, contando empates como ocurrencias",
+      "assessmentIds": [
+        "pregunta-3",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Los datos son tiempos enteros pequeños. El rango es un índice entero desde cero. La mediana vacía es null. k es entero no negativo; si excede la cantidad, devuelve todas las demoras."
+    ],
+    "workedExample": {
+      "problem": "Con [9,3,5,1,5] busca la mediana y las dos demoras mayores.",
+      "reasoning": "Partir por 5 deja dos menores, dos iguales y un mayor. El rango 2 pertenece a los iguales, así que la mediana es 5. La cola de tamaño dos conserva 9 y el primer 5 admitido; el segundo 5 no mejora la raíz.",
+      "result": "Mediana 5 y top 2 [9,5]. No necesitas ordenar por completo los cinco valores."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Las cotas se aplican al modelo y los contratos indicados.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Seleccionar por rango con Quickselect y conservar las mayores k demoras con un montículo acotado.",
+    "previous": "algoritmia/bo-lineales/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}
