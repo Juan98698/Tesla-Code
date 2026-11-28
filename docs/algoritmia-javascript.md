@@ -1,34 +1,28 @@
 # Algoritmia en JavaScript: ruta secuencial con proyecto acumulativo
 
-Propuesta de diseño para sustituir la edición actual (pseudocódigo con laboratorio en Python). Es un plan para aprobar: todavía no hay lecciones escritas ni cambios en el repositorio.
+La edición JavaScript publica las primeras 14 lecciones de un mapa de 87. Taller y Análisis están disponibles en secuencia. Los siete niveles siguientes, con 73 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
 
 ## 1. Decisión y alcance
 
 - **Lenguaje:** JavaScript puro, sin TypeScript, sin librerías y sin pasos de compilación. Los tipos, si hacen falta, se explican con JSDoc.
-- **Requisito de entrada:** Fundamentos con JavaScript completo. La ruta no repite lo que ya enseña: contratos y fronteras, contar operaciones, búsqueda por mitades, ordenar con comparador, recursión sobre árboles y estrategias básicas. Pasa de **usar** esas ideas a **construir, demostrar y medir** cada algoritmo.
+- **Entrada libre:** se recomienda Fundamentos con JavaScript. Las lecciones introducen o repasan la sintaxis que utilizan antes de pedir su aplicación. Algoritmia amplía contratos, pruebas, demostraciones y costes a medida que construye Tesla Metro.
 - **Secuencial:** 87 lecciones en 9 niveles. Cada una depende de la anterior y, cuando hace falta, de otras lecciones concretas (columna «Además requiere»).
 - **Proyecto acumulativo:** Tesla Metro, el motor de rutas de una ciudad que crece lección a lección.
-- **Entretenida y dinámica:** cada lección combina un visualizador, un juego de traza o un duelo de rendimiento con la implementación real.
+- **Interacción:** las cinco lecciones nuevas de Análisis incluyen una traza interactiva con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
 
 ## 2. Principios para no dejar vacíos
 
 1. **Ningún símbolo ni término aparece sin explicarse antes con un ejemplo.** Primero el caso concreto, después la definición.
 2. **Cada algoritmo se enseña con cuatro vistas:** intuición (visualizador), traza a mano, implementación en JavaScript y coste (medido y razonado).
-3. **Se implementa antes de usar la versión nativa.** Se construye la lista enlazada antes de `Array`, la tabla hash antes de `Map`, el heap antes de la cola de prioridad. Después se compara con la nativa.
+3. **Se construyen modelos explícitos.** Se usan arreglos de JavaScript como herramienta de enseñanza desde el taller. Antes de atribuir un coste a una estructura, se explica su modelo y se diferencia de lo que garantiza la especificación del lenguaje.
 4. **Cada concepto tiene al menos una evaluación explicativa y una evaluativa**, como exige el validador del repositorio.
-5. **Toda solución se prueba contra un oráculo** (la versión ingenua) y con casos límite generados al azar de forma reproducible.
+5. **Se comprueban casos concretos y propiedades.** La búsqueda comprueba lecturas observadas. El crecimiento se contrasta con copias en un arreglo construido de forma explícita y las consultas por prefijos se comparan con un oráculo directo en intervalos enumerados.
 6. **Los errores típicos forman parte del temario:** off-by-one, mutar mientras se recorre, comparar objetos por referencia, recursión sin caso base.
 7. **Cada lección declara requisitos y conceptos nuevos.** El validador bloquea una lección que use algo no enseñado antes.
 
 ## 3. Cómo es una lección
 
-Cinco pasos, igual que en Fundamentos, adaptados a algoritmos:
-
-1. **Misión:** una necesidad concreta de Tesla Metro («los pasajeros esperan demasiado en la ventanilla»).
-2. **Visualiza:** se interactúa con el algoritmo antes de leer código.
-3. **Implementa:** se escribe en JavaScript con pistas progresivas y comprobación automática.
-4. **Mide:** se cuenta operaciones y se compara contra otra solución.
-5. **Integra y depura:** se entrega el incremento al proyecto y se resuelve una variante o un fallo.
+El bloque comienza con una misión, una explicación, ejemplos ejecutables y una traza. En la práctica se sigue el ciclo de entender, implementar, reescribir y comprobar, e integrar y depurar. Las nuevas lecciones recuperan código aprobado y prueban capacidades previas en las siguientes entregas. Cada lección nueva añade un reto independiente con editor vacío. La bitácora guarda la justificación del estudiante para revisión.
 
 **Formatos que la hacen dinámica** (columna «Formato» del temario):
 
@@ -40,7 +34,19 @@ Cinco pasos, igual que en Fundamentos, adaptados a algoritmos:
 | B     | Detective de bugs      | Un algoritmo casi correcto falla en un caso límite que hay que encontrar. |
 | P     | Propiedades y proyecto | Pruebas con oráculo y entrega al proyecto acumulativo.                    |
 
-Además: bitácora personal, logros por hitos de rendimiento (por ejemplo, «redujiste las operaciones de n² a n log n») y repaso espaciado con las rondas del Laboratorio.
+Los hitos específicos de rendimiento y nuevos visualizadores pertenecen al plan de desarrollo.
+
+### Correspondencia del bloque de Análisis publicado
+
+| Lección                     | Explicación y ejemplo                                                                                                         | Implementación y reescritura                                                             | Integración y transferencia                                                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mejor, peor y caso promedio | Posición, ausencia, extremos y esperanza bajo una distribución declarada. Se trazan búsquedas y consultas de una muestra.     | `implementar-busqueda` y `reescribir-muestra` verifican salida temprana, media y vacío.  | `integrar-perfil` distingue máximo de una consulta y total de un lote. `aplicar-incidencia` busca la primera demora que supera un umbral.                 |
+| Coste amortizado            | Duplicación, coste individual, suma geométrica y crecimiento fijo. El ejemplo de avisos efectúa las copias.                   | `implementar-crecimiento` y `reescribir-politicas` separan capacidad, escrituras y pico. | `integrar-catalogo` conserva el perfil de búsqueda y detecta una política mal elegida. `aplicar-avisos` almacena datos con crecimiento real en el modelo. |
+| Memoria y espacio auxiliar  | Entrada, salida, trabajo auxiliar, pila activa, copias y pico de reserva. Se comparan dos sumas equivalentes.                 | `implementar-suma` y `reescribir-pila` cuentan lecturas y llamadas internas.             | `integrar-espacio` distingue capacidad final y pico. `aplicar-sufijo` evita la copia y las lecturas del prefijo.                                          |
+| Corrección e invariantes    | Intervalos semiabiertos, estado inicial, conservación, salida y variante. Se prueba el rechazo antes de leer.                 | `implementar-prefijo` y `reescribir-intervalo` conservan fronteras y datos.              | `integrar-distancia` repara una lectura fuera del rango. `aplicar-demoras` cambia la suma por un contador con invariante propio.                          |
+| Elegir con evidencia        | Sumas acumuladas, equivalencia, coste de preparación, memoria y reloj. El experimento alterna orden y mide ambas estrategias. | `implementar-directa` y `reescribir-indice` conservan el contrato de cada consulta.      | `integrar-decision` aplica presupuesto y empate. `aplicar-estimacion` decide antes de ejecutar un lote de lecturas.                                       |
+
+Mitades y recurrencias conservan su práctica original. La explicación delimita el caso simplificado del teorema maestro, completa el coste cuando dominan las hojas y muestra por qué Fibonacci queda fuera de ese modelo.
 
 ## 4. Proyecto acumulativo: Tesla Metro
 
@@ -225,13 +231,9 @@ Las lecciones marcadas como opcionales no bloquean el avance.
 
 ## 6. Actualidad 2026 en JavaScript
 
-Lo que la ruta enseña y cómo se mantiene al día:
+Las nuevas lecciones usan JavaScript estándar, arreglos y números sin dependencias de terceros. El análisis distingue el modelo de capacidad de las garantías de ECMAScript y explica la resolución del reloj de la plataforma. [ECMAScript, colecciones indexadas](https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array-objects) y [W3C, High Resolution Time](https://www.w3.org/TR/hr-time-3/).
 
-- **ECMAScript 2026.** Según una fuente consultada (OpenReplay), la especificación se aprobó el 30 de junio de 2026 con siete novedades: `Array.fromAsync`, `Error.isError`, `Math.sumPrecise`, métodos base64 y hex de `Uint8Array`, `Iterator.concat`, acceso al texto fuente en `JSON.parse` y `getOrInsert` en `Map`/`WeakMap`. Otra fuente consultada contradice ese detalle (atribuye a ES2026 funciones que son de ediciones anteriores y da por cerrado Temporal), así que **hay que verificar cada función contra la especificación y MDN antes de publicar la lección**.
-- **Funciones modernas que sí se usarán, con fecha de verificación y alternativa:** métodos de conjuntos de `Set`, helpers de iterador, `toSorted`/`toSpliced`/`with`, `Object.groupBy`/`Map.groupBy`, `structuredClone`, `Math.sumPrecise` (precisión numérica), `Map.prototype.getOrInsert` (grafos y memoización), `BigInt`, arreglos tipados y `Float16Array`.
-- **Plataforma:** Web Workers, objetos transferibles, `AbortSignal`, iteración asíncrona, `performance.now` y `performance.measure`, perfilador y gráfica de llamas de las DevTools.
-- **Qué NO se enseña:** código dependiente de una librería, TypeScript, ni funciones sin soporte amplio sin su alternativa.
-- **Mantenimiento:** cada lección referencia sus tecnologías en el registro de vigencia del repositorio, con fecha de revisión.
+El temario posterior contempla métodos de conjuntos, iteradores, arreglos tipados, Worker y WebAssembly. Al redactar cada lección se contrasta la especificación de su API, se comprueba el entorno real y se documenta una alternativa cuando la disponibilidad lo requiera.
 
 ## 7. Cobertura sin vacíos
 
@@ -248,7 +250,7 @@ Lo que la ruta enseña y cómo se mantiene al día:
 
 ## 8. Integración en el repositorio y riesgos
 
-1. **Edición nueva, no reemplazo:** igual que Fundamentos, la edición actual (12 lecciones en pseudocódigo) pasa a ser _legacy_ y la nueva se registra como edición vigente.
+1. **Edición vigente y archivo.** La edición JavaScript y la anterior mantienen sus identificadores y sus propios logros.
 2. **Registro de conceptos:** cada concepto nuevo necesita su entrada con la lección que lo introduce.
 3. **Revisión editorial:** el validador compara una huella del temario con `pedagogy-reviews.json`. Cambiar el temario exige que una persona lo revise y actualice ese registro; no debe falsificarse.
 4. **Widgets nuevos:** visualizadores de ordenamiento, grafos y árboles, el «duelo» con contador de operaciones y el juego de traza. Los dos últimos se pueden reutilizar de Fundamentos.
@@ -263,8 +265,4 @@ Lo que la ruta enseña y cómo se mantiene al día:
    - Tanda 7: JavaScript real, Dominio y entrega (13).
 7. **Riesgo principal:** que los visualizadores se conviertan en el cuello de botella. Se mitiga con un motor único de pasos (estado, paso siguiente, retroceso) reutilizado por todos.
 
-## 9. Decisiones que necesitan aprobación
-
-1. ¿Aprobar **Tesla Metro** como hilo conductor?
-2. ¿Mantener como opcionales Árboles B, Bellman-Ford, Emparejamiento bipartito y WebAssembly?
-3. ¿Empezar por la Tanda 1 y publicar cada nivel cuando esté completo?
+El siguiente bloque previsto es Estructuras lineales y hash. La revisión docente independiente y el piloto con estudiantes quedan pendientes.

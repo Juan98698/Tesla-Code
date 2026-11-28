@@ -23,6 +23,7 @@ function runSandbox(
     serial = 0;
   const sandbox = {
     performance,
+    structuredClone,
     setTimeout,
     clearTimeout,
     setInterval,

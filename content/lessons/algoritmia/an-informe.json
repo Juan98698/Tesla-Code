@@ -1,0 +1,852 @@
+{
+  "id": "an-informe",
+  "outcome": "Entregar un informe que elige entre recorrer por consulta y preparar sumas acumuladas bajo un límite de memoria.",
+  "requiresConcepts": [
+    "algoritmia.an-invariantes.invariante-de-ciclo",
+    "algoritmia.an-invariantes.terminacion",
+    "algoritmia.an-invariantes.induccion",
+    "algoritmia.tm-medir.contador-de-operaciones",
+    "algoritmia.tm-medir.calentamiento",
+    "algoritmia.tm-medir.varianza",
+    "algoritmia.tm-medir.benchmark-honesto"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Tesla Metro necesita consultar varios tiempos sobre un mapa estable. El equipo debe decidir cuándo compensa preparar un índice y cuál es el coste de mantenerlo.</p><p>Durante el lote de consultas los tramos son fijos, sus sumas se representan de forma exacta y cada consulta tiene dos límites.</p>\n<h3>Comprobar antes de comparar</h3><p>Los dos algoritmos deben resolver el mismo contrato de distanciaTramo. Para un rango inválido devuelven null. Un intervalo válido vacío vale cero. En el recorrido directo, cada consulta válida suma fin − inicio posiciones; las invalidaciones y la construcción del arreglo de salida existen, pero el contador de esta lección mide solo sumas y restas del cálculo de distancia. El tiempo total también incluye coste de validar cada consulta.</p>\n<h3>Construir acumulados desde cero</h3><p>Un arreglo de prefijos guarda en P[k] la suma de las primeras k posiciones. P[0] vale cero. Para tramos [2, 0, 3, 1], los prefijos son [0, 2, 2, 5, 6]. Si empiezas en uno y terminas antes de cuatro, P[4] − P[1] vale 6 − 2 = 4. Ambos acumulados incluyen el trozo [0, 1); restarlos elimina exactamente ese trozo. El vacío válido resta un prefijo de sí mismo. Si cambian los datos debes reconstruir o actualizar la representación antes de usarla.</p>\n<h3>Un informe con unidades y supuestos</h3><p>Un informe de decisión reúne contrato, supuestos, evidencia, límites y recomendación. Si m es la cantidad total de consultas, v las válidas y S la suma de sus longitudes, el directo hace S sumas e incurre en Θ(m + S) tiempo. El índice hace n sumas al construir y v restas al consultar, con tiempo Θ(n + m). El índice reserva n + 1 celdas auxiliares; ambos métodos almacenan su propia salida al analizarse por separado. El comparador didáctico ejecuta las dos versiones para verificar equivalencia; un producto elegiría antes de ejecutar las consultas si conoce sus tamaños.</p>\n<pre data-language=\"javascript\"><code>function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i &lt; fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) &amp;&amp; Number.isInteger(fin)\n    &amp;&amp; 0 &lt;= inicio &amp;&amp; inicio &lt;= fin &amp;&amp; fin &lt;= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nconst tramos = [2, 0, 3, 1];\nconst consultas = [[0, 4], [0, 4], [1, 4], [2, 2], [3, 2]];\nconsole.log(informeDirecto(tramos, consultas));\nconsole.log(informeConPrefijos(tramos, consultas));</code></pre>\n<h3>Cómo elegir y qué significa medir</h3><p>El informe recomienda prefijos solo si conserva las respuestas, cabe en el presupuesto de celdas y hace estrictamente menos sumas y restas. En empate elige directa. Modelo y medición se contrastan: una suma contada no equivale a un milisegundo. El reloj depende de resolución, motor, calentamiento, asignaciones, recolección y cargas ajenas. performance.now() da una marca temporal monotónica en milisegundos desde un origen del entorno. Dos lecturas pueden ser iguales. Se resta el inicio para obtener la duración; la prueba automática no fija su valor ni un ganador por reloj.</p>\n<h3>Experimento reproducible</h3><p>El segundo ejemplo calienta ambas versiones con la misma entrada, alterna la primera versión y registra cinco observaciones de cada una. Incluye la creación de prefijos dentro de su intervalo medido. % 2 distingue una muestra par de una impar. Ejecuta el ejemplo y cambia las llamadas finales para mostrar tiempos.directa y tiempos.prefijos. Haz una tabla con n, m, S y el presupuesto. Compara otro tamaño con las mismas entradas para ambas opciones. Usa mediana y rango como en el taller. Si el reloj muestra ceros o mucha variación, indica esa limitación y evita deducir una cota asintótica a partir de pocos puntos.</p>\n<pre data-language=\"javascript\"><code>function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i &lt; fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) &amp;&amp; Number.isInteger(fin)\n    &amp;&amp; 0 &lt;= inicio &amp;&amp; inicio &lt;= fin &amp;&amp; fin &lt;= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction compararTiempos(tramos, consultas) {\n  // Calienta ambas funciones con las mismas entradas.\n  for (let repeticion = 0; repeticion &lt; 3; repeticion++) {\n    informeDirecto(tramos, consultas);\n    informeConPrefijos(tramos, consultas);\n  }\n  const tiempos = { directa: [], prefijos: [] };\n  for (let muestra = 0; muestra &lt; 5; muestra++) {\n    if (muestra % 2 === 0) {\n      let inicio = performance.now();\n      informeDirecto(tramos, consultas);\n      tiempos.directa.push(performance.now() - inicio);\n      inicio = performance.now();\n      informeConPrefijos(tramos, consultas);\n      tiempos.prefijos.push(performance.now() - inicio);\n    } else {\n      let inicio = performance.now();\n      informeConPrefijos(tramos, consultas);\n      tiempos.prefijos.push(performance.now() - inicio);\n      inicio = performance.now();\n      informeDirecto(tramos, consultas);\n      tiempos.directa.push(performance.now() - inicio);\n    }\n  }\n  return tiempos;\n}\n\nconst tiempos = compararTiempos([2, 0, 3, 1], [[0, 4], [1, 4]]);\nconsole.log(tiempos.directa.length, tiempos.prefijos.length);</code></pre>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Para cuatro tramos llegan dos consultas completas, otra de longitud tres, una vacía y una inválida.</p><p>El directo suma 4 + 4 + 3 + 0 = 11. El índice hace cuatro sumas de preparación y cuatro restas válidas. Los resultados, incluido el rechazo, coinciden.</p><p>El índice usa ocho operaciones de cálculo y cinco celdas. Se elige si tiene cinco celdas de presupuesto. Con cuatro celdas se elige la versión directa.</p></section>\n<h3>Preparar la entrega</h3><p>Recupera tu distancia validada, mantén los casos de frontera y documenta por qué el resultado de la comparación cambia con presupuesto o patrón de consultas. Anota en la bitácora tus mediciones con reloj y con contador, y justifica cualquier discrepancia.</p>",
+  "examples": [
+    {
+      "id": "an-informe-e1",
+      "language": "javascript",
+      "code": "function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nconst tramos = [2, 0, 3, 1];\nconst consultas = [[0, 4], [0, 4], [1, 4], [2, 2], [3, 2]];\nconsole.log(informeDirecto(tramos, consultas));\nconsole.log(informeConPrefijos(tramos, consultas));",
+      "stdout": "{\"resultados\":[6,6,4,0,null],\"operaciones\":11}\n{\"resultados\":[6,6,4,0,null],\"operaciones\":8,\"celdasExtra\":5}\n"
+    },
+    {
+      "id": "an-informe-e2",
+      "language": "javascript",
+      "code": "function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction compararTiempos(tramos, consultas) {\n  // Calienta ambas funciones con las mismas entradas.\n  for (let repeticion = 0; repeticion < 3; repeticion++) {\n    informeDirecto(tramos, consultas);\n    informeConPrefijos(tramos, consultas);\n  }\n  const tiempos = { directa: [], prefijos: [] };\n  for (let muestra = 0; muestra < 5; muestra++) {\n    if (muestra % 2 === 0) {\n      let inicio = performance.now();\n      informeDirecto(tramos, consultas);\n      tiempos.directa.push(performance.now() - inicio);\n      inicio = performance.now();\n      informeConPrefijos(tramos, consultas);\n      tiempos.prefijos.push(performance.now() - inicio);\n    } else {\n      let inicio = performance.now();\n      informeConPrefijos(tramos, consultas);\n      tiempos.prefijos.push(performance.now() - inicio);\n      inicio = performance.now();\n      informeDirecto(tramos, consultas);\n      tiempos.directa.push(performance.now() - inicio);\n    }\n  }\n  return tiempos;\n}\n\nconst tiempos = compararTiempos([2, 0, 3, 1], [[0, 4], [1, 4]]);\nconsole.log(tiempos.directa.length, tiempos.prefijos.length);",
+      "stdout": "5 5\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "informe-memoria",
+      "type": "choice",
+      "concept": "algoritmia.an-informe.informe-de-decision",
+      "prompt": "¿Qué debe incluir el informe para poder decidir?",
+      "options": [
+        "Contrato, conteos, presupuesto, condiciones de medición y recomendación",
+        "Solo el menor tiempo observado",
+        "Únicamente el nombre del método"
+      ],
+      "answer": 0,
+      "explanation": "La recomendación se puede revisar al comparar fuerzas y límites."
+    },
+    {
+      "id": "informe-empate",
+      "type": "choice",
+      "concept": "algoritmia.an-informe.informe-de-decision",
+      "prompt": "Si ambas opciones hacen las mismas operaciones y coinciden en resultados, ¿qué elige el contrato?",
+      "options": [
+        "Directa",
+        "Prefijos",
+        "El resultado de un sorteo"
+      ],
+      "answer": 0,
+      "explanation": "El índice exige una mejora estricta."
+    },
+    {
+      "id": "modelo-unidades",
+      "type": "choice",
+      "concept": "algoritmia.an-informe.modelo-frente-a-medicion",
+      "prompt": "¿Qué comparan los conteos del ejercicio?",
+      "options": [
+        "Sumas y restas del cálculo, separadas del tiempo real",
+        "Milisegundos por operación",
+        "Bytes usados por JavaScript"
+      ],
+      "answer": 0,
+      "explanation": "Las operaciones son una medida del modelo. El reloj observa otra unidad."
+    },
+    {
+      "id": "modelo-reloj",
+      "type": "choice",
+      "concept": "algoritmia.an-informe.modelo-frente-a-medicion",
+      "prompt": "¿Qué harías si ambos tiempos salen cero en una entrada pequeña?",
+      "options": [
+        "Registraría la resolución observada y probaría un lote más grande en condiciones equivalentes",
+        "Concluiría que son Θ(1)",
+        "Asignaría el cero a la versión más fácil de escribir"
+      ],
+      "answer": 0,
+      "explanation": "La resolución del reloj puede ocultar tiempos cortos."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.an-informe.informe-de-decision",
+      "prompt": "Decide según requisitos y evidencia",
+      "brief": "Hay dos planes correctos y dos dispositivos con presupuestos diferentes.",
+      "evidence": [
+        {
+          "label": "Recorrido directo",
+          "text": "Once sumas, sin arreglo auxiliar de prefijos."
+        },
+        {
+          "label": "Prefijos",
+          "text": "Ocho operaciones de cálculo y cinco celdas extra."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "Con cuatro celdas disponibles, ¿qué recomiendas?",
+          "options": [
+            "Directa",
+            "Prefijos por tener menos operaciones",
+            "Cualquiera sin revisar"
+          ],
+          "answer": 0,
+          "explanation": "El plan de prefijos excede un límite explícito.",
+          "id": "decision-1",
+          "errorHint": "Verifica primero las restricciones de la misión."
+        },
+        {
+          "prompt": "Una medición pequeña favorece al directo. ¿Qué harías?",
+          "options": [
+            "Registraría las condiciones y contrastaría otros tamaños y el conteo",
+            "Cambiaría la cota asintótica de inmediato",
+            "Eliminaría las pruebas de equivalencia"
+          ],
+          "answer": 0,
+          "explanation": "El resultado observado depende del entorno y del tamaño.",
+          "id": "decision-2",
+          "errorHint": "Distingue el número de operaciones del tiempo de un dispositivo."
+        }
+      ],
+      "hint": "Verifica primero las restricciones de la misión.",
+      "explanation": "El presupuesto, el contrato y la carga sustentan la decisión.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Entender",
+        "input": "Dos planes y un límite de memoria.",
+        "output": "Una recomendación defendible para datos dados.",
+        "reflection": "Describe qué dato cambiaría tu recomendación y qué repetición usarías para investigarlo.",
+        "requires": [],
+        "from": "algoritmia/an-invariantes/integrar-distancia"
+      }
+    },
+    {
+      "id": "implementar-directa",
+      "type": "javascript",
+      "concept": "algoritmia.an-informe.informe-de-decision",
+      "prompt": "Añade informeDirecto(tramos, consultas). Devuelve {resultados, operaciones}. Cada consulta [inicio, fin] reutiliza distanciaTramo. Suma fin − inicio operaciones por consulta válida y cero por inválida. Conserva la función de distancia.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  // Recupera una distancia por consulta.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n",
+      "entrypoint": "informeDirecto",
+      "cases": [
+        {
+          "name": "Mezcla de consultas",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          ],
+          "expected": {
+            "resultados": [
+              6,
+              6,
+              4,
+              0,
+              null
+            ],
+            "operaciones": 11
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Nada que recorrer",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            []
+          ],
+          "expected": {
+            "resultados": [],
+            "operaciones": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Límites con tipos diferentes",
+          "args": [
+            [
+              2
+            ],
+            [
+              [
+                "0",
+                1
+              ],
+              [
+                0,
+                1
+              ]
+            ]
+          ],
+          "expected": {
+            "resultados": [
+              null,
+              2
+            ],
+            "operaciones": 1
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar el contrato de recorrido",
+          "args": [
+            [
+              2,
+              3
+            ],
+            0,
+            2
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "entrypoint": "distanciaTramo"
+        }
+      ],
+      "hint": "Por cada consulta llama distanciaTramo y conserva el orden.",
+      "hints": [
+        "Por cada consulta llama distanciaTramo y conserva el orden.",
+        "Si la distancia es cero, el rango aún es válido. Suma las operaciones según los límites."
+      ],
+      "explanation": "El informe directo conserva el contrato en cada consulta y cuenta el cálculo de distancia.",
+      "retryFeedback": "No descartes una distancia cero y no sumes operaciones a un rango inválido.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Implementar",
+        "input": "La función distanciaTramo validada.",
+        "output": "El informe directo con conteo de sumas.",
+        "reflection": "Anota cuáles operaciones mide el modelo y cuáles quedan fuera.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/an-invariantes/integrar-distancia"
+      }
+    },
+    {
+      "id": "reescribir-indice",
+      "type": "javascript",
+      "concept": "algoritmia.an-informe.modelo-frente-a-medicion",
+      "prompt": "Añade informeConPrefijos(tramos, consultas). Devuelve {resultados, operaciones, celdasExtra}. Parte de prefijos [0], construye un acumulado por tramo y haz una resta por consulta válida. Conserva la versión directa y valida igual que ella.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  // Construye los prefijos y responde por diferencia.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n",
+      "entrypoint": "informeConPrefijos",
+      "cases": [
+        {
+          "name": "Preparación y consultas",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          ],
+          "expected": {
+            "resultados": [
+              6,
+              6,
+              4,
+              0,
+              null
+            ],
+            "operaciones": 8,
+            "celdasExtra": 5
+          },
+          "preserveArgs": true,
+          "maxArrayReads": 4
+        },
+        {
+          "name": "Construye aunque no haya consultas",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            []
+          ],
+          "expected": {
+            "resultados": [],
+            "operaciones": 4,
+            "celdasExtra": 5
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "El prefijo cero existe",
+          "args": [
+            [],
+            [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                1
+              ]
+            ]
+          ],
+          "expected": {
+            "resultados": [
+              0,
+              null
+            ],
+            "operaciones": 1,
+            "celdasExtra": 1
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Versión directa conservada",
+          "args": [
+            [
+              0,
+              2
+            ],
+            [
+              [
+                0,
+                2
+              ]
+            ]
+          ],
+          "expected": {
+            "resultados": [
+              2
+            ],
+            "operaciones": 2
+          },
+          "preserveArgs": true,
+          "entrypoint": "informeDirecto"
+        }
+      ],
+      "hint": "Guarda primero la suma de cero datos.",
+      "hints": [
+        "Guarda primero la suma de cero datos.",
+        "Resta el acumulado de inicio al de fin solo para un rango válido."
+      ],
+      "explanation": "El índice paga una preparación y responde cada consulta válida mediante una diferencia.",
+      "retryFeedback": "Debe haber un prefijo más que tramos. El índice de fin puede igualar la longitud.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Reescribir y comprobar",
+        "input": "El informe directo comprobado.",
+        "output": "Un índice con el mismo contrato y su propio conteo.",
+        "reflection": "Explica qué prefijo se cancela y qué pasa con una consulta inválida.",
+        "requires": [
+          "implementar-directa"
+        ],
+        "from": "algoritmia/an-informe/implementar-directa"
+      }
+    },
+    {
+      "id": "integrar-decision",
+      "type": "javascript",
+      "concept": "algoritmia.an-informe.informe-de-decision",
+      "prompt": "Añade decidirEstrategia(tramos, consultas, presupuesto). Devuelve {resultados, coinciden, operacionesDirectas, operacionesIndice, celdasIndice, estrategia}. resultados viene del directo. Para coinciden compara la longitud y cada posición de las salidas. Recomienda prefijos solo si hay equivalencia, el índice cabe y reduce operaciones de forma estricta. Repara el borrador que ignora el presupuesto.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nfunction informeDirecto(tramos, consultas) {\n  const resultados = [];\n  let operaciones = 0;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    const total = distanciaTramo(tramos, inicio, fin);\n    resultados.push(total);\n    if (total !== null) operaciones += fin - inicio;\n  }\n  return { resultados, operaciones };\n}\n\nfunction informeConPrefijos(tramos, consultas) {\n  const prefijos = [0];\n  for (const minutos of tramos) {\n    prefijos.push(prefijos[prefijos.length - 1] + minutos);\n  }\n  const resultados = [];\n  let operaciones = tramos.length;\n  for (const consulta of consultas) {\n    const inicio = consulta[0];\n    const fin = consulta[1];\n    if (intervaloValido(tramos, inicio, fin)) {\n      resultados.push(prefijos[fin] - prefijos[inicio]);\n      operaciones++;\n    } else {\n      resultados.push(null);\n    }\n  }\n  return { resultados, operaciones, celdasExtra: prefijos.length };\n}\n\nfunction decidirEstrategia(tramos, consultas, presupuesto) {\n  const directo = informeDirecto(tramos, consultas);\n  const indice = informeConPrefijos(tramos, consultas);\n  let coinciden = directo.resultados.length === indice.resultados.length;\n  for (let i = 0; i < directo.resultados.length; i++) {\n    if (directo.resultados[i] !== indice.resultados[i]) coinciden = false;\n  }\n  const usarIndice = coinciden && indice.celdasExtra <= presupuesto\n    && indice.operaciones < directo.operaciones;\n  return {\n    resultados: directo.resultados,\n    coinciden,\n    operacionesDirectas: directo.operaciones,\n    operacionesIndice: indice.operaciones,\n    celdasIndice: indice.celdasExtra,\n    estrategia: usarIndice ? \"prefijos\" : \"directa\"\n  };\n}\n",
+      "entrypoint": "decidirEstrategia",
+      "cases": [
+        {
+          "name": "Muchas consultas, el índice cabe",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ],
+            5
+          ],
+          "expected": {
+            "resultados": [
+              6,
+              6,
+              4,
+              0,
+              null
+            ],
+            "coinciden": true,
+            "operacionesDirectas": 11,
+            "operacionesIndice": 8,
+            "celdasIndice": 5,
+            "estrategia": "prefijos"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "El mismo trabajo, memoria insuficiente",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ],
+            4
+          ],
+          "expected": {
+            "resultados": [
+              6,
+              6,
+              4,
+              0,
+              null
+            ],
+            "coinciden": true,
+            "operacionesDirectas": 11,
+            "operacionesIndice": 8,
+            "celdasIndice": 5,
+            "estrategia": "directa"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Empate favorece el método directo",
+          "args": [
+            [
+              2,
+              0
+            ],
+            [
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                2
+              ]
+            ],
+            3
+          ],
+          "expected": {
+            "resultados": [
+              2,
+              2
+            ],
+            "coinciden": true,
+            "operacionesDirectas": 4,
+            "operacionesIndice": 4,
+            "celdasIndice": 3,
+            "estrategia": "directa"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Una consulta breve no paga construir el índice",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            [
+              [
+                0,
+                1
+              ]
+            ],
+            5
+          ],
+          "expected": {
+            "resultados": [
+              2
+            ],
+            "coinciden": true,
+            "operacionesDirectas": 1,
+            "operacionesIndice": 5,
+            "celdasIndice": 5,
+            "estrategia": "directa"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Rangos vacío y rechazado sobre una lista vacía",
+          "args": [
+            [],
+            [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                1
+              ]
+            ],
+            1
+          ],
+          "expected": {
+            "resultados": [
+              0,
+              null
+            ],
+            "coinciden": true,
+            "operacionesDirectas": 0,
+            "operacionesIndice": 1,
+            "celdasIndice": 1,
+            "estrategia": "directa"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin consultas",
+          "args": [
+            [
+              2,
+              0,
+              3,
+              1
+            ],
+            [],
+            10
+          ],
+          "expected": {
+            "resultados": [],
+            "coinciden": true,
+            "operacionesDirectas": 0,
+            "operacionesIndice": 4,
+            "celdasIndice": 5,
+            "estrategia": "directa"
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar el contrato de recorrido",
+          "args": [
+            [
+              2,
+              3
+            ],
+            0,
+            2
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "entrypoint": "distanciaTramo"
+        },
+        {
+          "name": "Conservar el diagnóstico de memoria",
+          "args": [
+            [
+              3,
+              0,
+              5
+            ],
+            5
+          ],
+          "expected": {
+            "total": 8,
+            "llamadasActivas": 4,
+            "picoCeldasReservadas": 12
+          },
+          "preserveArgs": true,
+          "entrypoint": "auditarEspacio"
+        }
+      ],
+      "hint": "Separa equivalencia de ventaja. Busca el dato celdasExtra en el informe indexado.",
+      "hints": [
+        "Separa equivalencia de ventaja. Busca el dato celdasExtra en el informe indexado.",
+        "Si el índice excede el presupuesto o empata en operaciones, elige directa."
+      ],
+      "explanation": "El informe fundamenta la elección con resultados, operaciones y memoria.",
+      "retryFeedback": "Compara el mismo lote con presupuesto cinco y cuatro. La recomendación debe cambiar, las respuestas deben coincidir.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Integrar y depurar",
+        "input": "Dos informes comparables.",
+        "output": "Un informe final con equivalencia, presupuesto y elección.",
+        "reflection": "Escribe un informe breve con contrato, conteos, al menos dos observaciones de tiempo, límite de memoria y recomendación.",
+        "requires": [
+          "reescribir-indice"
+        ],
+        "from": "algoritmia/an-informe/reescribir-indice"
+      }
+    },
+    {
+      "id": "aplicar-estimacion",
+      "type": "javascript",
+      "concept": "algoritmia.an-informe.modelo-frente-a-medicion",
+      "prompt": "Escribe estimarPlan(longitud, validas, visitas, presupuesto). Estima el plan para un archivo fijo de lecturas antes de ejecutar. Los argumentos son enteros no negativos, validas es el número de consultas válidas y visitas es la suma de sus longitudes. Devuelve prefijos solo si cabe y su coste estimado es estrictamente menor; en otro caso devuelve directa.",
+      "starter": "",
+      "solution": "function estimarPlan(longitud, validas, visitas, presupuesto) {\n  const costeIndice = longitud + validas;\n  const celdasIndice = longitud + 1;\n  if (celdasIndice <= presupuesto && costeIndice < visitas) return \"prefijos\";\n  return \"directa\";\n}",
+      "entrypoint": "estimarPlan",
+      "cases": [
+        {
+          "name": "Ahorro con capacidad",
+          "args": [
+            4,
+            4,
+            11,
+            5
+          ],
+          "expected": "prefijos",
+          "preserveArgs": true
+        },
+        {
+          "name": "Mismo trabajo con menor memoria",
+          "args": [
+            4,
+            4,
+            11,
+            4
+          ],
+          "expected": "directa",
+          "preserveArgs": true
+        },
+        {
+          "name": "Empate",
+          "args": [
+            2,
+            2,
+            4,
+            3
+          ],
+          "expected": "directa",
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin consultas",
+          "args": [
+            4,
+            0,
+            0,
+            5
+          ],
+          "expected": "directa",
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Estima primero celdas y operaciones por separado.",
+      "hints": [
+        "Estima primero celdas y operaciones por separado.",
+        "Compara memoria con presupuesto y después el coste de construcción más consultas con visitas."
+      ],
+      "explanation": "La estrategia se puede escoger antes de ejecutar al conocer la carga prevista.",
+      "retryFeedback": "Escoger por visitas solas pierde tanto el coste de preparación como el presupuesto.",
+      "followUp": {
+        "requires": [
+          "integrar-decision"
+        ],
+        "reason": "Aplica el concepto a datos distintos y comprueba los casos límite antes de cerrar la lección."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Lee la evidencia antes de recomendar",
+    "brief": "Para [2, 0, 3, 1] usa los prefijos [0, 2, 2, 5, 6].",
+    "rounds": [
+      {
+        "prompt": "¿Qué resta responde [1, 4)?",
+        "options": [
+          "6 − 2",
+          "5 − 2",
+          "6 − 0"
+        ],
+        "answer": 0,
+        "explanation": "Se quita el acumulado anterior al índice uno."
+      },
+      {
+        "prompt": "Si el índice necesita cinco celdas y el presupuesto es cuatro, ¿qué opción recomienda el contrato?",
+        "options": [
+          "Directa",
+          "Prefijos",
+          "Siempre la opción que dio menos milisegundos"
+        ],
+        "answer": 0,
+        "explanation": "El límite de memoria precede al ahorro de operaciones."
+      },
+      {
+        "prompt": "¿Qué verificas antes de comparar tiempos?",
+        "options": [
+          "Que coincidan las salidas, incluido null",
+          "Que el arreglo tenga siempre diez tramos",
+          "Que ambos hagan igual número de sumas"
+        ],
+        "answer": 0,
+        "explanation": "Un programa más rápido que responde otra pregunta no sirve como alternativa."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "MIT 6.006 · Modelos de cómputo y análisis de algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/"
+    },
+    {
+      "title": "W3C · High Resolution Time",
+      "url": "https://www.w3.org/TR/hr-time-3/"
+    },
+    {
+      "title": "ECMAScript · Arreglos y operaciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array-objects"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Durante el lote de consultas los tramos son fijos, sus sumas se representan de forma exacta y cada consulta tiene dos límites."
+    ],
+    "workedExample": {
+      "problem": "Para cuatro tramos llegan dos consultas completas, otra de longitud tres, una vacía y una inválida.",
+      "reasoning": "El directo suma 4 + 4 + 3 + 0 = 11. El índice hace cuatro sumas de preparación y cuatro restas válidas. Los resultados, incluido el rechazo, coinciden.",
+      "result": "El índice usa ocho operaciones de cálculo y cinco celdas. Se elige si tiene cinco celdas de presupuesto. Con cuatro celdas se elige la versión directa."
+    },
+    "transferActivityIds": [
+      "aplicar-estimacion"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-informe.informe-de-decision": {
+      "explanationExcerpt": "Un informe de decisión reúne contrato, supuestos, evidencia, límites y recomendación",
+      "assessmentIds": [
+        "informe-memoria",
+        "informe-empate"
+      ]
+    },
+    "algoritmia.an-informe.modelo-frente-a-medicion": {
+      "explanationExcerpt": "Modelo y medición se contrastan: una suma contada no equivale a un milisegundo",
+      "assessmentIds": [
+        "modelo-unidades",
+        "modelo-reloj"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar y, cuando se indica, Performance API. Los casos deterministas se contrastan por valor, tipo y conservación de entradas.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Entregar un informe que elige entre recorrer por consulta y preparar sumas acumuladas bajo un límite de memoria.",
+    "previous": "algoritmia/an-invariantes/integrar-distancia",
+    "followUpIds": [
+      "aplicar-estimacion"
+    ]
+  }
+}

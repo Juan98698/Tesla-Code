@@ -1,0 +1,702 @@
+{
+  "id": "an-casos",
+  "outcome": "Instrumentar una búsqueda de estaciones y distinguir las fronteras teóricas de la media de consultas observadas.",
+  "requiresConcepts": [
+    "algoritmia.an-recursion.recurrencia",
+    "algoritmia.an-recursion.arbol-de-llamadas",
+    "algoritmia.an-recursion.teorema-maestro"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>El catálogo responde rápido cuando una parada aparece al principio. El equipo necesita saber qué ocurre al buscar al final o pedir una parada que no existe.</p><p>Las estaciones forman un arreglo sin huecos de códigos de texto y las comparaciones usan igualdad estricta.</p>\n<h3>Antes de empezar</h3><p>Un índice es la posición de un elemento y empieza en cero. length cuenta los elementos. El for arranca en cero, repite mientras i sea menor que length y aumenta i en uno. === compara los textos sin convertir tipos. return termina la función y devuelve un valor. Aquí la respuesta es [índice, comparaciones]. El índice −1 significa que no hubo coincidencia.</p>\n<h3>Una misma longitud admite costes distintos</h3><p>Contamos una comparación por cada igualdad entre un código y el objetivo. Para n datos y n &gt; 0, encontrarlo primero cuesta 1. Encontrarlo al final o no encontrarlo cuesta n: son entradas adversariales para este recorrido, es decir, provocan su coste máximo. Con n = 0, ambos extremos valen 0. El mejor caso es Θ(1) para longitudes positivas y el peor Θ(n). Esas cotas se aplican a funciones de coste distintas, aunque describan el mismo programa.</p>\n<pre data-language=\"javascript\"><code>function buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i &lt; estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nconsole.log(buscarParada([\"A\", \"B\", \"C\", \"D\"], \"C\"));\nconsole.log(buscarParada([\"A\", \"B\", \"C\", \"D\"], \"X\"));</code></pre>\n<h3>Qué significa «promedio»</h3><p>El caso promedio es una esperanza: multiplica el coste de cada posibilidad por su probabilidad y suma. Si el objetivo existe una sola vez y todas las posiciones son igual de probables, los costes son 1, 2, …, n y el promedio es (n + 1) / 2. Puedes emparejar primer y último coste: cada pareja suma n + 1. Si hay una probabilidad p de ausencia, con los aciertos aún uniformes, el coste esperado se vuelve p × n + (1 − p) × (n + 1) / 2. Con cuatro estaciones y p = 1/2 da 3,25. Una distribución distinta puede cambiar la media y hasta su crecimiento.</p>\n<h3>Medir una muestra</h3><p>La sensibilidad a la entrada significa que cambiar la posición, la frecuencia o la presencia del objetivo cambia los pasos, aun con igual n. En una muestra finita, la media observada es la suma dividida entre el número de consultas. Si no hubo consultas usamos null, un valor que indica ausencia de media. En el código push agrega al final; costes.length indica cuántas consultas quedaron registradas. La muestra no garantiza la distribución futura.</p>\n<pre data-language=\"javascript\"><code>function buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i &lt; estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nconsole.log(medirConsultas([\"A\", \"B\", \"C\", \"D\"], [\"A\", \"X\", \"C\"]));\nconsole.log(medirConsultas([\"A\"], []));</code></pre>\n<h3>Una comparación con el tramo anterior</h3><p>Recupera casoMaestro de tu entrega. Ese clasificador se conserva como herramienta para analizar un futuro algoritmo que sí descarte mitades. Un recorrido lineal como buscarParada avanza una estación y puede inspeccionarlas todas. La búsqueda por mitades exige una propiedad adicional, como un orden válido; se implementará más adelante.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Para [A, B, C, D], las consultas A, X y C llegan en ese orden.</p><p>A coincide en el primer paso. X obliga a inspeccionar las cuatro posiciones. C coincide en el índice dos, después de tres comparaciones.</p><p>El registro es [1,4,3], el total es 8 y la media observada es 8/3. El peor teórico de una sola consulta sigue siendo 4.</p></section>\n<h3>Preparar la entrega</h3><p>Mantén el clasificador de recurrencias y añade el informe del catálogo. Si recuperas una versión sin los nuevos nombres, consérvala y agrega las funciones indicadas. Contrasta duplicados, ausencia y una muestra vacía.</p>",
+  "examples": [
+    {
+      "id": "an-casos-e1",
+      "language": "javascript",
+      "code": "function buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nconsole.log(buscarParada([\"A\", \"B\", \"C\", \"D\"], \"C\"));\nconsole.log(buscarParada([\"A\", \"B\", \"C\", \"D\"], \"X\"));",
+      "stdout": "[2,3]\n[-1,4]\n"
+    },
+    {
+      "id": "an-casos-e2",
+      "language": "javascript",
+      "code": "function buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nconsole.log(medirConsultas([\"A\", \"B\", \"C\", \"D\"], [\"A\", \"X\", \"C\"]));\nconsole.log(medirConsultas([\"A\"], []));",
+      "stdout": "[[1,4,3],8,2.6666666666666665]\n[[],0,null]\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "peor-ausente",
+      "type": "choice",
+      "concept": "algoritmia.an-casos.caso-adversarial",
+      "prompt": "Para 12 códigos, ¿qué búsqueda alcanza el peor número de comparaciones?",
+      "options": [
+        "Un código ausente",
+        "El código en índice cero",
+        "Una consulta sobre el catálogo vacío"
+      ],
+      "answer": 0,
+      "explanation": "Una ausencia inspecciona las 12 posiciones."
+    },
+    {
+      "id": "mejor-constante",
+      "type": "choice",
+      "concept": "algoritmia.an-casos.caso-adversarial",
+      "prompt": "Con al menos una estación, ¿cuánto cuesta el mejor caso?",
+      "options": [
+        "Una comparación",
+        "n comparaciones",
+        "Cero comparaciones"
+      ],
+      "answer": 0,
+      "explanation": "El primer código ya coincide."
+    },
+    {
+      "id": "media-uniforme",
+      "type": "choice",
+      "concept": "algoritmia.an-casos.caso-promedio",
+      "prompt": "Si cuatro posiciones de acierto son equiprobables, ¿cuál es el coste esperado?",
+      "options": [
+        "2,5",
+        "4",
+        "1"
+      ],
+      "answer": 0,
+      "explanation": "La media de 1, 2, 3 y 4 es 2,5."
+    },
+    {
+      "id": "media-ausencias",
+      "type": "choice",
+      "concept": "algoritmia.an-casos.caso-promedio",
+      "prompt": "Con cuatro estaciones, la mitad de consultas no existe y los aciertos son equiprobables. ¿Cuál es la esperanza?",
+      "options": [
+        "3,25",
+        "2,5",
+        "4"
+      ],
+      "answer": 0,
+      "explanation": "La mitad pesa 4 y la otra mitad 2,5."
+    },
+    {
+      "id": "mismo-tamano",
+      "type": "choice",
+      "concept": "algoritmia.an-casos.sensibilidad-a-la-entrada",
+      "prompt": "¿Qué puede modificar la media sin modificar n?",
+      "options": [
+        "Que los aciertos se concentren en las primeras posiciones",
+        "Cambiar el nombre de la variable estaciones",
+        "Usar otro nombre para comparaciones"
+      ],
+      "answer": 0,
+      "explanation": "Cambiar la probabilidad de cada coste modifica la esperanza."
+    },
+    {
+      "id": "sin-muestra",
+      "type": "choice",
+      "concept": "algoritmia.an-casos.sensibilidad-a-la-entrada",
+      "prompt": "¿Qué representa null como media en el contrato del perfil?",
+      "options": [
+        "Que no se ejecutaron consultas",
+        "Que todas las consultas costaron cero",
+        "Que el catálogo siempre está vacío"
+      ],
+      "answer": 0,
+      "explanation": "No hay observaciones para dividir."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.an-casos.caso-adversarial",
+      "prompt": "Interpreta costes con la misma red",
+      "brief": "El equipo vio dos costes para un catálogo de cuatro paradas y quiere explicar la diferencia.",
+      "evidence": [
+        {
+          "label": "Primera parada",
+          "text": "A es la primera posición."
+        },
+        {
+          "label": "Ausencia",
+          "text": "X no figura en el catálogo."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué consulta revela el peor caso?",
+          "options": [
+            "X",
+            "A",
+            "Ambas cuestan exactamente lo mismo"
+          ],
+          "answer": 0,
+          "explanation": "La consulta ausente recorre las cuatro posiciones.",
+          "id": "decision-1",
+          "errorHint": "Cuenta también las comparaciones sin coincidencia."
+        },
+        {
+          "prompt": "¿Estos dos datos determinan la media futura?",
+          "options": [
+            "No, hace falta una distribución o una muestra representativa",
+            "Sí, siempre será 2,5",
+            "Sí, siempre será 4"
+          ],
+          "answer": 0,
+          "explanation": "Los dos datos muestran posibilidades, no sus probabilidades.",
+          "id": "decision-2",
+          "errorHint": "Distingue el coste posible de la frecuencia con que se observa."
+        }
+      ],
+      "hint": "Cuenta también las comparaciones sin coincidencia.",
+      "explanation": "La posición cambia el coste. El promedio necesita supuestos declarados.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Entender",
+        "input": "Una lista de paradas y dos consultas.",
+        "output": "Una predicción justificada de los costes.",
+        "reflection": "Indica dos consultas de igual tamaño que tengan costes distintos y explica el motivo.",
+        "requires": [],
+        "from": "algoritmia/an-recursion/integrar-maestro"
+      }
+    },
+    {
+      "id": "implementar-busqueda",
+      "type": "javascript",
+      "concept": "algoritmia.an-casos.sensibilidad-a-la-entrada",
+      "prompt": "Añade buscarParada(estaciones, objetivo). Devuelve [índice de la primera coincidencia, comparaciones]. Si falta, devuelve [−1, comparaciones]. Conserva casoMaestro y los datos. Cuenta una comparación por posición visitada y detente al encontrarla.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  // Cuenta y devuelve el primer acierto.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n",
+      "entrypoint": "buscarParada",
+      "cases": [
+        {
+          "name": "Primera posición",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "A"
+          ],
+          "expected": [
+            0,
+            1
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 1
+        },
+        {
+          "name": "Ausente",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "X"
+          ],
+          "expected": [
+            -1,
+            4
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 4
+        },
+        {
+          "name": "Conservar primera coincidencia",
+          "args": [
+            [
+              "A",
+              "B",
+              "B",
+              "C"
+            ],
+            "B"
+          ],
+          "expected": [
+            1,
+            2
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Catálogo vacío",
+          "args": [
+            [],
+            "A"
+          ],
+          "expected": [
+            -1,
+            0
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Se conserva la clasificación para mitades",
+          "args": [
+            1,
+            2,
+            0
+          ],
+          "expected": "equilibrado",
+          "preserveArgs": true,
+          "entrypoint": "casoMaestro"
+        }
+      ],
+      "hint": "Aumenta el contador justo antes de comprobar la igualdad.",
+      "hints": [
+        "Aumenta el contador justo antes de comprobar la igualdad.",
+        "Devuelve desde el ciclo en el primer acierto; tras terminar sin acierto devuelve −1 con el contador."
+      ],
+      "explanation": "La búsqueda conserva la posición original y cuenta exactamente las comparaciones anteriores al retorno.",
+      "retryFeedback": "Comprueba una coincidencia en índice cero y el vacío. No vuelvas a leer una posición si ya encontraste el objetivo.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Implementar",
+        "input": "Recupera el clasificador de la lección anterior.",
+        "output": "Una función que devuelve posición y comparaciones.",
+        "reflection": "Anota cuándo aumenta el contador y por qué un índice cero representa un acierto.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/an-recursion/integrar-maestro"
+      }
+    },
+    {
+      "id": "reescribir-muestra",
+      "type": "javascript",
+      "concept": "algoritmia.an-casos.caso-promedio",
+      "prompt": "Añade medirConsultas(estaciones, consultas) sobre buscarParada. Devuelve [costes, total, media]; usa null solo si no hay consultas. Mantén el método anterior.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  // Reutiliza buscarParada por cada consulta.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n",
+      "entrypoint": "medirConsultas",
+      "cases": [
+        {
+          "name": "Media de una muestra",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            [
+              "A",
+              "X",
+              "C"
+            ]
+          ],
+          "expected": [
+            [
+              1,
+              4,
+              3
+            ],
+            8,
+            2.6666666666666665
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin consultas",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            []
+          ],
+          "expected": [
+            [],
+            0,
+            null
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Tres consultas sobre catálogo vacío",
+          "args": [
+            [],
+            [
+              "A",
+              "A",
+              "B"
+            ]
+          ],
+          "expected": [
+            [
+              0,
+              0,
+              0
+            ],
+            0,
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "La búsqueda se conserva",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "B"
+          ],
+          "expected": [
+            1,
+            2
+          ],
+          "preserveArgs": true,
+          "entrypoint": "buscarParada"
+        }
+      ],
+      "hint": "Cada retorno de buscarParada tiene el coste en su segunda posición.",
+      "hints": [
+        "Cada retorno de buscarParada tiene el coste en su segunda posición.",
+        "Primero acumula total. Divide solo si hay al menos una consulta."
+      ],
+      "explanation": "Una media de cero es válida si todas las consultas cuestan cero.",
+      "retryFeedback": "Distingue una lista de consultas vacía de consultas realizadas sobre una lista vacía.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera tu búsqueda comprobada.",
+        "output": "Un registro y una media de varias consultas.",
+        "reflection": "Justifica por qué cero y null significan cosas distintas aquí.",
+        "requires": [
+          "implementar-busqueda"
+        ],
+        "from": "algoritmia/an-casos/implementar-busqueda"
+      }
+    },
+    {
+      "id": "integrar-perfil",
+      "type": "javascript",
+      "concept": "algoritmia.an-casos.caso-adversarial",
+      "prompt": "Añade perfilarConsultas. Devuelve {costes, total, media, mejorPosible, peorPosible}. Conserva los datos de medirConsultas. El mejor vale 0 si el catálogo está vacío y 1 en otro caso; el peor es la longitud. Repara el borrador que confunde el total de la muestra con el peor posible.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return { costes: medicion[0], total: medicion[1], media: medicion[2], mejorPosible: 1, peorPosible: medicion[1] };\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n",
+      "entrypoint": "perfilarConsultas",
+      "cases": [
+        {
+          "name": "Consultas repetidas no aumentan el peor unitario",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            [
+              "A",
+              "X",
+              "C"
+            ]
+          ],
+          "expected": {
+            "costes": [
+              1,
+              4,
+              3
+            ],
+            "total": 8,
+            "media": 2.6666666666666665,
+            "mejorPosible": 1,
+            "peorPosible": 4
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin muestra aún hay límites",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            []
+          ],
+          "expected": {
+            "costes": [],
+            "total": 0,
+            "media": null,
+            "mejorPosible": 1,
+            "peorPosible": 4
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            [
+              "X"
+            ]
+          ],
+          "expected": {
+            "costes": [
+              0
+            ],
+            "total": 0,
+            "media": 0,
+            "mejorPosible": 0,
+            "peorPosible": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Se conserva la clasificación para mitades",
+          "args": [
+            1,
+            2,
+            0
+          ],
+          "expected": "equilibrado",
+          "preserveArgs": true,
+          "entrypoint": "casoMaestro"
+        },
+        {
+          "name": "La medición anterior sigue disponible",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            [
+              "B"
+            ]
+          ],
+          "expected": [
+            [
+              2
+            ],
+            2,
+            2
+          ],
+          "preserveArgs": true,
+          "entrypoint": "medirConsultas"
+        }
+      ],
+      "hint": "Separa operaciones de todas las consultas de operaciones de una sola.",
+      "hints": [
+        "Separa operaciones de todas las consultas de operaciones de una sola.",
+        "Los límites se obtienen de estaciones.length, incluso cuando consultas está vacío."
+      ],
+      "explanation": "El perfil explicita tamaño, coste observado y fronteras de una consulta.",
+      "retryFeedback": "Un catálogo vacío no puede realizar una comparación; repetir consultas no cambia la longitud.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Integrar y depurar",
+        "input": "Recupera el registro anterior.",
+        "output": "Un perfil que separa observaciones de fronteras teóricas.",
+        "reflection": "Anota qué medida usarías para una alerta de peor caso y cuál describe tu muestra.",
+        "requires": [
+          "reescribir-muestra"
+        ],
+        "from": "algoritmia/an-casos/reescribir-muestra"
+      }
+    },
+    {
+      "id": "aplicar-incidencia",
+      "type": "javascript",
+      "concept": "algoritmia.an-casos.sensibilidad-a-la-entrada",
+      "prompt": "Escribe primeraIncidencia(esperas, limite). Los números son minutos no negativos. Devuelve [índice, inspecciones] de la primera espera estrictamente superior a limite. Si ninguna lo supera, devuelve [−1, inspecciones]. Conserva la lista y detente en el primer acierto.",
+      "starter": "",
+      "solution": "function primeraIncidencia(esperas, limite) {\n  let inspecciones = 0;\n  for (let i = 0; i < esperas.length; i++) {\n    inspecciones++;\n    if (esperas[i] > limite) return [i, inspecciones];\n  }\n  return [-1, inspecciones];\n}",
+      "entrypoint": "primeraIncidencia",
+      "cases": [
+        {
+          "name": "Igualdad y acierto posterior",
+          "args": [
+            [
+              5,
+              8,
+              12
+            ],
+            5
+          ],
+          "expected": [
+            1,
+            2
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Primer acierto",
+          "args": [
+            [
+              8,
+              10
+            ],
+            5
+          ],
+          "expected": [
+            0,
+            1
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 1
+        },
+        {
+          "name": "Ninguno",
+          "args": [
+            [
+              1,
+              5
+            ],
+            5
+          ],
+          "expected": [
+            -1,
+            2
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            0
+          ],
+          "expected": [
+            -1,
+            0
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        }
+      ],
+      "hint": "Igual al límite no es superior.",
+      "hints": [
+        "Igual al límite no es superior.",
+        "Conserva la posición y el contador como resultados distintos."
+      ],
+      "explanation": "La lectura termina al detectar la primera incidencia.",
+      "retryFeedback": "Valida la frontera estricta y el contador de intentos, también en vacío.",
+      "followUp": {
+        "requires": [
+          "integrar-perfil"
+        ],
+        "reason": "Aplica el concepto a datos distintos y comprueba los casos límite antes de cerrar la lección."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Traza una consulta al catálogo",
+    "brief": "La lista [A, B, C, D] tiene cuatro códigos y la consulta busca C.",
+    "rounds": [
+      {
+        "prompt": "Al revisar A, ¿cuántas comparaciones se han hecho?",
+        "options": [
+          "Una",
+          "Cero",
+          "Cuatro"
+        ],
+        "answer": 0,
+        "explanation": "Comparar A contra C cuenta aunque falle."
+      },
+      {
+        "prompt": "¿Qué devuelve al llegar a C?",
+        "options": [
+          "[2,3]",
+          "[3,3]",
+          "[2,2]"
+        ],
+        "answer": 0,
+        "explanation": "El índice empieza en cero y cada posición visitada aporta una comparación."
+      },
+      {
+        "prompt": "Si luego llega X, ¿cuántas comparaciones requiere esa consulta?",
+        "options": [
+          "Cuatro",
+          "Tres",
+          "Cero"
+        ],
+        "answer": 0,
+        "explanation": "Una ausencia obliga a revisar toda esta lista."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "MIT 6.006 · Modelos de cómputo y análisis de algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/"
+    },
+    {
+      "title": "ECMAScript · Arreglos y operaciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array-objects"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Las estaciones forman un arreglo sin huecos de códigos de texto y las comparaciones usan igualdad estricta."
+    ],
+    "workedExample": {
+      "problem": "Para [A, B, C, D], las consultas A, X y C llegan en ese orden.",
+      "reasoning": "A coincide en el primer paso. X obliga a inspeccionar las cuatro posiciones. C coincide en el índice dos, después de tres comparaciones.",
+      "result": "El registro es [1,4,3], el total es 8 y la media observada es 8/3. El peor teórico de una sola consulta sigue siendo 4."
+    },
+    "transferActivityIds": [
+      "aplicar-incidencia"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-casos.caso-adversarial": {
+      "explanationExcerpt": "son entradas adversariales para este recorrido, es decir, provocan su coste máximo",
+      "assessmentIds": [
+        "peor-ausente",
+        "mejor-constante"
+      ]
+    },
+    "algoritmia.an-casos.caso-promedio": {
+      "explanationExcerpt": "El caso promedio es una esperanza: multiplica el coste de cada posibilidad por su probabilidad y suma",
+      "assessmentIds": [
+        "media-uniforme",
+        "media-ausencias"
+      ]
+    },
+    "algoritmia.an-casos.sensibilidad-a-la-entrada": {
+      "explanationExcerpt": "cambiar la posición, la frecuencia o la presencia del objetivo cambia los pasos, aun con igual n",
+      "assessmentIds": [
+        "mismo-tamano",
+        "sin-muestra"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar y, cuando se indica, Performance API. Los casos deterministas se contrastan por valor, tipo y conservación de entradas.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Instrumentar una búsqueda de estaciones y distinguir las fronteras teóricas de la media de consultas observadas.",
+    "previous": "algoritmia/an-recursion/integrar-maestro",
+    "followUpIds": [
+      "aplicar-incidencia"
+    ]
+  }
+}

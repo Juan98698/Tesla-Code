@@ -1,0 +1,684 @@
+{
+  "id": "an-amortizado",
+  "outcome": "Comparar políticas de crecimiento y justificar el coste amortizado de las altas del catálogo.",
+  "requiresConcepts": [
+    "algoritmia.an-casos.caso-adversarial",
+    "algoritmia.an-casos.caso-promedio",
+    "algoritmia.an-casos.sensibilidad-a-la-entrada"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>El catálogo debe aceptar altas a medida que llegan. Reservar una celda cada vez parece económico, pero trasladar lo ya guardado puede dominar el trabajo.</p><p>El modelo empieza con capacidad uno, solo añade al final y cuenta una escritura por alta y una por cada celda copiada.</p>\n<h3>Longitud, capacidad y copia</h3><p>La longitud lógica cuenta datos guardados. La capacidad marca celdas disponibles. Estar lleno significa que ambas cantidades coinciden. Antes de una alta en lleno, se reserva otro bloque, se copian los datos en orden y se deja de usar el anterior. En new Array(4) hay cuatro posiciones reservadas en el modelo, inicialmente sin valores escritos. length da la longitud del arreglo JavaScript, que en este ejemplo usamos como capacidad explícita; longitud guarda cuántas posiciones sí tienen datos. El estándar de JavaScript define el comportamiento observable de Array, no una política física universal de memoria ni de crecimiento para push.</p>\n<h3>Qué ocurre al duplicar</h3><p>Duplicar capacidad significa reservar el doble solo cuando el bloque está lleno. Con cinco altas y tamaños 1 → 2 → 4 → 8, se copian 1, 2 y 4 datos. Se escriben cinco datos nuevos. El coste acumulado es 12 escrituras, mientras que la quinta operación individual cuesta cinco escrituras. El pico transitorio de celdas reservadas es 4 + 8 = 12 porque las dos reservas coinciden durante la copia. Aquí contamos celdas lógicas, no bytes ni memoria real del proceso.</p>\n<pre data-language=\"javascript\"><code>function resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas &lt; cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nconsole.log(resumirAltas(5, true));\nconsole.log(resumirAltas(5, false));</code></pre>\n<h3>Demostrar el coste de una secuencia</h3><p>El método agregado suma el coste de toda la secuencia y divide entre su número de operaciones. Si el último bloque tiene capacidad C, las copias acumuladas son 1 + 2 + 4 + … + C/2 = C − 1. Para n &gt; 0, C es la menor potencia de dos que alcanza n y C &lt; 2n. Por tanto se realizan menos de 2n copias y menos de 3n escrituras en total. Cada alta escribe al menos una vez, así que el total es Θ(n) y el coste amortizado por alta es Θ(1). Una alta que obliga a copiar puede costar Θ(n) por sí sola. Para cero altas se reporta total cero y no se divide.</p>\n<h3>Amortizado y promedio responden preguntas distintas</h3><p>El análisis amortizado reparte el coste de una secuencia completa sin asignar probabilidades. El caso promedio de la lección anterior sí depende de cuán probable es cada entrada. Si en vez de duplicar aumentas la capacidad en uno, copias 1 + 2 + … + (n − 1) = n(n − 1)/2: al emparejar los extremos cada pareja suma n, o puedes ver la mitad de una cuadrícula de n por n − 1. El total pasa a Θ(n²). Gastar menos celdas libres no garantiza menos trabajo.</p>\n<pre data-language=\"javascript\"><code>function agregarAvisos(avisos) {\n  let datos = new Array(1);\n  let longitud = 0;\n  let copias = 0;\n  for (const aviso of avisos) {\n    if (longitud === datos.length) {\n      const nuevo = new Array(datos.length * 2);\n      for (let i = 0; i &lt; longitud; i++) {\n        nuevo[i] = datos[i];\n        copias++;\n      }\n      datos = nuevo;\n    }\n    datos[longitud] = aviso;\n    longitud++;\n  }\n  return [datos.slice(0, longitud), datos.length, copias];\n}\n\nconsole.log(agregarAvisos([\"A\", \"B\", \"C\", \"D\", \"E\"]));\nconsole.log(agregarAvisos([]));</code></pre>\n<h3>Del modelo a datos reales</h3><p>En el simulador basta sumar ocupadas al contador de copias, porque sabemos cuántas copias corresponderían. En el segundo programa sí se escriben las celdas. slice(0, longitud) produce una copia de las posiciones desde cero incluido hasta longitud excluida, así que la salida omite huecos. Esa copia final pertenece al resultado del ejercicio y no se suma al contador de traslados por crecimiento.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>El catálogo empieza con capacidad uno y recibe cinco códigos en orden.</p><p>Las primeras ampliaciones llegan al insertar el segundo, tercero y quinto código. Sus traslados son 1, 2 y 4.</p><p>Con duplicación se hacen siete copias y cinco escrituras nuevas. El total de escrituras vale doce y la capacidad termina en ocho.</p></section>\n<h3>Preparar la entrega</h3><p>Recupera el perfil anterior y conserva su salida. Añade al informe dos políticas de altas. En Integrar repara la rama que se equivoca al elegir la política de crecimiento fijo.</p>",
+  "examples": [
+    {
+      "id": "an-amortizado-e1",
+      "language": "javascript",
+      "code": "function resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nconsole.log(resumirAltas(5, true));\nconsole.log(resumirAltas(5, false));",
+      "stdout": "[8,7,12,12]\n[5,10,15,9]\n"
+    },
+    {
+      "id": "an-amortizado-e2",
+      "language": "javascript",
+      "code": "function agregarAvisos(avisos) {\n  let datos = new Array(1);\n  let longitud = 0;\n  let copias = 0;\n  for (const aviso of avisos) {\n    if (longitud === datos.length) {\n      const nuevo = new Array(datos.length * 2);\n      for (let i = 0; i < longitud; i++) {\n        nuevo[i] = datos[i];\n        copias++;\n      }\n      datos = nuevo;\n    }\n    datos[longitud] = aviso;\n    longitud++;\n  }\n  return [datos.slice(0, longitud), datos.length, copias];\n}\n\nconsole.log(agregarAvisos([\"A\", \"B\", \"C\", \"D\", \"E\"]));\nconsole.log(agregarAvisos([]));",
+      "stdout": "[[\"A\",\"B\",\"C\",\"D\",\"E\"],8,7]\n[[],1,0]\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "amort-probabilidad",
+      "type": "choice",
+      "concept": "algoritmia.an-amortizado.analisis-amortizado",
+      "prompt": "¿Qué diferencia el análisis amortizado del promedio probabilístico?",
+      "options": [
+        "Acota el coste de la secuencia sin asignar probabilidades",
+        "Supone que todas las entradas son equiprobables",
+        "Solo mide el último evento"
+      ],
+      "answer": 0,
+      "explanation": "Se analiza el total de operaciones sobre el estado que va cambiando."
+    },
+    {
+      "id": "amort-peor",
+      "type": "choice",
+      "concept": "algoritmia.an-amortizado.analisis-amortizado",
+      "prompt": "¿Puede una alta individual costar Θ(n) con coste amortizado constante?",
+      "options": [
+        "Sí, al trasladar n datos",
+        "No, todas cuestan lo mismo",
+        "Solo si el catálogo es vacío"
+      ],
+      "answer": 0,
+      "explanation": "La copia costosa se paga con muchas altas baratas en la secuencia."
+    },
+    {
+      "id": "crecer-justo",
+      "type": "choice",
+      "concept": "algoritmia.an-amortizado.duplicacion-de-capacidad",
+      "prompt": "¿Cuándo se duplica un bloque lleno?",
+      "options": [
+        "Antes de insertar un dato que no cabe",
+        "Al completar exactamente la última celda, aunque no llegue otra alta",
+        "En cada alta"
+      ],
+      "answer": 0,
+      "explanation": "Una reserva llena sigue siendo válida hasta que se necesita espacio adicional."
+    },
+    {
+      "id": "capacidad-cinco",
+      "type": "choice",
+      "concept": "algoritmia.an-amortizado.duplicacion-de-capacidad",
+      "prompt": "¿Qué capacidad final tiene el modelo con cinco altas?",
+      "options": [
+        "Ocho",
+        "Cinco",
+        "Cuatro"
+      ],
+      "answer": 0,
+      "explanation": "La quinta alta necesita pasar de cuatro a ocho."
+    },
+    {
+      "id": "agregado-copias",
+      "type": "choice",
+      "concept": "algoritmia.an-amortizado.metodo-agregado",
+      "prompt": "¿Cuántas copias suman los traslados 1, 2 y 4?",
+      "options": [
+        "Siete",
+        "Ocho",
+        "Doce"
+      ],
+      "answer": 0,
+      "explanation": "Doce incluye también las cinco escrituras de nuevos datos."
+    },
+    {
+      "id": "agregado-fijo",
+      "type": "choice",
+      "concept": "algoritmia.an-amortizado.metodo-agregado",
+      "prompt": "¿Cómo crece el total de copias con capacidad aumentada en uno?",
+      "options": [
+        "Cuadrático",
+        "Constante",
+        "Logarítmico"
+      ],
+      "answer": 0,
+      "explanation": "Se suman 1 + 2 + … + (n − 1)."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.an-amortizado.analisis-amortizado",
+      "prompt": "Compara dos políticas de alta",
+      "brief": "Tesla Metro puede duplicar el bloque o sumar una sola celda cuando se llena.",
+      "evidence": [
+        {
+          "label": "Doblar",
+          "text": "Las copias para cinco altas son 1, 2 y 4."
+        },
+        {
+          "label": "Una celda",
+          "text": "Para cinco altas el crecimiento fijo copia 1, 2, 3 y 4."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué política copia menos celdas en este escenario?",
+          "options": [
+            "Duplicar",
+            "Sumar uno",
+            "Empatan"
+          ],
+          "answer": 0,
+          "explanation": "La primera hace siete copias y la segunda diez.",
+          "id": "decision-1",
+          "errorHint": "Suma cada traslado."
+        },
+        {
+          "prompt": "¿Qué afirma el coste constante amortizado?",
+          "options": [
+            "La secuencia completa cuesta a lo sumo una constante por alta al repartir el total",
+            "Cada alta se ejecuta en un paso",
+            "Que la entrada fue elegida al azar"
+          ],
+          "answer": 0,
+          "explanation": "La quinta alta puede copiar cuatro datos, aunque el promedio amortizado tenga cota constante.",
+          "id": "decision-2",
+          "errorHint": "Mira el total para n altas antes de evaluar una alta aislada."
+        }
+      ],
+      "hint": "Suma cada traslado.",
+      "explanation": "La secuencia y una operación aislada tienen cotas distintas.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Entender",
+        "input": "Dos políticas y sus traslados.",
+        "output": "Una predicción del coste acumulado.",
+        "reflection": "Explica qué se ahorra y qué se reserva de más al duplicar.",
+        "requires": [],
+        "from": "algoritmia/an-casos/integrar-perfil"
+      }
+    },
+    {
+      "id": "implementar-crecimiento",
+      "type": "javascript",
+      "concept": "algoritmia.an-amortizado.duplicacion-de-capacidad",
+      "prompt": "Añade resumirAltas(cantidad, duplicar). Devuelve [capacidad, copias, escrituras, pico]. cantidad es un entero de 0 a 1000. Con true duplica al llenar, con false crece en uno. Usa capacidad inicial y pico inicial de uno. Conserva perfilarConsultas.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  // Simula cambios de capacidad.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n",
+      "entrypoint": "resumirAltas",
+      "cases": [
+        {
+          "name": "Sin altas",
+          "args": [
+            0,
+            true
+          ],
+          "expected": [
+            1,
+            0,
+            0,
+            1
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Cabe exacto",
+          "args": [
+            4,
+            true
+          ],
+          "expected": [
+            4,
+            3,
+            7,
+            6
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Duplicar al desbordar",
+          "args": [
+            5,
+            true
+          ],
+          "expected": [
+            8,
+            7,
+            12,
+            12
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Crecer de uno en uno",
+          "args": [
+            5,
+            false
+          ],
+          "expected": [
+            5,
+            10,
+            15,
+            9
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar perfil de búsqueda",
+          "args": [
+            [
+              "A"
+            ],
+            [
+              "A"
+            ]
+          ],
+          "expected": {
+            "costes": [
+              1
+            ],
+            "total": 1,
+            "media": 1,
+            "mejorPosible": 1,
+            "peorPosible": 1
+          },
+          "preserveArgs": true,
+          "entrypoint": "perfilarConsultas"
+        }
+      ],
+      "hint": "En cada alta compara ocupadas con capacidad antes de escribir.",
+      "hints": [
+        "En cada alta compara ocupadas con capacidad antes de escribir.",
+        "En una ampliación suma las celdas copiadas y registra la suma de reservas anterior y nueva para el pico."
+      ],
+      "explanation": "Contar escrituras separadas revela qué cambia con la estrategia.",
+      "retryFeedback": "Con cinco altas y duplicación, la última ampliación va de cuatro a ocho.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Implementar",
+        "input": "El perfil de consultas anterior.",
+        "output": "Un modelo de altas con capacidad y escrituras.",
+        "reflection": "Anota en qué alta se duplicó por última vez en el caso de cinco.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/an-casos/integrar-perfil"
+      }
+    },
+    {
+      "id": "reescribir-politicas",
+      "type": "javascript",
+      "concept": "algoritmia.an-amortizado.metodo-agregado",
+      "prompt": "Añade compararAltas(cantidad). Retorna los dos informes de resumirAltas en el orden duplicación, crecimiento fijo. Reutiliza el simulador y conserva su contrato.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  // Ejecuta ambas políticas.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n",
+      "entrypoint": "compararAltas",
+      "cases": [
+        {
+          "name": "Políticas diferentes",
+          "args": [
+            5
+          ],
+          "expected": [
+            [
+              8,
+              7,
+              12,
+              12
+            ],
+            [
+              5,
+              10,
+              15,
+              9
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin altas",
+          "args": [
+            0
+          ],
+          "expected": [
+            [
+              1,
+              0,
+              0,
+              1
+            ],
+            [
+              1,
+              0,
+              0,
+              1
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Empate inicial",
+          "args": [
+            2
+          ],
+          "expected": [
+            [
+              2,
+              1,
+              3,
+              3
+            ],
+            [
+              2,
+              1,
+              3,
+              3
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Simulador conservado",
+          "args": [
+            3,
+            true
+          ],
+          "expected": [
+            4,
+            3,
+            6,
+            6
+          ],
+          "preserveArgs": true,
+          "entrypoint": "resumirAltas"
+        }
+      ],
+      "hint": "Usa los mismos datos en ambas ejecuciones.",
+      "hints": [
+        "Usa los mismos datos en ambas ejecuciones.",
+        "true y false eligen políticas distintas; conserva el orden pedido."
+      ],
+      "explanation": "Los retornos reúnen las dos políticas con entradas idénticas.",
+      "retryFeedback": "Al principio las políticas pueden coincidir; prueba también cinco altas.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Reescribir y comprobar",
+        "input": "El modelo comprobado.",
+        "output": "Una comparación de políticas para la misma cantidad.",
+        "reflection": "Explica por qué una diferencia puede no aparecer con dos altas.",
+        "requires": [
+          "implementar-crecimiento"
+        ],
+        "from": "algoritmia/an-amortizado/implementar-crecimiento"
+      }
+    },
+    {
+      "id": "integrar-catalogo",
+      "type": "javascript",
+      "concept": "algoritmia.an-amortizado.analisis-amortizado",
+      "prompt": "Añade auditarCatalogo(estaciones, consultas, altas). Devuelve {busqueda, crecimiento}. Usa perfilarConsultas y compararAltas. Si tu versión repite la primera política al comparar, repara ese fallo sin perder el perfil previo.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, true)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n",
+      "entrypoint": "auditarCatalogo",
+      "cases": [
+        {
+          "name": "Consulta y crecimiento",
+          "args": [
+            [
+              "A"
+            ],
+            [
+              "A"
+            ],
+            5
+          ],
+          "expected": {
+            "busqueda": {
+              "costes": [
+                1
+              ],
+              "total": 1,
+              "media": 1,
+              "mejorPosible": 1,
+              "peorPosible": 1
+            },
+            "crecimiento": [
+              [
+                8,
+                7,
+                12,
+                12
+              ],
+              [
+                5,
+                10,
+                15,
+                9
+              ]
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Nada que consultar ni añadir",
+          "args": [
+            [],
+            [],
+            0
+          ],
+          "expected": {
+            "busqueda": {
+              "costes": [],
+              "total": 0,
+              "media": null,
+              "mejorPosible": 0,
+              "peorPosible": 0
+            },
+            "crecimiento": [
+              [
+                1,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                1
+              ]
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conservar perfil de búsqueda",
+          "args": [
+            [
+              "A"
+            ],
+            [
+              "A"
+            ]
+          ],
+          "expected": {
+            "costes": [
+              1
+            ],
+            "total": 1,
+            "media": 1,
+            "mejorPosible": 1,
+            "peorPosible": 1
+          },
+          "preserveArgs": true,
+          "entrypoint": "perfilarConsultas"
+        }
+      ],
+      "hint": "Comprueba primero compararAltas con cinco.",
+      "hints": [
+        "Comprueba primero compararAltas con cinco.",
+        "Después arma el objeto con los dos informes sin recalcular el perfil a mano."
+      ],
+      "explanation": "El informe integra coste de lectura y de crecimiento.",
+      "retryFeedback": "Si ambas filas son idénticas para cinco altas, comprueba el segundo booleano.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Integrar y depurar",
+        "input": "Tu comparación y el perfil que conservaste.",
+        "output": "Un informe del catálogo que conserva ambas capacidades.",
+        "reflection": "Describe una razón para elegir duplicación y una razón para fijar un límite de memoria.",
+        "requires": [
+          "reescribir-politicas"
+        ],
+        "from": "algoritmia/an-amortizado/reescribir-politicas"
+      }
+    },
+    {
+      "id": "aplicar-avisos",
+      "type": "javascript",
+      "concept": "algoritmia.an-amortizado.duplicacion-de-capacidad",
+      "prompt": "Escribe agregarAvisos(avisos). Reserva capacidad uno, agrega cada texto en orden y duplica cuando falte espacio. Devuelve [avisos almacenados sin huecos, capacidad final, copias por crecimiento]. Cuenta cada traslado y conserva la entrada.",
+      "starter": "",
+      "solution": "function agregarAvisos(avisos) {\n  let datos = new Array(1);\n  let longitud = 0;\n  let copias = 0;\n  for (const aviso of avisos) {\n    if (longitud === datos.length) {\n      const nuevo = new Array(datos.length * 2);\n      for (let i = 0; i < longitud; i++) {\n        nuevo[i] = datos[i];\n        copias++;\n      }\n      datos = nuevo;\n    }\n    datos[longitud] = aviso;\n    longitud++;\n  }\n  return [datos.slice(0, longitud), datos.length, copias];\n}",
+      "entrypoint": "agregarAvisos",
+      "cases": [
+        {
+          "name": "Cuatro avisos",
+          "args": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          ],
+          "expected": [
+            [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            4,
+            3
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Cinco avisos y vacío válido",
+          "args": [
+            [
+              "A",
+              "",
+              "A",
+              "B",
+              "C"
+            ]
+          ],
+          "expected": [
+            [
+              "A",
+              "",
+              "A",
+              "B",
+              "C"
+            ],
+            8,
+            7
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin avisos",
+          "args": [
+            []
+          ],
+          "expected": [
+            [],
+            1,
+            0
+          ],
+          "preserveArgs": true
+        }
+      ],
+      "hint": "Distingue longitud lógica de la cantidad de posiciones reservadas.",
+      "hints": [
+        "Distingue longitud lógica de la cantidad de posiciones reservadas.",
+        "Copia los avisos guardados antes de escribir el nuevo; la copia final de salida no es un traslado por crecimiento."
+      ],
+      "explanation": "La secuencia de avisos conserva orden, posiciones y el recuento de copias.",
+      "retryFeedback": "Contrasta el último aviso que cabe exacto y el primero que obliga a crecer.",
+      "followUp": {
+        "requires": [
+          "integrar-catalogo"
+        ],
+        "reason": "Aplica el concepto a datos distintos y comprueba los casos límite antes de cerrar la lección."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Traza las primeras ampliaciones",
+    "brief": "Capacidad uno, lista vacía y cinco altas con duplicación.",
+    "rounds": [
+      {
+        "prompt": "¿La primera alta obliga a copiar?",
+        "options": [
+          "No, ocupa la celda libre",
+          "Sí, copia una celda",
+          "Sí, duplica sin copiar"
+        ],
+        "answer": 0,
+        "explanation": "La longitud era cero y había una celda disponible."
+      },
+      {
+        "prompt": "¿En qué alta se copia un bloque de dos datos?",
+        "options": [
+          "En la tercera",
+          "En la segunda",
+          "En la cuarta"
+        ],
+        "answer": 0,
+        "explanation": "Después de dos altas el bloque de capacidad dos está lleno."
+      },
+      {
+        "prompt": "Durante el último traslado, ¿cuál es el pico de capacidad simultánea?",
+        "options": [
+          "Doce celdas",
+          "Ocho celdas",
+          "Cinco celdas"
+        ],
+        "answer": 0,
+        "explanation": "El bloque de cuatro se conserva mientras se escribe en el de ocho."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "MIT 6.046J · Análisis amortizado y duplicación",
+      "url": "https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/13e2c7d165259712327af0af312a068e_MIT6_046JS15_lec05.pdf"
+    },
+    {
+      "title": "ECMAScript · Arreglos y operaciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array-objects"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "El modelo empieza con capacidad uno, solo añade al final y cuenta una escritura por alta y una por cada celda copiada."
+    ],
+    "workedExample": {
+      "problem": "El catálogo empieza con capacidad uno y recibe cinco códigos en orden.",
+      "reasoning": "Las primeras ampliaciones llegan al insertar el segundo, tercero y quinto código. Sus traslados son 1, 2 y 4.",
+      "result": "Con duplicación se hacen siete copias y cinco escrituras nuevas. El total de escrituras vale doce y la capacidad termina en ocho."
+    },
+    "transferActivityIds": [
+      "aplicar-avisos"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-amortizado.analisis-amortizado": {
+      "explanationExcerpt": "El análisis amortizado reparte el coste de una secuencia completa sin asignar probabilidades",
+      "assessmentIds": [
+        "amort-probabilidad",
+        "amort-peor"
+      ]
+    },
+    "algoritmia.an-amortizado.duplicacion-de-capacidad": {
+      "explanationExcerpt": "Duplicar capacidad significa reservar el doble solo cuando el bloque está lleno",
+      "assessmentIds": [
+        "crecer-justo",
+        "capacidad-cinco"
+      ]
+    },
+    "algoritmia.an-amortizado.metodo-agregado": {
+      "explanationExcerpt": "El método agregado suma el coste de toda la secuencia y divide entre su número de operaciones",
+      "assessmentIds": [
+        "agregado-copias",
+        "agregado-fijo"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar y, cuando se indica, Performance API. Los casos deterministas se contrastan por valor, tipo y conservación de entradas.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Comparar políticas de crecimiento y justificar el coste amortizado de las altas del catálogo.",
+    "previous": "algoritmia/an-casos/integrar-perfil",
+    "followUpIds": [
+      "aplicar-avisos"
+    ]
+  }
+}

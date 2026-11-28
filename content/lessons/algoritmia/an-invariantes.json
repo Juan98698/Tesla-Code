@@ -1,0 +1,645 @@
+{
+  "id": "an-invariantes",
+  "outcome": "Demostrar qué acumula un ciclo, por qué termina y cómo respeta el contrato de un intervalo.",
+  "requiresConcepts": [
+    "algoritmia.an-espacio.espacio-auxiliar",
+    "algoritmia.an-espacio.pila-de-llamadas",
+    "algoritmia.an-espacio.copias"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Tesla Metro suma minutos entre dos estaciones sin copiar datos. Una frontera mal elegida incluye un tramo extra aunque las pruebas iniciales parezcan correctas.</p><p>Los tramos contienen enteros no negativos con suma exacta y los intervalos válidos cumplen 0 ≤ inicio ≤ fin ≤ longitud.</p>\n<h3>Leer un intervalo semiabierto</h3><p>[inicio, fin) incluye inicio y excluye fin. Con [3, 0, 5, 2], el intervalo [1, 3) contiene índices uno y dos y suma cinco. Un fin igual a longitud es válido porque nunca se lee esa posición. [2, 2) está vacío y su suma es cero. Usamos Number.isInteger para comprobar que ambos límites sean números enteros sin convertir texto. Una cadena de comparaciones matemáticas debe escribirse con &amp;&amp; entre expresiones booleanas en JavaScript.</p>\n<h3>Una afirmación antes de cada vuelta</h3><p>Un invariante de ciclo es una afirmación que se mantiene en un punto definido del recorrido. Antes de cada evaluación de i &lt; fin, total contiene la suma de [inicio, i) e inicio ≤ i ≤ fin. Al iniciar, i = inicio y el intervalo vacío suma cero. Si i &lt; fin, tramos[i] pertenece a la entrada. Sumarlo y aumentar i transforma [inicio, i) en el siguiente prefijo. Al salir, i = fin, así que total contiene lo prometido. Este argumento por inducción usa caso inicial y conservación en cada paso.</p>\n<pre data-language=\"javascript\"><code>function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i &lt; fin; i++) total += tramos[i];\n  return total;\n}\n\nconsole.log(sumarIntervalo([3, 0, 5, 2], 1, 3));\nconsole.log(sumarIntervalo([3, 0, 5, 2], 2, 2));</code></pre>\n<h3>Por qué la ejecución termina</h3><p>La terminación se justifica con una variante: una cantidad entera no negativa que disminuye con cada vuelta. Aquí fin − i llega a cero porque se reduce en uno siempre que el ciclo entra. Una regla correcta para las vueltas no basta si alguna rama deja el contador congelado. A la inversa, terminar rápido no demuestra que la salida sea correcta. Juntar la prueba del resultado al salir y la de terminación demuestra corrección total dentro del contrato.</p>\n<h3>Validar antes del ciclo</h3><p>El contrato devuelve null para un rango inválido y cero para un intervalo válido sin datos. null señala rechazo y cero es un resultado. Los límites inválidos se comprueban antes de leer elementos. El error i &lt;= fin alcanza la frontera excluida; si fin = length la lectura devuelve undefined y una suma con undefined da NaN. El caso [0, longitud) detecta ese fallo.</p>\n<pre data-language=\"javascript\"><code>function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i &lt; fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) &amp;&amp; Number.isInteger(fin)\n    &amp;&amp; 0 &lt;= inicio &amp;&amp; inicio &lt;= fin &amp;&amp; fin &lt;= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nconsole.log(distanciaTramo([3, 0, 5, 2], 0, 4));\nconsole.log(distanciaTramo([3, 0], 1, 3));\nconsole.log(distanciaTramo([3, 0], \"0\", 2));</code></pre>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>El trayecto pide sumar desde el índice uno hasta antes del tres en [3, 0, 5, 2].</p><p>Antes de empezar se ha procesado [1, 1). Tras leer el cero se ha procesado [1, 2). Tras leer el cinco se ha procesado [1, 3).</p><p>Al salir i vale tres y el acumulador vale cinco. La variante fin − i pasó de dos a uno y después a cero.</p></section>\n<h3>Preparar la entrega</h3><p>A partir de la suma iterativa que conservaste, limita el recorrido primero a un prefijo y luego a un intervalo. Añade la validación y explica en la bitácora el estado inicial, la conservación, la salida y la variante.</p>",
+  "examples": [
+    {
+      "id": "an-invariantes-e1",
+      "language": "javascript",
+      "code": "function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nconsole.log(sumarIntervalo([3, 0, 5, 2], 1, 3));\nconsole.log(sumarIntervalo([3, 0, 5, 2], 2, 2));",
+      "stdout": "5\n0\n"
+    },
+    {
+      "id": "an-invariantes-e2",
+      "language": "javascript",
+      "code": "function sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n\nconsole.log(distanciaTramo([3, 0, 5, 2], 0, 4));\nconsole.log(distanciaTramo([3, 0], 1, 3));\nconsole.log(distanciaTramo([3, 0], \"0\", 2));",
+      "stdout": "10\nnull\nnull\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "inv-inicio",
+      "type": "choice",
+      "concept": "algoritmia.an-invariantes.invariante-de-ciclo",
+      "prompt": "¿Qué representa total antes de la primera vuelta?",
+      "options": [
+        "La suma del intervalo vacío [inicio, inicio)",
+        "La suma de toda la entrada",
+        "El primer tramo aunque todavía no se leyó"
+      ],
+      "answer": 0,
+      "explanation": "El estado inicial ya satisface el invariante."
+    },
+    {
+      "id": "inv-salida",
+      "type": "choice",
+      "concept": "algoritmia.an-invariantes.invariante-de-ciclo",
+      "prompt": "¿Qué significa que total suma [inicio, i) al salir con i = fin?",
+      "options": [
+        "Que total es la suma del intervalo pedido",
+        "Que falta incluir el dato de fin",
+        "Que el rango siempre es inválido"
+      ],
+      "answer": 0,
+      "explanation": "La frontera excluida coincide con el final del intervalo procesado."
+    },
+    {
+      "id": "variante-distancia",
+      "type": "choice",
+      "concept": "algoritmia.an-invariantes.terminacion",
+      "prompt": "¿Qué cantidad baja una unidad en cada vuelta?",
+      "options": [
+        "fin − i",
+        "total",
+        "tramos.length"
+      ],
+      "answer": 0,
+      "explanation": "El índice aumenta exactamente en uno. El total puede quedarse igual."
+    },
+    {
+      "id": "variante-congelada",
+      "type": "choice",
+      "concept": "algoritmia.an-invariantes.terminacion",
+      "prompt": "¿Qué fallo puede impedir terminar aunque sumar funcione?",
+      "options": [
+        "Una rama deja i sin avanzar",
+        "Suma un tramo con valor cero",
+        "fin coincide con i al inicio"
+      ],
+      "answer": 0,
+      "explanation": "Si i no cambia y la condición sigue verdadera, la variante no baja."
+    },
+    {
+      "id": "induccion-paso",
+      "type": "choice",
+      "concept": "algoritmia.an-invariantes.induccion",
+      "prompt": "¿Qué se verifica en el paso de conservación?",
+      "options": [
+        "Sumar la posición i y avanzar mantiene la afirmación para el prefijo siguiente",
+        "Que la lista nunca tenga cero",
+        "Que basta con probar una sola entrada"
+      ],
+      "answer": 0,
+      "explanation": "El paso relaciona un estado válido con el siguiente."
+    },
+    {
+      "id": "induccion-contrato",
+      "type": "choice",
+      "concept": "algoritmia.an-invariantes.induccion",
+      "prompt": "¿Qué distingue corrección total de acertar cuando el ciclo termina?",
+      "options": [
+        "También demuestra que termina",
+        "Solo requiere que la variable tenga nombre claro",
+        "Solo requiere un ejemplo ejecutado"
+      ],
+      "answer": 0,
+      "explanation": "El argumento incluye resultado y terminación."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.an-invariantes.invariante-de-ciclo",
+      "prompt": "Encuentra la frontera rota",
+      "brief": "Un recorrido usa i <= fin para un rango semiabierto y el equipo ve resultados inesperados.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "El índice fin no pertenece al intervalo."
+        },
+        {
+          "label": "Caso",
+          "text": "Para [3, 5] se consulta [0, 2)."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué lectura incorrecta puede hacer el ciclo?",
+          "options": [
+            "tramos[2]",
+            "tramos[0]",
+            "Ninguna lectura adicional"
+          ],
+          "answer": 0,
+          "explanation": "El índice dos no existe cuando la longitud vale dos.",
+          "id": "decision-1",
+          "errorHint": "El último índice válido del arreglo es length − 1."
+        },
+        {
+          "prompt": "¿Qué prueba de terminación corresponde al ciclo corregido?",
+          "options": [
+            "fin − i empieza no negativa y baja en uno por vuelta",
+            "total siempre sube al menos uno",
+            "La longitud cambia con cada lectura"
+          ],
+          "answer": 0,
+          "explanation": "Un tramo puede valer cero, así que el total no garantiza avance.",
+          "id": "decision-2",
+          "errorHint": "La variante debe bajar cada vez que se ejecuta el cuerpo."
+        }
+      ],
+      "hint": "El último índice válido del arreglo es length − 1.",
+      "explanation": "El límite de lectura y la variante prueban propiedades distintas.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Entender",
+        "input": "Una frontera defectuosa y un caso de fallo.",
+        "output": "Una predicción sobre las lecturas y la parada.",
+        "reflection": "Escribe invariante y variante para [0, 2) y explica qué cambia al usar <=.",
+        "requires": [],
+        "from": "algoritmia/an-espacio/integrar-espacio"
+      }
+    },
+    {
+      "id": "implementar-prefijo",
+      "type": "javascript",
+      "concept": "algoritmia.an-invariantes.invariante-de-ciclo",
+      "prompt": "Añade sumarPrefijo(tramos, fin). Suma [0, fin) sin copiar el arreglo ni leer otras posiciones. fin es un entero válido. Conserva sumarMinutos.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  // Acumula solo el prefijo.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n",
+      "entrypoint": "sumarPrefijo",
+      "cases": [
+        {
+          "name": "Subconjunto",
+          "args": [
+            [
+              3,
+              0,
+              5,
+              2
+            ],
+            3
+          ],
+          "expected": 8,
+          "preserveArgs": true,
+          "maxArrayReads": 3
+        },
+        {
+          "name": "Vacío válido",
+          "args": [
+            [
+              3
+            ],
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Todo el arreglo",
+          "args": [
+            [
+              2,
+              3
+            ],
+            2
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Suma original",
+          "args": [
+            [
+              3,
+              0,
+              5
+            ]
+          ],
+          "expected": 8,
+          "preserveArgs": true,
+          "entrypoint": "sumarMinutos"
+        }
+      ],
+      "hint": "Inicializa el acumulador a cero.",
+      "hints": [
+        "Inicializa el acumulador a cero.",
+        "La primera lectura es cero y la última posible es fin − 1."
+      ],
+      "explanation": "Cada vuelta amplía exactamente el prefijo procesado.",
+      "retryFeedback": "Prueba fin igual a cero y a la longitud.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Implementar",
+        "input": "La suma iterativa de la entrega anterior.",
+        "output": "Un prefijo sin copiar.",
+        "reflection": "Escribe qué intervalo representa total antes de la primera vuelta.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/an-espacio/integrar-espacio"
+      }
+    },
+    {
+      "id": "reescribir-intervalo",
+      "type": "javascript",
+      "concept": "algoritmia.an-invariantes.terminacion",
+      "prompt": "Añade sumarIntervalo(tramos, inicio, fin) a partir del prefijo. Los límites ya son válidos. Conserva sumarPrefijo y no copies ni leas fuera del intervalo.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  // Generaliza el índice inicial.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n",
+      "entrypoint": "sumarIntervalo",
+      "cases": [
+        {
+          "name": "Salta prefijo y cola",
+          "args": [
+            [
+              3,
+              0,
+              5,
+              2
+            ],
+            1,
+            3
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Intervalo vacío",
+          "args": [
+            [
+              3,
+              5
+            ],
+            1,
+            1
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Último tramo",
+          "args": [
+            [
+              3,
+              5
+            ],
+            1,
+            2
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "maxArrayReads": 1
+        },
+        {
+          "name": "Prefijo anterior",
+          "args": [
+            [
+              3,
+              5
+            ],
+            1
+          ],
+          "expected": 3,
+          "preserveArgs": true,
+          "entrypoint": "sumarPrefijo"
+        }
+      ],
+      "hint": "Empieza en inicio, no en cero.",
+      "hints": [
+        "Empieza en inicio, no en cero.",
+        "Cuando i llega a fin, el acumulador representa exactamente el intervalo pedido."
+      ],
+      "explanation": "Se mueve la condición inicial sin modificar el significado de fin.",
+      "retryFeedback": "No hace falta leer un prefijo para sumar únicamente el tramo interno.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Reescribir y comprobar",
+        "input": "El prefijo que ya comprobaste.",
+        "output": "Una suma que empieza en cualquier inicio válido.",
+        "reflection": "Explica fin − i para cada vuelta de [1, 3).",
+        "requires": [
+          "implementar-prefijo"
+        ],
+        "from": "algoritmia/an-invariantes/implementar-prefijo"
+      }
+    },
+    {
+      "id": "integrar-distancia",
+      "type": "javascript",
+      "concept": "algoritmia.an-invariantes.induccion",
+      "prompt": "Añade intervaloValido y distanciaTramo. Si algún límite no es un entero válido, devuelve null sin leer elementos. Para límites válidos usa sumarIntervalo. Repara la comparación inclusiva defectuosa del borrador y preserva la suma completa.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i <= fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n\nfunction sumarPrefijo(tramos, fin) {\n  let total = 0;\n  for (let i = 0; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction sumarIntervalo(tramos, inicio, fin) {\n  let total = 0;\n  for (let i = inicio; i < fin; i++) total += tramos[i];\n  return total;\n}\n\nfunction intervaloValido(tramos, inicio, fin) {\n  return Number.isInteger(inicio) && Number.isInteger(fin)\n    && 0 <= inicio && inicio <= fin && fin <= tramos.length;\n}\n\nfunction distanciaTramo(tramos, inicio, fin) {\n  if (!intervaloValido(tramos, inicio, fin)) return null;\n  return sumarIntervalo(tramos, inicio, fin);\n}\n",
+      "entrypoint": "distanciaTramo",
+      "cases": [
+        {
+          "name": "Fin al final",
+          "args": [
+            [
+              3,
+              5
+            ],
+            0,
+            2
+          ],
+          "expected": 8,
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Intervalo vacío",
+          "args": [
+            [
+              3,
+              5
+            ],
+            2,
+            2
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Rango invertido",
+          "args": [
+            [
+              3,
+              5
+            ],
+            2,
+            1
+          ],
+          "expected": null,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Texto numérico",
+          "args": [
+            [
+              3,
+              5
+            ],
+            "0",
+            2
+          ],
+          "expected": null,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Fin fuera",
+          "args": [
+            [
+              3,
+              5
+            ],
+            0,
+            3
+          ],
+          "expected": null,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Inicio negativo",
+          "args": [
+            [
+              3,
+              5
+            ],
+            -1,
+            1
+          ],
+          "expected": null,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Fracción",
+          "args": [
+            [
+              3,
+              5
+            ],
+            0.5,
+            2
+          ],
+          "expected": null,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Conservar suma completa",
+          "args": [
+            [
+              3,
+              5
+            ]
+          ],
+          "expected": 8,
+          "preserveArgs": true,
+          "entrypoint": "sumarMinutos"
+        }
+      ],
+      "hint": "Valida el tipo y todas las relaciones antes de leer la lista.",
+      "hints": [
+        "Valida el tipo y todas las relaciones antes de leer la lista.",
+        "Mantén i < fin para que la salida por frontera no lea un tramo ajeno."
+      ],
+      "explanation": "Separa rechazo del caso vacío y conserva la frontera exclusiva.",
+      "retryFeedback": "null indica rango inválido y cero sigue siendo una suma válida.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Integrar y depurar",
+        "input": "La suma de intervalo.",
+        "output": "Una distancia validada y una frontera corregida.",
+        "reflection": "Escribe el caso inicial, el paso de conservación, qué implica salir y la variante que baja.",
+        "requires": [
+          "reescribir-intervalo"
+        ],
+        "from": "algoritmia/an-invariantes/reescribir-intervalo"
+      }
+    },
+    {
+      "id": "aplicar-demoras",
+      "type": "javascript",
+      "concept": "algoritmia.an-invariantes.invariante-de-ciclo",
+      "prompt": "Escribe contarDemoras(demoras, limite, fin). Cuenta cuántas demoras del prefijo [0, fin) son mayores o iguales a limite. Los límites son válidos y las demoras son enteros no negativos. No leas fuera del prefijo.",
+      "starter": "",
+      "solution": "function contarDemoras(demoras, limite, fin) {\n  let cantidad = 0;\n  for (let i = 0; i < fin; i++) {\n    if (demoras[i] >= limite) cantidad++;\n  }\n  return cantidad;\n}",
+      "entrypoint": "contarDemoras",
+      "cases": [
+        {
+          "name": "Incluye igualdad y excluye cola",
+          "args": [
+            [
+              1,
+              5,
+              8,
+              10
+            ],
+            5,
+            3
+          ],
+          "expected": 2,
+          "preserveArgs": true,
+          "maxArrayReads": 3
+        },
+        {
+          "name": "Prefijo vacío",
+          "args": [
+            [
+              8
+            ],
+            0,
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Cero en el límite",
+          "args": [
+            [
+              0,
+              3
+            ],
+            0,
+            2
+          ],
+          "expected": 2,
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        }
+      ],
+      "hint": "En esta situación el acumulador cuenta coincidencias en lugar de sumar valores.",
+      "hints": [
+        "En esta situación el acumulador cuenta coincidencias en lugar de sumar valores.",
+        "El prefijo y la variante son los mismos. Cambia solo qué significa el acumulador."
+      ],
+      "explanation": "El mismo esquema de prueba sirve si defines otra afirmación sobre el acumulador.",
+      "retryFeedback": "No confundas sumar minutos con sumar uno por coincidencia.",
+      "followUp": {
+        "requires": [
+          "integrar-distancia"
+        ],
+        "reason": "Aplica el concepto a datos distintos y comprueba los casos límite antes de cerrar la lección."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Comprueba el estado antes de cada vuelta",
+    "brief": "Se suma el intervalo [1, 3) de [3, 0, 5, 2].",
+    "rounds": [
+      {
+        "prompt": "Antes de la primera vuelta, ¿qué intervalo describe total?",
+        "options": [
+          "[1, 1)",
+          "[0, 1)",
+          "[1, 3)"
+        ],
+        "answer": 0,
+        "explanation": "El acumulador empieza en cero para el intervalo vacío."
+      },
+      {
+        "prompt": "Después de leer el índice dos, ¿cuál es la variante?",
+        "options": [
+          "Cero",
+          "Uno",
+          "Dos"
+        ],
+        "answer": 0,
+        "explanation": "i ya vale tres, así que fin − i es cero."
+      },
+      {
+        "prompt": "¿En qué estado debe quedar el total?",
+        "options": [
+          "5, con i = 3",
+          "7, con i = 4",
+          "0, con i = 2"
+        ],
+        "answer": 0,
+        "explanation": "El límite fin queda excluido."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Cornell CS 2110 · Invariantes de ciclo",
+      "url": "https://courses.cs.cornell.edu/courses/cs2110/2026fa/lectures/lec04/"
+    },
+    {
+      "title": "ECMAScript · Arreglos y operaciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array-objects"
+    },
+    {
+      "title": "ECMAScript · Number.isInteger",
+      "url": "https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.isinteger"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Los tramos contienen enteros no negativos con suma exacta y los intervalos válidos cumplen 0 ≤ inicio ≤ fin ≤ longitud."
+    ],
+    "workedExample": {
+      "problem": "El trayecto pide sumar desde el índice uno hasta antes del tres en [3, 0, 5, 2].",
+      "reasoning": "Antes de empezar se ha procesado [1, 1). Tras leer el cero se ha procesado [1, 2). Tras leer el cinco se ha procesado [1, 3).",
+      "result": "Al salir i vale tres y el acumulador vale cinco. La variante fin − i pasó de dos a uno y después a cero."
+    },
+    "transferActivityIds": [
+      "aplicar-demoras"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-invariantes.invariante-de-ciclo": {
+      "explanationExcerpt": "Un invariante de ciclo es una afirmación que se mantiene en un punto definido del recorrido",
+      "assessmentIds": [
+        "inv-inicio",
+        "inv-salida"
+      ]
+    },
+    "algoritmia.an-invariantes.terminacion": {
+      "explanationExcerpt": "La terminación se justifica con una variante: una cantidad entera no negativa que disminuye con cada vuelta",
+      "assessmentIds": [
+        "variante-distancia",
+        "variante-congelada"
+      ]
+    },
+    "algoritmia.an-invariantes.induccion": {
+      "explanationExcerpt": "Este argumento por inducción usa caso inicial y conservación en cada paso",
+      "assessmentIds": [
+        "induccion-paso",
+        "induccion-contrato"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar y, cuando se indica, Performance API. Los casos deterministas se contrastan por valor, tipo y conservación de entradas.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Demostrar qué acumula un ciclo, por qué termina y cómo respeta el contrato de un intervalo.",
+    "previous": "algoritmia/an-espacio/integrar-espacio",
+    "followUpIds": [
+      "aplicar-demoras"
+    ]
+  }
+}

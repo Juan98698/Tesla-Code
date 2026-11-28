@@ -1,0 +1,577 @@
+{
+  "id": "an-espacio",
+  "outcome": "Comparar memoria auxiliar, profundidad de pila y pico de reservas al procesar tramos.",
+  "requiresConcepts": [
+    "algoritmia.an-amortizado.analisis-amortizado",
+    "algoritmia.an-amortizado.duplicacion-de-capacidad",
+    "algoritmia.an-amortizado.metodo-agregado"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>El equipo revisa el coste de guardar y procesar minutos en un dispositivo con memoria limitada. Dos implementaciones devuelven lo mismo y retienen cantidades distintas de datos.</p><p>Los tramos son arreglos de hasta treinta enteros no negativos y sus sumas son exactas como Number.</p>\n<h3>Separar entrada, salida y espacio de trabajo</h3><p>El espacio auxiliar cuenta el máximo almacenamiento adicional activo que necesita el algoritmo. En esta lección contamos la salida aparte y declaramos esa convención. La entrada de n tramos ya existe. Un acumulador, que guarda la suma parcial, y un índice usan Θ(1) espacio auxiliar. El tiempo sigue siendo Θ(n) porque hacemos una suma por tramo. Para reproducirlo, for…of entrega cada valor en orden y += suma y reasigna.</p>\n<pre data-language=\"javascript\"><code>function sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nconsole.log(sumarMinutos([3, 0, 5]));\nconsole.log(sumarMinutos([]));</code></pre>\n<h3>Qué queda pendiente en una llamada</h3><p>La pila de llamadas registra las invocaciones activas que aún deben terminar. Si la función llama a otra antes de devolver su resultado, retiene el trabajo pendiente. En sumar por recursión con índice, para tres datos quedan activas las llamadas de índices 0, 1, 2 y el caso base 3. Son cuatro llamadas internas simultáneas, sin contar la función que instrumenta. Un total de llamadas y un pico de activas son medidas diferentes en un árbol que se ramifica. Una ejecución profunda puede alcanzar el límite de pila del motor; no se fija un máximo portátil.</p>\n<pre data-language=\"javascript\"><code>function medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas &gt; pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nconsole.log(medirPila([3, 0, 5]));\nconsole.log(medirPila([]));</code></pre>\n<h3>Copias y pico transitorio</h3><p>Una copia con slice copia posiciones en otro arreglo, incluso si una posición contiene una referencia a un objeto: es superficial. Una copia de todo el arreglo cuesta Θ(n) celdas para los valores del nuevo contenedor. Si haces slice(1) dentro de cada llamada y cada sufijo sigue vivo hasta volver, las longitudes n−1, n−2, …, 1 suman Θ(n²) celdas simultáneas en ese modelo. Pasar un índice evita esas copias aunque conserva la pila Θ(n). Un ciclo por índice evita tanto los sufijos como la pila profunda.</p>\n<h3>Decisión para el proyecto</h3><p>En una ampliación de capacidad pueden coexistir bloque viejo y nuevo mientras se trasladan los datos. El pico anterior es una cuenta de celdas lógicas reservadas. No se suma directamente a las llamadas activas: son unidades diferentes y no se conoce el tamaño real de cada una. El recolector del entorno decide cuándo reutiliza memoria física; esta lección compara modelos, no tamaños en bytes.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Una ruta tiene tres tramos con tiempos 3, 0 y 5 minutos.</p><p>El ciclo conserva un acumulador. La recursión deja tres sumas pendientes y activa un caso base antes de regresar.</p><p>Ambos producen ocho minutos. En la versión recursiva el pico es de cuatro llamadas internas y en el ciclo el espacio auxiliar permanece constante.</p></section>\n<h3>Preparar la entrega</h3><p>Mantén el contador de altas para comparar reservas y añade una medición de pila. El caso base de la recursión también ocupa una llamada activa aunque ya no sume ningún dato.</p>",
+  "examples": [
+    {
+      "id": "an-espacio-e1",
+      "language": "javascript",
+      "code": "function sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nconsole.log(sumarMinutos([3, 0, 5]));\nconsole.log(sumarMinutos([]));",
+      "stdout": "8\n0\n"
+    },
+    {
+      "id": "an-espacio-e2",
+      "language": "javascript",
+      "code": "function medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nconsole.log(medirPila([3, 0, 5]));\nconsole.log(medirPila([]));",
+      "stdout": "[8,4]\n[0,1]\n"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "auxiliar-contar",
+      "type": "choice",
+      "concept": "algoritmia.an-espacio.espacio-auxiliar",
+      "prompt": "Con la entrada y la salida fuera del conteo, ¿qué usa un recorrido con un acumulador y un índice?",
+      "options": [
+        "Espacio auxiliar Θ(1)",
+        "Espacio auxiliar Θ(n)",
+        "Ninguna variable"
+      ],
+      "answer": 0,
+      "explanation": "El tamaño del estado adicional no depende de n."
+    },
+    {
+      "id": "tiempo-vs-espacio",
+      "type": "choice",
+      "concept": "algoritmia.an-espacio.espacio-auxiliar",
+      "prompt": "¿El acumulador constante implica tiempo constante?",
+      "options": [
+        "No, todavía recorre n tramos",
+        "Sí, porque solo guarda un total",
+        "Sí, si la suma da cero"
+      ],
+      "answer": 0,
+      "explanation": "La cantidad de posiciones visitadas sigue siendo n."
+    },
+    {
+      "id": "pila-base",
+      "type": "choice",
+      "concept": "algoritmia.an-espacio.pila-de-llamadas",
+      "prompt": "Para cuatro datos, ¿cuántas llamadas de desde están activas al alcanzar el caso base?",
+      "options": [
+        "Cinco",
+        "Cuatro",
+        "Una"
+      ],
+      "answer": 0,
+      "explanation": "Una por dato y una por el caso base."
+    },
+    {
+      "id": "pila-indice",
+      "type": "choice",
+      "concept": "algoritmia.an-espacio.pila-de-llamadas",
+      "prompt": "¿Qué elimina pasar un índice al llamar de nuevo?",
+      "options": [
+        "La copia de un sufijo, conservando la pila de llamadas",
+        "Todas las llamadas recursivas",
+        "Las comparaciones del caso base"
+      ],
+      "answer": 0,
+      "explanation": "Se comparte la entrada y cambia la posición."
+    },
+    {
+      "id": "copias-pico",
+      "type": "choice",
+      "concept": "algoritmia.an-espacio.copias",
+      "prompt": "Si conviven el bloque anterior de cuatro celdas y el nuevo de ocho, ¿cuál es el pico lógico de reserva?",
+      "options": [
+        "Doce celdas",
+        "Ocho celdas",
+        "Cuatro celdas"
+      ],
+      "answer": 0,
+      "explanation": "El pico considera la coexistencia durante el traslado."
+    },
+    {
+      "id": "copia-superficial",
+      "type": "choice",
+      "concept": "algoritmia.an-espacio.copias",
+      "prompt": "¿Qué copia slice cuando una celda contiene un objeto?",
+      "options": [
+        "La referencia a ese objeto en otra celda",
+        "Una copia profunda del objeto",
+        "Solo el nombre de la variable"
+      ],
+      "answer": 0,
+      "explanation": "Hay otro contenedor, pero el objeto puede seguir compartido."
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.an-espacio.espacio-auxiliar",
+      "prompt": "Elige una medida de memoria",
+      "brief": "Dos versiones recorren todos los tramos. Una usa ciclo, otra una llamada por posición.",
+      "evidence": [
+        {
+          "label": "Iteración",
+          "text": "Guarda el total y avanza por los datos."
+        },
+        {
+          "label": "Recursión",
+          "text": "El caso base se ejecuta con todas las llamadas previas activas."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué coste cambia aunque ambas hagan n sumas?",
+          "options": [
+            "El espacio auxiliar",
+            "La longitud original",
+            "El resultado final"
+          ],
+          "answer": 0,
+          "explanation": "La pila de la versión recursiva crece con n.",
+          "id": "decision-1",
+          "errorHint": "Piensa qué queda retenido mientras se ejecuta el caso base."
+        },
+        {
+          "prompt": "¿Se puede comparar directamente una celda con una llamada como si fueran bytes?",
+          "options": [
+            "No, son medidas lógicas distintas",
+            "Sí, ambas equivalen a ocho bytes",
+            "Solo si el total es cero"
+          ],
+          "answer": 0,
+          "explanation": "El tamaño de los datos internos depende de la implementación.",
+          "id": "decision-2",
+          "errorHint": "Identifica en qué unidad se contó cada cosa."
+        }
+      ],
+      "hint": "Piensa qué queda retenido mientras se ejecuta el caso base.",
+      "explanation": "El modelo separa celdas, marcos de ejecución y bytes.",
+      "learningStep": {
+        "phase": "entender",
+        "project": "tesla-metro",
+        "label": "Entender",
+        "input": "Dos implementaciones con el mismo resultado.",
+        "output": "Una predicción de memoria adicional.",
+        "reflection": "Anota qué estructuras cuentan como auxiliares y cuáles ya formaban parte de la entrada.",
+        "requires": [],
+        "from": "algoritmia/an-amortizado/integrar-catalogo"
+      }
+    },
+    {
+      "id": "implementar-suma",
+      "type": "javascript",
+      "concept": "algoritmia.an-espacio.espacio-auxiliar",
+      "prompt": "Añade sumarMinutos(tramos). Devuelve la suma usando un acumulador y sin copiar ni mutar la lista. Mantén resumirAltas disponible.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  // Suma en un recorrido.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n",
+      "entrypoint": "sumarMinutos",
+      "cases": [
+        {
+          "name": "Tres tramos",
+          "args": [
+            [
+              3,
+              0,
+              5
+            ]
+          ],
+          "expected": 8,
+          "preserveArgs": true,
+          "maxArrayReads": 3
+        },
+        {
+          "name": "Sin tramos",
+          "args": [
+            []
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Un tramo",
+          "args": [
+            [
+              9
+            ]
+          ],
+          "expected": 9,
+          "preserveArgs": true,
+          "maxArrayReads": 1
+        },
+        {
+          "name": "Crecimiento conservado",
+          "args": [
+            5,
+            true
+          ],
+          "expected": [
+            8,
+            7,
+            12,
+            12
+          ],
+          "preserveArgs": true,
+          "entrypoint": "resumirAltas"
+        }
+      ],
+      "hint": "Parte de cero para que la entrada vacía tenga un resultado.",
+      "hints": [
+        "Parte de cero para que la entrada vacía tenga un resultado.",
+        "Actualiza el total una vez por tramo, usando los valores en orden."
+      ],
+      "explanation": "La suma conserva los datos y solo retiene un estado de tamaño fijo.",
+      "retryFeedback": "No confundas cantidad de tramos con minutos acumulados.",
+      "learningStep": {
+        "phase": "implementar",
+        "project": "tesla-metro",
+        "label": "Implementar",
+        "input": "Recupera el informe del catálogo.",
+        "output": "Una suma iterativa sin copiar la entrada.",
+        "reflection": "Anota qué variables existen con uno y con treinta tramos.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/an-amortizado/integrar-catalogo"
+      }
+    },
+    {
+      "id": "reescribir-pila",
+      "type": "javascript",
+      "concept": "algoritmia.an-espacio.pila-de-llamadas",
+      "prompt": "Añade medirPila(tramos). Devuelve [total, pico de llamadas simultáneas de la función recursiva interna]. Cuenta también el caso base. Pasa la posición en vez de copiar un sufijo. Conserva sumarMinutos.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  // Cuenta llamadas activas y minutos.\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n",
+      "entrypoint": "medirPila",
+      "cases": [
+        {
+          "name": "Incluye el caso base",
+          "args": [
+            [
+              3,
+              0,
+              5
+            ]
+          ],
+          "expected": [
+            8,
+            4
+          ],
+          "preserveArgs": true,
+          "maxArrayReads": 3
+        },
+        {
+          "name": "Vacío aún activa el caso base",
+          "args": [
+            []
+          ],
+          "expected": [
+            0,
+            1
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Un dato",
+          "args": [
+            [
+              9
+            ]
+          ],
+          "expected": [
+            9,
+            2
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Suma iterativa conservada",
+          "args": [
+            [
+              1,
+              2
+            ]
+          ],
+          "expected": 3,
+          "preserveArgs": true,
+          "entrypoint": "sumarMinutos"
+        }
+      ],
+      "hint": "El contador de activas aumenta al hacer una llamada hija.",
+      "hints": [
+        "El contador de activas aumenta al hacer una llamada hija.",
+        "En la entrada del caso base aún están activas las demás llamadas. Anota el pico antes de regresar."
+      ],
+      "explanation": "El resultado se mantiene y el pico de la pila cambia con n.",
+      "retryFeedback": "Con un dato hay dos llamadas internas, aunque solo se lee una posición.",
+      "learningStep": {
+        "phase": "reescribir",
+        "project": "tesla-metro",
+        "label": "Reescribir y comprobar",
+        "input": "La suma iterativa comprobada.",
+        "output": "Una comparación con la profundidad de una versión recursiva.",
+        "reflection": "Dibuja la pila en el caso base para dos tramos.",
+        "requires": [
+          "implementar-suma"
+        ],
+        "from": "algoritmia/an-espacio/implementar-suma"
+      }
+    },
+    {
+      "id": "integrar-espacio",
+      "type": "javascript",
+      "concept": "algoritmia.an-espacio.copias",
+      "prompt": "Añade auditarEspacio(tramos, altas). Devuelve un objeto con total, llamadasActivas y picoCeldasReservadas. Reutiliza las dos funciones de suma y el modelo de duplicación. El borrador confunde capacidad final con pico transitorio.",
+      "starter": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[0]\n  };\n}\n",
+      "solution": "function casoMaestro(a, b, d) {\n  const combinar = b ** d;\n  if (a < combinar) {\n    return \"domina combinar\";\n  }\n  if (a === combinar) {\n    return \"equilibrado\";\n  }\n  return \"dominan las hojas\";\n}\n\nfunction buscarParada(estaciones, objetivo) {\n  let comparaciones = 0;\n  for (let i = 0; i < estaciones.length; i++) {\n    comparaciones++;\n    if (estaciones[i] === objetivo) return [i, comparaciones];\n  }\n  return [-1, comparaciones];\n}\n\nfunction medirConsultas(estaciones, consultas) {\n  const costes = [];\n  let total = 0;\n  for (const objetivo of consultas) {\n    const resultado = buscarParada(estaciones, objetivo);\n    costes.push(resultado[1]);\n    total += resultado[1];\n  }\n  return [costes, total, costes.length === 0 ? null : total / costes.length];\n}\n\nfunction perfilarConsultas(estaciones, consultas) {\n  const medicion = medirConsultas(estaciones, consultas);\n  return {\n    costes: medicion[0],\n    total: medicion[1],\n    media: medicion[2],\n    mejorPosible: estaciones.length === 0 ? 0 : 1,\n    peorPosible: estaciones.length\n  };\n}\n\nfunction resumirAltas(cantidad, duplicar) {\n  let capacidad = 1;\n  let copias = 0;\n  let pico = 1;\n  for (let ocupadas = 0; ocupadas < cantidad; ocupadas++) {\n    if (ocupadas === capacidad) {\n      const anterior = capacidad;\n      capacidad = duplicar ? anterior * 2 : anterior + 1;\n      copias += ocupadas;\n      pico = anterior + capacidad;\n    }\n  }\n  return [capacidad, copias, cantidad + copias, pico];\n}\n\nfunction compararAltas(cantidad) {\n  return [resumirAltas(cantidad, true), resumirAltas(cantidad, false)];\n}\n\nfunction auditarCatalogo(estaciones, consultas, altas) {\n  return { busqueda: perfilarConsultas(estaciones, consultas), crecimiento: compararAltas(altas) };\n}\n\nfunction sumarMinutos(tramos) {\n  let total = 0;\n  for (const minutos of tramos) total += minutos;\n  return total;\n}\n\nfunction medirPila(tramos) {\n  let pico = 0;\n  function desde(indice, activas) {\n    if (activas > pico) pico = activas;\n    if (indice === tramos.length) return 0;\n    return tramos[indice] + desde(indice + 1, activas + 1);\n  }\n  const total = desde(0, 1);\n  return [total, pico];\n}\n\nfunction auditarEspacio(tramos, altas) {\n  return {\n    total: sumarMinutos(tramos),\n    llamadasActivas: medirPila(tramos)[1],\n    picoCeldasReservadas: resumirAltas(altas, true)[3]\n  };\n}\n",
+      "entrypoint": "auditarEspacio",
+      "cases": [
+        {
+          "name": "Capacidad y pico difieren",
+          "args": [
+            [
+              3,
+              0,
+              5
+            ],
+            5
+          ],
+          "expected": {
+            "total": 8,
+            "llamadasActivas": 4,
+            "picoCeldasReservadas": 12
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin tramos ni altas",
+          "args": [
+            [],
+            0
+          ],
+          "expected": {
+            "total": 0,
+            "llamadasActivas": 1,
+            "picoCeldasReservadas": 1
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Modelo de crecimiento conservado",
+          "args": [
+            3,
+            true
+          ],
+          "expected": [
+            4,
+            3,
+            6,
+            6
+          ],
+          "preserveArgs": true,
+          "entrypoint": "resumirAltas"
+        }
+      ],
+      "hint": "Mira las cuatro posiciones que devuelve resumirAltas.",
+      "hints": [
+        "Mira las cuatro posiciones que devuelve resumirAltas.",
+        "Devuelve las unidades por separado: minutos, llamadas y celdas."
+      ],
+      "explanation": "El informe distingue el pico transitorio de la capacidad final.",
+      "retryFeedback": "Cinco altas tienen capacidad ocho pero durante el último traslado coexisten doce celdas.",
+      "learningStep": {
+        "phase": "integrar",
+        "project": "tesla-metro",
+        "label": "Integrar y depurar",
+        "input": "Las dos sumas y el modelo de capacidad.",
+        "output": "Un informe con total, pico de llamadas y pico de reserva.",
+        "reflection": "Explica por qué doce celdas y cuatro llamadas no prueban un consumo de dieciséis bytes.",
+        "requires": [
+          "reescribir-pila"
+        ],
+        "from": "algoritmia/an-espacio/reescribir-pila"
+      }
+    },
+    {
+      "id": "aplicar-sufijo",
+      "type": "javascript",
+      "concept": "algoritmia.an-espacio.copias",
+      "prompt": "Escribe sumarDesde(tramos, inicio). Suma desde el índice inicio incluido hasta el final, sin copiar un subarreglo ni leer el prefijo. inicio es un entero entre cero y la longitud incluida.",
+      "starter": "",
+      "solution": "function sumarDesde(tramos, inicio) {\n  let total = 0;\n  for (let i = inicio; i < tramos.length; i++) total += tramos[i];\n  return total;\n}",
+      "entrypoint": "sumarDesde",
+      "cases": [
+        {
+          "name": "Omite el prefijo",
+          "args": [
+            [
+              10,
+              2,
+              3
+            ],
+            1
+          ],
+          "expected": 5,
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Cero",
+          "args": [
+            [
+              0,
+              2
+            ],
+            0
+          ],
+          "expected": 2,
+          "preserveArgs": true,
+          "maxArrayReads": 2
+        },
+        {
+          "name": "Inicio al final",
+          "args": [
+            [
+              1,
+              2
+            ],
+            2
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            0
+          ],
+          "expected": 0,
+          "preserveArgs": true,
+          "maxArrayReads": 0
+        }
+      ],
+      "hint": "Arranca el índice del ciclo en inicio.",
+      "hints": [
+        "Arranca el índice del ciclo en inicio.",
+        "Si inicio coincide con la longitud, el ciclo no entra y la suma queda en cero."
+      ],
+      "explanation": "La posición permite reutilizar la entrada sin reservar una copia.",
+      "retryFeedback": "Revisa el límite superior exclusivo y el primer índice que se lee.",
+      "followUp": {
+        "requires": [
+          "integrar-espacio"
+        ],
+        "reason": "Aplica el concepto a datos distintos y comprueba los casos límite antes de cerrar la lección."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Traza el pico de la pila",
+    "brief": "medirPila recibe [3, 0, 5]. Solo cuenta las llamadas de desde.",
+    "rounds": [
+      {
+        "prompt": "Tras entrar en desde(0, 1), ¿cuántas llamadas internas están activas?",
+        "options": [
+          "Una",
+          "Cero",
+          "Cuatro"
+        ],
+        "answer": 0,
+        "explanation": "La primera llamada ya cuenta."
+      },
+      {
+        "prompt": "¿Cuál es el índice del caso base?",
+        "options": [
+          "Tres",
+          "Dos",
+          "Cuatro"
+        ],
+        "answer": 0,
+        "explanation": "El caso base aparece justo fuera de las posiciones válidas."
+      },
+      {
+        "prompt": "¿En qué momento se alcanza el pico?",
+        "options": [
+          "Antes de que devuelva el caso base",
+          "Al terminar y quedar el total",
+          "Al iniciar la primera llamada"
+        ],
+        "answer": 0,
+        "explanation": "En el caso base siguen pendientes las tres sumas anteriores."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "ECMAScript · Contextos de ejecución",
+      "url": "https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#sec-execution-contexts"
+    },
+    {
+      "title": "ECMAScript · Arreglos y operaciones indexadas",
+      "url": "https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array-objects"
+    },
+    {
+      "title": "MIT 6.006 · Modelos de cómputo y análisis de algoritmos",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/"
+    }
+  ],
+  "learningDesign": {
+    "assumptions": [
+      "Los tramos son arreglos de hasta treinta enteros no negativos y sus sumas son exactas como Number."
+    ],
+    "workedExample": {
+      "problem": "Una ruta tiene tres tramos con tiempos 3, 0 y 5 minutos.",
+      "reasoning": "El ciclo conserva un acumulador. La recursión deja tres sumas pendientes y activa un caso base antes de regresar.",
+      "result": "Ambos producen ocho minutos. En la versión recursiva el pico es de cuatro llamadas internas y en el ciclo el espacio auxiliar permanece constante."
+    },
+    "transferActivityIds": [
+      "aplicar-sufijo"
+    ]
+  },
+  "coverage": {
+    "algoritmia.an-espacio.espacio-auxiliar": {
+      "explanationExcerpt": "El espacio auxiliar cuenta el máximo almacenamiento adicional activo que necesita el algoritmo",
+      "assessmentIds": [
+        "auxiliar-contar",
+        "tiempo-vs-espacio"
+      ]
+    },
+    "algoritmia.an-espacio.pila-de-llamadas": {
+      "explanationExcerpt": "La pila de llamadas registra las invocaciones activas que aún deben terminar",
+      "assessmentIds": [
+        "pila-base",
+        "pila-indice"
+      ]
+    },
+    "algoritmia.an-espacio.copias": {
+      "explanationExcerpt": "Una copia con slice copia posiciones en otro arreglo",
+      "assessmentIds": [
+        "copias-pico",
+        "copia-superficial"
+      ]
+    }
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-27",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar y, cuando se indica, Performance API. Los casos deterministas se contrastan por valor, tipo y conservación de entradas.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Comparar memoria auxiliar, profundidad de pila y pico de reservas al procesar tramos.",
+    "previous": "algoritmia/an-amortizado/integrar-catalogo",
+    "followUpIds": [
+      "aplicar-sufijo"
+    ]
+  }
+}
