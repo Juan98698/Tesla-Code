@@ -1,0 +1,906 @@
+{
+  "id": "ar-segmentos",
+  "outcome": "Construir un árbol de segmentos y aplicar cambios por rango sin recorrer cada tramo cubierto.",
+  "requiresConcepts": [
+    "algoritmia.ar-fenwick.suma-de-prefijos-dinamica",
+    "algoritmia.ar-fenwick.bits-bajos",
+    "algoritmia.ar-fenwick.actualizacion-puntual"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Ajusta el aforo de varios tramos contiguos y vuelve a consultar tanto el total como el mínimo.</p><p>Datos enteros y densos. Los rangos cumplen 0 ≤ inicio ≤ fin ≤ longitud. fin se excluye. Las sumas, productos y deltas intermedios son enteros seguros. Un rango vacío devuelve {suma:0,minimo:null}.</p>\n<h3>Consulta por rango</h3><p>Una consulta por rango pide información de las posiciones en [inicio,fin). Divide la lista en mitades hasta llegar a intervalos de una celda. Al consultar un nodo decide si queda fuera, si se cubre entero o si necesitas bajar. Fuera aporta suma cero y mínimo ausente. Todo cubierto aporta el agregado que ya guardaste. Si la cobertura es parcial consulta sus dos hijos y combina.</p>\n<h3>Nodo agregado</h3><p>Un nodo agregado resume un intervalo con su suma y su mínimo. Las hojas conocen un valor. El padre suma las sumas de sus hijos y toma el menor de sus mínimos. Ignorar un mínimo ausente mantiene correctos los negativos y los positivos. Usar cero como mínimo neutro daría un cero falso cuando todos los datos sean positivos.</p>\n<h3>Actualización perezosa</h3><p>Una actualización perezosa guarda un cambio aún no enviado a los hijos. Si el intervalo entero recibe delta, suma longitud × delta a la suma y delta al mínimo. Acumula delta en pendiente. El nodo ya responde correctamente a una consulta completa. Antes de bajar a hijos por cobertura parcial, traslada el pendiente a ambos y ponlo a cero. Después de actualizar parcialmente, combina de nuevo los hijos.</p>\n<h3>Costes y elección</h3><p>Construir a partir de n valores crea O(n) nodos y toma O(n). Consultar o sumar en un intervalo contiguo cuesta O(log(n+1)): cada nivel solo puede dividir los dos bordes y los segmentos completos detienen el avance. El índice de Fenwick de la lección anterior es más compacto para sumas con cambios de un punto. El árbol de segmentos de este ejemplo también mantiene mínimo y acepta cambios sobre rangos.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Desde [4,2,7,5], agrega 3 a [0,4), después −2 a [1,3). Consulta [1,4).</p><p>La primera actualización ajusta la raíz a suma 30 y mínimo 5, con pendiente 3. La segunda es parcial: envía primero 3 a ambos hijos, después −2 a los dos puntos. Los valores lógicos quedan [7,3,8,8].</p><p>El intervalo [1,4) es [3,8,8]. Su suma es 19 y su mínimo es 3.</p></section>\n<h3>Prueba resumirRaiz</h3><p>Nunca agregues un valor inventado para un rango sin datos.</p><p>Antes de ejecutar, predice resumirRaiz([4,2,7,5]).</p><pre data-language=\"javascript\">function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}</pre><p>Salida esperada</p><pre data-language=\"json\">{\"suma\":18,\"minimo\":2}</pre>\n<h3>Prueba operarSegmentos</h3><p>Un pendiente se aplica una vez a cada hijo. Repetir una consulta no debe aumentar los datos.</p><p>Antes de ejecutar, predice operarSegmentos([4,2,7,5], [[\"sumar\",0,4,3],[\"sumar\",1,3,-2],[\"medir\",1,4],[\"medir\",1,4]]).</p><pre data-language=\"javascript\">function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio &gt;= fin ||\n    fin &lt;= nodo.inicio ||\n    nodo.fin &lt;= inicio\n  )\n    return;\n  if (inicio &lt;= nodo.inicio &amp;&amp; nodo.fin &lt;= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio &gt;= fin ||\n    fin &lt;= nodo.inicio ||\n    nodo.fin &lt;= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio &lt;= nodo.inicio &amp;&amp; nodo.fin &lt;= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) =&gt; sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) =&gt; leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}</pre><p>Salida esperada</p><pre data-language=\"json\">[{\"suma\":19,\"minimo\":3},{\"suma\":19,\"minimo\":3}]</pre>\n<h3>Prueba reporteSegmentado</h3><p>La medición final incluye el último tramo y se toma después de todos los cambios.</p><p>Antes de ejecutar, predice reporteSegmentado([1,2,8], [[\"sumar\",1,3,-2],[\"medir\",0,1]]).</p><pre data-language=\"javascript\">function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio &gt;= fin ||\n    fin &lt;= nodo.inicio ||\n    nodo.fin &lt;= inicio\n  )\n    return;\n  if (inicio &lt;= nodo.inicio &amp;&amp; nodo.fin &lt;= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio &gt;= fin ||\n    fin &lt;= nodo.inicio ||\n    nodo.fin &lt;= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio &lt;= nodo.inicio &amp;&amp; nodo.fin &lt;= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) =&gt; sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) =&gt; leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\n\nfunction reporteSegmentado(datos, acciones) {\n  const respuestas = operarSegmentos(datos, [\n    ...acciones,\n    [\"medir\", 0, datos.length],\n  ]);\n  const final = respuestas.pop();\n  return { respuestas, final };\n}</pre><p>Salida esperada</p><pre data-language=\"json\">{\"respuestas\":[{\"suma\":1,\"minimo\":1}],\"final\":{\"suma\":7,\"minimo\":0}}</pre>\n<h3>Preparar la entrega</h3><p>Consulta varios intervalos y resume el estado final. Comprueba la superposición de cambios, vacíos y dos consultas iguales.</p>",
+  "examples": [
+    {
+      "id": "ar-segmentos-ejemplo-1",
+      "language": "javascript",
+      "code": "function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Suma y mínimo",
+        "args": [
+          [
+            4,
+            2,
+            7,
+            5
+          ]
+        ],
+        "expected": {
+          "suma": 18,
+          "minimo": 2
+        },
+        "preserveArgs": true,
+        "entrypoint": "resumirRaiz"
+      }
+    },
+    {
+      "id": "ar-segmentos-ejemplo-2",
+      "language": "javascript",
+      "code": "function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return;\n  if (inicio <= nodo.inicio && nodo.fin <= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio <= nodo.inicio && nodo.fin <= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) => sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) => leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Propaga cambio completo y parcial",
+        "args": [
+          [
+            4,
+            2,
+            7,
+            5
+          ],
+          [
+            [
+              "sumar",
+              0,
+              4,
+              3
+            ],
+            [
+              "sumar",
+              1,
+              3,
+              -2
+            ],
+            [
+              "medir",
+              1,
+              4
+            ],
+            [
+              "medir",
+              1,
+              4
+            ]
+          ]
+        ],
+        "expected": [
+          {
+            "suma": 19,
+            "minimo": 3
+          },
+          {
+            "suma": 19,
+            "minimo": 3
+          }
+        ],
+        "preserveArgs": true,
+        "entrypoint": "operarSegmentos"
+      }
+    },
+    {
+      "id": "ar-segmentos-ejemplo-3",
+      "language": "javascript",
+      "code": "function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return;\n  if (inicio <= nodo.inicio && nodo.fin <= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio <= nodo.inicio && nodo.fin <= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) => sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) => leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\n\nfunction reporteSegmentado(datos, acciones) {\n  const respuestas = operarSegmentos(datos, [\n    ...acciones,\n    [\"medir\", 0, datos.length],\n  ]);\n  const final = respuestas.pop();\n  return { respuestas, final };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Última celda sí cuenta",
+        "args": [
+          [
+            1,
+            2,
+            8
+          ],
+          [
+            [
+              "sumar",
+              1,
+              3,
+              -2
+            ],
+            [
+              "medir",
+              0,
+              1
+            ]
+          ]
+        ],
+        "expected": {
+          "respuestas": [
+            {
+              "suma": 1,
+              "minimo": 1
+            }
+          ],
+          "final": {
+            "suma": 7,
+            "minimo": 0
+          }
+        },
+        "preserveArgs": true,
+        "entrypoint": "reporteSegmentado"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "Si una consulta cubre un nodo entero, ¿qué lees?",
+      "options": [
+        "Su agregado actual",
+        "Siempre todas sus hojas",
+        "Solo el hijo izquierdo"
+      ],
+      "answer": 0,
+      "explanation": "El intervalo guardado coincide con la parte solicitada.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.ar-segmentos.consulta-por-rango"
+    },
+    {
+      "prompt": "¿Qué mínimo aporta un intervalo vacío?",
+      "options": [
+        "El primer número del árbol",
+        "null",
+        "0"
+      ],
+      "answer": 1,
+      "explanation": "No aporta una medición al combinar.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.ar-segmentos.nodo-agregado"
+    },
+    {
+      "prompt": "¿Cómo se ajusta la suma de cinco celdas con delta −2?",
+      "options": [
+        "Baja en 2",
+        "Sube en 10",
+        "Baja en 10"
+      ],
+      "answer": 2,
+      "explanation": "El delta se aplica a cada una de las cinco celdas.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.ar-segmentos.actualizacion-perezosa"
+    },
+    {
+      "prompt": "¿Por qué se limpia el pendiente al propagarlo?",
+      "options": [
+        "Ya se aplicó a los dos hijos",
+        "El nodo pierde su suma",
+        "Permite deshacer el cambio"
+      ],
+      "answer": 0,
+      "explanation": "Dejarlo cobraría el mismo ajuste en consultas posteriores.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.ar-segmentos.actualizacion-perezosa"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.ar-segmentos.consulta-por-rango",
+      "prompt": "Predice y explica las decisiones de la misión",
+      "brief": "Desde [4,2,7,5], agrega 3 a [0,4), después −2 a [1,3). Consulta [1,4).",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Datos enteros y densos. Los rangos cumplen 0 ≤ inicio ≤ fin ≤ longitud. fin se excluye. Las sumas, productos y deltas intermedios son enteros seguros. Un rango vacío devuelve {suma:0,minimo:null}."
+        },
+        {
+          "label": "Datos iniciales",
+          "text": "Desde [4,2,7,5], agrega 3 a [0,4), después −2 a [1,3). Consulta [1,4)."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "Al sumar 3 a cuatro valores, ¿cuánto aumenta la suma de la raíz?",
+          "options": [
+            "12",
+            "3",
+            "4"
+          ],
+          "answer": 0,
+          "explanation": "Cada uno de los cuatro valores recibe tres.",
+          "id": "decision-1",
+          "errorHint": "Cada uno de los cuatro valores recibe tres."
+        },
+        {
+          "prompt": "Antes de bajar por [1,3), ¿qué haces con el 3 pendiente?",
+          "options": [
+            "Aplicarlo solo al hijo izquierdo",
+            "Aplicarlo a ambos hijos y limpiar la marca del padre",
+            "Olvidarlo"
+          ],
+          "answer": 1,
+          "explanation": "Ambas ramas ya estaban incluidas en el cambio.",
+          "id": "decision-2",
+          "errorHint": "Ambas ramas ya estaban incluidas en el cambio."
+        }
+      ],
+      "hint": "Cada uno de los cuatro valores recibe tres.",
+      "explanation": "La primera actualización ajusta la raíz a suma 30 y mínimo 5, con pendiente 3. La segunda es parcial: envía primero 3 a ambos hijos, después −2 a los dos puntos. Los valores lógicos quedan [7,3,8,8].",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y caso de la misión.",
+        "output": "Una predicción razonada.",
+        "reflection": "Escribe las marcas pendientes tras dos actualizaciones.",
+        "requires": [],
+        "from": "algoritmia/ar-fenwick/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.ar-segmentos.consulta-por-rango",
+      "prompt": "Define crearSegmentos y combinarSegmentos. Devuelve suma y mínimo del rango completo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n\nfunction resumirRaiz(datos) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n\nfunction combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n",
+      "entrypoint": "resumirRaiz",
+      "cases": [
+        {
+          "name": "Suma y mínimo",
+          "args": [
+            [
+              4,
+              2,
+              7,
+              5
+            ]
+          ],
+          "expected": {
+            "suma": 18,
+            "minimo": 2
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Negativos",
+          "args": [
+            [
+              -2,
+              -7,
+              4
+            ]
+          ],
+          "expected": {
+            "suma": -5,
+            "minimo": -7
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            []
+          ],
+          "expected": {
+            "suma": 0,
+            "minimo": null
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              4,
+              8,
+              3
+            ],
+            [
+              [
+                "sumar",
+                2,
+                5
+              ],
+              [
+                "rango",
+                1,
+                3
+              ],
+              [
+                "sumar",
+                0,
+                -1
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              16
+            ],
+            "total": 19
+          },
+          "preserveArgs": true,
+          "entrypoint": "aforoPuntual"
+        }
+      ],
+      "explanation": "Nunca agregues un valor inventado para un rango sin datos.",
+      "hint": "Si el intervalo tiene largo uno, usa la misma clave como suma y mínimo.",
+      "hints": [
+        "Si el intervalo tiene largo uno, usa la misma clave como suma y mínimo.",
+        "Usa mitades [inicio,medio) y [medio,fin)."
+      ],
+      "retryFeedback": "Usa mitades [inicio,medio) y [medio,fin).",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera la entrega aprobada de la lección anterior.",
+        "output": "Una versión comprobada de resumirRaiz.",
+        "reflection": "Contrasta el mínimo de un rango vacío con un valor cero.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/ar-fenwick/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.ar-segmentos.nodo-agregado",
+      "prompt": "Define prepararSegmentos y sus métodos sumar y medir. Recibe [sumar,l,r,delta] o [medir,l,r]. Devuelve solo consultas.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n\nfunction combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction operarSegmentos(datos, acciones) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n\nfunction combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return;\n  if (inicio <= nodo.inicio && nodo.fin <= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio <= nodo.inicio && nodo.fin <= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) => sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) => leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\n",
+      "entrypoint": "operarSegmentos",
+      "cases": [
+        {
+          "name": "Propaga cambio completo y parcial",
+          "args": [
+            [
+              4,
+              2,
+              7,
+              5
+            ],
+            [
+              [
+                "sumar",
+                0,
+                4,
+                3
+              ],
+              [
+                "sumar",
+                1,
+                3,
+                -2
+              ],
+              [
+                "medir",
+                1,
+                4
+              ],
+              [
+                "medir",
+                1,
+                4
+              ]
+            ]
+          ],
+          "expected": [
+            {
+              "suma": 19,
+              "minimo": 3
+            },
+            {
+              "suma": 19,
+              "minimo": 3
+            }
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío y fin excluido",
+          "args": [
+            [
+              5,
+              9,
+              1
+            ],
+            [
+              [
+                "sumar",
+                1,
+                1,
+                10
+              ],
+              [
+                "sumar",
+                0,
+                2,
+                -3
+              ],
+              [
+                "medir",
+                2,
+                3
+              ],
+              [
+                "medir",
+                1,
+                1
+              ]
+            ]
+          ],
+          "expected": [
+            {
+              "suma": 1,
+              "minimo": 1
+            },
+            {
+              "suma": 0,
+              "minimo": null
+            }
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva resumirRaiz",
+          "args": [
+            [
+              4,
+              2,
+              7,
+              5
+            ]
+          ],
+          "expected": {
+            "suma": 18,
+            "minimo": 2
+          },
+          "preserveArgs": true,
+          "entrypoint": "resumirRaiz"
+        }
+      ],
+      "explanation": "Un pendiente se aplica una vez a cada hijo. Repetir una consulta no debe aumentar los datos.",
+      "hint": "Resuelve primero ausencia o cobertura completa.",
+      "hints": [
+        "Resuelve primero ausencia o cobertura completa.",
+        "Empuja antes de leer o cambiar solo parte de un nodo."
+      ],
+      "retryFeedback": "Empuja antes de leer o cambiar solo parte de un nodo.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de operarSegmentos.",
+        "reflection": "Verifica consultar dos veces después de empujar un pendiente.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/ar-segmentos/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.ar-segmentos.actualizacion-perezosa",
+      "prompt": "Devuelve {respuestas,final} con las consultas y una medición de todos los tramos al final. Copia primero tu código. Restaura el código inicial para ver el fallo y recupera tu copia al corregirlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n\nfunction combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return;\n  if (inicio <= nodo.inicio && nodo.fin <= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio <= nodo.inicio && nodo.fin <= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) => sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) => leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\n\nfunction reporteSegmentado(datos, acciones) {\n  const respuestas = operarSegmentos(datos, [\n    ...acciones,\n    [\"medir\", 0, Math.max(0, datos.length - 1)],\n  ]);\n  const final = respuestas.pop();\n  return { respuestas, final };\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n\nfunction combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\n\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return;\n  if (inicio <= nodo.inicio && nodo.fin <= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio <= nodo.inicio && nodo.fin <= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) => sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) => leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\n\nfunction reporteSegmentado(datos, acciones) {\n  const respuestas = operarSegmentos(datos, [\n    ...acciones,\n    [\"medir\", 0, datos.length],\n  ]);\n  const final = respuestas.pop();\n  return { respuestas, final };\n}\n",
+      "entrypoint": "reporteSegmentado",
+      "cases": [
+        {
+          "name": "Última celda sí cuenta",
+          "args": [
+            [
+              1,
+              2,
+              8
+            ],
+            [
+              [
+                "sumar",
+                1,
+                3,
+                -2
+              ],
+              [
+                "medir",
+                0,
+                1
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              {
+                "suma": 1,
+                "minimo": 1
+              }
+            ],
+            "final": {
+              "suma": 7,
+              "minimo": 0
+            }
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin tramos",
+          "args": [
+            [],
+            []
+          ],
+          "expected": {
+            "respuestas": [],
+            "final": {
+              "suma": 0,
+              "minimo": null
+            }
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              4,
+              8,
+              3
+            ],
+            [
+              [
+                "sumar",
+                2,
+                5
+              ],
+              [
+                "rango",
+                1,
+                3
+              ],
+              [
+                "sumar",
+                0,
+                -1
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              16
+            ],
+            "total": 19
+          },
+          "preserveArgs": true,
+          "entrypoint": "aforoPuntual"
+        },
+        {
+          "name": "Conserva operarSegmentos",
+          "args": [
+            [
+              4,
+              2,
+              7,
+              5
+            ],
+            [
+              [
+                "sumar",
+                0,
+                4,
+                3
+              ],
+              [
+                "sumar",
+                1,
+                3,
+                -2
+              ],
+              [
+                "medir",
+                1,
+                4
+              ],
+              [
+                "medir",
+                1,
+                4
+              ]
+            ]
+          ],
+          "expected": [
+            {
+              "suma": 19,
+              "minimo": 3
+            },
+            {
+              "suma": 19,
+              "minimo": 3
+            }
+          ],
+          "preserveArgs": true,
+          "entrypoint": "operarSegmentos"
+        },
+        {
+          "name": "Conserva el horario y la simulación del segundo checkpoint",
+          "args": [
+            [
+              [
+                "N",
+                "León"
+              ],
+              [
+                "S",
+                "LEÓN"
+              ],
+              [
+                "W",
+                "Oeste"
+              ]
+            ],
+            " León ",
+            [
+              [
+                "A",
+                "N",
+                1,
+                [
+                  3,
+                  2
+                ]
+              ],
+              [
+                "X",
+                "W",
+                0,
+                []
+              ],
+              [
+                "B",
+                "S",
+                4,
+                [
+                  2
+                ]
+              ]
+            ],
+            4,
+            4
+          ],
+          "expected": {
+            "codigos": [
+              "N",
+              "S"
+            ],
+            "horario": [
+              [
+                1,
+                "A"
+              ],
+              [
+                4,
+                "B"
+              ]
+            ],
+            "proxima": [
+              4,
+              "B"
+            ],
+            "eventos": [
+              [
+                1,
+                "A",
+                0
+              ],
+              [
+                4,
+                "B",
+                0
+              ],
+              [
+                4,
+                "A",
+                1
+              ]
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "servicioTesla"
+        }
+      ],
+      "explanation": "La medición final incluye el último tramo y se toma después de todos los cambios.",
+      "hint": "Añade una consulta al lote sin modificar acciones.",
+      "hints": [
+        "Añade una consulta al lote sin modificar acciones.",
+        "Separa el último resultado del resto."
+      ],
+      "retryFeedback": "Separa el último resultado del resto.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de reporteSegmentado.",
+        "reflection": "Registra una unión de rangos que detectó un error en el último límite.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/ar-segmentos/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.ar-segmentos.actualizacion-perezosa",
+      "prompt": "Aplica correcciones de temperatura [l,r,delta] usando el árbol y devuelve el mínimo final en [inicio,fin), o null si está vacío.",
+      "starter": "",
+      "solution": "function combinarSegmentos(a, b) {\n  if (a.minimo === null) return b;\n  if (b.minimo === null) return a;\n  return { suma: a.suma + b.suma, minimo: Math.min(a.minimo, b.minimo) };\n}\nfunction crearSegmentos(datos, inicio = 0, fin = datos.length) {\n  if (inicio === fin) return null;\n  if (fin - inicio === 1) {\n    return {\n      inicio,\n      fin,\n      suma: datos[inicio],\n      minimo: datos[inicio],\n      pendiente: 0,\n      izq: null,\n      der: null,\n    };\n  }\n  const medio = inicio + Math.floor((fin - inicio) / 2);\n  const izq = crearSegmentos(datos, inicio, medio);\n  const der = crearSegmentos(datos, medio, fin);\n  return {\n    inicio,\n    fin,\n    ...combinarSegmentos(izq, der),\n    pendiente: 0,\n    izq,\n    der,\n  };\n}\nfunction resumirRaiz(datos) {\n  const raiz = crearSegmentos(datos);\n  return raiz\n    ? { suma: raiz.suma, minimo: raiz.minimo }\n    : { suma: 0, minimo: null };\n}\nfunction aplicarSegmento(nodo, delta) {\n  nodo.suma += (nodo.fin - nodo.inicio) * delta;\n  nodo.minimo += delta;\n  nodo.pendiente += delta;\n}\nfunction propagarSegmento(nodo) {\n  if (nodo.izq === null || nodo.pendiente === 0) return;\n  aplicarSegmento(nodo.izq, nodo.pendiente);\n  aplicarSegmento(nodo.der, nodo.pendiente);\n  nodo.pendiente = 0;\n}\nfunction sumarSegmento(nodo, inicio, fin, delta) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return;\n  if (inicio <= nodo.inicio && nodo.fin <= fin) {\n    aplicarSegmento(nodo, delta);\n    return;\n  }\n  propagarSegmento(nodo);\n  sumarSegmento(nodo.izq, inicio, fin, delta);\n  sumarSegmento(nodo.der, inicio, fin, delta);\n  const datos = combinarSegmentos(nodo.izq, nodo.der);\n  nodo.suma = datos.suma;\n  nodo.minimo = datos.minimo;\n}\nfunction leerSegmento(nodo, inicio, fin) {\n  if (\n    nodo === null ||\n    inicio >= fin ||\n    fin <= nodo.inicio ||\n    nodo.fin <= inicio\n  )\n    return { suma: 0, minimo: null };\n  if (inicio <= nodo.inicio && nodo.fin <= fin)\n    return { suma: nodo.suma, minimo: nodo.minimo };\n  propagarSegmento(nodo);\n  return combinarSegmentos(\n    leerSegmento(nodo.izq, inicio, fin),\n    leerSegmento(nodo.der, inicio, fin),\n  );\n}\nfunction prepararSegmentos(datos) {\n  const raiz = crearSegmentos(datos);\n  return {\n    sumar: (inicio, fin, delta) => sumarSegmento(raiz, inicio, fin, delta),\n    medir: (inicio, fin) => leerSegmento(raiz, inicio, fin),\n  };\n}\nfunction operarSegmentos(datos, acciones) {\n  const indice = prepararSegmentos(datos);\n  const respuestas = [];\n  for (const [tipo, inicio, fin, delta] of acciones) {\n    if (tipo === \"sumar\") indice.sumar(inicio, fin, delta);\n    else respuestas.push(indice.medir(inicio, fin));\n  }\n  return respuestas;\n}\nfunction riesgoTermico(temperaturas, correcciones, inicio, fin) {\n  const indice = prepararSegmentos(temperaturas);\n  for (const cambios of correcciones) indice.sumar(...cambios);\n  return indice.medir(inicio, fin).minimo;\n}\n",
+      "entrypoint": "riesgoTermico",
+      "cases": [
+        {
+          "name": "Corrige dos veces",
+          "args": [
+            [
+              2,
+              3,
+              6
+            ],
+            [
+              [
+                0,
+                3,
+                -2
+              ],
+              [
+                1,
+                2,
+                -4
+              ]
+            ],
+            0,
+            2
+          ],
+          "expected": -3,
+          "preserveArgs": true
+        },
+        {
+          "name": "Rango vacío",
+          "args": [
+            [
+              4
+            ],
+            [
+              [
+                0,
+                1,
+                3
+              ]
+            ],
+            0,
+            0
+          ],
+          "expected": null,
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "Un mínimo negativo sigue siendo una medición válida.",
+      "hint": "Mantén una sola estructura durante todas las correcciones.",
+      "hints": [
+        "Mantén una sola estructura durante todas las correcciones.",
+        "Consulta el mínimo, no el promedio."
+      ],
+      "retryFeedback": "Consulta el mínimo, no el promedio.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación distinta después de integrar la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Traza el delta pendiente",
+    "brief": "Desde [4,2,7,5], agrega 3 a [0,4), después −2 a [1,3). Consulta [1,4).",
+    "rounds": [
+      {
+        "prompt": "Al sumar 3 a cuatro valores, ¿cuánto aumenta la suma de la raíz?",
+        "options": [
+          "12",
+          "3",
+          "4"
+        ],
+        "answer": 0,
+        "explanation": "Cada uno de los cuatro valores recibe tres."
+      },
+      {
+        "prompt": "Antes de bajar por [1,3), ¿qué haces con el 3 pendiente?",
+        "options": [
+          "Aplicarlo solo al hijo izquierdo",
+          "Aplicarlo a ambos hijos y limpiar la marca del padre",
+          "Olvidarlo"
+        ],
+        "answer": 1,
+        "explanation": "Ambas ramas ya estaban incluidas en el cambio."
+      },
+      {
+        "prompt": "Después de los dos cambios, ¿qué devuelve [1,4)?",
+        "options": [
+          "Suma 26 y mínimo 5",
+          "Suma 19 y mínimo 0",
+          "Suma 19 y mínimo 3"
+        ],
+        "answer": 2,
+        "explanation": "Con el fin exclusivo consultas las tres últimas celdas."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Princeton · SegmentTree",
+      "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/SegmentTree.html"
+    },
+    {
+      "title": "MIT 6.006 · Árboles binarios y búsqueda",
+      "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/"
+    }
+  ],
+  "coverage": {
+    "algoritmia.ar-segmentos.consulta-por-rango": {
+      "explanationExcerpt": "Una consulta por rango pide información de las posiciones en [inicio,fin)",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.ar-segmentos.nodo-agregado": {
+      "explanationExcerpt": "Un nodo agregado resume un intervalo con su suma y su mínimo",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.ar-segmentos.actualizacion-perezosa": {
+      "explanationExcerpt": "Una actualización perezosa guarda un cambio aún no enviado a los hijos",
+      "assessmentIds": [
+        "pregunta-3",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Datos enteros y densos. Los rangos cumplen 0 ≤ inicio ≤ fin ≤ longitud. fin se excluye. Las sumas, productos y deltas intermedios son enteros seguros. Un rango vacío devuelve {suma:0,minimo:null}."
+    ],
+    "workedExample": {
+      "problem": "Desde [4,2,7,5], agrega 3 a [0,4), después −2 a [1,3). Consulta [1,4).",
+      "reasoning": "La primera actualización ajusta la raíz a suma 30 y mínimo 5, con pendiente 3. La segunda es parcial: envía primero 3 a ambos hijos, después −2 a los dos puntos. Los valores lógicos quedan [7,3,8,8].",
+      "result": "El intervalo [1,4) es [3,8,8]. Su suma es 19 y su mínimo es 3."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-28",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Cotas según el modelo y los contratos de cada lección.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Construir un árbol de segmentos y aplicar cambios por rango sin recorrer cada tramo cubierto.",
+    "previous": "algoritmia/ar-fenwick/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

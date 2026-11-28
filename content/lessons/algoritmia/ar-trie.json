@@ -1,0 +1,1074 @@
+{
+  "id": "ar-trie",
+  "outcome": "Indexar nombres por prefijo sin perder nombres que también son prefijos, homónimos ni acentos.",
+  "requiresConcepts": [
+    "algoritmia.ar-balance.altura",
+    "algoritmia.ar-balance.factor-de-balance",
+    "algoritmia.ar-balance.rotaciones",
+    "algoritmia.ls-hash1.funcion-hash",
+    "algoritmia.ls-hash1.colision",
+    "algoritmia.ls-hash1.encadenamiento"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Sugiere sitios mientras el operador escribe el principio de su nombre.</p><p>Registros [código,nombre] con códigos únicos y nombres no vacíos tras preparar. La clave usa trim, minúsculas y NFC. El prefijo vacío recorre todo el índice. El límite es entero no negativo. Ordena por clave preparada comparando unidades UTF-16; en empate conserva el orden de ingreso.</p>\n<h3>Prefijo</h3><p>Un prefijo es el inicio de una cadena, desde su primer elemento hasta una posición elegida. Nor es prefijo de Norte y de Noroeste. La cadena completa también cuenta como prefijo de sí misma y la cadena vacía es prefijo de todas. Un fragmento interior como orte no empieza en la primera posición.</p>\n<h3>Trie</h3><p>Un trie convierte cada prefijo común en un camino compartido. La raíz corresponde al prefijo vacío. Cada enlace se distingue por la próxima unidad del nombre. Usamos un Map de unidad a hijo. Un nodo puede ser terminal para un nombre y a la vez tener hijos. Guarda ahí los registros completos que terminan en ese camino, incluso si hay varios códigos con el mismo nombre.</p>\n<h3>Búsqueda por prefijo</h3><p>Buscar por prefijo sigue sus unidades desde la raíz, sin examinar las demás ramas. Si falta una, no hay coincidencias. Al llegar al nodo, lee primero sus registros completos y luego los descendientes. Ordenar las claves de sus hijos por unidades y recorrerlas en ese orden produce la salida definida. Detente al llegar al límite de sugerencias.</p>\n<h3>Nombres Unicode y coste</h3><p>En este ejemplo clave[i] lee una unidad UTF-16, como en las búsquedas de texto del bloque anterior. Un emoji puede usar dos enlaces. NFC unifica grafías canónicamente equivalentes y conserva el acento. Localizar la rama consume una consulta a Map por unidad. Después pagas las ramas visitadas, los hijos que ordenes y los registros que devuelvas, así que un prefijo corto puede producir más trabajo que uno largo.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Registra Nor, Norte y Noroeste. Busca Nor y limita la salida a dos códigos.</p><p>Sigue n, o, r hasta el terminal Nor. Inclúyelo antes de las extensiones. Desde ese nodo, sigue primero o de Noroeste y después t de Norte en el orden por unidades.</p><p>Los nombres devueltos son Nor y Noroeste. Si Nor tuviera dos códigos y el límite fuera dos, saldrían los dos homónimos.</p></section>\n<h3>Prueba coincidenciaTrie</h3><p>Un nodo sin registro terminal puede estar presente porque alguna clave más larga pasa por él.</p><p>Antes de ejecutar, predice coincidenciaTrie([[\"B\",\"Norte\"],[\"A\",\"Nor\"],[\"C\",\"NOR\"],[\"D\",\"Noroeste\"],[\"E\",\"León\"]], \" no \").</p><pre data-language=\"javascript\">function canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i &lt; clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i &lt; clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) =&gt; codigo) ?? [],\n  };\n}</pre><p>Salida esperada</p><pre data-language=\"json\">{\"existe\":true,\"completos\":[]}</pre>\n<h3>Prueba autocompletar</h3><p>Una búsqueda por Nor con homónimos devuelve hasta dos códigos del mismo nodo antes de continuar.</p><p>Antes de ejecutar, predice autocompletar([[\"B\",\"Norte\"],[\"A\",\"Nor\"],[\"C\",\"NOR\"],[\"D\",\"Noroeste\"],[\"E\",\"León\"]], \" Nor \", 3).</p><pre data-language=\"javascript\">function canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i &lt; clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i &lt; clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) =&gt; codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}</pre><p>Salida esperada</p><pre data-language=\"json\">[[\"A\",\"Nor\"],[\"C\",\"NOR\"],[\"D\",\"Noroeste\"]]</pre>\n<h3>Preparar la entrega</h3><p>Muestra el número de sugerencias y conserva los registros completos con su nombre original.</p>",
+  "examples": [
+    {
+      "id": "ar-trie-ejemplo-1",
+      "language": "javascript",
+      "code": "function canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Camino sin terminal",
+        "args": [
+          [
+            [
+              "B",
+              "Norte"
+            ],
+            [
+              "A",
+              "Nor"
+            ],
+            [
+              "C",
+              "NOR"
+            ],
+            [
+              "D",
+              "Noroeste"
+            ],
+            [
+              "E",
+              "León"
+            ]
+          ],
+          " no "
+        ],
+        "expected": {
+          "existe": true,
+          "completos": []
+        },
+        "preserveArgs": true,
+        "entrypoint": "coincidenciaTrie"
+      }
+    },
+    {
+      "id": "ar-trie-ejemplo-2",
+      "language": "javascript",
+      "code": "function canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Orden y límite",
+        "args": [
+          [
+            [
+              "B",
+              "Norte"
+            ],
+            [
+              "A",
+              "Nor"
+            ],
+            [
+              "C",
+              "NOR"
+            ],
+            [
+              "D",
+              "Noroeste"
+            ],
+            [
+              "E",
+              "León"
+            ]
+          ],
+          " Nor ",
+          3
+        ],
+        "expected": [
+          [
+            "A",
+            "Nor"
+          ],
+          [
+            "C",
+            "NOR"
+          ],
+          [
+            "D",
+            "Noroeste"
+          ]
+        ],
+        "preserveArgs": true,
+        "entrypoint": "autocompletar"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "¿Es norte prefijo de norte?",
+      "options": [
+        "Sí, una cadena completa también vale",
+        "No, un prefijo debe ser más corto",
+        "Solo si hay otra estación"
+      ],
+      "answer": 0,
+      "explanation": "Se permiten longitudes desde cero hasta la longitud completa.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.ar-trie.prefijo"
+    },
+    {
+      "prompt": "¿Dónde guardas dos códigos de nombre preparado igual?",
+      "options": [
+        "En nodos hijos sin unidad",
+        "En la misma lista terminal",
+        "En dos raíces"
+      ],
+      "answer": 1,
+      "explanation": "Comparten camino y guardan identidades separadas.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.ar-trie.trie"
+    },
+    {
+      "prompt": "¿Qué significa que falta un enlace del prefijo?",
+      "options": [
+        "Todavía pueden aparecer en otros hijos",
+        "Todas las estaciones coinciden",
+        "Ningún nombre empieza con ese prefijo"
+      ],
+      "answer": 2,
+      "explanation": "La ausencia descarta ese camino y sus extensiones.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.ar-trie.busqueda-por-prefijo"
+    },
+    {
+      "prompt": "¿Por qué se lee un terminal antes de sus hijos?",
+      "options": [
+        "Una clave que es prefijo se ordena antes que sus extensiones",
+        "Para impedir homónimos",
+        "Porque cada terminal es una hoja"
+      ],
+      "answer": 0,
+      "explanation": "Nor debe aparecer antes de Noroeste y Norte.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.ar-trie.busqueda-por-prefijo"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.ar-trie.prefijo",
+      "prompt": "Predice y explica las decisiones de la misión",
+      "brief": "Registra Nor, Norte y Noroeste. Busca Nor y limita la salida a dos códigos.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Registros [código,nombre] con códigos únicos y nombres no vacíos tras preparar. La clave usa trim, minúsculas y NFC. El prefijo vacío recorre todo el índice. El límite es entero no negativo. Ordena por clave preparada comparando unidades UTF-16; en empate conserva el orden de ingreso."
+        },
+        {
+          "label": "Datos iniciales",
+          "text": "Registra Nor, Norte y Noroeste. Busca Nor y limita la salida a dos códigos."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué nodo representa el prefijo vacío?",
+          "options": [
+            "La raíz",
+            "La última hoja",
+            "El primer terminal"
+          ],
+          "answer": 0,
+          "explanation": "Desde la raíz puedes seguir cualquier comienzo.",
+          "id": "decision-1",
+          "errorHint": "Desde la raíz puedes seguir cualquier comienzo."
+        },
+        {
+          "prompt": "Al llegar al nodo de Nor, ¿puede ser terminal y seguir teniendo hijos?",
+          "options": [
+            "Solo si todos tienen igual código",
+            "Sí, los hijos almacenan extensiones",
+            "No, habría que borrar Nor"
+          ],
+          "answer": 1,
+          "explanation": "Terminal indica que termina un nombre, no que el nodo sea hoja.",
+          "id": "decision-2",
+          "errorHint": "Terminal indica que termina un nombre, no que el nodo sea hoja."
+        }
+      ],
+      "hint": "Desde la raíz puedes seguir cualquier comienzo.",
+      "explanation": "Sigue n, o, r hasta el terminal Nor. Inclúyelo antes de las extensiones. Desde ese nodo, sigue primero o de Noroeste y después t de Norte en el orden por unidades.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y caso de la misión.",
+        "output": "Una predicción razonada.",
+        "reflection": "Dibuja las ramas desde el nodo de Nor.",
+        "requires": [],
+        "from": "algoritmia/ar-balance/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.ar-trie.prefijo",
+      "prompt": "Define crearTrie y buscarPrefijo. Devuelve {existe,completos}; existe indica que el camino está y completos lista códigos terminales exactos.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction coincidenciaTrie(registros, texto) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n",
+      "entrypoint": "coincidenciaTrie",
+      "cases": [
+        {
+          "name": "Camino sin terminal",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " no "
+          ],
+          "expected": {
+            "existe": true,
+            "completos": []
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Homónimos",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            "nOr"
+          ],
+          "expected": {
+            "existe": true,
+            "completos": [
+              "A",
+              "C"
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Camino ausente",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            "ort"
+          ],
+          "expected": {
+            "existe": false,
+            "completos": []
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Acento NFC",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " LEÓN "
+          ],
+          "expected": {
+            "existe": true,
+            "completos": [
+              "E"
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              4,
+              2,
+              6,
+              1,
+              3
+            ],
+            [
+              6
+            ]
+          ],
+          "expected": {
+            "raiz": 2,
+            "altura": 3,
+            "claves": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "agendaEquilibrada"
+        }
+      ],
+      "explanation": "Un nodo sin registro terminal puede estar presente porque alguna clave más larga pasa por él.",
+      "hint": "Agrega un registro solo al final de su camino.",
+      "hints": [
+        "Agrega un registro solo al final de su camino.",
+        "Si falta una unidad, busca la diferencia entre null y una lista vacía."
+      ],
+      "retryFeedback": "Si falta una unidad, busca la diferencia entre null y una lista vacía.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera la entrega aprobada de la lección anterior.",
+        "output": "Una versión comprobada de coincidenciaTrie.",
+        "reflection": "Distingue prefijo existente y nombre completo.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/ar-balance/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.ar-trie.trie",
+      "prompt": "Crea sugerenciasTrie y obtén hasta limite registros desde el prefijo preparado. Terminal antes que hijos; ordena los hijos.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction autocompletar(registros, texto, limite) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n",
+      "entrypoint": "autocompletar",
+      "cases": [
+        {
+          "name": "Orden y límite",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " Nor ",
+            3
+          ],
+          "expected": [
+            [
+              "A",
+              "Nor"
+            ],
+            [
+              "C",
+              "NOR"
+            ],
+            [
+              "D",
+              "Noroeste"
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío muestra catálogo",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            "",
+            2
+          ],
+          "expected": [
+            [
+              "E",
+              "León"
+            ],
+            [
+              "A",
+              "Nor"
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "No supone acentos",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            "leo",
+            2
+          ],
+          "expected": [],
+          "preserveArgs": true
+        },
+        {
+          "name": "Límite cero",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            "n",
+            0
+          ],
+          "expected": [],
+          "preserveArgs": true
+        },
+        {
+          "name": "Dos unidades de emoji",
+          "args": [
+            [
+              [
+                "M",
+                "🚇 Norte"
+              ],
+              [
+                "P",
+                "Norte"
+              ]
+            ],
+            "🚇",
+            2
+          ],
+          "expected": [
+            [
+              "M",
+              "🚇 Norte"
+            ]
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva coincidenciaTrie",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " no "
+          ],
+          "expected": {
+            "existe": true,
+            "completos": []
+          },
+          "preserveArgs": true,
+          "entrypoint": "coincidenciaTrie"
+        }
+      ],
+      "explanation": "Una búsqueda por Nor con homónimos devuelve hasta dos códigos del mismo nodo antes de continuar.",
+      "hint": "Empieza en el nodo del prefijo.",
+      "hints": [
+        "Empieza en el nodo del prefijo.",
+        "Revisa el límite después de cada registro y de cada visita a un hijo."
+      ],
+      "retryFeedback": "Revisa el límite después de cada registro y de cada visita a un hijo.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de autocompletar.",
+        "reflection": "Verifica el orden dentro de dos terminales con igual nombre.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/ar-trie/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.ar-trie.busqueda-por-prefijo",
+      "prompt": "Devuelve {prefijo,sugerencias,total}. prefijo es la clave preparada y total cuenta las sugerencias devueltas. Copia primero tu código. Restaura el código inicial para ver el fallo y recupera tu copia al corregirlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite + 1);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n",
+      "entrypoint": "panelDeNombres",
+      "cases": [
+        {
+          "name": "Respeta el límite",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " No ",
+            1
+          ],
+          "expected": {
+            "prefijo": "no",
+            "sugerencias": [
+              [
+                "A",
+                "Nor"
+              ]
+            ],
+            "total": 1
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Cero",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            "n",
+            0
+          ],
+          "expected": {
+            "prefijo": "n",
+            "sugerencias": [],
+            "total": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              4,
+              2,
+              6,
+              1,
+              3
+            ],
+            [
+              6
+            ]
+          ],
+          "expected": {
+            "raiz": 2,
+            "altura": 3,
+            "claves": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "agendaEquilibrada"
+        },
+        {
+          "name": "Conserva autocompletar",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " Nor ",
+            3
+          ],
+          "expected": [
+            [
+              "A",
+              "Nor"
+            ],
+            [
+              "C",
+              "NOR"
+            ],
+            [
+              "D",
+              "Noroeste"
+            ]
+          ],
+          "preserveArgs": true,
+          "entrypoint": "autocompletar"
+        },
+        {
+          "name": "Conserva el horario y la simulación del segundo checkpoint",
+          "args": [
+            [
+              [
+                "N",
+                "León"
+              ],
+              [
+                "S",
+                "LEÓN"
+              ],
+              [
+                "W",
+                "Oeste"
+              ]
+            ],
+            " León ",
+            [
+              [
+                "A",
+                "N",
+                1,
+                [
+                  3,
+                  2
+                ]
+              ],
+              [
+                "X",
+                "W",
+                0,
+                []
+              ],
+              [
+                "B",
+                "S",
+                4,
+                [
+                  2
+                ]
+              ]
+            ],
+            4,
+            4
+          ],
+          "expected": {
+            "codigos": [
+              "N",
+              "S"
+            ],
+            "horario": [
+              [
+                1,
+                "A"
+              ],
+              [
+                4,
+                "B"
+              ]
+            ],
+            "proxima": [
+              4,
+              "B"
+            ],
+            "eventos": [
+              [
+                1,
+                "A",
+                0
+              ],
+              [
+                4,
+                "B",
+                0
+              ],
+              [
+                4,
+                "A",
+                1
+              ]
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "servicioTesla"
+        }
+      ],
+      "explanation": "Máximo cero no debe mostrar el primer resultado.",
+      "hint": "El número debe corresponder a lo que enseñas.",
+      "hints": [
+        "El número debe corresponder a lo que enseñas.",
+        "No reconstruyas el catálogo para contar una salida que ya tienes."
+      ],
+      "retryFeedback": "No reconstruyas el catálogo para contar una salida que ya tienes.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de panelDeNombres.",
+        "reflection": "Anota qué casos comprueban límite cero y prefijo vacío.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/ar-trie/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.ar-trie.busqueda-por-prefijo",
+      "prompt": "Completa nombres de fichas [id,título] desde un prefijo usando el mismo criterio y devuelve solo los identificadores.",
+      "starter": "",
+      "solution": "function canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\nfunction solucionesDelGlosario(fichas, prefijo, limite) {\n  return autocompletar(fichas, prefijo, limite).map(([id]) => id);\n}\n",
+      "entrypoint": "solucionesDelGlosario",
+      "cases": [
+        {
+          "name": "Título antes que extensión",
+          "args": [
+            [
+              [
+                "B",
+                "Árbol AVL"
+              ],
+              [
+                "A",
+                "Árbol"
+              ],
+              [
+                "E",
+                "ÁRBOL"
+              ]
+            ],
+            "Árbol",
+            2
+          ],
+          "expected": [
+            "A",
+            "E"
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Falta prefijo",
+          "args": [
+            [
+              [
+                "A",
+                "Árbol"
+              ]
+            ],
+            "arb",
+            4
+          ],
+          "expected": [],
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "Las fichas completas con la misma clave conservan identidad propia.",
+      "hint": "No retires el acento al preparar el prefijo.",
+      "hints": [
+        "No retires el acento al preparar el prefijo.",
+        "Extrae IDs al final para buscar por los títulos."
+      ],
+      "retryFeedback": "Extrae IDs al final para buscar por los títulos.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación distinta después de integrar la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Camina hasta el prefijo",
+    "brief": "Registra Nor, Norte y Noroeste. Busca Nor y limita la salida a dos códigos.",
+    "rounds": [
+      {
+        "prompt": "¿Qué nodo representa el prefijo vacío?",
+        "options": [
+          "La raíz",
+          "La última hoja",
+          "El primer terminal"
+        ],
+        "answer": 0,
+        "explanation": "Desde la raíz puedes seguir cualquier comienzo."
+      },
+      {
+        "prompt": "Al llegar al nodo de Nor, ¿puede ser terminal y seguir teniendo hijos?",
+        "options": [
+          "Solo si todos tienen igual código",
+          "Sí, los hijos almacenan extensiones",
+          "No, habría que borrar Nor"
+        ],
+        "answer": 1,
+        "explanation": "Terminal indica que termina un nombre, no que el nodo sea hoja."
+      },
+      {
+        "prompt": "Si se pide ort, ¿sirve Norte?",
+        "options": [
+          "Sí, porque contiene esas letras",
+          "Sí, si el límite es mayor",
+          "No; ort aparece en el interior"
+        ],
+        "answer": 2,
+        "explanation": "El prefijo empieza desde la raíz."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Princeton · Trie y búsqueda de prefijos",
+      "url": "https://github.com/kevin-wayne/algs4/blob/master/src/main/java/edu/princeton/cs/algs4/TrieST.java"
+    },
+    {
+      "title": "ECMAScript · Cadenas y normalización",
+      "url": "https://tc39.es/ecma262/multipage/text-processing.html"
+    }
+  ],
+  "coverage": {
+    "algoritmia.ar-trie.prefijo": {
+      "explanationExcerpt": "Un prefijo es el inicio de una cadena, desde su primer elemento hasta una posición elegida",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.ar-trie.trie": {
+      "explanationExcerpt": "Un trie convierte cada prefijo común en un camino compartido",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.ar-trie.busqueda-por-prefijo": {
+      "explanationExcerpt": "Buscar por prefijo sigue sus unidades desde la raíz, sin examinar las demás ramas",
+      "assessmentIds": [
+        "pregunta-3",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Registros [código,nombre] con códigos únicos y nombres no vacíos tras preparar. La clave usa trim, minúsculas y NFC. El prefijo vacío recorre todo el índice. El límite es entero no negativo. Ordena por clave preparada comparando unidades UTF-16; en empate conserva el orden de ingreso."
+    ],
+    "workedExample": {
+      "problem": "Registra Nor, Norte y Noroeste. Busca Nor y limita la salida a dos códigos.",
+      "reasoning": "Sigue n, o, r hasta el terminal Nor. Inclúyelo antes de las extensiones. Desde ese nodo, sigue primero o de Noroeste y después t de Norte en el orden por unidades.",
+      "result": "Los nombres devueltos son Nor y Noroeste. Si Nor tuviera dos códigos y el límite fuera dos, saldrían los dos homónimos."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-28",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Cotas según el modelo y los contratos de cada lección.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Indexar nombres por prefijo sin perder nombres que también son prefijos, homónimos ni acentos.",
+    "previous": "algoritmia/ar-balance/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # Algoritmia en JavaScript: ruta secuencial con proyecto acumulativo
 
-La edición JavaScript publica las primeras 39 lecciones de un mapa de 87. Taller, Análisis, Estructuras lineales y hash y Buscar y ordenar están disponibles en secuencia. Los cinco niveles siguientes, con 48 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
+La edición JavaScript publica las primeras 48 lecciones de un mapa de 87. Taller, Análisis, Estructuras lineales y hash, Buscar y ordenar y Árboles y estructuras jerárquicas están disponibles. Los cuatro niveles siguientes, con 39 temas, siguen en preparación. La edición anterior de pseudocódigo y su laboratorio en Python siguen disponibles como archivo.
 
 ## 1. Decisión y alcance
 
@@ -8,7 +8,7 @@ La edición JavaScript publica las primeras 39 lecciones de un mapa de 87. Talle
 - **Entrada libre:** se recomienda Fundamentos con JavaScript. Las lecciones introducen o repasan la sintaxis que utilizan antes de pedir su aplicación. Algoritmia amplía contratos, pruebas, demostraciones y costes a medida que construye Tesla Metro.
 - **Secuencial:** 87 lecciones en 9 niveles. Cada una depende de la anterior y, cuando hace falta, de otras lecciones concretas (columna «Además requiere»).
 - **Proyecto acumulativo:** Tesla Metro, el motor de rutas de una ciudad que crece lección a lección.
-- **Interacción.** Las cinco últimas lecciones de Análisis, las 14 de Estructuras lineales y hash y las 11 de Buscar y ordenar incluyen una traza interactiva con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
+- **Interacción.** Las cinco últimas lecciones de Análisis y los bloques de Estructuras lineales y hash, Buscar y ordenar y Árboles y estructuras jerárquicas incluyen trazas interactivas con decisiones y código ejecutable. Los visualizadores y duelos del temario describen formatos previstos para el desarrollo posterior.
 
 ## 2. Principios para no dejar vacíos
 
@@ -88,6 +88,22 @@ El modelo de almacenamiento de los ejercicios distingue sus operaciones de las g
 | Checkpoint de horarios      | Agenda inicial, cola de eventos, desempate por alta y horizonte inclusivo         | Simular salidas y llegadas por estación y trasladar la lógica a un despacho    |
 
 La primera entrega recupera el archivo del catálogo y conserva en el código nuevo `catalogoTesla` con sus dependencias. Las pruebas siguientes siguen ejecutando ese contrato. El historial de entregas conserva el archivo completo para consultar los ejercicios anteriores. El simulador usa mezcla para ordenar horarios, búsqueda binaria para la próxima salida y montículo para el reloj de eventos. [ECMAScript, ordenamiento de arreglos](https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array.prototype.sort), [MIT 6.006, ordenamientos y cotas](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/).
+
+### Correspondencia de Árboles y estructuras jerárquicas
+
+| Lección                      | Conceptos y práctica guiada                                             | Entrega y aplicación independiente                                                               |
+| ---------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Árboles y recorridos         | Raíz, hojas, preorden, inorden, postorden y cola por niveles            | Presentar un plano jerárquico y localizar la profundidad más cercana en un organigrama           |
+| BST                          | Invariante de todo el subárbol, altas y bajas con sucesor               | Editar una agenda de inspecciones y buscar la primera reserva desde una hora                     |
+| AVL                          | Alturas almacenadas, factor, giros simples y dobles en altas y bajas    | Mantener una agenda equilibrada y recuperar niveles de códigos ordenados                         |
+| Trie                         | Prefijo UTF-16, NFC, terminales con homónimos y límite de resultados    | Sugerir estaciones y completar títulos de un glosario                                            |
+| Union-Find                   | Representante, compresión de caminos y unión por rango                  | Consultar grupos de andenes y encontrar el primer momento en que se conecta una red              |
+| Fenwick                      | Índices internos desde uno, peso del bit bajo y diferencias de prefijos | Actualizar un tramo y calcular el saldo de un intervalo de inventario                            |
+| Segmentos                    | Suma y mínimo, fronteras exclusivas y deltas perezosos                  | Ajustar aforos por intervalo y calcular el mínimo de temperaturas corregidas                     |
+| Árbol B                      | Varias claves por página, divisiones y visitas lógicas                  | Informar el coste de consultas y filtrar las que superan un presupuesto. Profundización opcional |
+| Checkpoint de autocompletado | Trie para nombres y árbol de segmentos por código                       | Presentar mediciones actualizables de estaciones y trasladar el patrón a salas de biblioteca     |
+
+La primera práctica recupera la entrega del simulador y conserva `servicioTesla` con sus dependencias. La profundización de árboles B se guarda aparte. El tercer checkpoint recupera el código de Árbol de segmentos y continúa desde ahí hacia Grafos. Las lecciones distinguen el orden de las claves, el estado de los agregados y el coste según el modelo. [MIT 6.006, AVL](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec7/), [Fenwick, frecuencias acumuladas](https://doi.org/10.1002/SPE.4380240306), [PostgreSQL 18, índices B-tree](https://www.postgresql.org/docs/18/btree.html).
 
 ## 4. Proyecto acumulativo: Tesla Metro
 
@@ -306,4 +322,4 @@ El temario posterior contempla métodos de conjuntos, iteradores, arreglos tipad
    - Tanda 7: JavaScript real, Dominio y entrega (13).
 7. **Riesgo principal:** que los visualizadores se conviertan en el cuello de botella. Se mitiga con un motor único de pasos (estado, paso siguiente, retroceso) reutilizado por todos.
 
-El siguiente bloque previsto es Árboles y estructuras jerárquicas. La revisión docente independiente y el piloto con estudiantes quedan pendientes.
+El siguiente bloque previsto es Grafos. La revisión docente independiente y el piloto con estudiantes quedan pendientes.

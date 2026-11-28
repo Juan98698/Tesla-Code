@@ -230,16 +230,26 @@ await withBrowser(4317, async (browser, origin) => {
       );
     }
   }
-  await page.evaluate(() => {
+  // The catalogue sweep creates hundreds of drafts in a single synthetic profile.
+  // Theme persistence and accessibility each need a usable browser profile.
+  await context.close();
+  const uiContext = await learningContext(browser, {
+    reducedMotion: 'reduce',
+    viewport: { width: 1440, height: 900 },
+  });
+  const uiPage = await uiContext.newPage();
+  await uiPage.goto(origin);
+  await uiPage.locator('.hero').waitFor();
+  await uiPage.evaluate(() => {
     localStorage.setItem('teslacode:theme', 'light');
   });
-  await page.reload();
-  await page.locator('.page').waitFor();
-  await page.locator('#theme-toggle').click();
-  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
-  await page.reload();
-  await page.locator('.page').waitFor();
-  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+  await uiPage.reload();
+  await uiPage.locator('.page').waitFor();
+  await uiPage.locator('#theme-toggle').click();
+  assert.equal(await uiPage.locator('html').getAttribute('data-theme'), 'dark');
+  await uiPage.reload();
+  await uiPage.locator('.page').waitFor();
+  assert.equal(await uiPage.locator('html').getAttribute('data-theme'), 'dark');
   console.log(
     'PASS: siete intentos, navegación asíncrona, tema persistente y 20 combinaciones de vista/tamaño sin desbordamiento.',
   );
@@ -255,18 +265,18 @@ await withBrowser(4317, async (browser, origin) => {
     'progreso',
   ];
   for (const theme of ['light', 'dark']) {
-    await page.evaluate((theme) => localStorage.setItem('teslacode:theme', theme), theme);
+    await uiPage.evaluate((theme) => localStorage.setItem('teslacode:theme', theme), theme);
     for (const hash of accessibilityViews) {
-      await page.goto(`${origin}/#/${hash}`);
-      await page.reload();
-      await page.locator('.page').waitFor();
+      await uiPage.goto(`${origin}/#/${hash}`);
+      await uiPage.reload();
+      await uiPage.locator('.page').waitFor();
       if (hash === 'practica') {
-        await page.locator('[data-route-group="algoritmia"] summary').click();
-        await page.locator('[data-id="acumulador-suma"] [data-open]').click();
-        await page.locator('[data-step]').waitFor();
+        await uiPage.locator('[data-route-group="algoritmia"] summary').click();
+        await uiPage.locator('[data-id="acumulador-suma"] [data-open]').click();
+        await uiPage.locator('[data-step]').waitFor();
       }
-      await page.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
-      const violations = await page.evaluate(async () => {
+      await uiPage.addScriptTag({ path: 'node_modules/axe-core/axe.min.js' });
+      const violations = await uiPage.evaluate(async () => {
         const result = await axe.run(document, {
           runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
         });
@@ -282,6 +292,7 @@ await withBrowser(4317, async (browser, origin) => {
   console.log(
     'PASS: 16 auditorías automatizadas WCAG A/AA sin infracciones detectadas. No sustituyen pruebas de accesibilidad con personas.',
   );
+  await uiContext.close();
   // Una sesión sin acceso a localStorage sigue siendo utilizable.
   const blocked = await learningContext(browser);
   await blocked.addInitScript(() => {

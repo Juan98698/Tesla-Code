@@ -1,0 +1,905 @@
+{
+  "id": "ar-union",
+  "outcome": "Mantener componentes con Union-Find, uniendo raíces por rango y acortando caminos.",
+  "requiresConcepts": [
+    "algoritmia.ar-trie.prefijo",
+    "algoritmia.ar-trie.trie",
+    "algoritmia.ar-trie.busqueda-por-prefijo"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Agrupa andenes conectados para consultar si existe un vínculo indirecto entre dos sin recorrer todos los enlaces.</p><p>Hay n elementos identificados de 0 a n−1. Cada conexión enlaza dos índices válidos y es bidireccional. Se pueden agregar conexiones y consultar pertenencia, sin bajas. Si dos rangos empatan, se usa la raíz del primer argumento como nueva raíz.</p>\n<h3>Conjuntos disjuntos</h3><p>Un conjunto disjunto en esta estructura es un grupo sin elementos compartidos con otros grupos. Cada uno empieza solo y se representa por una raíz. Un elemento apunta a su padre y una raíz se apunta a sí misma. Dos elementos pertenecen al mismo grupo si llegan a la misma raíz, aunque no tengan enlace directo.</p>\n<h3>Compresión de caminos</h3><p>La compresión de caminos cambia los padres visitados para que apunten directamente al representante. Primero sube hasta la raíz. Luego repite el camino guardando a dónde apuntaba cada elemento antes de acortarlo. Las próximas búsquedas saltan pasos sin cambiar qué elementos pertenecen al grupo.</p>\n<h3>Unión por rango</h3><p>La unión por rango enlaza raíces colocando la de menor rango debajo de la de mayor. Los rangos empiezan en cero. Si empatan, aumenta únicamente el rango de la nueva raíz. El rango limita la altura posible; después de comprimir puede superar la altura real. Si las raíces coinciden, no cambia la cantidad de grupos.</p>\n<h3>Coste y alcance</h3><p>Con rango, los caminos tienen altura O(log(n+1)). Junto con compresión, el coste amortizado por operación se puede expresar con la inversa de Ackermann, una función que crece extremadamente despacio. Eso no promete una búsqueda individual constante. La estructura recuerda conectividad, pero no conserva la lista de aristas, sus rutas físicas ni cómo separar un grupo al quitar una conexión.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Conecta (0,1), (2,3) y (0,2). Pregunta por el representante de 3.</p><p>Primero 1 pasa a 0 y 3 a 2. Al unir 0 y 2 empatan, así que 2 apunta a 0. Buscar 3 sube 3 → 2 → 0 y deja 3 apuntando directamente a 0.</p><p>Un grupo con todos los elementos. Tras buscar 3 quedan padres [0,0,0,0].</p></section>\n<h3>Prueba registrarVinculos</h3><p>Los padres aún pueden formar cadenas si nunca buscaste ese elemento después de unir.</p><p>Antes de ejecutar, predice registrarVinculos(4, [[0,1],[2,3],[0,2]]).</p><pre data-language=\"javascript\">function crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) =&gt; i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () =&gt; grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] &lt; rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () =&gt; padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}</pre><p>Salida esperada</p><pre data-language=\"json\">{\"padres\":[0,0,0,2],\"grupos\":1}</pre>\n<h3>Prueba inspeccionarRepresentantes</h3><p>Consultar 3 después de las tres uniones acorta el último enlace.</p><p>Antes de ejecutar, predice inspeccionarRepresentantes(4, [[0,1],[2,3],[0,2]], [3,1]).</p><pre data-language=\"javascript\">function crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) =&gt; i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () =&gt; grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] &lt; rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () =&gt; padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}</pre><p>Salida esperada</p><pre data-language=\"json\">{\"respuestas\":[0,0],\"padres\":[0,0,0,0]}</pre>\n<h3>Preparar la entrega</h3><p>Procesa conexiones y preguntas por conectividad en el orden recibido. El panel informa también cuántos grupos quedan.</p>",
+  "examples": [
+    {
+      "id": "ar-union-ejemplo-1",
+      "language": "javascript",
+      "code": "function crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Sin comprimir aún el 3",
+        "args": [
+          4,
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        ],
+        "expected": {
+          "padres": [
+            0,
+            0,
+            0,
+            2
+          ],
+          "grupos": 1
+        },
+        "preserveArgs": true,
+        "entrypoint": "registrarVinculos"
+      }
+    },
+    {
+      "id": "ar-union-ejemplo-2",
+      "language": "javascript",
+      "code": "function crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Ahora sí comprime",
+        "args": [
+          4,
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          [
+            3,
+            1
+          ]
+        ],
+        "expected": {
+          "respuestas": [
+            0,
+            0
+          ],
+          "padres": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "preserveArgs": true,
+        "entrypoint": "inspeccionarRepresentantes"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "¿Cómo sabes si 0 y 3 están conectados indirectamente?",
+      "options": [
+        "Comparas sus raíces",
+        "Comparas solo sus padres inmediatos",
+        "Comparas su valor numérico"
+      ],
+      "answer": 0,
+      "explanation": "Un padre intermedio no es necesariamente representante.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.ar-union.conjuntos-disjuntos"
+    },
+    {
+      "prompt": "¿Qué guardas al acortar un enlace?",
+      "options": [
+        "La cantidad de elementos",
+        "El padre anterior para seguir recorriendo",
+        "Solo el rango"
+      ],
+      "answer": 1,
+      "explanation": "Si sobrescribes antes de guardar, pierdes el camino pendiente.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.ar-union.compresion-de-caminos"
+    },
+    {
+      "prompt": "¿Qué pasa si los rangos son distintos?",
+      "options": [
+        "Ambos se incrementan",
+        "El menor se vuelve raíz",
+        "El rango mayor se queda y no se incrementa"
+      ],
+      "answer": 2,
+      "explanation": "Anexar un árbol de menor rango no exige subir el máximo.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.ar-union.union-por-rango"
+    },
+    {
+      "prompt": "¿Por qué un rango puede dejar de coincidir con la altura?",
+      "options": [
+        "Comprimir reduce altura sin recalcular rango",
+        "El rango cuenta conexiones",
+        "El rango empieza en uno"
+      ],
+      "answer": 0,
+      "explanation": "La cota se conserva aunque el árbol se acorte.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.ar-union.union-por-rango"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.ar-union.conjuntos-disjuntos",
+      "prompt": "Predice y explica las decisiones de la misión",
+      "brief": "Conecta (0,1), (2,3) y (0,2). Pregunta por el representante de 3.",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Hay n elementos identificados de 0 a n−1. Cada conexión enlaza dos índices válidos y es bidireccional. Se pueden agregar conexiones y consultar pertenencia, sin bajas. Si dos rangos empatan, se usa la raíz del primer argumento como nueva raíz."
+        },
+        {
+          "label": "Datos iniciales",
+          "text": "Conecta (0,1), (2,3) y (0,2). Pregunta por el representante de 3."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "Si 3 apunta a 2 y 2 apunta a 0, ¿quién representa a 3?",
+          "options": [
+            "0",
+            "2",
+            "3"
+          ],
+          "answer": 0,
+          "explanation": "La raíz es el primer elemento que se apunta a sí mismo.",
+          "id": "decision-1",
+          "errorHint": "La raíz es el primer elemento que se apunta a sí mismo."
+        },
+        {
+          "prompt": "¿Qué cambia en 3 después de buscarlo?",
+          "options": [
+            "Su rango sube",
+            "Su padre pasa a 0",
+            "Se vuelve un grupo aparte"
+          ],
+          "answer": 1,
+          "explanation": "Comprimir conserva la pertenencia.",
+          "id": "decision-2",
+          "errorHint": "Comprimir conserva la pertenencia."
+        }
+      ],
+      "hint": "La raíz es el primer elemento que se apunta a sí mismo.",
+      "explanation": "Primero 1 pasa a 0 y 3 a 2. Al unir 0 y 2 empatan, así que 2 apunta a 0. Buscar 3 sube 3 → 2 → 0 y deja 3 apuntando directamente a 0.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y caso de la misión.",
+        "output": "Una predicción razonada.",
+        "reflection": "Dibuja los padres después de tres uniones.",
+        "requires": [],
+        "from": "algoritmia/ar-trie/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.ar-union.conjuntos-disjuntos",
+      "prompt": "Crea crearUnionFind con representante, conectar, grupos y conexiones. Devuelve padres y cantidad de grupos tras aplicar pares.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction registrarVinculos(cantidad, pares) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n",
+      "entrypoint": "registrarVinculos",
+      "cases": [
+        {
+          "name": "Sin comprimir aún el 3",
+          "args": [
+            4,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          ],
+          "expected": {
+            "padres": [
+              0,
+              0,
+              0,
+              2
+            ],
+            "grupos": 1
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Duplicada o consigo mismo",
+          "args": [
+            2,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          ],
+          "expected": {
+            "padres": [
+              0,
+              0
+            ],
+            "grupos": 1
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Ninguno",
+          "args": [
+            0,
+            []
+          ],
+          "expected": {
+            "padres": [],
+            "grupos": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " No ",
+            1
+          ],
+          "expected": {
+            "prefijo": "no",
+            "sugerencias": [
+              [
+                "A",
+                "Nor"
+              ]
+            ],
+            "total": 1
+          },
+          "preserveArgs": true,
+          "entrypoint": "panelDeNombres"
+        }
+      ],
+      "explanation": "Los padres aún pueden formar cadenas si nunca buscaste ese elemento después de unir.",
+      "hint": "Cambia el padre de una raíz, no el de un elemento intermedio.",
+      "hints": [
+        "Cambia el padre de una raíz, no el de un elemento intermedio.",
+        "Elige como raíz la del primer argumento si empatan."
+      ],
+      "retryFeedback": "Elige como raíz la del primer argumento si empatan.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera la entrega aprobada de la lección anterior.",
+        "output": "Una versión comprobada de registrarVinculos.",
+        "reflection": "Traza qué enlaces acorta buscar el último elemento.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/ar-trie/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.ar-union.compresion-de-caminos",
+      "prompt": "Tras las uniones, busca cada índice solicitado. Devuelve {respuestas,padres}. padres representa el estado después de las consultas.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n",
+      "entrypoint": "inspeccionarRepresentantes",
+      "cases": [
+        {
+          "name": "Ahora sí comprime",
+          "args": [
+            4,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                0,
+                2
+              ]
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              0,
+              0
+            ],
+            "padres": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin conexiones",
+          "args": [
+            3,
+            [],
+            [
+              2,
+              0
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              2,
+              0
+            ],
+            "padres": [
+              0,
+              1,
+              2
+            ]
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva registrarVinculos",
+          "args": [
+            4,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          ],
+          "expected": {
+            "padres": [
+              0,
+              0,
+              0,
+              2
+            ],
+            "grupos": 1
+          },
+          "preserveArgs": true,
+          "entrypoint": "registrarVinculos"
+        }
+      ],
+      "explanation": "Consultar 3 después de las tres uniones acorta el último enlace.",
+      "hint": "Mide padres después del map.",
+      "hints": [
+        "Mide padres después del map.",
+        "Conserva el orden de las consultas al guardar resultados."
+      ],
+      "retryFeedback": "Conserva el orden de las consultas al guardar resultados.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de inspeccionarRepresentantes.",
+        "reflection": "Comprueba qué ocurre al unir un nodo consigo mismo.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/ar-union/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.ar-union.union-por-rango",
+      "prompt": "Recibe [unir,a,b] y [conectados,a,b]. Devuelve {respuestas,grupos}; cada acción produce booleano, en unir indica si se juntaron dos grupos. Copia primero tu código. Restaura el código inicial para ver el fallo y recupera tu copia al corregirlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : a === b,\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n",
+      "entrypoint": "gruposDeAndenes",
+      "cases": [
+        {
+          "name": "Consulta antes y después",
+          "args": [
+            4,
+            [
+              [
+                "unir",
+                0,
+                1
+              ],
+              [
+                "conectados",
+                0,
+                2
+              ],
+              [
+                "unir",
+                1,
+                2
+              ],
+              [
+                "conectados",
+                0,
+                2
+              ],
+              [
+                "unir",
+                2,
+                0
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "grupos": 2
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Consulta sin unión",
+          "args": [
+            2,
+            [
+              [
+                "conectados",
+                0,
+                1
+              ],
+              [
+                "conectados",
+                1,
+                1
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              false,
+              true
+            ],
+            "grupos": 2
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            [
+              [
+                "B",
+                "Norte"
+              ],
+              [
+                "A",
+                "Nor"
+              ],
+              [
+                "C",
+                "NOR"
+              ],
+              [
+                "D",
+                "Noroeste"
+              ],
+              [
+                "E",
+                "León"
+              ]
+            ],
+            " No ",
+            1
+          ],
+          "expected": {
+            "prefijo": "no",
+            "sugerencias": [
+              [
+                "A",
+                "Nor"
+              ]
+            ],
+            "total": 1
+          },
+          "preserveArgs": true,
+          "entrypoint": "panelDeNombres"
+        },
+        {
+          "name": "Conserva inspeccionarRepresentantes",
+          "args": [
+            4,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                0,
+                2
+              ]
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              0,
+              0
+            ],
+            "padres": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "inspeccionarRepresentantes"
+        },
+        {
+          "name": "Conserva el horario y la simulación del segundo checkpoint",
+          "args": [
+            [
+              [
+                "N",
+                "León"
+              ],
+              [
+                "S",
+                "LEÓN"
+              ],
+              [
+                "W",
+                "Oeste"
+              ]
+            ],
+            " León ",
+            [
+              [
+                "A",
+                "N",
+                1,
+                [
+                  3,
+                  2
+                ]
+              ],
+              [
+                "X",
+                "W",
+                0,
+                []
+              ],
+              [
+                "B",
+                "S",
+                4,
+                [
+                  2
+                ]
+              ]
+            ],
+            4,
+            4
+          ],
+          "expected": {
+            "codigos": [
+              "N",
+              "S"
+            ],
+            "horario": [
+              [
+                1,
+                "A"
+              ],
+              [
+                4,
+                "B"
+              ]
+            ],
+            "proxima": [
+              4,
+              "B"
+            ],
+            "eventos": [
+              [
+                1,
+                "A",
+                0
+              ],
+              [
+                4,
+                "B",
+                0
+              ],
+              [
+                4,
+                "A",
+                1
+              ]
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "servicioTesla"
+        }
+      ],
+      "explanation": "Un trayecto indirecto ya cuenta como conectado.",
+      "hint": "Compara representantes, no solo el número del andén.",
+      "hints": [
+        "Compara representantes, no solo el número del andén.",
+        "Solo las uniones de raíces distintas reducen grupos."
+      ],
+      "retryFeedback": "Solo las uniones de raíces distintas reducen grupos.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de gruposDeAndenes.",
+        "reflection": "Anota qué prueba detectó confundir conexión directa con conectividad.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/ar-union/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.ar-union.union-por-rango",
+      "prompt": "Para una pequeña red de sensores, devuelve cuántos enlaces hacen falta desde el principio de la lista hasta conectar a todos. Devuelve 0 si ya está conectada (0 o 1 sensor) y null si no alcanza.",
+      "starter": "",
+      "solution": "function crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\nfunction primeraRedConectada(cantidad, enlaces) {\n  if (cantidad <= 1) return 0;\n  const uf = crearUnionFind(cantidad);\n  for (let i = 0; i < enlaces.length; i++) {\n    uf.conectar(...enlaces[i]);\n    if (uf.grupos() === 1) return i + 1;\n  }\n  return null;\n}\n",
+      "entrypoint": "primeraRedConectada",
+      "cases": [
+        {
+          "name": "Cuenta vínculos redundantes",
+          "args": [
+            3,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          ],
+          "expected": 3,
+          "preserveArgs": true
+        },
+        {
+          "name": "Falta conexión",
+          "args": [
+            4,
+            [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          ],
+          "expected": null,
+          "preserveArgs": true
+        },
+        {
+          "name": "Ya conectada",
+          "args": [
+            1,
+            []
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "Los vínculos redundantes cuentan como intentos consumidos. Deja de leer al completar un único grupo.",
+      "hint": "Mira el total de grupos después de cada enlace.",
+      "hints": [
+        "Mira el total de grupos después de cada enlace.",
+        "i cuenta desde cero, los enlaces consumidos desde uno."
+      ],
+      "retryFeedback": "i cuenta desde cero, los enlaces consumidos desde uno.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación distinta después de integrar la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Sigue el camino del representante",
+    "brief": "Conecta (0,1), (2,3) y (0,2). Pregunta por el representante de 3.",
+    "rounds": [
+      {
+        "prompt": "Si 3 apunta a 2 y 2 apunta a 0, ¿quién representa a 3?",
+        "options": [
+          "0",
+          "2",
+          "3"
+        ],
+        "answer": 0,
+        "explanation": "La raíz es el primer elemento que se apunta a sí mismo."
+      },
+      {
+        "prompt": "¿Qué cambia en 3 después de buscarlo?",
+        "options": [
+          "Su rango sube",
+          "Su padre pasa a 0",
+          "Se vuelve un grupo aparte"
+        ],
+        "answer": 1,
+        "explanation": "Comprimir conserva la pertenencia."
+      },
+      {
+        "prompt": "¿Qué pasa si conectas 1 y 3 cuando ya están juntos?",
+        "options": [
+          "Descuenta otro grupo",
+          "Cambia su raíz por 3 siempre",
+          "Devuelve false y deja un grupo"
+        ],
+        "answer": 2,
+        "explanation": "Una raíz igual significa que no hubo unión nueva."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Princeton · Union-Find por rango",
+      "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/UF.html"
+    }
+  ],
+  "coverage": {
+    "algoritmia.ar-union.conjuntos-disjuntos": {
+      "explanationExcerpt": "Un conjunto disjunto en esta estructura es un grupo sin elementos compartidos con otros grupos",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.ar-union.compresion-de-caminos": {
+      "explanationExcerpt": "La compresión de caminos cambia los padres visitados para que apunten directamente al representante",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.ar-union.union-por-rango": {
+      "explanationExcerpt": "La unión por rango enlaza raíces colocando la de menor rango debajo de la de mayor",
+      "assessmentIds": [
+        "pregunta-3",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Hay n elementos identificados de 0 a n−1. Cada conexión enlaza dos índices válidos y es bidireccional. Se pueden agregar conexiones y consultar pertenencia, sin bajas. Si dos rangos empatan, se usa la raíz del primer argumento como nueva raíz."
+    ],
+    "workedExample": {
+      "problem": "Conecta (0,1), (2,3) y (0,2). Pregunta por el representante de 3.",
+      "reasoning": "Primero 1 pasa a 0 y 3 a 2. Al unir 0 y 2 empatan, así que 2 apunta a 0. Buscar 3 sube 3 → 2 → 0 y deja 3 apuntando directamente a 0.",
+      "result": "Un grupo con todos los elementos. Tras buscar 3 quedan padres [0,0,0,0]."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-28",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Cotas según el modelo y los contratos de cada lección.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Mantener componentes con Union-Find, uniendo raíces por rango y acortando caminos.",
+    "previous": "algoritmia/ar-trie/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

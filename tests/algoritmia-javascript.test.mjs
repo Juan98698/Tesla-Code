@@ -47,6 +47,15 @@ const PUBLISHED = [
   'bo-seleccion',
   'bo-patrones',
   'tm-cp2',
+  'ar-recorridos',
+  'ar-bst',
+  'ar-balance',
+  'ar-trie',
+  'ar-union',
+  'ar-fenwick',
+  'ar-segmentos',
+  'ar-b',
+  'tm-cp3',
 ];
 const withTransfer = PUBLISHED.slice(9);
 const loadLesson = (id) => read(`content/lessons/algoritmia/${id}.json`);
@@ -113,7 +122,9 @@ test('las entregas se encadenan y cada ejemplo, solución e incidencia se contra
     const lesson = loadLesson(id);
     assert.equal(lesson.learningProject.id, 'tesla-metro', id);
     assert.equal(lesson.learningProject.previous, previous, id);
-    previous = `algoritmia/${id}/${lesson.activities[3].id}`;
+    if (route.lessons.find((meta) => meta.id === id).kind === 'core') {
+      previous = `algoritmia/${id}/${lesson.activities[3].id}`;
+    }
     const expanded = withTransfer.includes(id);
     assert.equal(lesson.activities.length, expanded ? 5 : 4, id);
     if (expanded) {
@@ -405,5 +416,121 @@ test('la simulación por montículo respeta el reloj y los empates de una agenda
         pendientes.push({ minuto: minuto + duracion, i, parada: parada + 1 });
     }
     assert.deepEqual(simular(viajes, hasta), esperado);
+  }
+});
+
+test('AVL conserva orden, altura y balance tras altas y bajas intercaladas', () => {
+  const { insertarAVL, borrarAVL } = solutionFor(
+    'ar-balance',
+    'integrar-tesla',
+    '({ insertarAVL, borrarAVL })',
+  );
+  const inspeccionar = (nodo, min = -Infinity, max = Infinity) => {
+    if (nodo === null) return { altura: 0, claves: [] };
+    assert.ok(min < nodo.clave && nodo.clave < max);
+    const izq = inspeccionar(nodo.izq, min, nodo.clave);
+    const der = inspeccionar(nodo.der, nodo.clave, max);
+    assert.ok(Math.abs(izq.altura - der.altura) <= 1);
+    const altura = Math.max(izq.altura, der.altura) + 1;
+    assert.equal(nodo.altura, altura);
+    return { altura, claves: [...izq.claves, nodo.clave, ...der.claves] };
+  };
+  let raiz = null;
+  const claves = new Set();
+  for (let i = 0; i < 100; i++) {
+    const clave = (i * 13) % 51;
+    const anterior = raiz;
+    const copia = structuredClone(anterior);
+    if (i % 3 === 0) {
+      raiz = borrarAVL(raiz, clave);
+      claves.delete(clave);
+    } else {
+      raiz = insertarAVL(raiz, clave);
+      claves.add(clave);
+    }
+    assert.deepEqual(anterior, copia);
+    assert.deepEqual(
+      inspeccionar(raiz).claves,
+      [...claves].toSorted((a, b) => a - b),
+    );
+  }
+});
+
+test('Fenwick y segmentos coinciden con un arreglo tras ajustes solapados y lecturas repetidas', () => {
+  const fenwick = solutionFor('ar-fenwick', 'implementar-estructura', 'crearFenwick');
+  const segmentos = solutionFor('ar-segmentos', 'reescribir-operacion', 'prepararSegmentos');
+  const datos = [5, 1, 8, 3, 10, -2, 4];
+  const esperado = datos.slice();
+  const sumas = fenwick(datos);
+  const estadisticas = segmentos(datos);
+  for (const [inicio, fin, delta] of [
+    [0, 7, 2],
+    [1, 6, -3],
+    [3, 3, 22],
+    [4, 7, 5],
+  ]) {
+    estadisticas.sumar(inicio, fin, delta);
+    for (let i = inicio; i < fin; i++) {
+      esperado[i] += delta;
+      sumas.sumar(i, delta);
+    }
+    for (let desde = 0; desde <= datos.length; desde++) {
+      for (let hasta = desde; hasta <= datos.length; hasta++) {
+        const rango = esperado.slice(desde, hasta);
+        const suma = rango.reduce((total, valor) => total + valor, 0);
+        assert.equal(sumas.rango(desde, hasta), suma);
+        assert.deepEqual(estadisticas.medir(desde, hasta), {
+          suma,
+          minimo: rango.length ? Math.min(...rango) : null,
+        });
+      }
+    }
+  }
+  assert.deepEqual(datos, [5, 1, 8, 3, 10, -2, 4]);
+});
+
+test('las divisiones del árbol B conservan intervalos, claves y profundidad de hojas', () => {
+  const { construirArbolB, buscarEnB } = solutionFor(
+    'ar-b',
+    'reescribir-operacion',
+    '({ construirArbolB, buscarEnB })',
+  );
+  const claves = Array.from({ length: 55 }, (_, i) => i * 2 - 30);
+  for (const datos of [claves, claves.toReversed(), claves.map((_, i) => claves[(i * 13) % 55])]) {
+    const raiz = construirArbolB([...datos, datos[0], datos[20]]);
+    const alturas = new Set();
+    const inspeccionar = (nodo, profundidad, inferior, superior) => {
+      assert.ok(nodo.claves.length >= 1 && nodo.claves.length <= 3);
+      assert.ok(
+        nodo.claves.every(
+          (clave, i) => clave > (nodo.claves[i - 1] ?? inferior) && clave < superior,
+        ),
+      );
+      if (nodo.hijos.length === 0) {
+        alturas.add(profundidad);
+        return nodo.claves.length;
+      }
+      assert.equal(nodo.hijos.length, nodo.claves.length + 1);
+      return (
+        nodo.claves.length +
+        nodo.hijos.reduce(
+          (total, hijo, i) =>
+            total +
+            inspeccionar(
+              hijo,
+              profundidad + 1,
+              nodo.claves[i - 1] ?? inferior,
+              nodo.claves[i] ?? superior,
+            ),
+          0,
+        )
+      );
+    };
+    assert.equal(inspeccionar(raiz, 0, -Infinity, Infinity), claves.length);
+    assert.equal(alturas.size, 1);
+    for (const clave of claves) {
+      assert.equal(buscarEnB(raiz, clave).encontrada, true);
+      assert.equal(buscarEnB(raiz, clave + 1).encontrada, false);
+    }
   }
 });

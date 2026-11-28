@@ -1,0 +1,880 @@
+{
+  "id": "ar-fenwick",
+  "outcome": "Construir un árbol de Fenwick que actualiza un tramo y consulta prefijos con saltos de bits.",
+  "requiresConcepts": [
+    "algoritmia.ar-union.conjuntos-disjuntos",
+    "algoritmia.ar-union.compresion-de-caminos",
+    "algoritmia.ar-union.union-por-rango",
+    "algoritmia.ls-arreglos.dos-punteros",
+    "algoritmia.ls-arreglos.ventana",
+    "algoritmia.ls-arreglos.suma-de-prefijos",
+    "algoritmia.ls-arreglos.arreglo-de-diferencias"
+  ],
+  "html": "<h3>Misión de Tesla Metro</h3><p>Corrige el conteo de un solo tramo y vuelve a consultar sumas en rangos sin recalcular todos los prefijos.</p><p>Hasta 100000 tramos y operaciones en índices válidos. Todas las sumas intermedias son enteros seguros en Number. La API usa índices desde 0 y rangos [inicio,fin); sumar agrega un delta al valor en un índice.</p>\n<h3>Suma de prefijos dinámica</h3><p>Una suma de prefijos dinámica conserva consultas sobre datos que van cambiando. Con prefijos acumulados comunes, cambiar una celda altera los prefijos posteriores. Fenwick guarda bloques de tamaños potencia de dos en una tabla con índices internos desde 1. La celda i suma el bloque de salto(i) posiciones que termina en i.</p>\n<h3>Bits bajos</h3><p>El bit bajo de un entero positivo es su primer 1 empezando desde la derecha. Su peso es salto(i). Doce en binario es 1100, así que su bit bajo vale 4. En complemento a dos, negar un número invierte sus bits y suma uno; AND con el original, i &amp; -i, conserva el bit bajo. El operador de bits de JavaScript trabaja con enteros de 32 bits. Acotamos los índices internos para que los saltos sean positivos.</p>\n<h3>Actualización puntual</h3><p>Para actualizar un punto convierte su índice externo a i = índice + 1; añade delta a la celda i y avanza con i + salto(i), que visita todos los bloques que contienen el punto. Para sumar las primeras hasta posiciones empiezas en i = hasta y restas el salto. Así los bloques consultados no se solapan y se detienen al llegar a cero. Nunca empiezas una actualización en cero, porque su salto es cero.</p>\n<h3>Límites y coste</h3><p>La suma de [inicio,fin) resta prefijo(inicio) de prefijo(fin). Si los límites son iguales vale cero. Actualizar y calcular un prefijo toman O(log(n+1)) y se guarda O(n). El ejemplo construye con una actualización por valor, en O(n log(n+1)). Existe una construcción lineal propagando cada bloque solo una vez; aquí primero practicamos el mismo mecanismo de actualización.</p>\n<section class=\"worked-example\"><h3>Ejemplo razonado</h3><p>Con [2,4,1,3], suma 2 al índice externo 1 y consulta [1,4).</p><p>El índice interno es 2. Cambia las celdas 2 y 4. El arreglo lógico queda [2,6,1,3]. prefijo(4) da 12 y prefijo(1) da 2.</p><p>La suma consultada es 10. Una consulta [1,1) devuelve 0.</p></section>\n<h3>Prueba prefijosFenwick</h3><p>La consulta para cuatro posiciones lee su bloque agregado, sin recorrer todo el arreglo.</p><p>Antes de ejecutar, predice prefijosFenwick([2,4,1,3], [0,1,3,4]).</p><pre data-language=\"javascript\">function saltoFenwick(i) {\n  return i &amp; -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i &lt; parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i &gt; 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) =&gt; sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) =&gt; prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}</pre><p>Salida esperada</p><pre data-language=\"json\">[0,2,7,10]</pre>\n<h3>Prueba operarFenwick</h3><p>La misma instancia de Fenwick debe recibir todas las operaciones del lote.</p><p>Antes de ejecutar, predice operarFenwick([2,4,1,3], [[\"rango\",1,4],[\"sumar\",1,2],[\"rango\",1,4],[\"rango\",4,4]]).</p><pre data-language=\"javascript\">function saltoFenwick(i) {\n  return i &amp; -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i &lt; parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i &gt; 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) =&gt; sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) =&gt; prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}</pre><p>Salida esperada</p><pre data-language=\"json\">[8,10,0]</pre>\n<h3>Preparar la entrega</h3><p>Conserva el orden de actualizaciones y consultas. Contrasta el total final con la suma directa de los valores corregidos.</p>",
+  "examples": [
+    {
+      "id": "ar-fenwick-ejemplo-1",
+      "language": "javascript",
+      "code": "function saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Límites 0,1,3,4",
+        "args": [
+          [
+            2,
+            4,
+            1,
+            3
+          ],
+          [
+            0,
+            1,
+            3,
+            4
+          ]
+        ],
+        "expected": [
+          0,
+          2,
+          7,
+          10
+        ],
+        "preserveArgs": true,
+        "entrypoint": "prefijosFenwick"
+      }
+    },
+    {
+      "id": "ar-fenwick-ejemplo-2",
+      "language": "javascript",
+      "code": "function saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n",
+      "stdout": "",
+      "sample": {
+        "name": "Actualiza y consulta",
+        "args": [
+          [
+            2,
+            4,
+            1,
+            3
+          ],
+          [
+            [
+              "rango",
+              1,
+              4
+            ],
+            [
+              "sumar",
+              1,
+              2
+            ],
+            [
+              "rango",
+              1,
+              4
+            ],
+            [
+              "rango",
+              4,
+              4
+            ]
+          ]
+        ],
+        "expected": [
+          8,
+          10,
+          0
+        ],
+        "preserveArgs": true,
+        "entrypoint": "operarFenwick"
+      }
+    }
+  ],
+  "quiz": [
+    {
+      "prompt": "¿Qué posiciones internas cubre la celda 12 si salto vale 4?",
+      "options": [
+        "9 a 12",
+        "12 a 15",
+        "1 a 12"
+      ],
+      "answer": 0,
+      "explanation": "El bloque termina en i y tiene la longitud del salto.",
+      "id": "pregunta-1",
+      "type": "choice",
+      "concept": "algoritmia.ar-fenwick.suma-de-prefijos-dinamica"
+    },
+    {
+      "prompt": "¿Qué vale salto(10) para binario 1010?",
+      "options": [
+        "10",
+        "2",
+        "8"
+      ],
+      "answer": 1,
+      "explanation": "El primer uno desde la derecha pesa dos.",
+      "id": "pregunta-2",
+      "type": "choice",
+      "concept": "algoritmia.ar-fenwick.bits-bajos"
+    },
+    {
+      "prompt": "¿Cómo avanzas al actualizar?",
+      "options": [
+        "Restas salto(i)",
+        "Sumas uno siempre",
+        "Sumas salto(i)"
+      ],
+      "answer": 2,
+      "explanation": "La actualización avanza a bloques más grandes que contienen el punto.",
+      "id": "pregunta-3",
+      "type": "choice",
+      "concept": "algoritmia.ar-fenwick.actualizacion-puntual"
+    },
+    {
+      "prompt": "¿Qué pasa al consultar prefijo(0)?",
+      "options": [
+        "Devuelve cero sin leer",
+        "Lee celda 1",
+        "Empieza una actualización"
+      ],
+      "answer": 0,
+      "explanation": "Es la suma de cero posiciones.",
+      "id": "pregunta-4",
+      "type": "choice",
+      "concept": "algoritmia.ar-fenwick.actualizacion-puntual"
+    }
+  ],
+  "activities": [
+    {
+      "id": "entender-modelo",
+      "type": "case-study",
+      "concept": "algoritmia.ar-fenwick.suma-de-prefijos-dinamica",
+      "prompt": "Predice y explica las decisiones de la misión",
+      "brief": "Con [2,4,1,3], suma 2 al índice externo 1 y consulta [1,4).",
+      "evidence": [
+        {
+          "label": "Contrato",
+          "text": "Hasta 100000 tramos y operaciones en índices válidos. Todas las sumas intermedias son enteros seguros en Number. La API usa índices desde 0 y rangos [inicio,fin); sumar agrega un delta al valor en un índice."
+        },
+        {
+          "label": "Datos iniciales",
+          "text": "Con [2,4,1,3], suma 2 al índice externo 1 y consulta [1,4)."
+        }
+      ],
+      "decisions": [
+        {
+          "prompt": "¿Qué índice interno corresponde al tramo externo 1?",
+          "options": [
+            "2",
+            "1",
+            "0"
+          ],
+          "answer": 0,
+          "explanation": "La tabla reserva la celda cero.",
+          "id": "decision-1",
+          "errorHint": "La tabla reserva la celda cero."
+        },
+        {
+          "prompt": "¿Qué celdas cubren la actualización desde 2 con cuatro tramos?",
+          "options": [
+            "1, 2 y 4",
+            "2 y 4",
+            "2 y 3"
+          ],
+          "answer": 1,
+          "explanation": "El paso de 2 tiene tamaño 2.",
+          "id": "decision-2",
+          "errorHint": "El paso de 2 tiene tamaño 2."
+        }
+      ],
+      "hint": "La tabla reserva la celda cero.",
+      "explanation": "El índice interno es 2. Cambia las celdas 2 y 4. El arreglo lógico queda [2,6,1,3]. prefijo(4) da 12 y prefijo(1) da 2.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "entender",
+        "label": "Entender",
+        "input": "Contrato y caso de la misión.",
+        "output": "Una predicción razonada.",
+        "reflection": "Explica por qué la celda 2 cubre el índice externo 1.",
+        "requires": [],
+        "from": "algoritmia/ar-union/integrar-tesla"
+      }
+    },
+    {
+      "id": "implementar-estructura",
+      "type": "javascript",
+      "concept": "algoritmia.ar-fenwick.suma-de-prefijos-dinamica",
+      "prompt": "Define saltoFenwick y crearFenwick. Devuelve las sumas prefijo de todos los límites en orden.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction prefijosFenwick(datos, limites) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n",
+      "entrypoint": "prefijosFenwick",
+      "cases": [
+        {
+          "name": "Límites 0,1,3,4",
+          "args": [
+            [
+              2,
+              4,
+              1,
+              3
+            ],
+            [
+              0,
+              1,
+              3,
+              4
+            ]
+          ],
+          "expected": [
+            0,
+            2,
+            7,
+            10
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Negativos",
+          "args": [
+            [
+              4,
+              -6,
+              7
+            ],
+            [
+              1,
+              2,
+              3
+            ]
+          ],
+          "expected": [
+            4,
+            -2,
+            5
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Sin datos",
+          "args": [
+            [],
+            [
+              0
+            ]
+          ],
+          "expected": [
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            4,
+            [
+              [
+                "unir",
+                0,
+                1
+              ],
+              [
+                "conectados",
+                0,
+                2
+              ],
+              [
+                "unir",
+                1,
+                2
+              ],
+              [
+                "conectados",
+                0,
+                2
+              ],
+              [
+                "unir",
+                2,
+                0
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "grupos": 2
+          },
+          "preserveArgs": true,
+          "entrypoint": "gruposDeAndenes"
+        }
+      ],
+      "explanation": "La consulta para cuatro posiciones lee su bloque agregado, sin recorrer todo el arreglo.",
+      "hint": "Separa los índices internos de los del arreglo.",
+      "hints": [
+        "Separa los índices internos de los del arreglo.",
+        "Quita el bloque leído con i -= saltoFenwick(i)."
+      ],
+      "retryFeedback": "Quita el bloque leído con i -= saltoFenwick(i).",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "implementar",
+        "label": "Implementar",
+        "input": "Recupera la entrega aprobada de la lección anterior.",
+        "output": "Una versión comprobada de prefijosFenwick.",
+        "reflection": "Lista los saltos de 6 al consultar su prefijo.",
+        "requires": [
+          "entender-modelo"
+        ],
+        "from": "algoritmia/ar-union/integrar-tesla"
+      }
+    },
+    {
+      "id": "reescribir-operacion",
+      "type": "javascript",
+      "concept": "algoritmia.ar-fenwick.bits-bajos",
+      "prompt": "Aplica [sumar,índice,delta] y [rango,inicio,fin]. Devuelve solo las sumas solicitadas, incluyendo rangos vacíos.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  // Implementa el contrato de la actividad.\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n",
+      "entrypoint": "operarFenwick",
+      "cases": [
+        {
+          "name": "Actualiza y consulta",
+          "args": [
+            [
+              2,
+              4,
+              1,
+              3
+            ],
+            [
+              [
+                "rango",
+                1,
+                4
+              ],
+              [
+                "sumar",
+                1,
+                2
+              ],
+              [
+                "rango",
+                1,
+                4
+              ],
+              [
+                "rango",
+                4,
+                4
+              ]
+            ]
+          ],
+          "expected": [
+            8,
+            10,
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Delta negativo al último",
+          "args": [
+            [
+              1,
+              2
+            ],
+            [
+              [
+                "sumar",
+                1,
+                -3
+              ],
+              [
+                "rango",
+                1,
+                2
+              ],
+              [
+                "rango",
+                0,
+                2
+              ]
+            ]
+          ],
+          "expected": [
+            -1,
+            0
+          ],
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva prefijosFenwick",
+          "args": [
+            [
+              2,
+              4,
+              1,
+              3
+            ],
+            [
+              0,
+              1,
+              3,
+              4
+            ]
+          ],
+          "expected": [
+            0,
+            2,
+            7,
+            10
+          ],
+          "preserveArgs": true,
+          "entrypoint": "prefijosFenwick"
+        }
+      ],
+      "explanation": "La misma instancia de Fenwick debe recibir todas las operaciones del lote.",
+      "hint": "Emite salida solo al consultar.",
+      "hints": [
+        "Emite salida solo al consultar.",
+        "Usa prefijo(fin) menos prefijo(inicio)."
+      ],
+      "retryFeedback": "Usa prefijo(fin) menos prefijo(inicio).",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "reescribir",
+        "label": "Reescribir y comprobar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de operarFenwick.",
+        "reflection": "Comprueba un delta negativo y una consulta vacía.",
+        "requires": [
+          "implementar-estructura"
+        ],
+        "from": "algoritmia/ar-fenwick/implementar-estructura"
+      }
+    },
+    {
+      "id": "integrar-tesla",
+      "type": "javascript",
+      "concept": "algoritmia.ar-fenwick.actualizacion-puntual",
+      "prompt": "Devuelve {respuestas,total} usando operarFenwick, con total después de aplicar todas las acciones. Puedes añadir una consulta [0,length) al lote sin modificarlo. Copia primero tu código. Restaura el código inicial para ver el fallo y recupera tu copia al corregirlo.",
+      "starter": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, Math.max(0, datos.length - 1)],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n",
+      "solution": "function crearDoble() {\n  const raiz = {};\n  raiz.siguiente = raiz;\n  raiz.anterior = raiz;\n  return raiz;\n}\n\nfunction ponerAntes(destino, valor) {\n  const nodo = { valor, anterior: destino.anterior, siguiente: destino };\n  nodo.anterior.siguiente = nodo;\n  destino.anterior = nodo;\n  return nodo;\n}\n\nfunction sacarDoble(nodo) {\n  nodo.anterior.siguiente = nodo.siguiente;\n  nodo.siguiente.anterior = nodo.anterior;\n}\n\nfunction crearLRU(capacidad) {\n  const raiz = crearDoble();\n  const indice = new Map();\n  function promover(nodo) {\n    sacarDoble(nodo);\n    indice.set(nodo.valor.clave, ponerAntes(raiz, nodo.valor));\n  }\n  return {\n    leer(clave) {\n      const nodo = indice.get(clave);\n      if (!nodo) return { acierto: false, valor: null };\n      promover(nodo);\n      return { acierto: true, valor: nodo.valor.valor };\n    },\n    guardar(clave, valor) {\n      if (capacidad === 0) return;\n      const nodo = indice.get(clave);\n      if (nodo) {\n        nodo.valor.valor = valor;\n        promover(nodo);\n        return;\n      }\n      if (indice.size === capacidad) {\n        const expulsado = raiz.siguiente;\n        sacarDoble(expulsado);\n        indice.delete(expulsado.valor.clave);\n      }\n      indice.set(clave, ponerAntes(raiz, { clave, valor }));\n    },\n    orden() {\n      const claves = [];\n      for (let nodo = raiz.siguiente; nodo !== raiz; nodo = nodo.siguiente)\n        claves.push(nodo.valor.clave);\n      return claves;\n    },\n  };\n}\n\nfunction tablaPrefijos(patron) {\n  const pi = Array(patron.length).fill(0);\n  let largo = 0;\n  for (let i = 1; i < patron.length; i++) {\n    while (largo && patron[i] !== patron[largo]) largo = pi[largo - 1];\n    if (patron[i] === patron[largo]) largo++;\n    pi[i] = largo;\n  }\n  return pi;\n}\n\nfunction buscarKMP(texto, patron) {\n  if (!patron.length)\n    return Array.from({ length: texto.length + 1 }, (_, i) => i);\n  const pi = tablaPrefijos(patron);\n  const indices = [];\n  let largo = 0;\n  for (let i = 0; i < texto.length; i++) {\n    while (largo && texto[i] !== patron[largo]) largo = pi[largo - 1];\n    if (texto[i] === patron[largo]) largo++;\n    if (largo === patron.length) {\n      indices.push(i - patron.length + 1);\n      largo = pi[largo - 1];\n    }\n  }\n  return indices;\n}\n\nfunction canonizarNombre(texto) {\n  return texto.trim().toLowerCase().normalize(\"NFC\");\n}\n\nfunction indiceDeNombres(estaciones) {\n  const porNombre = new Map();\n  for (const [codigo, nombre] of estaciones) {\n    const clave = canonizarNombre(nombre);\n    if (!porNombre.has(clave)) porNombre.set(clave, []);\n    porNombre.get(clave).push(codigo);\n  }\n  return porNombre;\n}\n\nfunction catalogoTesla(estaciones, acciones, capacidad) {\n  const nombres = indiceDeNombres(estaciones);\n  const cache = crearLRU(capacidad);\n  const historia = [];\n  const respuestas = [];\n  for (const [modo, consulta] of acciones) {\n    if (modo === \"deshacer\") {\n      respuestas.push(historia.pop() ?? null);\n      continue;\n    }\n    const clave = canonizarNombre(consulta);\n    const claveCache = JSON.stringify([modo, clave]);\n    const previa = cache.leer(claveCache);\n    let codigos = previa.valor;\n    if (!previa.acierto) {\n      if (clave === \"\") codigos = [];\n      else if (modo === \"exacta\") codigos = nombres.get(clave) ?? [];\n      else {\n        const aceptados = new Set();\n        for (const nombre of nombres.keys()) {\n          if (buscarKMP(nombre, clave).length) aceptados.add(nombre);\n        }\n        codigos = estaciones\n          .filter(([, nombre]) => aceptados.has(canonizarNombre(nombre)))\n          .map(([codigo]) => codigo);\n      }\n      cache.guardar(claveCache, codigos);\n    }\n    historia.push({ modo, clave, codigos });\n    respuestas.push({ acierto: previa.acierto, codigos });\n  }\n  return { respuestas, historia };\n}\n\nfunction limiteHorario(datos, hora, despues = false) {\n  let inicio = 0;\n  let fin = datos.length;\n  while (inicio < fin) {\n    const medio = inicio + Math.floor((fin - inicio) / 2);\n    const minuto = datos[medio];\n    if (minuto < hora || (despues && minuto === hora)) inicio = medio + 1;\n    else fin = medio;\n  }\n  return inicio;\n}\n\nfunction mezclarHorarios(a, b) {\n  const salida = [];\n  let i = 0;\n  let j = 0;\n  while (i < a.length && j < b.length) {\n    if (a[i][0] <= b[j][0]) salida.push(a[i++]);\n    else salida.push(b[j++]);\n  }\n  for (; i < a.length; i++) salida.push(a[i]);\n  for (; j < b.length; j++) salida.push(b[j]);\n  return salida;\n}\n\nfunction ordenarMezcla(registros) {\n  if (registros.length < 2) return registros.slice();\n  const medio = Math.floor(registros.length / 2);\n  const izquierda = ordenarMezcla(registros.slice(0, medio));\n  const derecha = ordenarMezcla(registros.slice(medio));\n  return mezclarHorarios(izquierda, derecha);\n}\n\nfunction bajarMonticulo(datos, i, tamano, compara) {\n  while (2 * i + 1 < tamano) {\n    const izquierdo = 2 * i + 1;\n    const derecho = izquierdo + 1;\n    const hijo =\n      derecho < tamano && compara(datos[derecho], datos[izquierdo]) < 0\n        ? derecho\n        : izquierdo;\n    if (compara(datos[hijo], datos[i]) >= 0) return;\n    [datos[i], datos[hijo]] = [datos[hijo], datos[i]];\n    i = hijo;\n  }\n}\n\nfunction construirMonticulo(datos, compara) {\n  const copia = datos.slice();\n  for (let i = Math.floor(copia.length / 2) - 1; i >= 0; i--)\n    bajarMonticulo(copia, i, copia.length, compara);\n  return copia;\n}\n\nfunction crearColaPrioridad(datos, compara) {\n  const heap = construirMonticulo(datos, compara);\n  return {\n    tamano: () => heap.length,\n    ver: () => heap[0] ?? null,\n    agregar(valor) {\n      heap.push(valor);\n      let i = heap.length - 1;\n      while (i > 0) {\n        const padre = Math.floor((i - 1) / 2);\n        if (compara(heap[i], heap[padre]) >= 0) break;\n        [heap[i], heap[padre]] = [heap[padre], heap[i]];\n        i = padre;\n      }\n    },\n    extraer() {\n      if (!heap.length) return null;\n      const primero = heap[0];\n      const ultimo = heap.pop();\n      if (heap.length) {\n        heap[0] = ultimo;\n        bajarMonticulo(heap, 0, heap.length, compara);\n      }\n      return primero;\n    },\n  };\n}\n\nfunction agendaInicial(viajes) {\n  return ordenarMezcla(viajes.map(([id, origen, salida]) => [salida, id]));\n}\n\nfunction simularLlegadas(viajes, hasta) {\n  const eventos = viajes.map((viaje, i) => [viaje[2], i, i, 0]);\n  const cola = crearColaPrioridad(\n    eventos,\n    (a, b) => a[0] - b[0] || a[1] - b[1],\n  );\n  const resultados = [];\n  let alta = viajes.length;\n  while (cola.tamano() && cola.ver()[0] <= hasta) {\n    const [minuto, , i, parada] = cola.extraer();\n    const [id, , , duraciones] = viajes[i];\n    resultados.push([minuto, id, parada]);\n    if (parada < duraciones.length) {\n      const proximo = minuto + duraciones[parada];\n      cola.agregar([proximo, alta++, i, parada + 1]);\n    }\n  }\n  return resultados;\n}\n\nfunction servicioTesla(estaciones, consulta, viajes, desde, hasta) {\n  const { respuestas } = catalogoTesla(estaciones, [[\"exacta\", consulta]], 1);\n  const codigos = respuestas[0].codigos;\n  const origenes = new Set(codigos);\n  const filtrados = viajes.filter(([, origen]) => origenes.has(origen));\n  const horario = agendaInicial(filtrados);\n  const posicion = limiteHorario(\n    horario.map((registro) => registro[0]),\n    desde,\n  );\n  return {\n    codigos,\n    horario,\n    proxima: horario[posicion] ?? null,\n    eventos: simularLlegadas(filtrados, hasta),\n  };\n}\n\nfunction nodoArbol(clave, izq = null, der = null) {\n  return { clave, izq, der };\n}\nfunction recorrerArbol(raiz) {\n  const pre = [],\n    inorden = [],\n    post = [],\n    hojas = [];\n  function visitar(nodo) {\n    if (nodo === null) return;\n    const { clave, izq, der } = nodo;\n    pre.push(clave);\n    if (izq === null && der === null) hojas.push(clave);\n    visitar(izq);\n    inorden.push(clave);\n    visitar(der);\n    post.push(clave);\n  }\n  visitar(raiz);\n  return { pre, inorden, post, hojas };\n}\n\nfunction porNiveles(raiz) {\n  if (raiz === null) return [];\n  const cola = [raiz];\n  const niveles = [];\n  let inicio = 0;\n  while (inicio < cola.length) {\n    const fin = cola.length;\n    const nivel = [];\n    while (inicio < fin) {\n      const nodo = cola[inicio++];\n      nivel.push(nodo.clave);\n      if (nodo.izq !== null) cola.push(nodo.izq);\n      if (nodo.der !== null) cola.push(nodo.der);\n    }\n    niveles.push(nivel);\n  }\n  return niveles;\n}\n\nfunction planoJerarquico(raiz) {\n  const recorridos = recorrerArbol(raiz);\n  const niveles = porNiveles(raiz);\n  return { recorridos, niveles, profundidad: niveles.length - 1 };\n}\n\nfunction insertarBST(raiz, clave) {\n  if (raiz === null) return nodoArbol(clave);\n  if (clave === raiz.clave) return raiz;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, insertarBST(raiz.izq, clave), raiz.der);\n  return nodoArbol(raiz.clave, raiz.izq, insertarBST(raiz.der, clave));\n}\nfunction construirBST(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarBST(raiz, clave);\n  return raiz;\n}\n\nfunction borrarBST(raiz, clave) {\n  if (raiz === null) return null;\n  if (clave < raiz.clave)\n    return nodoArbol(raiz.clave, borrarBST(raiz.izq, clave), raiz.der);\n  if (clave > raiz.clave)\n    return nodoArbol(raiz.clave, raiz.izq, borrarBST(raiz.der, clave));\n  if (raiz.izq === null) return raiz.der;\n  if (raiz.der === null) return raiz.izq;\n  let sucesor = raiz.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return nodoArbol(sucesor.clave, raiz.izq, borrarBST(raiz.der, sucesor.clave));\n}\nfunction editarBST(claves, bajas) {\n  let raiz = construirBST(claves);\n  for (const clave of bajas) raiz = borrarBST(raiz, clave);\n  return raiz;\n}\n\nfunction agendaDeInspecciones(claves, bajas) {\n  const raiz = editarBST(claves, bajas);\n  return { claves: recorrerArbol(raiz).inorden, raiz: raiz?.clave ?? null };\n}\n\nfunction alturaArbol(raiz) {\n  return raiz === null\n    ? 0\n    : 1 + Math.max(alturaArbol(raiz.izq), alturaArbol(raiz.der));\n}\nfunction estadoAltura(raiz) {\n  if (raiz === null) return { altura: 0, factor: 0 };\n  const izq = alturaArbol(raiz.izq);\n  const der = alturaArbol(raiz.der);\n  return { altura: 1 + Math.max(izq, der), factor: izq - der };\n}\n\nfunction altoAVL(nodo) {\n  return nodo?.altura ?? 0;\n}\nfunction nodoAVL(clave, izq = null, der = null) {\n  return { clave, izq, der, altura: 1 + Math.max(altoAVL(izq), altoAVL(der)) };\n}\nfunction factorAVL(nodo) {\n  return nodo === null ? 0 : altoAVL(nodo.izq) - altoAVL(nodo.der);\n}\nfunction girarDerecha(raiz) {\n  const nueva = raiz.izq;\n  return nodoAVL(\n    nueva.clave,\n    nueva.izq,\n    nodoAVL(raiz.clave, nueva.der, raiz.der),\n  );\n}\nfunction girarIzquierda(raiz) {\n  const nueva = raiz.der;\n  return nodoAVL(\n    nueva.clave,\n    nodoAVL(raiz.clave, raiz.izq, nueva.izq),\n    nueva.der,\n  );\n}\nfunction equilibrarAVL(nodo) {\n  const factor = factorAVL(nodo);\n  if (factor > 1) {\n    if (factorAVL(nodo.izq) < 0)\n      nodo = nodoAVL(nodo.clave, girarIzquierda(nodo.izq), nodo.der);\n    return girarDerecha(nodo);\n  }\n  if (factor < -1) {\n    if (factorAVL(nodo.der) > 0)\n      nodo = nodoAVL(nodo.clave, nodo.izq, girarDerecha(nodo.der));\n    return girarIzquierda(nodo);\n  }\n  return nodo;\n}\nfunction insertarAVL(nodo, clave) {\n  if (nodo === null) return nodoAVL(clave);\n  if (clave === nodo.clave) return nodo;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, insertarAVL(nodo.izq, clave), nodo.der),\n    );\n  return equilibrarAVL(\n    nodoAVL(nodo.clave, nodo.izq, insertarAVL(nodo.der, clave)),\n  );\n}\nfunction construirAVL(claves) {\n  let raiz = null;\n  for (const clave of claves) raiz = insertarAVL(raiz, clave);\n  return raiz;\n}\n\nfunction borrarAVL(nodo, clave) {\n  if (nodo === null) return null;\n  if (clave < nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, borrarAVL(nodo.izq, clave), nodo.der),\n    );\n  if (clave > nodo.clave)\n    return equilibrarAVL(\n      nodoAVL(nodo.clave, nodo.izq, borrarAVL(nodo.der, clave)),\n    );\n  if (nodo.izq === null) return nodo.der;\n  if (nodo.der === null) return nodo.izq;\n  let sucesor = nodo.der;\n  while (sucesor.izq !== null) sucesor = sucesor.izq;\n  return equilibrarAVL(\n    nodoAVL(sucesor.clave, nodo.izq, borrarAVL(nodo.der, sucesor.clave)),\n  );\n}\nfunction agendaEquilibrada(claves, bajas) {\n  let raiz = construirAVL(claves);\n  for (const clave of bajas) raiz = borrarAVL(raiz, clave);\n  return {\n    raiz: raiz?.clave ?? null,\n    altura: altoAVL(raiz),\n    claves: recorrerArbol(raiz).inorden,\n  };\n}\n\nfunction crearTrie(registros) {\n  const raiz = { hijos: new Map(), registros: [] };\n  for (const [codigo, nombre] of registros) {\n    const clave = canonizarNombre(nombre);\n    let nodo = raiz;\n    for (let i = 0; i < clave.length; i++) {\n      const unidad = clave[i];\n      if (!nodo.hijos.has(unidad))\n        nodo.hijos.set(unidad, { hijos: new Map(), registros: [] });\n      nodo = nodo.hijos.get(unidad);\n    }\n    nodo.registros.push([codigo, nombre]);\n  }\n  return raiz;\n}\nfunction buscarPrefijo(raiz, clave) {\n  let nodo = raiz;\n  for (let i = 0; i < clave.length; i++) {\n    nodo = nodo.hijos.get(clave[i]);\n    if (!nodo) return null;\n  }\n  return nodo;\n}\nfunction coincidenciaTrie(registros, texto) {\n  const nodo = buscarPrefijo(crearTrie(registros), canonizarNombre(texto));\n  return {\n    existe: nodo !== null,\n    completos: nodo?.registros.map(([codigo]) => codigo) ?? [],\n  };\n}\n\nfunction sugerenciasTrie(raiz, texto, limite) {\n  const inicio = buscarPrefijo(raiz, canonizarNombre(texto));\n  if (inicio === null || limite === 0) return [];\n  const salida = [];\n  function visitar(nodo) {\n    for (const registro of nodo.registros) {\n      salida.push(registro);\n      if (salida.length === limite) return;\n    }\n    for (const unidad of Array.from(nodo.hijos.keys()).sort()) {\n      visitar(nodo.hijos.get(unidad));\n      if (salida.length === limite) return;\n    }\n  }\n  visitar(inicio);\n  return salida;\n}\nfunction autocompletar(registros, texto, limite) {\n  return sugerenciasTrie(crearTrie(registros), texto, limite);\n}\n\nfunction panelDeNombres(registros, texto, limite) {\n  const sugerencias = autocompletar(registros, texto, limite);\n  return {\n    prefijo: canonizarNombre(texto),\n    sugerencias,\n    total: sugerencias.length,\n  };\n}\n\nfunction crearUnionFind(cantidad) {\n  const padres = Array.from({ length: cantidad }, (_, i) => i);\n  const rangos = Array(cantidad).fill(0);\n  let grupos = cantidad;\n  function representante(i) {\n    let raiz = i;\n    while (padres[raiz] !== raiz) raiz = padres[raiz];\n    while (padres[i] !== i) {\n      const anterior = padres[i];\n      padres[i] = raiz;\n      i = anterior;\n    }\n    return raiz;\n  }\n  return {\n    representante,\n    grupos: () => grupos,\n    conectar(a, b) {\n      let x = representante(a);\n      let y = representante(b);\n      if (x === y) return false;\n      if (rangos[x] < rangos[y]) [x, y] = [y, x];\n      padres[y] = x;\n      if (rangos[x] === rangos[y]) rangos[x]++;\n      grupos--;\n      return true;\n    },\n    conexiones: () => padres.slice(),\n  };\n}\nfunction registrarVinculos(cantidad, pares) {\n  const grupos = crearUnionFind(cantidad);\n  for (const [a, b] of pares) grupos.conectar(a, b);\n  return { padres: grupos.conexiones(), grupos: grupos.grupos() };\n}\n\nfunction inspeccionarRepresentantes(cantidad, pares, consultas) {\n  const uf = crearUnionFind(cantidad);\n  for (const [a, b] of pares) uf.conectar(a, b);\n  const respuestas = consultas.map(uf.representante);\n  return { respuestas, padres: uf.conexiones() };\n}\n\nfunction gruposDeAndenes(cantidad, acciones) {\n  const uf = crearUnionFind(cantidad);\n  const respuestas = acciones.map(([tipo, a, b]) =>\n    tipo === \"unir\"\n      ? uf.conectar(a, b)\n      : uf.representante(a) === uf.representante(b),\n  );\n  return { respuestas, grupos: uf.grupos() };\n}\n\nfunction saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\n\nfunction operarFenwick(datos, operaciones) {\n  const tabla = crearFenwick(datos);\n  const respuestas = [];\n  for (const [tipo, a, b] of operaciones) {\n    if (tipo === \"sumar\") tabla.sumar(a, b);\n    else respuestas.push(tabla.rango(a, b));\n  }\n  return respuestas;\n}\n\nfunction aforoPuntual(datos, operaciones) {\n  const respuestas = operarFenwick(datos, [\n    ...operaciones,\n    [\"rango\", 0, datos.length],\n  ]);\n  const total = respuestas.pop();\n  return { respuestas, total };\n}\n",
+      "entrypoint": "aforoPuntual",
+      "cases": [
+        {
+          "name": "Suma total posterior",
+          "args": [
+            [
+              4,
+              8,
+              3
+            ],
+            [
+              [
+                "sumar",
+                2,
+                5
+              ],
+              [
+                "rango",
+                1,
+                3
+              ],
+              [
+                "sumar",
+                0,
+                -1
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              16
+            ],
+            "total": 19
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Vacío",
+          "args": [
+            [],
+            []
+          ],
+          "expected": {
+            "respuestas": [],
+            "total": 0
+          },
+          "preserveArgs": true
+        },
+        {
+          "name": "Conserva la entrega anterior",
+          "args": [
+            4,
+            [
+              [
+                "unir",
+                0,
+                1
+              ],
+              [
+                "conectados",
+                0,
+                2
+              ],
+              [
+                "unir",
+                1,
+                2
+              ],
+              [
+                "conectados",
+                0,
+                2
+              ],
+              [
+                "unir",
+                2,
+                0
+              ]
+            ]
+          ],
+          "expected": {
+            "respuestas": [
+              true,
+              false,
+              true,
+              true,
+              false
+            ],
+            "grupos": 2
+          },
+          "preserveArgs": true,
+          "entrypoint": "gruposDeAndenes"
+        },
+        {
+          "name": "Conserva operarFenwick",
+          "args": [
+            [
+              2,
+              4,
+              1,
+              3
+            ],
+            [
+              [
+                "rango",
+                1,
+                4
+              ],
+              [
+                "sumar",
+                1,
+                2
+              ],
+              [
+                "rango",
+                1,
+                4
+              ],
+              [
+                "rango",
+                4,
+                4
+              ]
+            ]
+          ],
+          "expected": [
+            8,
+            10,
+            0
+          ],
+          "preserveArgs": true,
+          "entrypoint": "operarFenwick"
+        },
+        {
+          "name": "Conserva el horario y la simulación del segundo checkpoint",
+          "args": [
+            [
+              [
+                "N",
+                "León"
+              ],
+              [
+                "S",
+                "LEÓN"
+              ],
+              [
+                "W",
+                "Oeste"
+              ]
+            ],
+            " León ",
+            [
+              [
+                "A",
+                "N",
+                1,
+                [
+                  3,
+                  2
+                ]
+              ],
+              [
+                "X",
+                "W",
+                0,
+                []
+              ],
+              [
+                "B",
+                "S",
+                4,
+                [
+                  2
+                ]
+              ]
+            ],
+            4,
+            4
+          ],
+          "expected": {
+            "codigos": [
+              "N",
+              "S"
+            ],
+            "horario": [
+              [
+                1,
+                "A"
+              ],
+              [
+                4,
+                "B"
+              ]
+            ],
+            "proxima": [
+              4,
+              "B"
+            ],
+            "eventos": [
+              [
+                1,
+                "A",
+                0
+              ],
+              [
+                4,
+                "B",
+                0
+              ],
+              [
+                4,
+                "A",
+                1
+              ]
+            ]
+          },
+          "preserveArgs": true,
+          "entrypoint": "servicioTesla"
+        }
+      ],
+      "explanation": "El rango completo se consulta después de los cambios.",
+      "hint": "Agrega el rango total al final, no al inicio.",
+      "hints": [
+        "Agrega el rango total al final, no al inicio.",
+        "Quita su valor de las respuestas del usuario."
+      ],
+      "retryFeedback": "Quita su valor de las respuestas del usuario.",
+      "learningStep": {
+        "project": "tesla-metro",
+        "phase": "integrar",
+        "label": "Integrar y depurar",
+        "input": "Recupera la entrega aprobada del paso anterior.",
+        "output": "Una versión comprobada de aforoPuntual.",
+        "reflection": "Registra qué frontera detectó restar el prefijo equivocado.",
+        "requires": [
+          "reescribir-operacion"
+        ],
+        "from": "algoritmia/ar-fenwick/reescribir-operacion"
+      }
+    },
+    {
+      "id": "aplicar-otro-caso",
+      "type": "javascript",
+      "concept": "algoritmia.ar-fenwick.actualizacion-puntual",
+      "prompt": "Actualiza un inventario con movimientos [índice,delta] y calcula cuántas unidades hay en el rango final usando Fenwick.",
+      "starter": "",
+      "solution": "function saltoFenwick(i) {\n  return i & -i;\n}\nfunction crearFenwick(datos) {\n  const parciales = Array(datos.length + 1).fill(0);\n  function sumar(indice, delta) {\n    for (let i = indice + 1; i < parciales.length; i += saltoFenwick(i))\n      parciales[i] += delta;\n  }\n  function prefijo(hasta) {\n    let total = 0;\n    for (let i = hasta; i > 0; i -= saltoFenwick(i)) total += parciales[i];\n    return total;\n  }\n  datos.forEach((valor, i) => sumar(i, valor));\n  return {\n    sumar,\n    prefijo,\n    rango: (inicio, fin) => prefijo(fin) - prefijo(inicio),\n  };\n}\nfunction prefijosFenwick(datos, limites) {\n  const tabla = crearFenwick(datos);\n  return limites.map(tabla.prefijo);\n}\nfunction saldoEstantes(inventario, movimientos, inicio, fin) {\n  const tabla = crearFenwick(inventario);\n  for (const [i, delta] of movimientos) tabla.sumar(i, delta);\n  return tabla.rango(inicio, fin);\n}\n",
+      "entrypoint": "saldoEstantes",
+      "cases": [
+        {
+          "name": "Ignora estante afuera",
+          "args": [
+            [
+              2,
+              2,
+              2
+            ],
+            [
+              [
+                0,
+                5
+              ],
+              [
+                1,
+                -1
+              ],
+              [
+                2,
+                4
+              ]
+            ],
+            1,
+            3
+          ],
+          "expected": 7,
+          "preserveArgs": true
+        },
+        {
+          "name": "Rango vacío",
+          "args": [
+            [
+              4
+            ],
+            [
+              [
+                0,
+                3
+              ]
+            ],
+            1,
+            1
+          ],
+          "expected": 0,
+          "preserveArgs": true
+        }
+      ],
+      "explanation": "El reporte devuelve el estado luego de todas las correcciones puntuales.",
+      "hint": "Conserva el orden de actualizaciones.",
+      "hints": [
+        "Conserva el orden de actualizaciones.",
+        "Recuerda que fin se excluye."
+      ],
+      "retryFeedback": "Recuerda que fin se excluye.",
+      "followUp": {
+        "requires": [
+          "integrar-tesla"
+        ],
+        "reason": "Resuelve una situación distinta después de integrar la entrega."
+      }
+    }
+  ],
+  "traceGame": {
+    "title": "Sigue los saltos internos",
+    "brief": "Con [2,4,1,3], suma 2 al índice externo 1 y consulta [1,4).",
+    "rounds": [
+      {
+        "prompt": "¿Qué índice interno corresponde al tramo externo 1?",
+        "options": [
+          "2",
+          "1",
+          "0"
+        ],
+        "answer": 0,
+        "explanation": "La tabla reserva la celda cero."
+      },
+      {
+        "prompt": "¿Qué celdas cubren la actualización desde 2 con cuatro tramos?",
+        "options": [
+          "1, 2 y 4",
+          "2 y 4",
+          "2 y 3"
+        ],
+        "answer": 1,
+        "explanation": "El paso de 2 tiene tamaño 2."
+      },
+      {
+        "prompt": "¿Qué operación responde el rango [1,4)?",
+        "options": [
+          "prefijo(4) − prefijo(0)",
+          "prefijo(3) − prefijo(1)",
+          "prefijo(4) − prefijo(1)"
+        ],
+        "answer": 2,
+        "explanation": "Cada prefijo usa el número de posiciones incluidas."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "title": "Fenwick · A new data structure for cumulative frequency tables",
+      "url": "https://doi.org/10.1002/SPE.4380240306"
+    },
+    {
+      "title": "ECMAScript · Operaciones numéricas sobre Number",
+      "url": "https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-numeric-types-number"
+    }
+  ],
+  "coverage": {
+    "algoritmia.ar-fenwick.suma-de-prefijos-dinamica": {
+      "explanationExcerpt": "Una suma de prefijos dinámica conserva consultas sobre datos que van cambiando",
+      "assessmentIds": [
+        "pregunta-1"
+      ]
+    },
+    "algoritmia.ar-fenwick.bits-bajos": {
+      "explanationExcerpt": "El bit bajo de un entero positivo es su primer 1 empezando desde la derecha",
+      "assessmentIds": [
+        "pregunta-2"
+      ]
+    },
+    "algoritmia.ar-fenwick.actualizacion-puntual": {
+      "explanationExcerpt": "Para actualizar un punto convierte su índice externo a i = índice + 1; añade delta a la celda i y avanza con i + salto(i), que visita todos los bloques que contienen el punto",
+      "assessmentIds": [
+        "pregunta-3",
+        "pregunta-4"
+      ]
+    }
+  },
+  "learningDesign": {
+    "assumptions": [
+      "Hasta 100000 tramos y operaciones en índices válidos. Todas las sumas intermedias son enteros seguros en Number. La API usa índices desde 0 y rangos [inicio,fin); sumar agrega un delta al valor en un índice."
+    ],
+    "workedExample": {
+      "problem": "Con [2,4,1,3], suma 2 al índice externo 1 y consulta [1,4).",
+      "reasoning": "El índice interno es 2. Cambia las celdas 2 y 4. El arreglo lógico queda [2,6,1,3]. prefijo(4) da 12 y prefijo(1) da 2.",
+      "result": "La suma consultada es 10. Una consulta [1,1) devuelve 0."
+    },
+    "transferActivityIds": [
+      "aplicar-otro-caso"
+    ]
+  },
+  "technicalReview": {
+    "verifiedOn": "2026-11-28",
+    "reviewDue": "2027-05-05",
+    "technologyRefs": [
+      "foundations",
+      "web"
+    ],
+    "testedVersions": [],
+    "note": "JavaScript estándar. Cotas según el modelo y los contratos de cada lección.",
+    "policyDigest": "7c7141c8005c40a8134b3b9bfef79598ca2e4fbc751625f389198acb528c149d"
+  },
+  "learningProject": {
+    "id": "tesla-metro",
+    "name": "Tesla Metro",
+    "version": 1,
+    "increment": "Construir un árbol de Fenwick que actualiza un tramo y consulta prefijos con saltos de bits.",
+    "previous": "algoritmia/ar-union/integrar-tesla",
+    "followUpIds": [
+      "aplicar-otro-caso"
+    ]
+  }
+}

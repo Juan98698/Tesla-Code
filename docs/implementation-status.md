@@ -825,3 +825,11 @@ El segundo checkpoint recibe el nombre de una estación, conserva homónimos, pr
 La primera práctica recupera el archivo anterior y guía al estudiante para conservar el punto de entrada del catálogo con sus dependencias. Cada integración sigue contrastando su comportamiento. La solución del segundo checkpoint ocupa 17 032 caracteres y las entregas completas de Estructuras permanecen disponibles en sus lecciones. Se conservan los IDs, las versiones y los prerrequisitos del bloque.
 
 Las pruebas contrastan búsqueda binaria con recorrido directo, estabilidad con orden de referencia, Quickselect y top-k con orden completo y simulación con una agenda lineal. La [correspondencia editorial](algoritmia-javascript.md) vincula cada tema con su práctica. Siguen pendientes la revisión docente independiente y el piloto con principiantes. Árboles y estructuras jerárquicas queda en preparación.
+
+## Tesla Metro entrega Árboles y estructuras jerárquicas
+
+28 de noviembre de 2026. Algoritmia con JavaScript llega a 48 de 87 lecciones. El bloque añade 9 lecciones, 20 ejemplos ejecutables, 28 decisiones de traza, 45 actividades, 36 preguntas y 141 casos de código. Árboles B conserva su carácter opcional. El tercer checkpoint parte de Árbol de segmentos y consulta el trie por nombre y las mediciones por código, con soporte para homónimos, rangos vacíos y estaciones que aún no tienen lecturas.
+
+La primera entrega recupera el simulador y conserva su interfaz con el código que necesita. Los pasos de integración vuelven a comprobar los horarios y la simulación. Los ejemplos de AVL cubren cuatro rotaciones y bajas, incluida la que encuentra un hijo de factor cero. Las pruebas comparan Fenwick y el árbol de segmentos con sumas directas y comprueban que las páginas del árbol B respetan sus intervalos y comparten profundidad en hojas. La [correspondencia editorial](algoritmia-javascript.md) documenta cada tema y sus prácticas.
+
+El recorrido general conserva la inspección de todas las lecciones y abre otro perfil de navegador para probar la persistencia del tema y la accesibilidad. En `b5f1f0b`, la inspección acumuló cientos de borradores en un solo perfil y produjo `QuotaExceededError` al guardar el tema. El cambio aísla esa fase de prueba. La revisión docente independiente y el piloto con principiantes quedan pendientes. Grafos queda en preparación.
